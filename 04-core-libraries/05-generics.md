@@ -96,7 +96,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:9: error: incompatible types: String cannot be converted to Integer
+Main.java:10: error: incompatible types: String cannot be converted to Integer
         Integer n = sb.get();
                           ^
 1 error
@@ -230,7 +230,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:12: error: incompatible types: List<Integer> cannot be converted to List<Number>
+Main.java:14: error: incompatible types: List<Integer> cannot be converted to List<Number>
         System.out.println(sum(ints));
                                ^
 ```
@@ -292,7 +292,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:4: error: Object cannot be safely cast to List<String>
+Main.java:5: error: Object cannot be safely cast to List<String>
         if (obj instanceof List<String>) {
             ^
 ```

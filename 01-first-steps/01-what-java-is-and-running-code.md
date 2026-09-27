@@ -217,6 +217,8 @@ public class Main {
     }
 }
 ```
+
+**Output** *(a launch error — the JVM finds no `main`, so nothing runs):*
 ```
 Error: Main method not found in class Main, please define the main method as:
    public static void main(String[] args)
@@ -271,6 +273,8 @@ public class Main {
     }
 }
 ```
+
+**Output:**
 ```
 abc
 d

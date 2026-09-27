@@ -353,11 +353,9 @@ public class Main {
 }
 ```
 
-**Output** *(then an error):*
+**Output** *(prints `42`, then a thrown exception):*
 ```
 42
-```
-```
 Exception in thread "main" java.lang.NumberFormatException: For input string: "3.5"
 ```
 

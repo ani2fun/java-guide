@@ -90,7 +90,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:8: error: balance has private access in Account
+Main.java:9: error: balance has private access in Account
         System.out.println(acct.balance);
                                ^
 1 error
@@ -205,7 +205,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:5: error: balance has private access in Account
+Main.java:6: error: balance has private access in Account
     int peek(Account a) { return a.balance; }
                                   ^
 1 error

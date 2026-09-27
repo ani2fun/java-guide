@@ -116,14 +116,18 @@ put 5   buffer=[4, 5]
 **Intuition.**
 *Mechanism.* Every monitor has two rooms: the **entry queue** (threads blocked trying to acquire the lock) and the **wait set** (threads that held the lock and called `wait()`). `wait()` atomically releases the lock and moves the thread to the wait set; `notifyAll()` moves everyone in the wait set back to the entry queue, where they re-acquire the lock one at a time and — because of the `while` loop — re-check the condition before proceeding.
 
-*Concrete bite.* Two classic mistakes. First, calling `wait()` without holding the monitor fails immediately — this two-line program throws:
+*Concrete bite.* Two classic mistakes. First, calling `wait()` without holding the monitor fails immediately — this program throws:
 
-```java
-Object lock = new Object();
-lock.wait();   // not inside synchronized (lock) — we don't own the monitor
+```java run
+public class Main {
+    public static void main(String[] args) throws InterruptedException {
+        Object lock = new Object();
+        lock.wait();   // not inside synchronized (lock) — we don't own the monitor
+    }
+}
 ```
 
-**Output:**
+**Output** *(a thrown exception):*
 ```
 Exception in thread "main" java.lang.IllegalMonitorStateException: current thread is not owner
 ```
@@ -143,6 +147,7 @@ Second, and far worse because it *usually* works: guarding with `if` instead of 
 One lock serializes; two locks *held at the same time* can **deadlock**: thread 1 holds lock A and wants B, thread 2 holds B and wants A. Neither can proceed, neither will ever release, and the program hangs forever — no exception, no error, just silence. This program deadlocks almost every run (shown statically: a deadlocked program never finishes, so the sandbox would only time out):
 
 ```java
+// expects-hang: a deadlock — each thread waits forever for the lock the other holds
 public class Main {
     static final Object lockA = new Object();
     static final Object lockB = new Object();

@@ -100,7 +100,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:4: error: Shape is abstract; cannot be instantiated
+Main.java:5: error: Shape is abstract; cannot be instantiated
         Shape s = new Shape();
                   ^
 ```
@@ -160,7 +160,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:2: error: Circle is not abstract and does not override abstract method draw() in Drawable
+Main.java:3: error: Circle is not abstract and does not override abstract method draw() in Drawable
 class Circle implements Drawable { }
 ^
 ```

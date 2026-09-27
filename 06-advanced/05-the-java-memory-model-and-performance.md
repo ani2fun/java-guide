@@ -78,6 +78,7 @@ done
 That "would hang" is not hypothetical — delete the one keyword and it *does*. Shown statically, because a hung program never finishes (the sandbox would only time out):
 
 ```java
+// expects-hang: without volatile, the worker may never see running = false
 public class Main {
     static boolean running = true;   // volatile removed — nothing else changed
     public static void main(String[] args) throws InterruptedException {
@@ -183,7 +184,7 @@ flowchart LR
 
 §2's rules have a consequence that surprises even experienced developers: **a constructor is not a fence.** Consider one thread building an object and handing it to another through a plain field:
 
-```java
+```text
 // Thread A                          // Thread B
 config = new Config("prod", 42);     if (config != null) {
                                          use(config.name);   // can see null!

@@ -151,7 +151,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:7: error: unreported exception IOException; must be caught or declared to be thrown
+Main.java:8: error: unreported exception IOException; must be caught or declared to be thrown
         risky();
              ^
 ```

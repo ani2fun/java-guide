@@ -102,7 +102,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:7: error: non-static method area() cannot be referenced from a static context
+Main.java:8: error: non-static method area() cannot be referenced from a static context
         System.out.println(Rectangle.area());
                                     ^
 1 error
@@ -169,7 +169,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:7: error: constructor Rectangle in class Rectangle cannot be applied to given types;
+Main.java:8: error: constructor Rectangle in class Rectangle cannot be applied to given types;
         Rectangle r = new Rectangle();
                       ^
   required: int,int

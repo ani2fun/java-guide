@@ -98,7 +98,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:5: error: the switch expression does not cover all possible input values
+Main.java:6: error: the switch expression does not cover all possible input values
         String s = switch (d) {
                    ^
 ```
@@ -205,7 +205,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:5: error: x has private access in Point
+Main.java:6: error: x has private access in Point
         p.x = 5;
          ^
 1 error

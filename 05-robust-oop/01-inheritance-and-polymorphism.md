@@ -154,7 +154,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:3: error: method does not override or implement a method from a supertype
+Main.java:4: error: method does not override or implement a method from a supertype
     @Override
     ^
 ```

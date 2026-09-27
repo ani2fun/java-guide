@@ -175,7 +175,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:4: error: incompatible types: TwoMethods is not a functional interface
+Main.java:5: error: incompatible types: TwoMethods is not a functional interface
         TwoMethods t = () -> System.out.println("?");
                        ^
     multiple non-overriding abstract methods found in interface TwoMethods

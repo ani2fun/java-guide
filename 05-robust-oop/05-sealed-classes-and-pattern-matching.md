@@ -193,7 +193,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:6: error: the switch expression does not cover all possible input values
+Main.java:7: error: the switch expression does not cover all possible input values
         return switch (s) {
 ```
 

@@ -361,7 +361,7 @@ public class Main {
 **Compiler error:**
 ```
 Main.java:4: error: incompatible types: String cannot be converted to int
-        x = "hello";
+        x = "hello";    // x is an int — it can't hold text
             ^
 1 error
 ```
