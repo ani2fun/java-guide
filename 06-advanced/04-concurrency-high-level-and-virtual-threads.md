@@ -105,9 +105,12 @@ import java.util.concurrent.*;
 public class Main {
     public static void main(String[] args) throws Exception {
         ExecutorService pool = Executors.newFixedThreadPool(1);
-        Future<Integer> f = pool.submit(() -> 10 / 0);
-        System.out.println(f.get());
-        pool.shutdown();
+        try {
+            Future<Integer> f = pool.submit(() -> 10 / 0);
+            System.out.println(f.get());
+        } finally {
+            pool.shutdown();   // without this, the idle worker keeps the JVM alive after get() throws
+        }
     }
 }
 ```
@@ -355,6 +358,7 @@ completed: 10000
 The unmounting has one important exception on Java 21: **pinning**. A virtual thread that blocks *while inside a `synchronized` block or method* cannot unmount — it pins its carrier OS thread for the whole wait, quietly costing you the scalability you came for. The JVM will tell you where, if you ask (shown statically — this run needs the `-Djdk.tracePinnedThreads=full` JVM flag, which the sandbox can't pass):
 
 ```java
+// requires: the JVM flag -Djdk.tracePinnedThreads=full for the trace — without it, only "done" prints
 public class Main {
     static final Object lock = new Object();
 
@@ -396,6 +400,7 @@ The `reason:MONITOR` line is the JVM reporting the pin, and `<== monitors:1` poi
 One outlook, because you'll meet it in code review before long: **structured concurrency** (`StructuredTaskScope`, a *preview* API in Java 21 — it needs `--enable-preview`, so no Run button here) makes a scope own its forked subtasks the way a `try` block owns a resource:
 
 ```java
+// requires: --enable-preview (a preview API in Java 21), and fetchUser/fetchScore from your code
 try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
     var user  = scope.fork(() -> fetchUser());     // both run concurrently,
     var score = scope.fork(() -> fetchScore());    // on virtual threads

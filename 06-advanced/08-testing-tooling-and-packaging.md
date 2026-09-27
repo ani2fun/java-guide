@@ -49,7 +49,7 @@ These examples use multi-file projects and the `javac`/`mvn`/`jar` tools, so the
 
 The core idea of a test is an **assertion**: a claim that must hold, checked automatically. Java has a built-in `assert` statement — but it's **disabled unless you pass `-ea`** (enable assertions), which makes it unsuitable as your testing tool.
 
-```java
+```java run
 public class Main {
     static int add(int a, int b) { return a + b; }
     public static void main(String[] args) {
@@ -59,24 +59,17 @@ public class Main {
 }
 ```
 
-Run it three ways:
-
+**Output** *(a plain `java Main`, which is how the Run button starts it — assertions are off):*
 ```
-$ java -ea Main          # assertions ENABLED, passing version (2+3==5)
-all assertions passed
-
-$ java Main              # assertions DISABLED by default — the wrong assert is SKIPPED
 passed
-
-$ java -ea Main          # assertions ENABLED, the wrong assert (2+2==5) now fires
-Exception in thread "main" java.lang.AssertionError: add(2,2) should be 5
 ```
 
-**Output** *(the three runs above are real captured sessions):*
+The same program, started with assertions enabled:
+
 ```
-all assertions passed
-passed
+$ java -ea Main
 Exception in thread "main" java.lang.AssertionError: add(2,2) should be 5
+	at Main.main(Main.java:4)
 ```
 
 **Analysis.** With `-ea`, a true assertion passes silently and a false one throws `AssertionError` with its message — that's a check. But **without** `-ea` (the default), the assertion is *skipped entirely*: the program printed `passed` even though `add(2, 2) == 5` is false. An assertion the JVM ignores by default is worthless as a test, which is the whole motivation for a real testing framework whose checks *always* run.
@@ -84,7 +77,7 @@ Exception in thread "main" java.lang.AssertionError: add(2,2) should be 5
 **Intuition.**
 *Mechanism.* `assert cond : msg` throws `AssertionError` if `cond` is false — but only when assertions are enabled (`-ea`); otherwise the JVM strips the check. They were designed for internal sanity checks during development, not as a production test mechanism.
 
-*Concrete bite.* The middle run is the trap: `java Main` printed `passed` for code that's wrong, because the assertion was disabled. Relying on `assert` for tests means your "tests" silently do nothing in any normal run — which is why no one tests with bare `assert`.
+*Concrete bite.* The first run is the trap: `java Main` printed `passed` for code that's wrong, because the assertion was disabled. Relying on `assert` for tests means your "tests" silently do nothing in any normal run — which is why no one tests with bare `assert`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -99,6 +92,7 @@ Exception in thread "main" java.lang.AssertionError: add(2,2) should be 5
 **JUnit 5** is the standard. You write test methods annotated `@Test`, each asserting expected behavior with `assertEquals`, `assertThrows`, and friends; the framework discovers and runs them all, every time. Here's a class and its test:
 
 ```java
+// requires: JUnit 5 and a two-file Maven layout — not runnable in the sandbox
 // src/main/java/Calculator.java
 public class Calculator {
     public int add(int a, int b) { return a + b; }

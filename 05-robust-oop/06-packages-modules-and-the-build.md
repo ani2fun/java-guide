@@ -49,6 +49,7 @@ Because these examples span *multiple files* and use the `javac`/`jar`/`java` to
 A class declares its **package** with a `package` line, and its directory must match the package name. Other packages reach it by its fully-qualified name or an `import`. Here a `Main` in `com.example` imports a utility from `com.example.util`:
 
 ```java
+// requires: two source files in two packages — not runnable in the sandbox
 // src/com/example/util/Text.java
 package com.example.util;
 public class Text {
@@ -98,6 +99,7 @@ HELLO!
 [Access modifiers](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers) showed their full meaning needs packages. A `public` member is visible everywhere; a **package-private** one (no modifier) is visible only *within its own package*. Across a package boundary, package-private is invisible — even to code that can see the class.
 
 ```java
+// requires: two packages — as one file, both classes share a package and this compiles
 // com.example.util.Text  (whisper has no modifier → package-private)
 public class Text {
     public static String shout(String s) { return s.toUpperCase() + "!"; }
@@ -143,6 +145,7 @@ src2/com/example/Main.java:5: error: whisper(String) is not public in Text; cann
 On the classpath, any `public` type in any package is reachable by anyone — package-private hides *members*, but a `public` class in an "internal" package is still exposed. The **module system** (JPMS, JDK 9+) closes that: a module declares which packages it `exports` and which modules it `requires`, in a `module-info.java` at its root.
 
 ```java
+// requires: a module source tree — a module-info.java is not a program
 // src/com.example.app/module-info.java
 module com.example.app {
     // requires java.base implicitly
