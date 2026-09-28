@@ -1,0 +1,11 @@
+{
+    "title": "Java",
+    "description": "Java from first steps to advanced — control flow, classes and objects, the core libraries, robust object-oriented design, and advanced topics.",
+    "tags": [
+        "java",
+        "programming-languages"
+    ],
+    "estimatedReadingMinutes": 500,
+    "order": 7,
+    "slug": "java"
+}
