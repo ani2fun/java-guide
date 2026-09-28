@@ -105,4 +105,4 @@ must reach 4.
 | §5: `Object` as the default superclass, cited; the dispatch-table claim removed; the `final` class non-example | gap 8; fact-check rows 2, 7, 8 |
 | Gotcha checklist → 14-row troubleshooting table; mental-model rows added | the /prepare shape |
 | Predict box as a numbered list, answered in `<details>` with a proved fence | the /prepare shape |
-| Register: long sentences and walls split; hedges removed ("actually", "really", "kind of") | lint: 18 problems → 0 |
+| Register: long sentences and walls split; hedges removed ("actually", "really", "kind of") | lint: 13 problems → 0 |
