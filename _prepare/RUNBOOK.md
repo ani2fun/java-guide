@@ -124,6 +124,32 @@ Fence rules:
 - Work on branch `prepare-gate`. Push after each lesson: `git push origin HEAD:prepare-gate`. If that push is
   refused, push the session's own branch and open a PR into `prepare-gate`.
 
+### 7a. Landing a finished chapter on `main`
+
+`main` holds **only the book**. Since 2026-09-28 it has been one squashed commit (`6fd6495`), plus
+one commit per landed chapter. The pass's working material lives **only on `prepare-gate`**: the
+`_<stem>.session.md` records, `_prepare/`, `_tooling/`, `_media/`, and
+`.github/workflows/render-d2.yml`. That workflow is kept off `main` because it would commit
+`_media/d2` back to `main`. The D2 source stays inline in the lessons as ```` ```d2 ```` fences.
+
+- **Never merge `prepare-gate` into `main`, and never open a PR.** Merging brings the history and
+  the meta files with it.
+- At the chapter's end, copy the chapter's lesson files onto `main` and make one commit. Lesson
+  files start with a digit; session records start with `_`, so the glob below skips them:
+
+  ```bash
+  git checkout main && git pull --ff-only
+  git checkout prepare-gate -- ':(glob)<chapter-dir>/[0-9]*.md'
+  git status --short                                   # only <chapter-dir>/NN-*.md may appear
+  git commit -m "Prepare <Chapter title> (lessons 01–NN) to the /prepare gate"
+  git ls-tree -r --name-only HEAD | grep -E '(^|/)_' && echo "STOP: meta files on main"
+  git push origin main
+  git checkout prepare-gate
+  ```
+
+- A lesson that changes a file outside its chapter (a link target, `README.md`) copies that file the
+  same way, by explicit path. Never copy a path that starts with `_`.
+
 ## 8. Scope and stopping
 
 - **One chapter per session.** Stop at the chapter's end and report (section 9). Do not start the next chapter.
