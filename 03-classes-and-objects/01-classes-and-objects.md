@@ -1,10 +1,10 @@
 ---
-title: Classes & Objects
+title: Defining Classes & Creating Objects
 summary: A class is a blueprint that bundles data (fields) with the operations on it (methods); new makes an object from it, each with its own state; a constructor initializes a new object; and this names the current object. The leap from procedural code to objects — with the shadowing, missing-constructor, and aliasing traps shown as real output.
 prereqs: []
 ---
 
-# Classes & Objects — Bundling Data with Behavior
+# Defining Classes & Creating Objects — Bundling Data with Behavior
 
 Until now your programs have been `static` methods that pass primitives and arrays around. A **class** changes the unit of organization. It bundles **data** (its *fields*) with the **operations** on that data (its *methods*) into one named blueprint.
 
