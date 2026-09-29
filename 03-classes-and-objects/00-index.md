@@ -1,5 +1,5 @@
 ---
-title: Classes & Objects
+title: Classes & Objects - Overview
 summary: Tier 2 of the Java book — the OOP leap. Four chapters move from procedural code to objects: defining classes, hiding state behind a controlled interface, the class-vs-instance distinction, and the reference model (stack/heap, == vs .equals, null) that underlies every Java surprise. Every example compiled and run.
 prereqs: []
 ---
