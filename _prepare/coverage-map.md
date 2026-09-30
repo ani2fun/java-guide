@@ -49,7 +49,7 @@ Severity: **H** = an exam objective with no teaching, or a JLS rule a beginner h
 | 9.1 | Console and file I/O with I/O streams | 06-advanced/06 | partial | M | Console input beyond `Scanner` (`BufferedReader`) and output streams |
 | 9.2 | Serialize and deserialize objects | nowhere taught (one mention) | **GAP** | M | A serialization section in 06-advanced/06, with its security warning |
 | 9.3 | `Path` objects and `java.nio.file` | 06-advanced/06 §1–2 | covered | — | Directory traversal (`Files.walk`/`list`) missing; L |
-| 10.1 | Localization: locales, resource bundles, formatting messages, dates, times, numbers, currency, percentages | nowhere | **GAP** | M | New lesson in 06-advanced: *Localization* (after dates and times exist) |
+| 10.1 | Localization: locales, resource bundles, formatting messages, dates, times, numbers, currency, percentages | 06-advanced/09 (new lesson, 2026-09-30) | covered | — | — |
 | — | Annotations, generics, logging (named as expected knowledge by a secondary source only) | generics 04-core-libraries/05; `@Override` used; logging nowhere | partial | L | [?] Confirm on Oracle's page before acting |
 
 ## JLS SE 21 chapters
@@ -77,7 +77,7 @@ Severity: **H** = an exam objective with no teaching, or a JLS rule a beginner h
 
 ## Summary
 
-- **New lessons (Part 3):** *Dates and times* (1.4), then *Localization* (10.1), which rests on it.
+- **New lessons (Part 3):** *Dates and times* (1.4), then *Localization* (10.1), which rests on it. Both written 2026-09-30: `04-core-libraries/07-dates-and-times.md` and `06-advanced/09-localization.md`.
 - **High-severity sections** inside existing lessons: wrappers and autoboxing (1.1), varargs (3.3),
   interface `static`/`private` methods (3.6), `Deque` and sorting (5.1), definite assignment (JLS 16).
 - Each is picked up by the owning lesson's gaps pass, not fixed here.
