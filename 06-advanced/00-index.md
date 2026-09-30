@@ -1,14 +1,14 @@
 ---
 title: "Advanced & Idiomatic: Overview"
-summary: Chapter 6 of the Java book — functional Java, concurrency and the memory model, I/O, modern idioms, and shipping. The Streams API, threads and the happens-before rule, high-level concurrency and virtual threads, the JIT and GC, NIO.2 files, how the modern features compose into data-oriented design, and testing/build/packaging. Every example compiled and run.
+summary: Chapter 6 of the Java book — functional Java, concurrency and the memory model, I/O, modern idioms, and shipping. The Streams API, threads and the happens-before rule, high-level concurrency and virtual threads, the JIT and GC, NIO.2 files, how the modern features compose into data-oriented design, testing/build/packaging, and localization with Locale, resource bundles and MessageFormat. Every example compiled and run.
 prereqs: []
 ---
 
 # Advanced & Idiomatic: Overview
 
-This is Chapter 6, the summit. With the full language and the standard library behind you, these eight lessons cover what separates competent Java from idiomatic, production-grade Java: declarative data processing with streams, the hard truths of concurrency — races, coordination, and the Java Memory Model — how the JVM actually runs and reclaims your code, modern file I/O, the way the modern type-system features compose into one coherent style, and the testing, tooling, and packaging that ship it.
+This is Chapter 6, the summit. With the full language and the standard library behind you, these nine lessons cover what separates competent Java from idiomatic, production-grade Java: declarative data processing with streams, the hard truths of concurrency — races, coordination, and the Java Memory Model — how the JVM actually runs and reclaims your code, modern file I/O, the way the modern type-system features compose into one coherent style, the testing, tooling, and packaging that ship it, and the localization that lets it speak its readers' languages.
 
-Eight lessons, in order:
+Nine lessons, in order:
 
 1. [**Functional Java & the Streams API**](/synapse/programming-languages/java/advanced/functional-java-and-streams) — lazy pipelines, collectors, `Optional`, and the parallel-stream hazard.
 2. [**Concurrency: the Basics**](/synapse/programming-languages/java/advanced/concurrency-the-basics) — what a thread is, race conditions, `synchronized`, and happens-before.
@@ -18,6 +18,7 @@ Eight lessons, in order:
 6. [**I/O, Files & NIO.2**](/synapse/programming-languages/java/advanced/io-files-and-nio2) — `Path`/`Files`, the stream name clash, and bytes vs characters.
 7. [**Modern Java Idioms & the Type System**](/synapse/programming-languages/java/advanced/modern-java-idioms) — records + sealed + patterns as one data-oriented design.
 8. [**Testing, Tooling & Packaging**](/synapse/programming-languages/java/advanced/testing-tooling-and-packaging) — JUnit 5, build tools, dependencies, and executable JARs.
+9. [**Localization**](/synapse/programming-languages/java/advanced/localization) — `Locale`, `NumberFormat`, localized dates, resource bundles, and `MessageFormat`.
 
 Every code block with a ▶ Run button is live; the concurrency, performance, and tooling lessons include real captured runs (a data race, JIT and GC logs, a `mvn test` summary) where behavior is nondeterministic or project-level. The habit that matters most in this chapter is **knowing the cost**: streams, parallelism, immutability, and abstractions all have trade-offs, and senior judgment is choosing them deliberately.
 
