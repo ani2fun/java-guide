@@ -174,21 +174,26 @@ Next: <ledger.py --next>.
 
 ## 10. Carry-over notes
 
-**`01-first-steps/02` (variables):** researched 2026-09-27 on JDK 21; nothing written yet. The gaps and their run outputs:
+_None open._ The `01-first-steps/02` note was resolved when that lesson was prepared (definite
+assignment, ranges, `var` and the rest are in the lesson and its session record).
 
-- **Definite assignment** (JLS §16, §4.12.5; coverage map H). `int x; System.out.println(x);` gives
-  `Main.java:4: error: variable x might not have been initialized`.
-- **Declaring without an initializer.** `int age; age = 25;` prints `25`.
-- **Identifiers** (JLS §3.8). `int 2nd = 5;` gives `error: not a statement`, then `error: ';' expected`, a confusing
-  message worth a troubleshooting row. `int class = 5;` gives the same.
-- **Why `byte c = 5` compiles but `byte b = 200` does not.** Constant narrowing in assignment contexts (JLS §5.2).
-  The 🧪 box relies on it, and the lesson never explains it.
-- **Exact ranges**, as a `Byte/Short/Integer/Long.MIN_VALUE/MAX_VALUE` and `(int) Character.MIN/MAX_VALUE` fence:
-  byte −128..127, short −32768..32767, int −2147483648..2147483647,
-  long −9223372036854775808..9223372036854775807, char 0..65535.
-- **`boolean` size.** The table's "1 bit, logically" should say the JLS fixes no size (check JLS §4.2).
-- **`var`** (JEP 286, Java 10): `var n = null;` gives `cannot infer type for local variable n` with
-  `(variable initializer is 'null')`.
-- **Predict box.** `var d = 5; d = 5.5;` gives `possible lossy conversion from double to int`, and `int b = 5.0;` gives the same.
-- **Links.** Replace "Tutorial 3/5" and "Tier 2" with links: `numbers-and-arithmetic`, `input-and-output`, and
-  `/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model`.
+## 11. Status and archive
+
+The pass finished on 2026-09-30: every lesson DONE (`_prepare/revision-ledger.md`), and both
+Part 3 lessons written — `04-core-libraries/07-dates-and-times.md` (coverage map 1.4) and
+`06-advanced/09-localization.md` (10.1). Every lesson is on `main`.
+
+This branch is then archived: the tag **`archive/prepare-gate`** points at its last commit, and
+the branch itself is deleted. The tag keeps every session record, `_prepare/`, `_tooling/` and
+`_media/`. To pick the work up again:
+
+```bash
+git fetch origin tag archive/prepare-gate
+git checkout -b prepare-gate archive/prepare-gate        # resume the pass on a fresh branch
+git checkout archive/prepare-gate -- _tooling _prepare/RUNBOOK.md   # or copy the tooling into another branch
+```
+
+`_tooling/` needs nothing from this book beyond its layout: `prove.py` and `prepare_lint.py`
+walk every `.md` lesson under the repository root (skipping `_` and `.` paths), so the same files work in another
+Java book laid out the same way. The leading `_` keeps them out of the rendered book wherever
+they are copied.
