@@ -12,7 +12,7 @@ The book is a single text, read top to bottom. It starts assuming **you have nev
 
 ## Reading conventions
 
-- **Every code block with a Run button is real.** Cortex compiles and runs it in a sandboxed **Java 21 (OpenJDK)** runner — the same one that produced every `Output:` block in this book. Click ▶ Run, edit the code, run it again. The output you see is the output we verified.
+- **Every code block with a Run button is real.** Synapse compiles and runs it in a sandboxed **Java 21 (OpenJDK)** runner — the same one that produced every `Output:` block in this book. Click ▶ Run, edit the code, run it again. The output you see is the output we verified.
 - **When the lesson is a compile error, the block is labelled `Compiler error:`** and shows the real `javac` diagnostic — because in Java, many of the most important lessons happen *before* the program runs.
 - **Blocks without a Run button are deliberate** — short fragments, or programs shown precisely because they need keyboard input the sandbox can't supply. Their output is still shown and still real.
 - **Every lesson is built on a thesis** stated in its first paragraph, and a fixed rhythm: concept → code → verified output → analysis ("what happened") → an **Intuition** box ("why it must be so").
