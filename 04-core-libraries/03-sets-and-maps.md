@@ -9,7 +9,7 @@ prereqs: []
 A [`List`](/synapse/programming-languages/java/core-libraries/the-collections-framework) keeps things in order and allows duplicates. Two other shapes cover most of what's left:
 
 - a **`Set`** stores *unique* elements and answers "is this in here?" in about constant time;
-- a **`Map`** stores *key → value* associations and answers "what's the value for this key?" as fast.
+- a **`Map`** stores *key → value* associations and answers "what's the value for this key?" just as fast.
 
 Both come in three forms:
 
@@ -17,7 +17,7 @@ Both come in three forms:
 - tree-based, with keys sorted: `TreeSet`, `TreeMap`;
 - linked, with insertion order kept: `LinkedHashSet`, `LinkedHashMap`.
 
-The speed of the hash versions comes from **hashing** entries into buckets. That mechanism is why the next lesson's `hashCode` contract matters.
+The hash versions get their speed from **hashing** entries into buckets. That mechanism is why the next lesson's `hashCode` contract matters.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -107,17 +107,17 @@ key -> hashfn
 hashfn -> buckets.b1: "97 % 4 = 1"
 ```
 
-**Analysis.** Adding `"a"` twice left the size at `2`: the second `add` found `"a"` already present and did nothing. `contains` returned `true` for a member and `false` for a non-member, each without scanning the whole set.
+**Analysis.** Adding `"a"` twice left the size at `2`, because the second `add` found `"a"` already present and did nothing. `contains` returned `true` for a member and `false` for a non-member, each without scanning the whole set.
 
-The diagram shows why it is fast. An element's **hash code** is a number computed from its contents; `"a"` gives `97`, and `"b"` gives `98`. The hash code picks a **bucket**, so a membership check looks in one bucket, not at every element. (The diagram is simplified to 4 buckets; a new `HashSet` starts with 16 <abbr title="Java SE 21 API, java.util.HashSet">[2]</abbr>.)
+The diagram shows why it's fast. An element's **hash code** is a number computed from its contents: `"a"` gives `97`, and `"b"` gives `98`. The hash code picks a **bucket**, so a membership check looks in one bucket, not at every element. (The diagram is simplified to 4 buckets. A new `HashSet` starts with 16 <abbr title="Java SE 21 API, java.util.HashSet">[2]</abbr>.)
 
 **Intuition.**
 *Mechanism.* A `HashSet` keeps an array of buckets <abbr title="Java SE 21 API, java.util.HashSet">[2]</abbr>. To add or look up an element, it computes the element's `hashCode`, maps that to a bucket index, and checks only that bucket.
 
 - So `add` and `contains` take constant time, "assuming the hash function disperses the elements properly among the buckets" <abbr title="Java SE 21 API, java.util.HashSet">[2]</abbr>. A `List.contains` scans every element: O(n).
-- Uniqueness falls out: an element that lands in an occupied bucket is compared with `.equals`, and dropped if an equal one is already there.
+- Uniqueness comes for free: an element that lands in an occupied bucket is compared with `.equals`, and dropped if an equal one is already there.
 
-*Concrete bite.* Uniqueness does not always mean "a duplicate is ignored". `Set.of(...)` builds an unmodifiable set, and it **rejects** duplicates at creation <abbr title="Java SE 21 API, java.util.Set, Unmodifiable Sets">[1]</abbr>:
+*Concrete bite.* Uniqueness doesn't always mean "a duplicate is ignored". `Set.of(...)` builds an unmodifiable set, and it **rejects** duplicates at creation <abbr title="Java SE 21 API, java.util.Set, Unmodifiable Sets">[1]</abbr>:
 
 ```java run
 import java.util.Set;
@@ -137,13 +137,13 @@ true
 Exception in thread "main" java.lang.IllegalArgumentException: duplicate element: a
 ```
 
-`Map.of` does the same for a repeated key: `duplicate key: k`. Like `List.of`, both are unmodifiable, so `add` or `put` on them throws `UnsupportedOperationException`.
+`Map.of` does the same for a repeated key: `duplicate key: k`. Like `List.of`, both are unmodifiable, so calling `add` or `put` on them throws `UnsupportedOperationException`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Use a `Set` when you need uniqueness or fast membership tests: "have I seen this?", "is this allowed?". Reach for a `HashSet` by default. Use `Set.of` only for fixed values you know are distinct.
 
-The cost is losing order and a small overhead per element. The benefit is membership in constant time instead of the O(n) scan a `List.contains` does.
+The cost is losing order, plus a small overhead per element. The payoff is membership in constant time instead of the O(n) scan a `List.contains` does.
 
 </div>
 
@@ -184,7 +184,7 @@ linked: [3, 1, 2]
 hash:   [1, 2, 3]
 ```
 
-**Analysis.** All three dropped the duplicate `1`, so each holds `{1, 2, 3}`, but the *order* differs:
+**Analysis.** All three dropped the duplicate `1`, so each holds `{1, 2, 3}`. But the *order* differs:
 
 - `TreeSet` printed sorted: `[1, 2, 3]`.
 - `LinkedHashSet` printed insertion order: `[3, 1, 2]`.
@@ -199,7 +199,7 @@ The `java.util.*` import brings in every class of the package at once.
 - `LinkedHashSet` is a `HashSet` plus "a doubly-linked list running through all of its entries" in insertion order <abbr title="Java SE 21 API, java.util.LinkedHashSet">[5]</abbr>. It stays constant time.
 - `HashSet` is the plain bucket array. Its API "makes no guarantees as to the iteration order", not even that the order stays the same over time <abbr title="Java SE 21 API, java.util.HashSet">[2]</abbr>.
 
-*Concrete bite.* The `hash: [1, 2, 3]` line is a trap dressed as order. Use strings, and the order is neither sorted nor the insertion order:
+*Concrete bite.* The `hash: [1, 2, 3]` line is a trap dressed up as order. Switch to strings, and the order is neither sorted nor the insertion order:
 
 ```java run
 import java.util.*;
@@ -225,7 +225,7 @@ hash:   [apple, pear, kiwi, fig]
 
 The `HashSet` order comes from the strings' hash codes. This run on JDK 21 printed `apple, pear, kiwi, fig`; another JDK, or more elements, may print another order.
 
-A `TreeSet` has its own trap: it must compare its elements. A class with no natural ordering fails on the first `add` <abbr title="Java SE 21 API, java.util.TreeSet">[4]</abbr>:
+A `TreeSet` has its own trap, because it must compare its elements. A class with no natural ordering fails on the first `add` <abbr title="Java SE 21 API, java.util.TreeSet">[4]</abbr>:
 
 ```java run
 import java.util.Set;
@@ -263,7 +263,7 @@ The fix is the one from [sorting a list](/synapse/programming-languages/java/cor
 - `TreeSet` when you need sorted iteration (O(log n), and the elements must be comparable);
 - `LinkedHashSet` when you need insertion order (a little more memory).
 
-The cost of `Tree` or `Linked` is speed or memory. The cost of assuming `HashSet` is ordered is a bug that hides until the data changes.
+`Tree` or `Linked` costs you speed or memory. Assuming `HashSet` is ordered costs you a bug that hides until the data changes.
 
 </div>
 
@@ -271,7 +271,7 @@ The cost of `Tree` or `Linked` is speed or memory. The cost of assuming `HashSet
 
 ## 3. `Map`: key → value
 
-A `Map` associates each unique **key** with a **value**; "each key can map to at most one value" <abbr title="Java SE 21 API, java.util.Map">[6]</abbr>. Its main methods:
+A `Map` associates each unique **key** with a **value**, and "each key can map to at most one value" <abbr title="Java SE 21 API, java.util.Map">[6]</abbr>. Its main methods:
 
 - `put` stores a value under a key;
 - `get` retrieves the value for a key;
@@ -325,7 +325,7 @@ classDiagram
 
 A `Map` finds a value by hashing the key into a bucket, exactly as a `Set` hashes its elements. `Map<String, Integer>` names two types: the keys' type, then the values' type.
 
-A map also updates, removes, and lets you walk its entries. A `Map` is not itself a collection, but it offers three views that are <abbr title="Java SE 21 API, java.util.Map">[6]</abbr>:
+A map can also update, remove, and let you walk its entries. A `Map` isn't itself a collection, but it offers three views that are <abbr title="Java SE 21 API, java.util.Map">[6]</abbr>:
 
 - `keySet()`, the set of keys;
 - `values()`, the collection of values;
@@ -369,7 +369,7 @@ pear -> 9
 - The for-each over `entrySet()` visited every pair. A `TreeMap` visits keys in sorted order <abbr title="Java SE 21 API, java.util.TreeMap">[8]</abbr>, so `fig` came before `pear`.
 
 **Intuition.**
-*Mechanism.* `get` returns the value for the key, or `null` if the key is absent. A `HashMap` may also store `null` as a value, so "a return value of null does not necessarily indicate that the map contains no mapping for the key" <abbr title="Java SE 21 API, Map.get">[9]</abbr>. `getOrDefault` and `containsKey` exist to handle absence explicitly.
+*Mechanism.* `get` returns the value for the key, or `null` when the key is absent. A `HashMap` may also store `null` as a value, so "a return value of null does not necessarily indicate that the map contains no mapping for the key" <abbr title="Java SE 21 API, Map.get">[9]</abbr>. `getOrDefault` and `containsKey` exist to handle absence explicitly.
 
 *Concrete bite.* Because a missing key gives `null`, assigning `get`'s result straight into a primitive unboxes `null` and throws:
 
@@ -391,13 +391,13 @@ public class Main {
 Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.lang.Integer.intValue()" because the return value of "java.util.Map.get(Object)" is null
 ```
 
-`m.get("missing")` returned `null`, because there is no such key. Assigning it to an `int` tried to unbox `null`: the [null-unboxing `NullPointerException`](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) <abbr title="The Java Language Specification, Java SE 21, §5.1.8">[10]</abbr>. The map did not fail; the *hidden unboxing of a `null`* did.
+`m.get("missing")` returned `null`, because there's no such key. Assigning it to an `int` tried to unbox `null`, which is the [null-unboxing `NullPointerException`](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) <abbr title="The Java Language Specification, Java SE 21, §5.1.8">[10]</abbr>. The map didn't fail. The *hidden unboxing of a `null`* did.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Treat `Map.get` as possibly returning `null`. Use `getOrDefault(key, fallback)` or `containsKey` when a key may be absent, and never assign `get`'s result straight into a primitive. Walk a map through `entrySet()` when you need both keys and values.
 
-The cost is a fallback value or an extra check. The benefit is no surprise `NullPointerException` from a lookup that missed.
+The cost is a fallback value or an extra check. The payoff is no surprise `NullPointerException` from a lookup that missed.
 
 </div>
 
@@ -405,7 +405,7 @@ The cost is a fallback value or an extra check. The benefit is no surprise `Null
 
 ## 4. The counting idiom
 
-The most common `Map` task is counting occurrences. It has a one-line shape with `getOrDefault`: read the current count (`0` for a new key), add one, and put it back.
+The most common `Map` task is counting occurrences, and it takes one line with `getOrDefault`: read the current count (`0` for a new key), add one, and put it back.
 
 ```java run viz=hashmap:counts
 import java.util.Map;
@@ -432,12 +432,12 @@ public class Main {
 1
 ```
 
-**Analysis.** For each word, `getOrDefault(word, 0)` returned the running count (`0` the first time a word appeared). `+ 1` incremented it, and `put` stored it back over the old value. The result is a frequency table: `a` three times, `b` twice, `c` once.
+**Analysis.** For each word, `getOrDefault(word, 0)` returned the running count (`0` the first time a word appeared). `+ 1` incremented it, and `put` stored it back over the old value. The result is a frequency table: `a` three times, `b` twice, and `c` once.
 
 **Intuition.**
 *Mechanism.* `getOrDefault(k, d)` returns the mapped value, or `d` if `k` is absent <abbr title="Java SE 21 API, java.util.Map">[6]</abbr>. So the first occurrence reads `0`, and every later one reads the count so far. The idiom folds "start at zero on first sight" and "add one on later sights" into one expression.
 
-*Concrete bite.* Drop the default and use `get`, and the *first* occurrence of each word reads `null`, unboxes, and throws:
+*Concrete bite.* Drop the default and use `get`, and the *first* occurrence of each word reads `null`, unboxes it, and throws:
 
 ```java run
 import java.util.Map;
@@ -459,13 +459,13 @@ public class Main {
 Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.lang.Integer.intValue()" because the return value of "java.util.Map.get(Object)" is null
 ```
 
-The `getOrDefault(..., 0)` is not decoration; it is the seed that makes the count work.
+The `getOrDefault(..., 0)` isn't decoration. It's the seed that makes the count work.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Count with `map.put(k, map.getOrDefault(k, 0) + 1)`. Once you have the method references of [Lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas), `merge(k, 1, Integer::sum)` does the same in one call.
 
-The cost of the `getOrDefault` form is a little length. The benefit is that it works with only what you know now, and it makes "the default for a new key" explicit.
+The `getOrDefault` form costs a little length. The payoff is that it works with only what you know so far, and it makes "the default for a new key" explicit.
 
 </div>
 
@@ -528,7 +528,7 @@ One check per objective. Answer before you open anything.
 
 - Adding `"x"`, `"y"`, `"x"`, `"z"`, `"y"` leaves size `3`.
 - Adding `5, 3, 5, 1`: `TreeSet` prints `[1, 3, 5]`, `LinkedHashSet` prints `[5, 3, 1]`, and `HashSet` printed `[1, 3, 5]` on JDK 21, by the small-`Integer` accident of §2.
-- `System.out.println(m.get("a"))` prints `null`. `int n = m.get("a");` throws `NullPointerException`: the `null` is unboxed.
+- `System.out.println(m.get("a"))` prints `null`. `int n = m.get("a");` throws `NullPointerException`, because the `null` gets unboxed.
 - The fixed loop is `m.put(w, m.getOrDefault(w, 0) + 1);`.
 
 </details>

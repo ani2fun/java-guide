@@ -6,12 +6,12 @@ prereqs: []
 
 # Strings in Depth — Immutability and Its Cost
 
-In [Strings, the Basics](/synapse/programming-languages/java/first-steps/strings-the-basics) you learned that a `String` is immutable: every method that seems to edit it returns a *new* object. That was a correctness fact. Here it becomes a *performance* fact:
+In [Strings, the Basics](/synapse/programming-languages/java/first-steps/strings-the-basics) you learned that a `String` is immutable: every method that seems to edit it actually returns a *new* object. That was a fact about correctness. Here it becomes a fact about *performance*:
 
 - each concatenation that runs builds a brand-new String, so concatenating in a loop does O(N²) work;
 - `StringBuilder`, a mutable buffer of characters, is the O(N) fix.
 
-This lesson also adds `intern()` to the [String pool](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model), shows why `StringBuilder` does not compare by contents, and covers splitting and joining. It ends with the modern tools for assembling text: `formatted()` and multi-line **text blocks**.
+This lesson also adds `intern()` to the [String pool](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model), shows why `StringBuilder` doesn't compare by contents, and covers splitting and joining. It wraps up with the modern tools for assembling text: `formatted()` and multi-line **text blocks**.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -57,7 +57,7 @@ This is the deep pass of [Strings, the Basics](/synapse/programming-languages/ja
 
 A `String` never changes, so `s = s + "b"` does **not** extend `s`. It builds a new String and points `s` at it <abbr title="The Java Language Specification, Java SE 21, §15.18.1">[1]</abbr>.
 
-We can see the new object with `System.identityHashCode`. It returns a number for an object, and the same object always gives the same number <abbr title="Java SE 21 API, Object.hashCode and System.identityHashCode">[2]</abbr>. So two different numbers mean two different objects:
+You can see the new object with `System.identityHashCode`. It returns a number for an object, and the same object always gives the same number <abbr title="Java SE 21 API, Object.hashCode and System.identityHashCode">[2]</abbr>. So two different numbers mean two different objects:
 
 ```java run
 public class Main {
@@ -78,9 +78,9 @@ ab
 false
 ```
 
-**Analysis.** After `s = s + "b"`, `s` reads `"ab"`, but `h1 == h2` is `false`: `s` now refers to a *different* object. The `+` did not modify the original `"a"`; it allocated a new `"ab"`.
+**Analysis.** After `s = s + "b"`, `s` reads `"ab"`, but `h1 == h2` is `false`, because `s` now refers to a *different* object. The `+` didn't modify the original `"a"`. It allocated a new `"ab"`.
 
-The numbers themselves vary per run, which is why we compare them rather than print them. (The reverse does not hold. Distinct numbers for distinct objects are promised only "as far as is reasonably practical" <abbr title="Java SE 21 API, Object.hashCode and System.identityHashCode">[2]</abbr>, so equal numbers prove nothing.)
+The numbers themselves vary from run to run, which is why we compare them instead of printing them. (The reverse doesn't hold. Distinct numbers for distinct objects are promised only "as far as is reasonably practical" <abbr title="Java SE 21 API, Object.hashCode and System.identityHashCode">[2]</abbr>, so equal numbers prove nothing.)
 
 **Intuition.**
 *Mechanism.* The JLS says the result of `+` on strings is a **newly created** String, unless the whole expression is a constant <abbr title="The Java Language Specification, Java SE 21, §15.18.1">[1]</abbr>.
@@ -88,9 +88,9 @@ The numbers themselves vary per run, which is why we compare them rather than pr
 - Inside one expression such as `a + b + c`, Java may skip the in-between Strings and build the result in one step. Since JDK 9, javac hands that step to a library method chosen at run time <abbr title="JEP 280: Indify String Concatenation">[3]</abbr>.
 - A *loop* is different. Each pass runs the expression again, and each new String copies every character built so far.
 
-*Concrete bite.* Append one character `N` times with `out += "x"`. Pass `k` copies `k` characters, so the total is `1 + 2 + … + N`, about N²/2 copies: **quadratic**.
+*Concrete bite.* Append one character `N` times with `out += "x"`. Pass `k` copies `k` characters, so the total is `1 + 2 + … + N`, about N²/2 copies. That's **quadratic**.
 
-The result is correct, so nothing warns you; only the time grows. Doubling `N` should roughly quadruple the `+=` time. Your times will differ from these:
+The result is correct, so nothing warns you. Only the time grows. Doubling `N` should roughly quadruple the `+=` time. Your times will differ from these:
 
 ```java run
 public class Main {
@@ -128,13 +128,13 @@ public class Main {
 200000 pieces: += 943 ms, StringBuilder 0 ms
 ```
 
-Each doubling of `N` made `+=` more than three times slower, heading for the four times that N² predicts. `StringBuilder` stayed near zero. Small sizes are noisy while the JVM warms up; the trend is the point.
+Each doubling of `N` made `+=` more than three times slower, heading for the four times that N² predicts. `StringBuilder` stayed near zero. Small sizes are noisy while the JVM warms up, so focus on the trend.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** `+` is fine for a *fixed, small* number of pieces in one expression: it is readable, and Java may build the result in one step. Never build a string with `+=` inside a loop.
+💡 **Earned rule.** `+` is fine for a *fixed, small* number of pieces in one expression. It's readable, and Java may build the result in one step. Never build a string with `+=` inside a loop.
 
-The cost of ignoring this rule is a program that works in tests and crawls on large input. It is a performance bug with no error, and the next section fixes it.
+Ignore this rule, and you get a program that works in tests and crawls on large input. It's a performance bug with no error, and the next section fixes it.
 
 </div>
 
@@ -142,7 +142,7 @@ The cost of ignoring this rule is a program that works in tests and crawls on la
 
 ## 2. `StringBuilder`: the O(n) fix
 
-`StringBuilder` is a *mutable* sequence of characters <abbr title="Java SE 21 API, java.lang.StringBuilder">[4]</abbr>. `append` adds to it **in place**, with no new object per step. `toString()` produces the final `String` once, at the end. The total work is linear.
+`StringBuilder` is a *mutable* sequence of characters <abbr title="Java SE 21 API, java.lang.StringBuilder">[4]</abbr>. `append` adds to it **in place**, with no new object per step. `toString()` produces the final `String` once, at the end. So the total work is linear.
 
 ```java run
 public class Main {
@@ -164,9 +164,9 @@ public class Main {
 5
 ```
 
-**Analysis.** The loop appended `0` to `4` into one growing buffer, and `toString()` produced `"01234"` at the end. That is a single String allocation instead of one per step.
+**Analysis.** The loop appended `0` to `4` into one growing buffer, and `toString()` produced `"01234"` at the end. That's a single String allocation instead of one per step.
 
-A builder can do more than append. Because it is mutable, its methods change it in place, and most of them return the same builder, so calls chain:
+A builder can do more than append. Because it's mutable, its methods change it in place, and most of them return the same builder, so you can chain calls:
 
 ```java run
 public class Main {
@@ -200,14 +200,14 @@ true
 **Analysis.**
 
 - `reverse`, `insert`, `deleteCharAt`, `setLength` and `setCharAt` all edited the one object `sb`.
-- `same == sb` is `true`: `append` returned the builder it was called on. That is why `sb.append(x).append(y)` works.
+- `same == sb` is `true`, because `append` returned the builder it was called on. That's why `sb.append(x).append(y)` works.
 - `println(sb)` printed the text. `println` turns any object into text with `String.valueOf`, which calls its `toString()` <abbr title="Java SE 21 API, PrintStream.println(Object)">[17]</abbr>.
 - A new, empty builder has room for 16 characters before it must grow <abbr title="Java SE 21 API, java.lang.StringBuilder">[4]</abbr>.
 
 **Intuition.**
 *Mechanism.* A `StringBuilder` keeps its characters in an internal array with spare room, its **capacity**. `append` writes into that room.
 
-When the room runs out, the builder "is automatically made larger" <abbr title="Java SE 21 API, java.lang.StringBuilder">[4]</abbr>. OpenJDK grows it to twice its size plus 2 (16, 34, 70, 142 in a run), so the copies stay rare, and N appends cost O(N) in total. (Since JDK 9 that array holds bytes, not `char`s, to save memory on Latin-1 text <abbr title="JEP 254: Compact Strings">[5]</abbr>. The API is the same.)
+When the room runs out, the builder "is automatically made larger" <abbr title="Java SE 21 API, java.lang.StringBuilder">[4]</abbr>. OpenJDK grows it to twice its size plus 2 (16, 34, 70, 142 in a run), so the copies stay rare, and N appends cost O(N) in total. (Since JDK 9, that array holds bytes, not `char`s, to save memory on Latin-1 text <abbr title="JEP 254: Compact Strings">[5]</abbr>. The API is the same.)
 
 *Concrete bite.* `StringBuilder` does **not** override `equals` <abbr title="Java SE 21 API, StringBuilder.compareTo, API Note">[6]</abbr>. It inherits `Object`'s `equals`, which is identity, the same trap as arrays in [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model):
 
@@ -228,7 +228,7 @@ false
 true
 ```
 
-`a.equals(b)` is `false`: two builders are never "equal" unless they are the same object. To compare *contents*, convert to `String` first. Two shortcuts skip the conversion:
+`a.equals(b)` is `false`, because two builders are never "equal" unless they're the same object. To compare *contents*, convert to `String` first. Two shortcuts let you skip the conversion:
 
 - `"hi".contentEquals(a)` compares a String with any sequence of characters <abbr title="Java SE 21 API, String.contentEquals(CharSequence)">[7]</abbr>;
 - `a.compareTo(b) == 0` compares two builders by their characters (since Java 11) <abbr title="Java SE 21 API, StringBuilder.compareTo, API Note">[6]</abbr>.
@@ -239,17 +239,17 @@ Why a class compares by identity unless it overrides `equals` is the subject of 
 
 💡 **Earned rule.** Use `StringBuilder` to assemble a string across many steps, and call `toString()` once to finish. Compare its contents through a `String`, never with `StringBuilder.equals`.
 
-The cost is a little ceremony and a mutable object to manage. The benefit is linear-time building and a clear seam: the builder is "in progress", and the `String` you hand out is finished and immutable.
+The cost is a little ceremony and a mutable object to manage. The payoff is linear-time building and a clear seam: the builder is "in progress", and the `String` you hand out is finished and immutable.
 
 </div>
 
-You may meet `StringBuffer` in older code. It has the same methods, but they are synchronized, so several threads can share one buffer safely <abbr title="Java SE 21 API, java.lang.StringBuffer">[16]</abbr>. The API recommends `StringBuilder` for single-threaded use, as "it will be faster under most implementations" <abbr title="Java SE 21 API, java.lang.StringBuilder">[4]</abbr>.
+You may run into `StringBuffer` in older code. It has the same methods, but they are synchronized, so several threads can share one buffer safely <abbr title="Java SE 21 API, java.lang.StringBuffer">[16]</abbr>. The API recommends `StringBuilder` for single-threaded use, as "it will be faster under most implementations" <abbr title="Java SE 21 API, java.lang.StringBuilder">[4]</abbr>.
 
 ---
 
 ## 3. The pool and `intern()`
 
-Recall from [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model): string literals and constant expressions are **interned**, so equal ones are the same object <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[8]</abbr>. A string computed at run time is a fresh object. `intern()` takes a runtime string and returns the shared instance from the pool.
+Recall from [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model): string literals and constant expressions are **interned**, so equal ones are the same object <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[8]</abbr>. A string computed at run time is a fresh object. `intern()` takes a runtime string and hands back the shared instance from the pool.
 
 ```java run
 public class Main {
@@ -273,22 +273,22 @@ true
 
 **Analysis.**
 
-- `b` is built from the *variable* `a`, so it is a new object, and `b == c` is `false`, though both read `"hello"`.
+- `b` is built from the *variable* `a`, so it's a new object, and `b == c` is `false`, though both read `"hello"`.
 - `b.intern()` returns the pooled `"hello"`, the same object the literal `c` points at, so `b.intern() == c` is `true`.
-- `b.equals(c)` compares characters, so it is `true` regardless.
+- `b.equals(c)` compares characters, so it's `true` either way.
 
-Written as two literals, `"he" + "llo"` is a constant expression, and it is pooled. The variable `a` is what makes `b` a runtime string.
+Written as two literals, `"he" + "llo"` is a constant expression, so it's pooled. The variable `a` is what makes `b` a runtime string.
 
 **Intuition.**
-*Mechanism.* The class `String` keeps a private pool, "initially empty" <abbr title="Java SE 21 API, String.intern()">[9]</abbr>. `intern()` looks for an equal string there. If it finds one, it returns that one; otherwise it adds this string and returns it. Literals are interned "as if by execution of the method `String.intern`" <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[8]</abbr>.
+*Mechanism.* The class `String` keeps a private pool, "initially empty" <abbr title="Java SE 21 API, String.intern()">[9]</abbr>. `intern()` looks for an equal string there. If it finds one, it returns that one. Otherwise, it adds this string and returns it. Literals are interned "as if by execution of the method `String.intern`" <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[8]</abbr>.
 
-*Concrete bite.* `b == c` being `false` is the identity trap again: only pooled strings share identity, and a variable-built string is not pooled. `intern()` *can* make `==` work. Needing it to compare strings is a sign you should use `.equals`.
+*Concrete bite.* `b == c` coming out `false` is the identity trap again. Only pooled strings share identity, and a variable-built string isn't pooled. `intern()` *can* make `==` work, but if you need it to compare strings, that's a sign you should use `.equals`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Compare string contents with `.equals`. Reach for `intern()` only as a deliberate memory optimization: many equal runtime strings, deduplicated into one.
 
-Never use `intern()` to make `==` "work". Its cost is a pool lookup on every call. Its benefit, in the rare right case, is one shared instance instead of thousands of duplicates.
+Never use `intern()` to make `==` "work". It costs a pool lookup on every call. Its payoff, in the rare right case, is one shared instance instead of thousands of duplicates.
 
 </div>
 
@@ -330,7 +330,7 @@ ababab
 **Analysis.** `split(",")` produced three parts, and `Arrays.toString` printed the array (a plain `println` of an array prints only its type and hash). `String.join` accepts an array or a `List`. `repeat(3)` (Java 11) joins three copies <abbr title="Java SE 21 API, String.join and String.repeat">[11]</abbr>.
 
 **Intuition.**
-*Mechanism.* The argument to `split` is not plain text. It is a **regular expression**: a small pattern language in which some characters have special meanings <abbr title="Java SE 21 API, java.util.regex.Pattern">[18]</abbr>. Letters and `,` match themselves. `.` means "any character", and `|` means "or".
+*Mechanism.* The argument to `split` isn't plain text. It's a **regular expression**, a small pattern language in which some characters have special meanings <abbr title="Java SE 21 API, java.util.regex.Pattern">[18]</abbr>. Letters and `,` match themselves. `.` means "any character", and `|` means "or".
 
 *Concrete bite.* Split a version number on `.`, and every character is a separator:
 
@@ -366,7 +366,7 @@ public class Main {
 
 💡 **Earned rule.** Treat `split`'s argument as a regex. Escape `. | * + ? ( ) [ ] { } ^ $ \` with `\\`, and pass `-1` as the limit when empty fields count.
 
-The cost is one more rule to remember. The benefit is that one call can split on patterns, such as `" +"` for "one or more spaces".
+The cost is one more rule to remember. The payoff is that one call can split on patterns, such as `" +"` for "one or more spaces".
 
 </div>
 
@@ -408,7 +408,7 @@ Score: 95
 - The block ended with a newline, because the closing `"""` sits on its own line. So `[end]` printed on a line of its own.
 - `.formatted(name, score)` then filled the placeholders.
 
-Text blocks remove the old pain of `"line1\n" + "line2\n"` for multi-line text such as SQL, JSON and HTML.
+Text blocks spare you the old pain of `"line1\n" + "line2\n"` for multi-line text such as SQL, JSON and HTML.
 
 **Intuition.**
 *Mechanism.* A text block is an ordinary `String` with friendlier syntax <abbr title="The Java Language Specification, Java SE 21, §3.10.6">[14]</abbr>. The compiler processes its content in three steps:
@@ -417,7 +417,7 @@ Text blocks remove the old pain of `"line1\n" + "line2\n"` for multi-line text s
 2. It removes **incidental white space**: the common leading indentation, and the trailing spaces on every line.
 3. It interprets escape sequences such as `\n` and `\t`.
 
-The opening `"""` must end its line <abbr title="The Java Language Specification, Java SE 21, §3.10.6">[14]</abbr>. A one-line text block does not compile:
+The opening `"""` must end its line <abbr title="The Java Language Specification, Java SE 21, §3.10.6">[14]</abbr>. A one-line text block doesn't compile:
 
 ```java run
 public class Main {
@@ -435,7 +435,7 @@ Main.java:3: error: illegal text block open delimiter sequence, missing line ter
                       ^
 ```
 
-*Concrete bite.* The indentation stripped is the *common minimum*, and the closing `"""` counts when it sits on its own line. Move it to the far left, and nothing is stripped:
+*Concrete bite.* The compiler strips the *common minimum* indentation, and the closing `"""` counts when it sits on its own line. Move it to the far left, and nothing gets stripped:
 
 ```java run
 public class Main {
@@ -499,7 +499,7 @@ two]
 
 💡 **Earned rule.** Use text blocks for any multi-line literal, and `formatted()` to fill them. Put the closing `"""` on its own line, aligned with the content, to strip the indentation and end with a newline.
 
-The cost is remembering that the closing delimiter's position controls the result. The benefit is multi-line strings you can read as the text they represent, without escape clutter.
+The cost is remembering that the closing delimiter's position controls the result. The payoff is multi-line strings you can read as the text they represent, without escape clutter.
 
 </div>
 
@@ -565,7 +565,7 @@ One check per objective. Answer before you open anything.
 <summary>The 🧪 box below: both lengths, the builders' <code>equals</code>, and where the closing <code>"""</code> goes.</summary>
 
 - Both ways build `"0123456789"`, so both lengths are `10`. The two ways differ in cost, not result.
-- `new StringBuilder("x").equals(new StringBuilder("x"))` is `false`: `StringBuilder` keeps `Object`'s identity `equals`.
+- `new StringBuilder("x").equals(new StringBuilder("x"))` is `false`, because `StringBuilder` keeps `Object`'s identity `equals`.
 - Put the closing `"""` on its own line, in the same column as `{` and `}`. The common indentation is then the indentation of `{`, so `{` and `}` print at the left margin, and `"key"` keeps its 2 extra spaces:
 
 ```java run

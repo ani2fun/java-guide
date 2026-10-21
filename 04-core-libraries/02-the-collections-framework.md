@@ -6,12 +6,12 @@ prereqs: []
 
 # The Collections Framework — Program to the Interface
 
-[Arrays](/synapse/programming-languages/java/control-flow/arrays) were our first containers, but their fixed size is a real limit. The **Collections Framework** is Java's library of growable, feature-rich containers. Its central design idea is worth more than any single class:
+[Arrays](/synapse/programming-languages/java/control-flow/arrays) were our first containers, but their fixed size is a real limit. The **Collections Framework** is Java's library of growable, feature-rich containers. Its central design idea is worth more than any single class in it:
 
 - you program to an **interface** (`List`), a named set of operations;
 - you *choose* an implementation (`ArrayList`, `LinkedList`) only at the moment you create the object.
 
-Code written against `List` works with any list, so you can swap implementations for performance without changing a line that uses them. This lesson covers `List` and why it holds `Integer` rather than `int`. Then come the `Iterator` behind every for-each, sorting, the `Deque` as a stack and a queue, and how to choose an implementation.
+Code written against `List` works with any list, so you can swap implementations for performance without changing a single line that uses them. This lesson covers `List` and why it holds `Integer` instead of `int`. After that come the `Iterator` behind every for-each, sorting, the `Deque` as a stack and a queue, and how to choose an implementation.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -25,7 +25,7 @@ Code written against `List` works with any list, so you can swap implementations
 
 </div>
 
-This is the deep pass of [arrays](/synapse/programming-languages/java/control-flow/arrays). The `<Integer>` notation is a *generic* type, "a `List` of `Integer`". It gets its full treatment in [Generics](/synapse/programming-languages/java/core-libraries/generics); read it here as "this list holds `Integer`s". Every output below was produced by compiling and running the code on Java 21.
+This is the deep pass of [arrays](/synapse/programming-languages/java/control-flow/arrays). The `<Integer>` notation is a *generic* type, "a `List` of `Integer`". It gets its full treatment in [Generics](/synapse/programming-languages/java/core-libraries/generics). For now, read it as "this list holds `Integer`s". Every output below was produced by compiling and running the code on Java 21.
 
 **You'll be able to:** add, read, replace and remove elements of a `List`, and predict what a `List.of` list allows; explain why a list holds `Integer`, not `int`, and predict what `remove(1)` removes from a `List<Integer>`; predict when changing a list inside a for-each throws, and remove safely with an `Iterator`; sort a list in natural, reverse and case-insensitive order, and make a class of your own sortable; use a `Deque` as a stack and as a queue, and pick between `ArrayList`, `LinkedList` and `ArrayDeque`.
 
@@ -93,18 +93,18 @@ public class Main {
 [90, 100, 95]
 ```
 
-**Analysis.** We never declared a size: `add` grew the list to three.
+**Analysis.** We never declared a size. `add` grew the list to three.
 
-- `get(1)` returned the element at index 1 (`85`); indices start at `0`, as with arrays.
+- `get(1)` returned the element at index 1 (`85`). Indices start at `0`, just as with arrays.
 - `set(1, 100)` replaced it.
 - Printing the list shows `[90, 100, 95]`. A `List` has a readable `toString`, unlike a bare array.
 
-The empty `<>` after `ArrayList` is the **diamond** form <abbr title="The Java Language Specification, Java SE 21, §15.9">[19]</abbr>: the compiler fills in `Integer` from the variable's type.
+The empty `<>` after `ArrayList` is the **diamond** form <abbr title="The Java Language Specification, Java SE 21, §15.9">[19]</abbr>, and the compiler fills in `Integer` from the variable's type.
 
 **Intuition.**
-*Mechanism.* `ArrayList` keeps its elements in an array. When the array fills, it allocates a bigger one and copies the elements over. The API leaves the growth policy unspecified "beyond the fact that adding an element has constant amortized time cost" <abbr title="Java SE 21 API, java.util.ArrayList">[2]</abbr>. `get` and `set` are direct array indexing underneath.
+*Mechanism.* `ArrayList` keeps its elements in an array. When the array fills, it allocates a bigger one and copies the elements over. The API leaves the growth policy unspecified "beyond the fact that adding an element has constant amortized time cost" <abbr title="Java SE 21 API, java.util.ArrayList">[2]</abbr>. Underneath, `get` and `set` are direct array indexing.
 
-*Concrete bite.* Not every `List` grows. `List.of(...)` builds an **unmodifiable** list: any `add`, `remove` or `set` throws <abbr title="Java SE 21 API, java.util.List, Unmodifiable Lists">[1]</abbr>:
+*Concrete bite.* Not every `List` grows. `List.of(...)` builds an **unmodifiable** list, and any `add`, `remove` or `set` throws <abbr title="Java SE 21 API, java.util.List, Unmodifiable Lists">[1]</abbr>:
 
 ```java run
 import java.util.List;
@@ -128,9 +128,9 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Reach for a `List` whenever the number of elements isn't fixed up front, which is most of the time. Keep a bare array only when the size is truly fixed and you need raw speed or primitives without boxing. Use `List.of` for values that never change, and `new ArrayList<>(…)` for a list you will edit.
+💡 **Earned rule.** Reach for a `List` whenever the number of elements isn't fixed up front, which is most of the time. Keep a bare array only when the size is truly fixed and you need raw speed or primitives without boxing. Use `List.of` for values that never change, and `new ArrayList<>(…)` for a list you'll edit.
 
-The cost of a `List` is the boxing of primitives (next section) and a little overhead per element. The benefit is growth, a rich API, and a real `toString`.
+A `List` costs you the boxing of primitives (next section) and a little overhead per element. The payoff is growth, a rich API, and a real `toString`.
 
 </div>
 
@@ -138,7 +138,7 @@ The cost of a `List` is the boxing of primitives (next section) and a little ove
 
 ## 2. `Integer`, not `int`: wrappers in collections
 
-A collection holds **objects**, never primitives. The type inside `<…>` must be a reference type <abbr title="The Java Language Specification, Java SE 21, §4.5.1">[3]</abbr>, so `List<int>` does not compile:
+A collection holds **objects**, never primitives. The type inside `<…>` must be a reference type <abbr title="The Java Language Specification, Java SE 21, §4.5.1">[3]</abbr>, so `List<int>` doesn't compile:
 
 ```java run
 import java.util.List;
@@ -165,7 +165,7 @@ The fix is the **wrapper class** from [References, Equality & the Object Model](
 - **boxing** wraps an `int` into an `Integer` when you `add` it <abbr title="The Java Language Specification, Java SE 21, §5.1.7">[4]</abbr>;
 - **unboxing** unwraps an `Integer` into an `int` when you assign it to an `int` <abbr title="The Java Language Specification, Java SE 21, §5.1.8">[5]</abbr>.
 
-A list of `Integer` can also hold `null`, which no `int` can. Unboxing that `null` throws:
+A list of `Integer` can also hold `null`, which no `int` can. Unbox that `null`, and it throws:
 
 ```java run
 import java.util.List;
@@ -195,10 +195,10 @@ public class Main {
 Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.lang.Integer.intValue()" because the return value of "java.util.Iterator.next()" is null
 ```
 
-**Analysis.** `add(7)` boxed and `get(0)` unboxed, so `first + 1` is `8`. The list printed `null` without complaint. The crash came in the loop: `for (int n : nums)` unboxes each element into `int n`, and the second element was `null`. The message names `Iterator.next()`, a first look at the machinery of §4.
+**Analysis.** `add(7)` boxed and `get(0)` unboxed, so `first + 1` is `8`. The list printed `null` without complaint. The crash came in the loop, because `for (int n : nums)` unboxes each element into `int n`, and the second element was `null`. The message names `Iterator.next()`, your first glimpse of the machinery in §4.
 
 **Intuition.**
-*Mechanism.* Boxing is automatic, and so is its failure. A `List` method may take either an index (`int`) or an element (`Object`), and `List` declares both `remove(int index)` and `remove(Object o)` <abbr title="Java SE 21 API, java.util.List">[1]</abbr>. The compiler first looks for a method that fits *without* boxing <abbr title="The Java Language Specification, Java SE 21, §15.12.2">[6]</abbr>. With an `int` argument, `remove(int)` fits, so it wins.
+*Mechanism.* Boxing is automatic, and so is its failure. A `List` method may take either an index (`int`) or an element (`Object`), and `List` declares both versions: `remove(int index)` and `remove(Object o)` <abbr title="Java SE 21 API, java.util.List">[1]</abbr>. The compiler first looks for a method that fits *without* boxing <abbr title="The Java Language Specification, Java SE 21, §15.12.2">[6]</abbr>. With an `int` argument, `remove(int)` fits, so it wins.
 
 *Concrete bite.* `remove(1)` on a `List<Integer>` removes the element at **index** 1, not the value `1`:
 
@@ -224,13 +224,13 @@ public class Main {
 [30]
 ```
 
-**Analysis.** `remove(1)` did **not** remove a value `1`. It removed the element at index `1` (the `20`), leaving `[10, 30]`. To remove by *value*, pass an `Integer` object: `remove(Integer.valueOf(10))` removed the value `10`.
+**Analysis.** `remove(1)` did **not** remove a value `1`. It removed the element at index `1` (the `20`), leaving `[10, 30]`. To remove by *value*, pass an `Integer` object, as `remove(Integer.valueOf(10))` did to remove the value `10`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Write `List<Integer>`, and let boxing do the conversions. With a `List<Integer>`, remove by value with `remove(Integer.valueOf(x))` or `remove((Integer) x)`, never a bare `remove(x)`, which means *index*. Keep `null` out of a list you will unbox.
+💡 **Earned rule.** Write `List<Integer>`, and let boxing do the conversions. With a `List<Integer>`, remove by value with `remove(Integer.valueOf(x))` or `remove((Integer) x)`, never a bare `remove(x)`, which means *index*. Keep `null` out of a list you'll unbox.
 
-The cost is one object per number and one overload to remember. The benefit is every collection in the library, for numbers too.
+The cost is one object per number and one overload to remember. The payoff is every collection in the library, for numbers too.
 
 </div>
 
@@ -238,7 +238,7 @@ The cost is one object per number and one overload to remember. The benefit is e
 
 ## 3. Program to the interface
 
-`List` is an *interface*: a contract of operations. `ArrayList` and `LinkedList` are two *implementations* of it. Declare your variables and parameters as `List`, and your code works with **any** implementation; the concrete class appears only at `new`.
+`List` is an *interface*, a contract of operations. `ArrayList` and `LinkedList` are two *implementations* of it. Declare your variables and parameters as `List`, and your code works with **any** implementation. The concrete class shows up only at `new`.
 
 ```java run
 import java.util.List;
@@ -280,23 +280,23 @@ classDiagram
   List <|.. LinkedList
 ```
 
-**Analysis.** `sum` is written against `List`, so it summed both an `ArrayList` and a `LinkedList` with no change: they share the `List` contract. The diagram shows the relationship:
+**Analysis.** `sum` is written against `List`, so it summed both an `ArrayList` and a `LinkedList` with no change, because they share the `List` contract. The diagram shows the relationship:
 
 - `List` extends `Collection`, the root interface of the framework <abbr title="Java SE 21 API, java.util.Collection">[7]</abbr>;
 - both concrete classes *implement* `List` (the dotted lines).
 
-The variable type (`List`) is the contract; the `new` type is the implementation.
+The variable type (`List`) is the contract, and the `new` type is the implementation.
 
 **Intuition.**
-*Mechanism.* The compiler checks a call on a `List` variable against `List`'s declared methods only. So any object whose class implements `List` is acceptable. At run time the actual implementation's methods run; [Inheritance & Polymorphism](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism) calls this dynamic dispatch. Your code depends on the interface, not the class.
+*Mechanism.* The compiler checks a call on a `List` variable against `List`'s declared methods only. So any object whose class implements `List` will do. At run time, the actual implementation's methods run. [Inheritance & Polymorphism](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism) calls this dynamic dispatch. Your code depends on the interface, not the class.
 
-*Concrete bite.* The payoff is swap-ability. Change `new ArrayList<>()` to `new LinkedList<>()` and nothing else breaks, because every caller spoke to `List`. Declare the variable as `ArrayList` instead, and the choice is welded in: callers can now use `ArrayList`-only methods, and swapping becomes a refactor.
+*Concrete bite.* The payoff is swap-ability. Change `new ArrayList<>()` to `new LinkedList<>()`, and nothing else breaks, because every caller spoke to `List`. Declare the variable as `ArrayList` instead, and the choice is welded in. Callers can now use `ArrayList`-only methods, and swapping becomes a refactor.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Declare variables, parameters, and return types with the **interface** (`List`, `Collection`), and name the implementation only at construction.
 
-The cost is forgoing implementation-specific methods, which you rarely need. The benefit is that the implementation becomes a decision you can revisit for performance without touching the code that uses it.
+The cost is giving up implementation-specific methods, which you rarely need. The payoff is that the implementation becomes a decision you can revisit for performance without touching the code that uses it.
 
 </div>
 
@@ -304,7 +304,7 @@ The cost is forgoing implementation-specific methods, which you rarely need. The
 
 ## 4. Iteration, the `Iterator`, and the modification trap
 
-Every collection is walked by an **`Iterator`**: an object with `hasNext()` and `next()` <abbr title="Java SE 21 API, java.util.Iterator">[8]</abbr>. The enhanced `for` over a collection is shorthand for a loop over its iterator <abbr title="The Java Language Specification, Java SE 21, §14.14.2">[9]</abbr>. That iterator enforces a rule: you may not structurally modify a collection while a for-each walks it.
+An **`Iterator`** walks every collection. It's an object with `hasNext()` and `next()` <abbr title="Java SE 21 API, java.util.Iterator">[8]</abbr>. The enhanced `for` over a collection is shorthand for a loop over its iterator <abbr title="The Java Language Specification, Java SE 21, §14.14.2">[9]</abbr>. That iterator enforces a rule: you may not structurally modify a collection while a for-each is walking it.
 
 ```java run viz=array:nums
 import java.util.List;
@@ -325,12 +325,12 @@ public class Main {
 1 2 3 4 
 ```
 
-**Analysis.** The for-each obtained an `Iterator` from `nums` and called `hasNext()` and `next()` under the hood to visit each element. There is no index; the iterator tracks the position.
+**Analysis.** The for-each obtained an `Iterator` from `nums` and called `hasNext()` and `next()` under the hood to visit each element. There's no index. The iterator tracks the position.
 
 **Intuition.**
 *Mechanism.* The list counts its structural changes. The iterator remembers the count it started with and checks it on each `next()`.
 
-Suppose something *other* than the iterator adds or removes an element. The counts then differ, and `next()` throws `ConcurrentModificationException`. This is called **fail-fast**: it catches the bug instead of silently skipping or repeating elements <abbr title="Java SE 21 API, java.util.ArrayList">[2]</abbr>.
+Suppose something *other* than the iterator adds or removes an element. The counts then differ, and `next()` throws `ConcurrentModificationException`. This is called **fail-fast**, because it catches the bug instead of silently skipping or repeating elements <abbr title="Java SE 21 API, java.util.ArrayList">[2]</abbr>.
 
 *Concrete bite.* Remove from the list inside a for-each, and it throws:
 
@@ -355,7 +355,7 @@ public class Main {
 Exception in thread "main" java.util.ConcurrentModificationException
 ```
 
-`nums.remove(...)` changed the list behind the for-each's iterator, so the next `next()` detected the mismatch and threw. The check is only "best-effort" <abbr title="Java SE 21 API, java.util.ArrayList">[2]</abbr>. Remove the second-to-last element, and the loop ends before the next `next()`, with no exception, and an element never visited:
+`nums.remove(...)` changed the list behind the for-each's iterator, so the following `next()` spotted the mismatch and threw. The check is only "best-effort" <abbr title="Java SE 21 API, java.util.ArrayList">[2]</abbr>. Remove the second-to-last element, and the loop ends before the next `next()`, with no exception and one element never visited:
 
 ```java run
 import java.util.List;
@@ -378,7 +378,7 @@ public class Main {
 [1, 3]
 ```
 
-The result looks right, but the loop never visited `3`: after the removal, `hasNext()` saw no more elements. The API warns that "it would be wrong to write a program that depended on this exception for its correctness" <abbr title="Java SE 21 API, java.util.ArrayList">[2]</abbr>. The fix is to remove **through the iterator**, whose own `remove()` keeps the counts in sync:
+The result looks right, but the loop never visited `3`, because after the removal `hasNext()` saw no more elements. The API warns that "it would be wrong to write a program that depended on this exception for its correctness" <abbr title="Java SE 21 API, java.util.ArrayList">[2]</abbr>. The fix is to remove **through the iterator**, whose own `remove()` keeps the counts in sync:
 
 ```java run viz=array:nums
 import java.util.List;
@@ -408,7 +408,7 @@ public class Main {
 
 💡 **Earned rule.** Never `add` or `remove` on a collection while a for-each is walking it, even when no exception appears. To delete during a pass, use an explicit `Iterator` and its `remove()`. Once you have [lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas), `removeIf` does the same in one call.
 
-The cost of the fail-fast check is that the convenient for-each can't mutate. The benefit is that most "modified mid-iteration" bugs throw loudly instead of silently corrupting the traversal.
+The fail-fast check costs you a for-each that can't mutate. The payoff is that most "modified mid-iteration" bugs throw loudly instead of silently corrupting the traversal.
 
 </div>
 
@@ -416,7 +416,7 @@ The cost of the fail-fast check is that the convenient for-each can't mutate. Th
 
 ## 5. Sorting a list
 
-A list is sorted in place, by `Collections.sort(list)` or `list.sort(order)`:
+You sort a list in place with `Collections.sort(list)` or `list.sort(order)`:
 
 - with no order given, elements sort by their **natural ordering**: numbers ascending, strings by character code <abbr title="Java SE 21 API, java.lang.Comparable">[10]</abbr>;
 - a **`Comparator`** is an object that supplies another order. The library has ready-made ones, such as `Comparator.reverseOrder()` and `String.CASE_INSENSITIVE_ORDER` <abbr title="Java SE 21 API, java.util.Comparator and String.CASE_INSENSITIVE_ORDER">[11]</abbr>.
@@ -468,11 +468,11 @@ public class Main {
 - `Arrays.sort` sorted the `int[]` in place.
 
 **Intuition.**
-*Mechanism.* Natural ordering comes from the **`Comparable`** interface. A class that implements it has a `compareTo` method. It returns a negative number, zero, or a positive number: `this` is less than, equal to, or greater than the other object <abbr title="Java SE 21 API, java.lang.Comparable">[10]</abbr>.
+*Mechanism.* Natural ordering comes from the **`Comparable`** interface. A class that implements it has a `compareTo` method. It returns a negative number, zero, or a positive number, meaning `this` is less than, equal to, or greater than the other object <abbr title="Java SE 21 API, java.lang.Comparable">[10]</abbr>.
 
-`Integer` and `String` implement it. A class you write does not, until you say so.
+`Integer` and `String` implement it. A class you write doesn't, until you say so.
 
-*Concrete bite.* Sort a list of your own objects, and there is no order to use:
+*Concrete bite.* Sort a list of your own objects, and there's no order to use:
 
 ```java run
 import java.util.ArrayList;
@@ -506,7 +506,7 @@ Main.java:20: error: no suitable method found for sort(List<Player>)
                    ^
 ```
 
-`Collections.sort(list)` accepts only a list of `Comparable` elements, so javac rejects it (the rest of the message is about [generics](/synapse/programming-languages/java/core-libraries/generics)). `players.sort(null)` compiles, but fails at run time with `ClassCastException: class Player cannot be cast to class java.lang.Comparable`. The fix is to give `Player` a natural ordering:
+`Collections.sort(list)` accepts only a list of `Comparable` elements, so javac rejects it (the rest of the message is about [generics](/synapse/programming-languages/java/core-libraries/generics)). `players.sort(null)` compiles, but it fails at run time with `ClassCastException: class Player cannot be cast to class java.lang.Comparable`. The fix is to give `Player` a natural ordering:
 
 ```java run
 import java.util.ArrayList;
@@ -556,9 +556,9 @@ public class Main {
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Sort with `list.sort(…)` or `Collections.sort(…)`: natural order for numbers and strings, a `Comparator` for any other order. Give a class a natural ordering with `Comparable` when it has one obvious order.
+💡 **Earned rule.** Sort with `list.sort(…)` or `Collections.sort(…)`. Use natural order for numbers and strings, and a `Comparator` for any other order. Give a class a natural ordering with `Comparable` when it has one obvious order.
 
-The cost is that `String`'s natural order is not dictionary order: capitals sort first. For orders built on the fly, such as "by name, then by score", [lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas) make a `Comparator` in one line.
+The catch is that `String`'s natural order isn't dictionary order: capitals sort first. For orders built on the fly, such as "by name, then by score", [lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas) make a `Comparator` in one line.
 
 </div>
 
@@ -566,7 +566,7 @@ The cost is that `String`'s natural order is not dictionary order: capitals sort
 
 ## 6. `Deque`: a stack and a queue
 
-A **`Deque`** ("deck", a double-ended queue) is a sequence you add to and remove from at both ends <abbr title="Java SE 21 API, java.util.Deque">[15]</abbr>. It serves two classic shapes:
+A **`Deque`** ("deck", a double-ended queue) is a sequence you can add to and remove from at both ends <abbr title="Java SE 21 API, java.util.Deque">[15]</abbr>. It serves two classic shapes:
 
 - a **stack** is last-in, first-out (LIFO): `push` adds to the front, `pop` removes from the front;
 - a **queue** is first-in, first-out (FIFO): `offer` adds at the back, `poll` removes from the front.
@@ -613,7 +613,7 @@ a
 **Intuition.**
 *Mechanism.* Each end has two families of methods <abbr title="Java SE 21 API, java.util.Deque">[15]</abbr>. One family throws an exception when the deque is empty: `pop`, `removeFirst`, `getFirst`. The other returns `null`: `poll`, `peek`. `ArrayDeque` also rejects `null` elements, so a `null` from `poll` always means "empty" <abbr title="Java SE 21 API, java.util.ArrayDeque">[16]</abbr>.
 
-*Concrete bite.* On an empty deque, `poll` and `peek` are harmless, but `pop` throws:
+*Concrete bite.* On an empty deque, `poll` and `peek` do no harm, but `pop` throws:
 
 ```java run
 import java.util.ArrayDeque;
@@ -640,7 +640,7 @@ Exception in thread "main" java.util.NoSuchElementException
 
 💡 **Earned rule.** For a stack or a queue, declare a `Deque` and create an `ArrayDeque`. Use `poll` and `peek` when empty is normal, and check for `null`. Use `pop` when empty is a bug that should throw.
 
-You may meet the old `Stack` class. Its API says a `Deque` "should be used in preference to this class" <abbr title="Java SE 21 API, java.util.Stack">[17]</abbr>.
+You may run into the old `Stack` class. Its API says a `Deque` "should be used in preference to this class" <abbr title="Java SE 21 API, java.util.Stack">[17]</abbr>.
 
 </div>
 
@@ -664,13 +664,13 @@ The choice is about *cost*, not behavior.
 | add or remove in the middle | O(n): shift elements | O(1) *at a node you hold* | not offered |
 | memory per element | low (one array slot) | higher (a node and two links) | low (one array slot) |
 
-`LinkedList` "will traverse the list from the beginning or the end, whichever is closer" to reach an index <abbr title="Java SE 21 API, java.util.LinkedList">[18]</abbr>. That is why `get(i)` is O(n). `ArrayDeque` "is likely to be … faster than `LinkedList` when used as a queue" <abbr title="Java SE 21 API, java.util.ArrayDeque">[16]</abbr>.
+`LinkedList` "will traverse the list from the beginning or the end, whichever is closer" to reach an index <abbr title="Java SE 21 API, java.util.LinkedList">[18]</abbr>. That's why `get(i)` is O(n). `ArrayDeque` "is likely to be … faster than `LinkedList` when used as a queue" <abbr title="Java SE 21 API, java.util.ArrayDeque">[16]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Default to `ArrayList` for a list, and to `ArrayDeque` for a stack or a queue. Reach for `LinkedList` only when you insert and remove in the middle through an iterator, or need a queue that holds `null`.
 
-The cost of a wrong choice is speed, never correctness: all three give the same results through their interfaces.
+A wrong choice costs you speed, never correctness: all three give the same results through their interfaces.
 
 </div>
 
@@ -765,7 +765,7 @@ public class Main {
 [a, c]
 ```
 
-- `xs.remove(1)` on `[5, 7]` removes index 1 and leaves `[5]`. `xs.remove(Integer.valueOf(1))` looks for the value `1`, finds none, returns `false`, and leaves `[5, 7]`.
+- `xs.remove(1)` on `[5, 7]` removes index 1 and leaves `[5]`. `xs.remove(Integer.valueOf(1))` looks for the value `1`, finds none, returns `false`, and leaves `[5, 7]` alone.
 
 </details>
 
