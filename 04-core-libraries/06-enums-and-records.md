@@ -428,7 +428,7 @@ classDiagram
 - `sealed`: its own `permits` list;
 - `non-sealed`: open again to any subclass.
 
-A plain class that forgets to choose gets rejected: `class Square implements Shape {}` gives `error: sealed, non-sealed or final modifiers expected`.
+An interface can't be `final`, so a permitted interface must be `sealed` or `non-sealed`. A plain class that forgets to choose gets rejected: `class Square implements Shape {}` gives `error: sealed, non-sealed or final modifiers expected`.
 
 *Concrete bite.* A type that isn't in the `permits` clause can't join the family:
 

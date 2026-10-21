@@ -741,7 +741,7 @@ One check per objective. Answer before you open anything.
 <summary>The 🧪 box below: <code>set(0, "z")</code>, removing every <code>"b"</code> in a for-each, and <code>xs.remove(1)</code> against <code>xs.remove(Integer.valueOf(1))</code>.</summary>
 
 - After `add("a")`, `add("b")`, `add("c")` and `set(0, "z")`, the list prints `[z, b, c]`.
-- Removing every `"b"` from `["a", "b", "b", "c"]` inside a for-each throws `ConcurrentModificationException`: the second `"b"` is not the second-to-last element when the first is removed. The iterator version prints `[a, c]`:
+- Removing every `"b"` from `["a", "b", "b", "c"]` inside a for-each throws `ConcurrentModificationException`. The first `"b"` removed sits at index 1, not in the second-to-last position, so the loop calls `next()` again and the check fires. The iterator version prints `[a, c]`:
 
 ```java run
 import java.util.ArrayList;

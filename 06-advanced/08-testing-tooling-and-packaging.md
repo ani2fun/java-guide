@@ -6,7 +6,7 @@ prereqs: []
 
 # Testing, Tooling & Packaging — Shipping Reliable Java
 
-This is the last lesson, and it's about everything *around* the code — the things that make it trustworthy and shippable:
+This lesson is about everything *around* the code — the things that make it trustworthy and shippable:
 
 - **Tests** turn "I think it works" into "the machine verifies it works, on every build." Java's built-in `assert` is disabled by default, which is why projects test with a framework such as **JUnit**, whose `@Test` methods always run.
 - **Build tools** (Maven and Gradle) take over the manual `javac`/`jar` steps from [Packages, Modules & the Build](/synapse/programming-languages/java/robust-oop/packages-modules-and-the-build). They resolve dependencies from coordinates, compile, run the tests, and package the result.

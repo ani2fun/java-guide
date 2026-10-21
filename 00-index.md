@@ -1,6 +1,6 @@
 ---
 title: Java
-summary: A single progressive Java text, absolute beginner to advanced. Thirty-five lessons in six chapters, in strict read order, each deriving the language's behaviour from one generative idea rather than listing features — built on verified, compiled-and-run code and a three-move "Intuition" standard that turns rules into things you can re-derive. The throughline: the compiler is a proof-checker you run before your program ever touches data.
+summary: A single progressive Java text, absolute beginner to advanced. Thirty-seven lessons in six chapters, in strict read order, each deriving the language's behaviour from one generative idea rather than listing features — built on verified, compiled-and-run code and a three-move "Intuition" standard that turns rules into things you can re-derive. The throughline: the compiler is a proof-checker you run before your program ever touches data.
 prereqs: []
 ---
 
@@ -94,26 +94,28 @@ flowchart TD
 19. [`equals` & `hashCode`](/synapse/programming-languages/java/core-libraries/equals-and-hashcode)
 20. [Generics](/synapse/programming-languages/java/core-libraries/generics)
 21. [Enums & Records](/synapse/programming-languages/java/core-libraries/enums-and-records)
+22. [Dates & Times](/synapse/programming-languages/java/core-libraries/dates-and-times)
 
 **Chapter 5 — Robust OOP & Error Handling** *(intermediate → advanced)* — the full object model: polymorphism, abstraction, errors, and the bridge to functional Java.
 
-22. [Inheritance & Polymorphism](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism)
-23. [Abstract Classes & Interfaces](/synapse/programming-languages/java/robust-oop/abstract-classes-and-interfaces)
-24. [Exceptions](/synapse/programming-languages/java/robust-oop/exceptions)
-25. [Nested & Anonymous Classes; Lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas)
-26. [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching)
-27. [Packages, Modules & the Build](/synapse/programming-languages/java/robust-oop/packages-modules-and-the-build)
+23. [Inheritance & Polymorphism](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism)
+24. [Abstract Classes & Interfaces](/synapse/programming-languages/java/robust-oop/abstract-classes-and-interfaces)
+25. [Exceptions](/synapse/programming-languages/java/robust-oop/exceptions)
+26. [Nested & Anonymous Classes; Lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas)
+27. [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching)
+28. [Packages, Modules & the Build](/synapse/programming-languages/java/robust-oop/packages-modules-and-the-build)
 
-**Chapter 6 — Advanced & Idiomatic** *(advanced)* — functional Java, concurrency and the memory model, I/O, modern idioms, and shipping.
+**Chapter 6 — Advanced & Idiomatic** *(advanced)* — functional Java, concurrency and the memory model, I/O, modern idioms, shipping, and localization.
 
-28. [Functional Java & the Streams API](/synapse/programming-languages/java/advanced/functional-java-and-streams)
-29. [Concurrency: the Basics](/synapse/programming-languages/java/advanced/concurrency-the-basics)
-30. [Concurrency: Coordination](/synapse/programming-languages/java/advanced/concurrency-coordination)
-31. [Concurrency: High-Level & Virtual Threads](/synapse/programming-languages/java/advanced/concurrency-high-level-and-virtual-threads)
-32. [The Java Memory Model & Performance](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance)
-33. [I/O, Files & NIO.2](/synapse/programming-languages/java/advanced/io-files-and-nio2)
-34. [Modern Java Idioms & the Type System](/synapse/programming-languages/java/advanced/modern-java-idioms)
-35. [Testing, Tooling & Packaging](/synapse/programming-languages/java/advanced/testing-tooling-and-packaging)
+29. [Functional Java & the Streams API](/synapse/programming-languages/java/advanced/functional-java-and-streams)
+30. [Concurrency: the Basics](/synapse/programming-languages/java/advanced/concurrency-the-basics)
+31. [Concurrency: Coordination](/synapse/programming-languages/java/advanced/concurrency-coordination)
+32. [Concurrency: High-Level & Virtual Threads](/synapse/programming-languages/java/advanced/concurrency-high-level-and-virtual-threads)
+33. [The Java Memory Model & Performance](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance)
+34. [I/O, Files & NIO.2](/synapse/programming-languages/java/advanced/io-files-and-nio2)
+35. [Modern Java Idioms & the Type System](/synapse/programming-languages/java/advanced/modern-java-idioms)
+36. [Testing, Tooling & Packaging](/synapse/programming-languages/java/advanced/testing-tooling-and-packaging)
+37. [Localization](/synapse/programming-languages/java/advanced/localization)
 
 ---
 
@@ -123,7 +125,7 @@ flowchart TD
 
 **Path B — You program in another language, but you're new to Java.** Skim Chapter 1 for the syntax and the surprises (integer division truncates, `int` overflow wraps silently, `==` vs `.equals`), then slow down at **Chapter 3 — Classes & Objects**. The reference model (stack vs heap, values vs references, aliasing) and the equality/`hashCode` contract are where Java differs most from scripting-language mental models — and where assumptions carried over from other languages cause the subtlest bugs.
 
-**Path C — You know Java, and want to fill gaps.** Use the chapter map to find your boundary, and read forward from there. The highest-leverage deep passes are the object model (lesson 15), `equals`/`hashCode` (19), generics and erasure (20), the Streams API (28), and concurrency with the memory model (29–32).
+**Path C — You know Java, and want to fill gaps.** Use the chapter map to find your boundary, and read forward from there. The highest-leverage deep passes are the object model (lesson 15), `equals`/`hashCode` (19), generics and erasure (20), the Streams API (29), and concurrency with the memory model (30–33).
 
 ---
 
@@ -131,4 +133,4 @@ flowchart TD
 
 Every runnable block compiles and runs in an isolated **Java 21 (OpenJDK)** sandbox — no setup, no install, nothing to break. The sandbox compiles your code as a class named `Main`, so the examples here use that name. Each block runs on its own (state doesn't carry over from one block to the next), so self-contained examples repeat any setup they need. Anonymous runs work; signing in lets you edit and run, and raises your hourly quota.
 
-One limit is worth knowing early: the sandbox can't pause to read keyboard input. So the interactive `Scanner(System.in)` programs in [Input & Output](/synapse/programming-languages/java/first-steps/input-and-output) are shown statically, each paired with a runnable twin that reads from a fixed source. You do **not** need Java installed locally to read this book — though by Chapter 6 you'll want it, and the last lesson, [Testing, Tooling & Packaging](/synapse/programming-languages/java/advanced/testing-tooling-and-packaging), shows how to set it up properly.
+One limit is worth knowing early: the sandbox can't pause to read keyboard input. So the interactive `Scanner(System.in)` programs in [Input & Output](/synapse/programming-languages/java/first-steps/input-and-output) are shown statically, each paired with a runnable twin that reads from a fixed source. You do **not** need Java installed locally to read this book — though by Chapter 6 you'll want it, and [Testing, Tooling & Packaging](/synapse/programming-languages/java/advanced/testing-tooling-and-packaging), near the end of the book, shows how to set it up properly.

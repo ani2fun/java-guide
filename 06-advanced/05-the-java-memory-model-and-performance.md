@@ -490,7 +490,7 @@ $ java -Xlog:gc -XX:ActiveProcessorCount=1 Main
 
 *Concrete bite.* Automatic GC doesn't mean "no memory bugs." A **memory leak** in Java is unintended *reachability*. Objects you forgot to remove from a `static` collection or cache stay reachable, so the GC can't reclaim them, and the heap grows until you hit `OutOfMemoryError`. This program needs a small heap, `-Xmx64m`, to fail quickly, so it's a terminal run:
 
-```java run
+```java
 // requires: the JVM flag -Xmx64m, so the leak fills a small heap in a moment
 import java.util.ArrayList;
 import java.util.List;
