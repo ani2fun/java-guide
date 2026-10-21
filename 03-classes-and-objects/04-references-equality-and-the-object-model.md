@@ -6,7 +6,7 @@ prereqs: []
 
 # References, Equality & the Object Model
 
-This is the lesson the last several have been building toward. Every variable in Java is one of exactly two things:
+The last several lessons have been building toward this one. Every variable in Java is one of exactly two things:
 
 - a **primitive**, which holds its value directly;
 - a **reference**, which points at an object that lives in a memory area called the **heap**.
@@ -18,7 +18,7 @@ That single distinction explains nearly every Java surprise you've met:
 - a method can change your object but not your variable;
 - `null` is the most common crash in the language.
 
-Get this picture right and the rules stop being arbitrary; they become consequences.
+Get this picture right, and the rules stop feeling arbitrary. They become consequences.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -63,11 +63,11 @@ This is the deep pass of [primitives](/synapse/programming-languages/java/first-
 
 ## 1. Two kinds of variable: values and references
 
-A primitive variable *is* its value: the bits sit in the variable. A reference variable holds a **pointer** to an object stored elsewhere <abbr title="The Java Language Specification, Java SE 21, §4.3.1">[1]</abbr>; the object is not in the variable.
+A primitive variable *is* its value: the bits sit right in the variable. A reference variable holds a **pointer** to an object stored elsewhere <abbr title="The Java Language Specification, Java SE 21, §4.3.1">[1]</abbr>, and the object itself isn't in the variable.
 
-Where do they live? Each running method has a **frame** on its thread's **stack**, holding its local variables <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.2">[2]</abbr>. Every object and array is allocated on the **heap**, one area shared by the whole program <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.3">[3]</abbr>. This lesson calls the pointer an **address**; the JVM does not fix how it is stored <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.7">[4]</abbr>, but the picture holds.
+So where do they live? Each running method has a **frame** on its thread's **stack**, which holds its local variables <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.2">[2]</abbr>. Every object and array is allocated on the **heap**, one area shared by the whole program <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.3">[3]</abbr>. This lesson calls the pointer an **address**. The JVM doesn't pin down how it's stored <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.7">[4]</abbr>, but the picture holds.
 
-Assignment copies whatever the variable holds — and that is the whole story:
+Assignment copies whatever the variable holds — and that's the whole story:
 
 ```java run viz=array:a
 public class Main {
@@ -109,22 +109,22 @@ stack.a -> heap.arr
 stack.b -> heap.arr
 ```
 
-**Analysis.** `int y = x` copied the *value* `5` into `y`, so changing `y` to `99` left `x` at `5`: two independent values.
+**Analysis.** `int y = x` copied the *value* `5` into `y`, so changing `y` to `99` left `x` at `5`. These are two independent values.
 
-`int[] b = a` copied the *reference*. `a` and `b` now hold the same address and point at the **one** array, so `b[0] = 99` changed the array both see; hence `99 99`.
+`int[] b = a` copied the *reference*. `a` and `b` now hold the same address and point at the **one** array, so `b[0] = 99` changed the array they both see. Hence `99 99`.
 
-The diagram is the model. These local variables sit on the stack: the primitives hold values, and the references hold addresses that point into the heap. Two references can point at the same object. (A primitive *field* is different: it sits inside its object, on the heap.)
+The diagram is the model. These local variables sit on the stack. The primitives hold values, and the references hold addresses that point into the heap. Two references can point at the same object. (A primitive *field* is different: it sits inside its object, on the heap.)
 
 **Intuition.**
 *Mechanism.* A variable stores a fixed-size slot of bits. For a primitive, those bits are the value. For a reference type (arrays, `String`, every class), they are the *address* of a heap object. `=` copies the slot (the value, or the address), never the heap object itself.
 
-*Concrete bite.* The two output lines are the contrast. Copy a primitive and the copies are independent (`5 99`); copy a reference and both names share one object (`99 99`). The same fact explains [pass-by-value of references](/synapse/programming-languages/java/control-flow/methods): a method gets a copy of the *reference*, so it can change the shared object.
+*Concrete bite.* The two output lines show the contrast. Copy a primitive, and the copies are independent (`5 99`). Copy a reference, and both names share one object (`99 99`). The same fact explains [pass-by-value of references](/synapse/programming-languages/java/control-flow/methods): a method gets a copy of the *reference*, so it can change the shared object.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Always ask "is this a value or a reference?". The answer tells you whether `=` (or a method call) makes an independent copy or shares an object.
 
-The cost of references is the sharing surprise. The benefit is efficiency: passing a million-element array copies one address, not a million `int`s. Every trap in the rest of this lesson follows from this one distinction.
+References cost you the sharing surprise. The payoff is efficiency: passing a million-element array copies one address, not a million `int`s. Every trap in the rest of this lesson follows from this one distinction.
 
 </div>
 
@@ -132,7 +132,7 @@ The cost of references is the sharing surprise. The benefit is efficiency: passi
 
 ## 2. `==` compares what the variable holds
 
-`==` looks at the bits in the two variables. For primitives, those bits are values, so `==` compares values. For references, those bits are *addresses*, so `==` asks "same object?". That is **identity**, not contents <abbr title="The Java Language Specification, Java SE 21, §15.21.3">[5]</abbr>.
+`==` looks at the bits in the two variables. For primitives, those bits are values, so `==` compares values. For references, those bits are *addresses*, so `==` asks "same object?". That's **identity**, not contents <abbr title="The Java Language Specification, Java SE 21, §15.21.3">[5]</abbr>.
 
 ```java run
 public class Main {
@@ -156,18 +156,18 @@ true
 
 **Analysis.**
 
-- `a == b` is `false` even though both arrays hold `{1, 2, 3}`. They are *different objects* at different addresses, and `==` compares addresses.
+- `a == b` is `false`, even though both arrays hold `{1, 2, 3}`. They're *different objects* at different addresses, and `==` compares addresses.
 - `a == c` is `true` because `c` was assigned `a`, so they share one address.
 - `a[0] == b[0]` is `true` because those are `int`s, and `==` on primitives compares values.
 
-Same operator, two meanings, decided by whether the operands are references or primitives.
+Same operator, two meanings, and the operands decide which: references or primitives.
 
 **Intuition.**
-*Mechanism.* `==` is always "are the stored bits equal?". A primitive's bits are its value; a reference's bits are an address. So `==` is value equality for primitives and identity (same object) for references. There is no third behavior.
+*Mechanism.* `==` always asks "are the stored bits equal?". A primitive's bits are its value, and a reference's bits are an address. So `==` is value equality for primitives and identity (same object) for references. There's no third behavior.
 
-`==` between types that can never be the same object does not compile: `Integer == String` gives `incomparable types: Integer and String`.
+`==` between types that can never be the same object doesn't compile: `Integer == String` gives `incomparable types: Integer and String`.
 
-*Concrete bite.* `a == b` being `false` for two identical-looking arrays is the trap. On references, `==` cannot see contents, only identity.
+*Concrete bite.* The trap is `a == b` coming out `false` for two identical-looking arrays. On references, `==` can't see contents, only identity.
 
 *Non-example: `.equals` on arrays.* The usual advice is "compare contents with `.equals`". For arrays, that advice fails:
 
@@ -190,13 +190,13 @@ false
 true
 ```
 
-An array's `.equals` is the one every object starts with, from the class `Object`. It returns `true` only when both sides are the same object <abbr title="java.lang.Object.equals(Object), Java SE 21 API">[6]</abbr>. Your own classes start the same way: two `new Box(7)` objects are not `.equals` until the class defines what "equal" means. [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) shows how. For arrays, compare contents with `Arrays.equals`.
+An array's `.equals` is the one every object starts with, inherited from the class `Object`. It returns `true` only when both sides are the same object <abbr title="java.lang.Object.equals(Object), Java SE 21 API">[6]</abbr>. Your own classes start out the same way: two `new Box(7)` objects aren't `.equals` until the class defines what "equal" means. [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) shows how. For arrays, compare contents with `Arrays.equals`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `==` for primitives and for deliberate "same object?" checks; never use it to compare the *contents* of two objects. For contents, use `.equals` on classes that define it (`String`, `Integer`), and `Arrays.equals` on arrays.
+💡 **Earned rule.** Use `==` for primitives and for deliberate "same object?" checks. Never use it to compare the *contents* of two objects. For contents, use `.equals` on classes that define it (`String`, `Integer`), and `Arrays.equals` on arrays.
 
-The cost of forgetting is a comparison that's `false` for equal-meaning objects, or, as the next sections show, `true` by accident.
+Forget, and you get a comparison that's `false` for objects that mean the same thing, or, as the next sections show, `true` by accident.
 
 </div>
 
@@ -209,7 +209,7 @@ Every primitive type has a matching **wrapper class**: an object that holds one 
 - **boxing** turns an `int` into an `Integer` (`Integer a = 127;`) <abbr title="The Java Language Specification, Java SE 21, §5.1.7">[7]</abbr>;
 - **unboxing** turns an `Integer` back into an `int` <abbr title="The Java Language Specification, Java SE 21, §5.1.8">[8]</abbr>.
 
-`.equals` is a *method* an object defines to compare by **meaning**. For `Integer`, it compares the wrapped numbers. The danger is that boxing small numbers reuses cached objects, so `==` *accidentally* agrees with `.equals` — until it doesn't.
+`.equals` is a *method* that an object defines to compare by **meaning**. For `Integer`, it compares the wrapped numbers. The danger is that boxing small numbers reuses cached objects, so `==` *accidentally* agrees with `.equals` — until it doesn't.
 
 ```java run
 public class Main {
@@ -236,23 +236,23 @@ true
 **Analysis.**
 
 - `Integer a = 127` boxes through a cache of `Integer` objects for −128..127, so `a` and `b` are the *same* cached object, and `a == b` is `true`.
-- `128` is outside that cache. Here `c` and `d` boxed to *two distinct* objects, so `c == d` is `false`, while `c.equals(d)`, comparing the wrapped values, is `true`.
-- The primitives `e` and `f` hold `128` directly, so `e == f` compares values: `true`.
+- `128` is outside that cache. Here `c` and `d` boxed to *two distinct* objects, so `c == d` is `false`, while `c.equals(d)`, which compares the wrapped values, is `true`.
+- The primitives `e` and `f` hold `128` directly, so `e == f` compares values and gives `true`.
 
 The `Integer` `==` flipped from `true` to `false` between `127` and `128`.
 
 **Intuition.**
-*Mechanism.* `Integer` is a reference type, so `==` compares object identity. Boxing a value in −128..127 always gives the same object <abbr title="The Java Language Specification, Java SE 21, §5.1.7">[7]</abbr> <abbr title="java.lang.Integer.valueOf(int), Java SE 21 API">[9]</abbr>. Beyond that range the JVM *may* reuse objects, and by default does not <abbr title="java.lang.Integer.valueOf(int), Java SE 21 API">[9]</abbr>. So `==` is *coincidentally* true for small values, and false for larger ones on this JVM.
+*Mechanism.* `Integer` is a reference type, so `==` compares object identity. Boxing a value in −128..127 always gives the same object <abbr title="The Java Language Specification, Java SE 21, §5.1.7">[7]</abbr> <abbr title="java.lang.Integer.valueOf(int), Java SE 21 API">[9]</abbr>. Beyond that range, the JVM *may* reuse objects, but by default it doesn't <abbr title="java.lang.Integer.valueOf(int), Java SE 21 API">[9]</abbr>. So `==` is *coincidentally* true for small values, and false for larger ones on this JVM.
 
 Mix an `Integer` with an `int`, and `==` unboxes the `Integer` and compares numbers <abbr title="The Java Language Specification, Java SE 21, §15.21.1">[10]</abbr>: `Integer c = 128; int e = 128; c == e` is `true`.
 
-*Concrete bite.* A test that passes with `127` and fails with `128` is the signature of code that used `==` for object equality. The cache makes the bug invisible in small-number tests and live in production.
+*Concrete bite.* A test that passes with `127` and fails with `128` is the telltale sign of code that used `==` for object equality. The cache hides the bug in small-number tests and lets it loose in production.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Compare wrapper objects with `.equals`; reserve `==` for primitives and identity.
+💡 **Earned rule.** Compare wrapper objects with `.equals`, and save `==` for primitives and identity.
 
-The cost is vigilance. Boxing hides the boundary, so a passing small-value `==` test proves nothing. `.equals` is the comparison that means "same value" for objects. The String pool, next, is the same mechanism.
+The cost is vigilance. Boxing hides the boundary, so a passing small-value `==` test proves nothing. For objects, `.equals` is the comparison that means "same value". The String pool, coming next, works the same way.
 
 </div>
 
@@ -260,7 +260,7 @@ The cost is vigilance. Boxing hides the boundary, so a passing small-value `==` 
 
 ## 4. The String pool
 
-`String` is a reference type too, so `==` on strings is identity. But Java **interns** string *literals*: identical literals share one pooled object <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[11]</abbr>. That makes `==` *look* right for literals and wrong for everything else.
+`String` is a reference type too, so `==` on strings means identity. But Java **interns** string *literals*, so identical literals share one pooled object <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[11]</abbr>. That makes `==` *look* right for literals and wrong for everything else.
 
 ```java run
 public class Main {
@@ -282,7 +282,7 @@ false
 true
 ```
 
-**Analysis.** `a` and `b` are the same literal `"hello"`, which the pool stores once. So `a == b` is `true`, *by interning, not by content comparison*. `new String("hello")` forces a separate object, so `a == c` is `false`, even though `a.equals(c)` (comparing characters) is `true`. This is the mechanism behind the [Strings](/synapse/programming-languages/java/first-steps/strings-the-basics) teaser: `==` on strings is identity, and the pool makes literals share identity.
+**Analysis.** `a` and `b` are the same literal `"hello"`, which the pool stores once. So `a == b` is `true`, *by interning, not by content comparison*. `new String("hello")` forces a separate object, so `a == c` is `false`, even though `a.equals(c)` (comparing characters) is `true`. That's the mechanism behind the [Strings](/synapse/programming-languages/java/first-steps/strings-the-basics) teaser: `==` on strings is identity, and the pool makes literals share it.
 
 **Intuition.**
 *Mechanism.* Literals, and more generally the values of compile-time **constant expressions**, are interned into a shared pool, so equal ones are the same object <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[11]</abbr>. A string built at run time is a fresh object: `new String(…)`, user input, or `+` with a variable.
@@ -307,13 +307,13 @@ false
 true
 ```
 
-`computed` spells `abc`, but it was built at run time from the variable `part`, so it is a new object. A program that compares typed-in or computed strings with `==` rejects correct matches.
+`computed` spells `abc`, but it was built at run time from the variable `part`, so it's a new object. A program that compares typed-in or computed strings with `==` rejects correct matches.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Compare string contents with `.equals` (or `.equalsIgnoreCase`); never `==`.
+💡 **Earned rule.** Compare string contents with `.equals` (or `.equalsIgnoreCase`), never with `==`.
 
-The cost of the pool is that `==` passes in quick literal tests and fails on real strings. It is the Integer cache's trap in a different form, with the same lesson: `==` is identity, `.equals` is meaning.
+The pool's cost is that `==` passes in quick literal tests and fails on real strings. It's the Integer cache's trap in a different form, with the same lesson: `==` is identity, and `.equals` is meaning.
 
 </div>
 
@@ -321,7 +321,7 @@ The cost of the pool is that `==` passes in quick literal tests and fails on rea
 
 ## 5. `null` and `NullPointerException`
 
-A reference can point at *no object*: the value `null` <abbr title="The Java Language Specification, Java SE 21, §4.3.1">[1]</abbr>. That is legal to hold and print. But the moment you try to *use* the object it points to (call a method, read a field), there is no object, and the JVM throws `NullPointerException`.
+A reference can point at *no object*: the value `null` <abbr title="The Java Language Specification, Java SE 21, §4.3.1">[1]</abbr>. You can legally hold it and print it. But the moment you try to *use* the object it points to (call a method, read a field), there's no object, and the JVM throws `NullPointerException`.
 
 ```java run
 public class Main {
@@ -339,14 +339,14 @@ null
 Exception in thread "main" java.lang.NullPointerException: Cannot invoke "String.length()" because "<local1>" is null
 ```
 
-**Analysis.** `System.out.println(s)` printed `null`: `println` handles a null reference by writing the text "null". But `s.length()` tried to *follow* the reference to call a method, and there was no object to call it on. So the JVM threw `NullPointerException`.
+**Analysis.** `System.out.println(s)` printed `null`, because `println` handles a null reference by writing the text "null". But `s.length()` tried to *follow* the reference to call a method, and there was no object to call it on. So the JVM threw `NullPointerException`.
 
-Since Java 14 the message names what was null and what you tried to do <abbr title="JEP 358: Helpful NullPointerExceptions (JDK 14)">[12]</abbr>. The variable shows as `<local1>` because the Run button compiles without local-variable names. Compile with `javac -g` and the message says `because "s" is null`.
+Since Java 14, the message names what was null and what you tried to do <abbr title="JEP 358: Helpful NullPointerExceptions (JDK 14)">[12]</abbr>. The variable shows as `<local1>` because the Run button compiles without local-variable names. Compile with `javac -g`, and the message says `because "s" is null`.
 
 **Intuition.**
-*Mechanism.* `null` is the absence of an object: a reference holding no address. Reading or printing the *reference* is fine. **Dereferencing** it (`.method()`, `.field`) requires an object that isn't there, which is the `NullPointerException`.
+*Mechanism.* `null` is the absence of an object: a reference holding no address. Reading or printing the *reference* is fine. **Dereferencing** it (`.method()`, `.field`) needs an object that isn't there, and that's the `NullPointerException`.
 
-*Concrete bite.* The `null` line works, the `s.length()` line throws: the boundary is *use*. Fields of a reference type start as `null`, as do the slots of a new object array and many "not found" results. So any object you didn't definitely set could be `null`, and the first method call on it crashes.
+*Concrete bite.* The `null` line works, and the `s.length()` line throws. The boundary is *use*. Fields of a reference type start as `null`, and so do the slots of a new object array and many "not found" results. So any object you didn't definitely set could be `null`, and the first method call on it crashes.
 
 *Non-example: an NPE with no dot in sight.* Unboxing is a hidden method call. Store a `null` `Integer` into an `int`, and the JVM must call `intValue()` on nothing <abbr title="The Java Language Specification, Java SE 21, §5.1.8">[8]</abbr>:
 
@@ -367,15 +367,15 @@ before
 Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.lang.Integer.intValue()" because "<local1>" is null
 ```
 
-Line 5, `int n = count;`, has no `.` in it, yet the message names `Integer.intValue()`. When an NPE points at a line with no method call, look for an `Integer`, `Double` or `Boolean` being used as a number or a `boolean`.
+Line 5, `int n = count;`, has no `.` in it, yet the message names `Integer.intValue()`. When an NPE points at a line with no method call, look for an `Integer`, `Double` or `Boolean` that's being used as a number or a `boolean`.
 
-Comparing with `.equals` has the same edge. `"hi".equals(s)` returns `false` when `s` is `null`, but `s.equals("hi")` throws. `java.util.Objects.equals(a, b)` is safe on either side <abbr title="java.util.Objects.equals(Object, Object), Java SE 21 API">[13]</abbr>.
+Comparing with `.equals` has the same sharp edge. `"hi".equals(s)` returns `false` when `s` is `null`, but `s.equals("hi")` throws. `java.util.Objects.equals(a, b)` is safe on either side <abbr title="java.util.Objects.equals(Object, Object), Java SE 21 API">[13]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Guard a reference before dereferencing when it might be `null`: `if (s != null && s.length() > 0)`. The [short-circuit `&&`](/synapse/programming-languages/java/control-flow/booleans-and-logic) skips the right side when `s` is `null`.
 
-The cost of `null` is constant vigilance and the most common crash in Java. The typed alternative, which makes "might be absent" visible in the type, is `Optional`, in [Modern Java Idioms](/synapse/programming-languages/java/advanced/modern-java-idioms).
+`null` costs you constant vigilance, and it's the most common crash in Java. The typed alternative, which makes "might be absent" visible in the type, is `Optional`, covered in [Modern Java Idioms](/synapse/programming-languages/java/advanced/modern-java-idioms).
 
 </div>
 
@@ -385,7 +385,7 @@ The cost of `null` is constant vigilance and the most common crash in Java. The 
 
 Java has no statement that deletes an object. Objects are "never explicitly deallocated" <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.3">[3]</abbr>. The **garbage collector** reclaims the heap memory of objects the program can no longer reach.
 
-An object is **reachable** while some running code can still get to it through a chain of references <abbr title="The Java Language Specification, Java SE 21, §12.6.1">[14]</abbr>. It becomes unreachable when the last such reference is gone:
+An object is **reachable** as long as some running code can still get to it through a chain of references <abbr title="The Java Language Specification, Java SE 21, §12.6.1">[14]</abbr>. It becomes unreachable once the last such reference is gone:
 
 - the variable is pointed at another object (`a = new Counter();`);
 - the variable is set to `null`;
@@ -433,15 +433,15 @@ stack.keep -> heap.first
 **Analysis.** `a = new Counter()` pointed `a` at a second object, with `count` `0`. The first object survived, because `keep` still refers to it (`count` `1`). Delete the line `Counter keep = a;`, and after the reassignment nothing refers to the first counter. It becomes unreachable, and the program can never read it again.
 
 **Intuition.**
-*Mechanism.* Reachability is about references, not about variables going quiet. As long as one live reference leads to an object, it stays. When none does, the garbage collector *may* reclaim it. The specification fixes no moment, and a small program may end before any collection runs <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.3">[3]</abbr>.
+*Mechanism.* Reachability is about references, not about variables going quiet. As long as one live reference leads to an object, the object stays. When none does, the garbage collector *may* reclaim it. The specification sets no moment for that, and a small program may end before any collection runs <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.3">[3]</abbr>.
 
-*Concrete bite.* The reverse is the real-world bug. An object stays alive as long as *anything* refers to it, such as a forgotten entry in a long-lived `static` list. Such an object is never collected, however useless it has become. That is a memory leak, in a language with a garbage collector.
+*Concrete bite.* The reverse is the real-world bug. An object stays alive as long as *anything* refers to it, such as a forgotten entry in a long-lived `static` list. That object is never collected, however useless it has become. It's a memory leak, in a language with a garbage collector.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Let objects go by letting references go: keep variables in the smallest scope, and remove entries from long-lived collections when you are done with them. Never rely on *when* an object is collected.
+💡 **Earned rule.** Let objects go by letting references go. Keep variables in the smallest scope, and remove entries from long-lived collections when you're done with them. Never rely on *when* an object is collected.
 
-The cost of automatic memory management is that you do not control the timing. The benefit is that there is no "use after delete" bug: an object you can still reach is never reclaimed.
+Automatic memory management costs you control over the timing. The payoff is that there's no "use after delete" bug: an object you can still reach is never reclaimed.
 
 </div>
 
@@ -511,8 +511,8 @@ One check per objective. Answer before you open anything.
 
 - `p == q` with `100`: `true`. Both boxed values come from the cache.
 - `r == s` with `200`: `false`, and `r.equals(s)`: `true`. `200` is outside the cache.
-- `x == y` for `"ab" + "c"` and `"abc"`: `true`. `"ab" + "c"` is a constant expression, so it is interned like a literal <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[11]</abbr>. Built from a variable, as in §4, it would be `false`.
-- `z + "!"` with `z` `null`: prints `null!`. String concatenation writes a `null` reference as the text `null`.
+- `x == y` for `"ab" + "c"` and `"abc"`: `true`. `"ab" + "c"` is a constant expression, so it's interned like a literal <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[11]</abbr>. Built from a variable, as in §4, it would be `false`.
+- `z + "!"` with `z` set to `null`: prints `null!`. String concatenation writes a `null` reference as the text `null`.
 - `z.toUpperCase()`: throws `NullPointerException: Cannot invoke "String.toUpperCase()" because "<local5>" is null`. The `5` counts the locals of a `main` that declares `p`, `q`, `r`, `s` and `z`, in that order.
 
 </details>

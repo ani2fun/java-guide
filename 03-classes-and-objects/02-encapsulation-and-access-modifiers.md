@@ -6,11 +6,11 @@ prereqs: []
 
 # Encapsulation & Access Modifiers — Controlling Access
 
-A class that exposes its raw fields cannot defend itself. Anyone can set `balance` to `-999`, and the class is powerless to object.
+A class that exposes its raw fields can't defend itself. Anyone can set `balance` to `-999`, and the class is powerless to object.
 
-**Encapsulation** is the fix. Hide the data (`private`) and expose only methods that *control* how it changes. The class can then enforce its own rules, its **invariants**: facts about its fields that must hold after every operation.
+**Encapsulation** is the fix. Hide the data (`private`), and expose only methods that *control* how it changes. The class can then enforce its own rules, its **invariants**: facts about its fields that must hold after every operation.
 
-The **access modifiers** `private`, `protected` and `public`, plus writing none at all (package-private), give four levels of who can see each field and method. Pushed to its limit, encapsulation gives you **immutable** objects: data set once at construction and never changed. Such objects are safe to share without the aliasing surprise from [Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects).
+The **access modifiers** `private`, `protected` and `public`, plus writing none at all (package-private), give you four levels of who can see each field and method. Push encapsulation to its limit, and you get **immutable** objects: data set once at construction and never changed. You can share such objects without the aliasing surprise from [Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects).
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -53,7 +53,7 @@ This builds on [classes and objects](/synapse/programming-languages/java/classes
 
 ## 1. Hiding data with `private`
 
-Marking a field `private` means it can be touched only from *inside* its own class. Code elsewhere must go through the methods the class chooses to expose — a **getter** to read, for instance.
+Marking a field `private` means only code *inside* its own class can touch it. Code anywhere else has to go through the methods the class chooses to expose — a **getter** to read it, for instance.
 
 ```java run
 class Account {
@@ -75,12 +75,12 @@ public class Main {
 100
 ```
 
-**Analysis.** `balance` is `private`, so `main` cannot read it directly. It asks through `getBalance()`, a method the `Account` class deliberately provides. The class now stands between its data and the outside world: every access goes through code the class controls.
+**Analysis.** `balance` is `private`, so `main` can't read it directly. Instead, it asks through `getBalance()`, a method the `Account` class deliberately provides. The class now stands between its data and the outside world, and every access goes through code the class controls.
 
 **Intuition.**
-*Mechanism.* The **compiler** enforces `private`. A `private` member can be used only inside the class that declares it <abbr title="The Java Language Specification, Java SE 21, §6.6.1">[1]</abbr>. Any use from elsewhere is rejected before the program runs.
+*Mechanism.* The **compiler** enforces `private`. A `private` member can be used only inside the class that declares it <abbr title="The Java Language Specification, Java SE 21, §6.6.1">[1]</abbr>. The compiler rejects any use from elsewhere before the program ever runs.
 
-*Concrete bite.* Reach for the field directly and it won't compile:
+*Concrete bite.* Reach for the field directly, and it won't compile:
 
 ```java run
 class Account {
@@ -104,13 +104,13 @@ Main.java:9: error: balance has private access in Account
 1 error
 ```
 
-`acct.balance` is rejected because `balance` is `private` to `Account`, and `main` is outside that class. The wall is checked at compile time; it is not a convention you can quietly ignore.
+The compiler rejects `acct.balance` because `balance` is `private` to `Account`, and `main` is outside that class. The wall is checked at compile time. It isn't a convention you can quietly ignore.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Make fields `private` by default, and expose behavior, not data.
 
-The cost is the extra code of accessor methods for the data you *do* want to share. The benefit: the set of ways to touch a field shrinks from "everywhere" to "the few methods in this class". That is what makes the next section's invariants enforceable.
+The cost is the extra code for accessor methods on the data you *do* want to share. The payoff: the ways to touch a field shrink from "everywhere" to "the few methods in this class". That's what makes the next section's invariants enforceable.
 
 </div>
 
@@ -118,7 +118,7 @@ The cost is the extra code of accessor methods for the data you *do* want to sha
 
 ## 2. Getters, setters, and invariants
 
-Routing access through methods pays off because a method can **check**. A **setter** (a method that changes a field) can reject or adjust bad input, so the object never enters an invalid state. A bare field can never do that. This book names a getter `getX` and a setter `setX`.
+Routing access through methods pays off because a method can **check**. A **setter** (a method that changes a field) can reject or adjust bad input, so the object never ends up in an invalid state. A bare field can never do that. This book names a getter `getX` and a setter `setX`.
 
 ```java run
 class Account {
@@ -150,12 +150,12 @@ ignored invalid deposit: -30
 150
 ```
 
-**Analysis.** `deposit(50)` passed the check and raised the balance to `150`. `deposit(-30)` was caught by the guard and rejected, leaving the balance untouched.
+**Analysis.** `deposit(50)` passed the check and raised the balance to `150`. The guard caught `deposit(-30)` and rejected it, leaving the balance untouched.
 
-The method enforced the invariant "deposits must be positive". The class can guarantee it because `balance` is `private`, and `deposit` is the only way in. (Real code usually *throws an exception* here instead of printing; [Exceptions](/synapse/programming-languages/java/robust-oop/exceptions) shows how.)
+The method enforced the invariant "deposits must be positive". The class can guarantee it because `balance` is `private`, and `deposit` is the only way in. (Real code usually *throws an exception* here instead of printing. [Exceptions](/synapse/programming-languages/java/robust-oop/exceptions) shows how.)
 
 **Intuition.**
-*Mechanism.* A mutating method is a gate: it validates before changing state, so the invariants hold after every call. With a `private` field, the class's own methods are the only paths to it. Guard every one of them, and no path leads to an invalid value.
+*Mechanism.* A mutating method is a gate. It validates before changing state, so the invariants hold after every call. With a `private` field, the class's own methods are the only paths to it. Guard every one of them, and no path leads to an invalid value.
 
 *Concrete bite.* A `public` field has no gate — it accepts anything:
 
@@ -178,9 +178,9 @@ public class Main {
 -999
 ```
 
-With `balance` public, `acct.balance = -999` succeeds. The class never gets a chance to object, and a "bank account" now holds `-999`. No method can enforce a rule, because the assignment bypasses methods entirely.
+With `balance` public, `acct.balance = -999` succeeds. The class never gets a chance to object, and a "bank account" now holds `-999`. No method can enforce a rule, because the assignment skips methods entirely.
 
-*Non-example: a guard the constructor skips.* The constructor is a path in too. Here `deposit` guards, but the constructor stores whatever it is given:
+*Non-example: a guard the constructor skips.* The constructor is a way in too. Here `deposit` has a guard, but the constructor stores whatever it's given:
 
 ```java run
 class Account {
@@ -211,13 +211,13 @@ ignored invalid deposit: -30
 -50
 ```
 
-The guard in `deposit` worked, and the account is still invalid: `new Account(-50)` never met it. Put the same check in the constructor. An invariant holds only if *every* way in checks it, construction included.
+The guard in `deposit` worked, yet the account is still invalid, because `new Account(-50)` never met it. Put the same check in the constructor. An invariant holds only if *every* way in checks it, construction included.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Expose mutation through methods that validate, not through public fields, and validate in the constructor as well. Then invariants are checked at the few places state changes.
+💡 **Earned rule.** Expose mutation through methods that validate, not through public fields, and validate in the constructor as well. Then the invariants get checked at the few places where state changes.
 
-The cost is more code than a public field: a getter and a guarded setter in place of a bare variable. The benefit is that "an account can't break its rules" is enforced by construction, not by hoping every caller behaves.
+The cost is more code than a public field: a getter and a guarded setter in place of a bare variable. The payoff is that "an account can't break its rules" is enforced by construction, not by hoping every caller behaves.
 
 </div>
 
@@ -238,7 +238,7 @@ Every field, method, and constructor has one of four visibilities <abbr title="T
 
 A member with no modifier is package-private. All the classes in one Run-button program share the unnamed package, so they see each other's package-private members.
 
-`private` is per-**class**, not per-file: another top-level class in the same file cannot see a `private` member.
+`private` works per **class**, not per file. Another top-level class in the same file can't see a `private` member.
 
 ```java run
 class Account {
@@ -262,12 +262,12 @@ Main.java:6: error: balance has private access in Account
 1 error
 ```
 
-**Analysis.** `Auditor` is a *different class*, so it cannot read `Account`'s `private` `balance`, even from the same file. Privacy is scoped to the declaring class; being nearby in the file grants no access.
+**Analysis.** `Auditor` is a *different class*, so it can't read `Account`'s `private` `balance`, even from the same file. Privacy is scoped to the declaring class, and sitting nearby in the file grants no access.
 
 **Intuition.**
-*Mechanism.* For each access, the compiler checks the member's modifier against where the access sits: the same class, the same package, or a subclass. `protected` adds subclass access, which only means something once classes inherit from each other.
+*Mechanism.* For each access, the compiler checks the member's modifier against where the access sits: the same class, the same package, or a subclass. `protected` adds subclass access, which only matters once classes inherit from each other.
 
-*Concrete bite.* The check is per class, **not per object**. A method of `Account` may read the `private` field of *another* `Account`:
+*Concrete bite.* The check works per class, **not per object**. A method of `Account` may read the `private` field of *another* `Account`:
 
 ```java run
 class Account {
@@ -296,7 +296,7 @@ false
 
 `other.balance` compiled, because the code sits inside `Account`. `private` protects a class's data from *other classes*, not one object from another of its kind.
 
-A top-level class itself may be only `public` or package-private. `private class Helper` at the top of a file gives `modifier private not allowed here` <abbr title="The Java Language Specification, Java SE 21, §8.1.1">[3]</abbr>.
+A top-level class itself can be only `public` or package-private. `private class Helper` at the top of a file gives `modifier private not allowed here` <abbr title="The Java Language Specification, Java SE 21, §8.1.1">[3]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -306,7 +306,7 @@ A top-level class itself may be only `public` or package-private. `private class
 - `protected` for what subclasses must reach;
 - `public` only for the deliberate interface.
 
-The cost of starting narrow is widening later. The cost of starting `public` is that every member becomes part of your contract. Once other code depends on it, you cannot quietly take it back.
+Start narrow, and you may have to widen later. Start `public`, and every member becomes part of your contract. Once other code depends on it, you can't quietly take it back.
 
 </div>
 
@@ -314,7 +314,7 @@ The cost of starting narrow is widening later. The cost of starting `public` is 
 
 ## 4. Immutability by design
 
-The strongest form of encapsulation is to allow no changes at all. A `final` field can be assigned exactly once, at its declaration or in the constructor, and never again. A class whose fields are all `final`, with no setters, has state fixed for life. Its objects are **immutable**, provided the fields hold primitives or other immutable objects (the non-example below shows why).
+The strongest form of encapsulation allows no changes at all. You can assign a `final` field exactly once, at its declaration or in the constructor, and never again. A class whose fields are all `final`, with no setters, has its state fixed for life. Its objects are **immutable**, as long as the fields hold primitives or other immutable objects (the non-example below shows why).
 
 ```java run
 class Point {
@@ -336,7 +336,7 @@ public class Main {
 3,4
 ```
 
-**Analysis.** `x` and `y` are `final`, set once in the constructor. After that, a `Point` can be read but never altered: there is no setter, and the `final` fields cannot be reassigned. The object is frozen the moment construction finishes.
+**Analysis.** `x` and `y` are `final`, set once in the constructor. After that, you can read a `Point` but never change it. There's no setter, and the `final` fields can't be reassigned. The object is frozen the moment construction finishes.
 
 **Intuition.**
 *Mechanism.* `final` on a field is a compile-time guarantee of single assignment. The compiler checks that every constructor assigns the field <abbr title="The Java Language Specification, Java SE 21, §8.3.1.2">[4]</abbr>, and it rejects any later assignment. Forget one, and the error lands on the constructor's closing brace:
@@ -365,7 +365,7 @@ Main.java:6: error: variable y might not have been initialized
 1 error
 ```
 
-*Concrete bite.* Add a method that tries to change a `final` field and it won't compile:
+*Concrete bite.* Add a method that tries to change a `final` field, and it won't compile:
 
 ```java run
 class Point {
@@ -387,7 +387,7 @@ Main.java:4: error: cannot assign a value to final variable x
 1 error
 ```
 
-`moveTo` tries to reassign `x`, but `x` is `final`, already assigned in the constructor, so the compiler refuses. To "move" an immutable point you don't mutate it; you build a *new* `Point`.
+`moveTo` tries to reassign `x`, but `x` is `final` and already assigned in the constructor, so the compiler refuses. To "move" an immutable point, you don't mutate it. You build a *new* `Point`.
 
 *Non-example: a `final` field that holds an array.* `final` freezes the *reference*, not the object it points to <abbr title="The Java Language Specification, Java SE 21, §4.12.4">[5]</abbr>. This class has only `private final` fields and no setters, yet its data changes twice:
 
@@ -420,7 +420,7 @@ public class Main {
 - The constructor stored the caller's array, so `input[0] = 0` changed the `Scores` object too.
 - The getter handed out the same array, so `s.getValues()[0] = -1` changed it again.
 
-`values` still points at the same array, as `final` promised. The array's contents changed under it. The fix is a **defensive copy**, made on the way in and on the way out:
+`values` still points at the same array, just as `final` promised. But the array's contents changed underneath it. The fix is a **defensive copy**, made on the way in and on the way out:
 
 ```java run
 import java.util.Arrays;
@@ -450,7 +450,7 @@ public class Main {
 90
 ```
 
-Now the object owns an array no one else can reach. The caller's changes land on copies.
+Now the object owns an array that no one else can reach, and the caller's changes land on copies.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -461,7 +461,7 @@ Now the object owns an array no one else can reach. The caller's changes land on
 - everything set in the constructor;
 - a defensive copy of any mutable object the class takes in or hands out.
 
-The cost is that "changing" an immutable object means creating a new one (more allocations), and deep updates get verbose. The benefit is that an immutable object is safe to alias freely. The aliasing surprise from [Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects) can't bite, because nothing can change behind your back. ([Enums & Records](/synapse/programming-languages/java/core-libraries/enums-and-records) shows `record`, which declares the private fields, the constructor and the accessor methods of such a class for you <abbr title="The Java Language Specification, Java SE 21, §8.10.1">[6]</abbr>.)
+The cost is that "changing" an immutable object means creating a new one (more allocations), and deep updates get wordy. The payoff is that you can alias an immutable object freely. The aliasing surprise from [Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects) can't bite, because nothing can change behind your back. ([Enums & Records](/synapse/programming-languages/java/core-libraries/enums-and-records) shows `record`, which declares the private fields, the constructor and the accessor methods of such a class for you <abbr title="The Java Language Specification, Java SE 21, §8.10.1">[6]</abbr>.)
 
 </div>
 
@@ -529,7 +529,7 @@ Copy the array in the constructor and in the getter, for example with `Arrays.co
 <summary>The 🧪 box below: <code>withdraw(150)</code>, <code>acct.balance -= 10</code>, and an aliased mutable <code>Point</code>.</summary>
 
 1. With a guard that prints `refused: ` and the amount, the run prints `refused: 150`, then `100`. The balance is untouched.
-2. It does not compile: `balance has private access in Account`, with the caret under the dot of `acct.balance`.
+2. It doesn't compile: `balance has private access in Account`, with the caret under the dot of `acct.balance`.
 3. A change made through one variable (say `p.x = 9`) would show up through the other, where nobody expected it. With `final` fields, no such change can be written.
 
 </details>

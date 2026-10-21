@@ -6,9 +6,9 @@ prereqs: []
 
 # `static` vs Instance — the Class vs the Object
 
-You've used `static` since `main`, and met it again on helper methods; now it earns a precise definition. A **`static`** member belongs to the **class itself**: there is exactly one copy, shared by everything. An **instance** member belongs to each **object**, with a fresh copy per `new`.
+You've used `static` since `main`, and you met it again on helper methods. Now it earns a precise definition. A **`static`** member belongs to the **class itself**, so there's exactly one copy, shared by everything. An **instance** member belongs to each **object**, with a fresh copy for every `new`.
 
-That one distinction decides where a value lives, who can see it, and what a method may touch. A `static` method has no object, hence no `this`, hence no access to instance fields. The same keyword gives you class-wide **constants** (`static final`) and one-time class setup (a `static` block).
+That one distinction decides where a value lives, who can see it, and what a method may touch. A `static` method has no object, so it has no `this`, so it can't reach instance fields. The same keyword also gives you class-wide **constants** (`static final`) and one-time class setup (a `static` block).
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -52,7 +52,7 @@ This is the deep pass of [the `static` you've used on methods](/synapse/programm
 
 ## 1. `static` fields are shared
 
-A `static` field is stored on the **class**, so every object sees the same one. An instance field is stored on each **object**, so each has its own. Here `count` is shared (how many widgets exist) and `id` is per-widget:
+A `static` field is stored on the **class**, so every object sees the same one. An instance field is stored on each **object**, so each object has its own. Here `count` is shared (how many widgets exist), and `id` belongs to each widget:
 
 ```java run
 class Widget {
@@ -97,14 +97,14 @@ b -> cls
 c -> cls
 ```
 
-**Analysis.** Each constructor incremented the one shared `count` (`1`, `2`, `3`) and copied that into its own `id`. So the three widgets have distinct ids `1, 2, 3`, while `count` is a single value, `3`, reached through the class as `Widget.count`. The diagram shows three objects, each with its own `id`, all pointing at one class that holds the single `count`.
+**Analysis.** Each constructor incremented the one shared `count` (`1`, `2`, `3`) and copied it into its own `id`. So the three widgets have distinct ids `1, 2, 3`, while `count` is a single value, `3`, that you reach through the class as `Widget.count`. The diagram shows three objects, each with its own `id`, all pointing at one class that holds the single `count`.
 
 **Intuition.**
-*Mechanism.* A `static` field has exactly one copy, however many objects exist, even zero <abbr title="The Java Language Specification, Java SE 21, §8.3.1.1">[1]</abbr>. It lives with the class. An instance field is created with each object, on the object. `Widget.count` names the class's copy; `a.id` names that object's copy.
+*Mechanism.* A `static` field has exactly one copy, however many objects exist, even zero <abbr title="The Java Language Specification, Java SE 21, §8.3.1.1">[1]</abbr>. It lives with the class. An instance field is created with each object, on that object. `Widget.count` names the class's copy, and `a.id` names that object's copy.
 
-*Concrete bite.* Because the static field is shared, a change through *any* path is seen by *all*. `count` reached `3` because three different constructors all incremented the same variable. That is the feature (a class-wide tally) and the hazard (shared mutable state that any instance can change).
+*Concrete bite.* Because the static field is shared, a change through *any* path shows up for *everyone*. `count` reached `3` because three different constructors all incremented the same variable. That's both the feature (a class-wide tally) and the hazard (shared mutable state that any instance can change).
 
-*Non-example: a `static` field read through an object.* Java lets you write `a.count`, and it looks like `a`'s own field. It is not:
+*Non-example: a `static` field read through an object.* Java lets you write `a.count`, and it looks like `a`'s own field. It isn't:
 
 ```java run
 class Widget {
@@ -126,13 +126,13 @@ public class Main {
 2 2 2
 ```
 
-`a.count`, `b.count` and `Widget.count` are one variable. Compile with `javac -Xlint:static` and javac warns: `static variable should be qualified by type name, Widget, instead of by an expression`. Write `Widget.count`, so the reader sees it is shared.
+`a.count`, `b.count` and `Widget.count` are all one variable. Compile with `javac -Xlint:static`, and javac warns: `static variable should be qualified by type name, Widget, instead of by an expression`. Write `Widget.count`, so the reader can see it's shared.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Use a `static` field for state that belongs to the class as a whole (a counter, a shared cache, a registry). Use an instance field for anything that differs per object.
 
-The cost of `static` mutable state is its sharing: it acts as a global variable. Changes from anywhere are visible everywhere, which makes it hard to reason about. It is also unsafe when several threads change it at once, a theme that returns in [Concurrency: the Basics](/synapse/programming-languages/java/advanced/concurrency-the-basics).
+`static` mutable state costs you through its sharing, because it acts as a global variable. Changes from anywhere show up everywhere, which makes it hard to reason about. It's also unsafe when several threads change it at once, a theme that comes back in [Concurrency: the Basics](/synapse/programming-languages/java/advanced/concurrency-the-basics).
 
 </div>
 
@@ -140,7 +140,7 @@ The cost of `static` mutable state is its sharing: it acts as a global variable.
 
 ## 2. `static` vs instance methods
 
-An instance method runs *on an object*, so it reaches that object's fields through the implicit `this`. A `static` method runs *on the class*. There is no object, no `this`, and therefore no instance fields to reach.
+An instance method runs *on an object*, so it reaches that object's fields through the implicit `this`. A `static` method runs *on the class*. There's no object, no `this`, and so no instance fields to reach.
 
 ```java run
 class Widget {
@@ -168,10 +168,10 @@ id 2 of 2
 2
 ```
 
-**Analysis.** `describe()` is an instance method called on `w`, so it sees both `w.id` (`2`) and the shared `count` (`2`). `total()` is `static`, called as `Widget.total()` with no object. It can read `count` because `count` is also `static`, but it has no `id` to read. Instance methods can touch everything; static methods can touch only static members, unless they are handed an object.
+**Analysis.** `describe()` is an instance method called on `w`, so it sees both `w.id` (`2`) and the shared `count` (`2`). `total()` is `static`, called as `Widget.total()` with no object. It can read `count` because `count` is also `static`, but it has no `id` to read. Instance methods can touch everything, while static methods can touch only static members, unless someone hands them an object.
 
 **Intuition.**
-*Mechanism.* An instance method receives a hidden `this`, and an unqualified field name resolves against it. A `static` method has no `this` <abbr title="The Java Language Specification, Java SE 21, §8.4.3.2">[2]</abbr>. An unqualified *instance* field name has nothing to resolve against, so the compiler rejects it.
+*Mechanism.* An instance method receives a hidden `this`, and an unqualified field name resolves against it. A `static` method has no `this` <abbr title="The Java Language Specification, Java SE 21, §8.4.3.2">[2]</abbr>. A bare *instance* field name has nothing to resolve against, so the compiler rejects it.
 
 *Concrete bite.* Reading an instance field from a static method is a compile error:
 
@@ -198,13 +198,13 @@ Main.java:4: error: non-static variable id cannot be referenced from a static co
 1 error
 ```
 
-`show()` is `static`, so there is no `this` and no particular widget whose `id` to print. Writing `this.id` does not help: javac says `non-static variable this cannot be referenced from a static context`. This is the rule that stopped `Rectangle.area()` in [Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects): instance state needs an instance. A static method *can* read `w.id` when it is handed a `Widget w` as a parameter.
+`show()` is `static`, so there's no `this`, and no particular widget whose `id` it could print. Writing `this.id` doesn't help either. javac says `non-static variable this cannot be referenced from a static context`. This is the rule that stopped `Rectangle.area()` in [Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects): instance state needs an instance. A static method *can* read `w.id` when it gets a `Widget w` as a parameter.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Make a method `static` when it doesn't depend on any one object's state: a utility that works purely from its arguments. Make it an instance method when it operates on `this` object's fields.
+💡 **Earned rule.** Make a method `static` when it doesn't depend on any one object's state, like a utility that works purely from its arguments. Make it an instance method when it operates on `this` object's fields.
 
-The cost of guessing wrong is a compile error the moment a static method reaches for instance state. The benefit is a signature that tells the truth: a `static` method visibly needs no object, so you can call it without making one.
+Guess wrong, and you get a compile error the moment a static method reaches for instance state. The payoff is a signature that tells the truth: a `static` method visibly needs no object, so you can call it without making one.
 
 </div>
 
@@ -212,7 +212,7 @@ The cost of guessing wrong is a compile error the moment a static method reaches
 
 ## 3. `static final` constants
 
-Combine `static` (one shared copy) with `final` (assigned once, never changed), and you get a **constant**: a single, unchangeable, class-wide value. Convention names them in `UPPER_SNAKE_CASE`.
+Combine `static` (one shared copy) with `final` (assigned once, never changed), and you get a **constant**: a single, unchangeable, class-wide value. By convention, constants are named in `UPPER_SNAKE_CASE`.
 
 ```java run
 class Circle {
@@ -237,12 +237,12 @@ public class Main {
 3.14159
 ```
 
-**Analysis.** `PI` is one shared value, since there is no point giving every circle its own copy of a constant. `final` means nothing can change it. `area()` reads it like any field; `Circle.PI` reads it through the class. (The JDK already has a more precise one, `Math.PI`.)
+**Analysis.** `PI` is one shared value, since there's no point giving every circle its own copy of a constant. `final` means nothing can change it. `area()` reads it like any field, and `Circle.PI` reads it through the class. (The JDK already has a more precise one, `Math.PI`.)
 
 **Intuition.**
-*Mechanism.* `static` gives one copy; `final` forbids reassignment after its single initialization. Some of these are special. Take a `static final` field of a primitive type or `String`, set to a compile-time constant such as `100`. It is a **constant variable** <abbr title="The Java Language Specification, Java SE 21, §4.12.4">[3]</abbr>. javac copies its value into every place that reads it <abbr title="The Java Language Specification, Java SE 21, §13.1">[4]</abbr>. §4 shows a consequence.
+*Mechanism.* `static` gives one copy, and `final` forbids reassignment after its single initialization. Some of these fields are special. Take a `static final` field of a primitive type or `String`, set to a compile-time constant such as `100`. That's a **constant variable** <abbr title="The Java Language Specification, Java SE 21, §4.12.4">[3]</abbr>. javac copies its value into every place that reads it <abbr title="The Java Language Specification, Java SE 21, §13.1">[4]</abbr>. §4 shows a consequence.
 
-*Concrete bite.* Trying to reassign a `static final` is rejected, the same way as an instance `final`:
+*Concrete bite.* Try to reassign a `static final`, and javac rejects it, just as it does an instance `final`:
 
 ```java run
 class Config {
@@ -269,7 +269,7 @@ Main.java:3: error: cannot assign a value to static final variable MAX
 
 💡 **Earned rule.** Use `static final` for fixed, shared values: limits, conversion factors, configuration that never changes at run time. Name them in `UPPER_SNAKE_CASE` so readers know they're constants.
 
-For values that are truly fixed, the cost is nothing. The discipline is reserving it for things that never vary. A `static final` you later need to vary forces a redesign.
+For values that are truly fixed, this costs you nothing. The discipline is saving it for things that never vary. A `static final` that you later need to vary forces a redesign.
 
 </div>
 
@@ -277,7 +277,7 @@ For values that are truly fixed, the cost is nothing. The discipline is reservin
 
 ## 4. `static` initialization blocks
 
-A field initialized with a simple value can be set inline. When a class's `static` state needs *computation* to set up, a **`static` block**, `static { … }`, does that work once, when the class is initialized <abbr title="The Java Language Specification, Java SE 21, §8.7">[5]</abbr>.
+You can set a field with a simple value inline. When a class's `static` state needs *computation* to set up, a **`static` block**, `static { … }`, does that work once, when the class is initialized <abbr title="The Java Language Specification, Java SE 21, §8.7">[5]</abbr>.
 
 ```java run viz=array:SQUARES
 class Lookup {
@@ -307,9 +307,9 @@ static block ran
 16
 ```
 
-**Analysis.** Read the order: `main start` printed *first*, and only then `static block ran`. The `Lookup` class isn't initialized until it's first *used*, the moment `main` reaches `Lookup.SQUARES`.
+**Analysis.** Look at the order: `main start` printed *first*, and only then `static block ran`. The `Lookup` class isn't initialized until it's first *used*, the moment `main` reaches `Lookup.SQUARES`.
 
-At that point the `static` block ran once and filled `SQUARES` (`0, 1, 4, 9, 16`). The reads that followed returned `9` and `16`. A `static` block is the constructor for class-level state.
+At that point, the `static` block ran once and filled `SQUARES` (`0, 1, 4, 9, 16`). The reads that followed returned `9` and `16`. Think of a `static` block as the constructor for class-level state.
 
 **Intuition.**
 *Mechanism.* A class is initialized **lazily**, immediately before the first of these <abbr title="The Java Language Specification, Java SE 21, §12.4.1">[6]</abbr>:
@@ -319,11 +319,11 @@ At that point the `static` block ran once and filled `SQUARES` (`0, 1, 4, 9, 16`
 - a `static` field of the class is assigned;
 - a `static` field of the class is read, and it is **not** a constant variable (§3).
 
-Initialization runs the `static` field initializers and `static` blocks in source order, exactly **once** per class <abbr title="The Java Language Specification, Java SE 21, §12.4.2">[7]</abbr>. Object construction is per object; class initialization is per class, one time. The class that holds `main` is initialized before `main` starts <abbr title="The Java Language Specification, Java SE 21, §12.1.3">[8]</abbr>, so a `static` block in `Main` prints before `main`'s first line.
+Initialization runs the `static` field initializers and `static` blocks in source order, exactly **once** per class <abbr title="The Java Language Specification, Java SE 21, §12.4.2">[7]</abbr>. Object construction happens per object, while class initialization happens once per class. The class that holds `main` is initialized before `main` starts <abbr title="The Java Language Specification, Java SE 21, §12.1.3">[8]</abbr>, so a `static` block in `Main` prints before `main`'s first line.
 
-*Concrete bite.* The single `static block ran` line is the proof of "once". `main` touched `Lookup` twice (`SQUARES[3]` and `SQUARES[4]`), yet the block ran a single time.
+*Concrete bite.* The single `static block ran` line proves the "once". `main` touched `Lookup` twice (`SQUARES[3]` and `SQUARES[4]`), yet the block ran only one time.
 
-The last rule in the list has a visible edge. Reading a constant variable does not initialize its class, because javac already copied the value into the reader:
+The last rule in the list has a visible edge. Reading a constant variable doesn't initialize its class, because javac already copied the value into the reader:
 
 ```java run
 class Config {
@@ -351,7 +351,7 @@ Config initialized
 0
 ```
 
-`Config.MAX` printed `100` with no initialization: the `100` was already compiled into `Main`. `Config.calls` is not a constant, so reading it initialized `Config`, and the block printed first.
+`Config.MAX` printed `100` with no initialization, because the `100` was already compiled into `Main`. `Config.calls` isn't a constant, so reading it initialized `Config`, and the block printed first.
 
 *Non-example: a `static` block that throws.* A `static` block runs where the class is first used, so its failure lands there too, wrapped in a new error:
 
@@ -384,13 +384,13 @@ Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 5 out of bounds for l
 
 The real fault is the `Caused by` line: index `5` in an array of length `2`. The JVM reports it as an `ExceptionInInitializerError` at the line in `main` that first used `Table` <abbr title="The Java Language Specification, Java SE 21, §12.4.2">[7]</abbr>. `<clinit>` is the JVM's name for a class's combined static initialization code <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.9.2">[9]</abbr>.
 
-The class is now marked as failed. Any later use of it throws `NoClassDefFoundError: Could not initialize class Table`, and the block never runs again.
+The JVM now marks the class as failed. Any later use of it throws `NoClassDefFoundError: Could not initialize class Table`, and the block never runs again.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use a `static` block for class-level setup that needs more than a literal: building a lookup table, validating configuration, registering something. Rely on its run-once, lazy-on-first-use timing.
+💡 **Earned rule.** Use a `static` block for class-level setup that needs more than a literal, such as building a lookup table, validating configuration, or registering something. You can rely on its run-once, lazy-on-first-use timing.
 
-The cost is that the *moment* it runs is subtle: first use, not program start. A `static` block with side effects or ordering dependencies can surprise you, and a failure in it breaks the whole class. Keep them simple.
+The catch is that the *moment* it runs is subtle: first use, not program start. A `static` block with side effects or ordering dependencies can surprise you, and a failure inside it breaks the whole class. Keep them simple.
 
 </div>
 
@@ -398,7 +398,7 @@ The cost is that the *moment* it runs is subtle: first use, not program start. A
 
 ## 5. Instance initializers and the order of construction
 
-Objects have a per-object twin of the `static` block. An **instance initializer** is a bare block, `{ … }`, in the class body. It runs every time an object is created <abbr title="The Java Language Specification, Java SE 21, §8.6">[10]</abbr>. This program logs every step of the class and object setup:
+The `static` block has a per-object twin. An **instance initializer** is a bare block, `{ … }`, in the class body, and it runs every time an object is created <abbr title="The Java Language Specification, Java SE 21, §8.6">[10]</abbr>. This program logs every step of the class and object setup:
 
 ```java run
 class Order {
@@ -446,7 +446,7 @@ instance block
 constructor body
 ```
 
-**Analysis.** The first `new Order()` triggered class initialization: the static field initializer, then the static block, in source order. Then it built the object: the instance field initializer, then the instance block, again in source order, then the constructor body. The second `new` skipped the static part, since the class was already initialized, and repeated only the three instance steps.
+**Analysis.** The first `new Order()` triggered class initialization: the static field initializer, then the static block, in source order. Then it built the object: the instance field initializer, then the instance block, again in source order, and finally the constructor body. The second `new` skipped the static part, since the class was already initialized, and repeated only the three instance steps.
 
 **Intuition.**
 *Mechanism.* `new` works in a fixed order <abbr title="The Java Language Specification, Java SE 21, §12.5">[11]</abbr>:
@@ -479,13 +479,13 @@ Main.java:2: error: illegal forward reference
 1 error
 ```
 
-When `a`'s initializer runs, `b` has not been set to `5` yet. Swap the two lines, and `a` becomes `6`.
+When `a`'s initializer runs, `b` hasn't been set to `5` yet. Swap the two lines, and `a` becomes `6`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Put object setup in the constructor. Reach for an instance block only for code that every constructor must share, and read a class's initializers top to bottom, the way the JVM runs them.
 
-The cost of initializers spread across a class is that the order is textual, not logical. Moving a line changes what runs first. One constructor that does the setup keeps the order in one place.
+Spread initializers across a class, and you pay with an order that's textual, not logical. Move a line, and you change what runs first. One constructor that does the setup keeps the order in one place.
 
 </div>
 
@@ -545,7 +545,7 @@ One check per objective. Answer before you open anything.
 
 `S`, `I`, `C`, then `I`, `C`. The class initializes once, on the first `new`. Each object then runs its instance block, then its constructor body. The §5 proof shows the same order with field initializers added.
 
-No. `Lookup` is initialized only when it is first used. A class that `main` never touches is never initialized, so its `static` block never runs.
+No. `Lookup` is initialized only when it's first used. A class that `main` never touches is never initialized, so its `static` block never runs.
 
 </details>
 

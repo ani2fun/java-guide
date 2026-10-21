@@ -6,11 +6,11 @@ prereqs: []
 
 # Defining Classes & Creating Objects — Bundling Data with Behavior
 
-Until now your programs have been `static` methods that pass primitives and arrays around. A **class** changes the unit of organization. It bundles **data** (its *fields*) with the **operations** on that data (its *methods*) into one named blueprint.
+Until now, your programs have been `static` methods that pass primitives and arrays around. A **class** changes how you organize code. It bundles **data** (its *fields*) with the **operations** on that data (its *methods*) into one named blueprint.
 
-From that blueprint, `new` builds **objects** (also called *instances*). Each object is a self-contained bundle with its own copy of the fields. Code stops acting on loose data; the data carries the code that acts on it.
+From that blueprint, `new` builds **objects** (also called *instances*). Each object is a self-contained bundle with its own copy of the fields. Code stops acting on loose data. Instead, the data carries the code that acts on it.
 
-It rests on one idea you already met: an object variable holds a *reference*, so two variables can point at the same object.
+All of this rests on one idea you've already met: an object variable holds a *reference*, so two variables can point at the same object.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -53,7 +53,7 @@ This builds directly on [methods](/synapse/programming-languages/java/control-fl
 
 ## 1. A class bundles fields and methods
 
-A class declares **fields** (the data each object holds) and **methods** (what each object can do). `new ClassName()` builds an object; you reach its fields and methods with a dot.
+A class declares **fields** (the data each object holds) and **methods** (what each object can do). `new ClassName()` builds an object, and you reach its fields and methods with a dot.
 
 ```java run
 class Rectangle {
@@ -90,7 +90,7 @@ classDiagram
 
 **Analysis.** `new Rectangle()` created an object with two `int` fields, each starting at `0`. We set `r.width` and `r.height`, then called `r.area()`.
 
-`area()` read `width` and `height` *without parameters*. It is an **instance method**: it works on the object it was called on. The data and the operation live together.
+`area()` read `width` and `height` *without parameters*. It's an **instance method**, which means it works on the object it was called on. The data and the operation live together.
 
 The fields carry no access modifier, so any class in the same package can reach them. [Encapsulation & Access Modifiers](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers) adds the control that usually hides them.
 
@@ -101,9 +101,9 @@ The fields carry no access modifier, so any class in the same package can reach 
 - Mark `Rectangle` `public` too, and javac says `class Rectangle is public, should be declared in a file named Rectangle.java`.
 
 **Intuition.**
-*Mechanism.* An instance method has an implicit **receiver**: the object before the dot. Its unqualified field names (`width`, `height`) refer to *that object's* fields. A `static` method (like `main`) has no receiver; it belongs to the class, not to any object.
+*Mechanism.* An instance method has an implicit **receiver**: the object before the dot. Its unqualified field names (`width`, `height`) refer to *that object's* fields. A `static` method (like `main`) has no receiver. It belongs to the class, not to any object.
 
-*Concrete bite.* So an instance method cannot be called without an object — there is no implicit receiver to supply the fields:
+*Concrete bite.* So you can't call an instance method without an object — there's no implicit receiver to supply the fields:
 
 ```java run
 class Rectangle {
@@ -126,7 +126,7 @@ Main.java:8: error: non-static method area() cannot be referenced from a static 
 1 error
 ```
 
-`Rectangle.area()` tries to call `area` on the *class*. But `area` needs an object's `width` and `height`, and there isn't one. That is the difference between `r.area()` (an object) and `Rectangle.area()` (the class).
+`Rectangle.area()` tries to call `area` on the *class*. But `area` needs an object's `width` and `height`, and there isn't one. That's the difference between `r.area()` (an object) and `Rectangle.area()` (the class).
 
 ### Fields start at a default value
 
@@ -165,9 +165,9 @@ null
 null
 ```
 
-Number fields start at zero, `boolean` at `false`, and `char` at the character with code `0`. Every reference type (`String`, arrays, your own classes) starts at `null`: no object at all. A field may also declare its own start value, as in `int width = 1;` <abbr title="The Java Language Specification, Java SE 21, §8.3.2">[3]</abbr>.
+Number fields start at zero, `boolean` at `false`, and `char` at the character with code `0`. Every reference type (`String`, arrays, your own classes) starts at `null`, meaning no object at all. A field may also declare its own start value, as in `int width = 1;` <abbr title="The Java Language Specification, Java SE 21, §8.3.2">[3]</abbr>.
 
-*Non-example: a local variable gets no default.* The rule is for fields, not for the local variables of a method. An object variable declared without `new` is not a usable object:
+*Non-example: a local variable gets no default.* The rule covers fields, not a method's local variables. An object variable declared without `new` isn't a usable object:
 
 ```java run
 class Rectangle {
@@ -191,9 +191,9 @@ Main.java:9: error: variable r might not have been initialized
 1 error
 ```
 
-`r` is a local variable, and [Variables & Primitive Types](/synapse/programming-languages/java/first-steps/variables-and-primitive-types) showed that a local must be assigned before it is read. Declaring `Rectangle r;` makes a variable, not an object. Only `new Rectangle()` makes the object.
+`r` is a local variable, and [Variables & Primitive Types](/synapse/programming-languages/java/first-steps/variables-and-primitive-types) showed that you must assign a local before you read it. Declaring `Rectangle r;` makes a variable, not an object. Only `new Rectangle()` makes the object.
 
-**Printing an object.** `println(r)` does not print the fields. Unless the class says otherwise, it prints the class name, `@`, and a hexadecimal hash code <abbr title="java.lang.Object.toString(), Java SE 21 API">[4]</abbr>:
+**Printing an object.** `println(r)` doesn't print the fields. Unless the class says otherwise, it prints the class name, `@`, and a hexadecimal hash code <abbr title="java.lang.Object.toString(), Java SE 21 API">[4]</abbr>:
 
 ```java run
 class Rectangle {
@@ -213,13 +213,13 @@ public class Main {
 Rectangle@15db9742
 ```
 
-To see the fields, print them: `r.width + " x " + r.height`. A later chapter shows how a class supplies its own text form.
+To see the fields, print them: `r.width + " x " + r.height`. A later chapter shows how a class can supply its own text form.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Group a piece of data with the methods that operate on it into a class, and call instance methods through an object (`r.area()`).
 
-The cost of this bundling is the ceremony of creating objects before you can use their behavior. The benefit is that an object carries its own data, so a method never has to be handed the state it works on.
+This bundling costs you the ceremony of creating objects before you can use their behavior. The payoff is that an object carries its own data, so nobody has to hand a method the state it works on.
 
 </div>
 
@@ -227,7 +227,7 @@ The cost of this bundling is the ceremony of creating objects before you can use
 
 ## 2. Constructors: initializing a new object
 
-Setting fields one by one after `new` is verbose and easy to forget. A **constructor** runs at creation time to initialize the object, so you can build it fully formed in one step. It looks like a method with the class's name and no return type <abbr title="The Java Language Specification, Java SE 21, §8.8">[5]</abbr>.
+Setting fields one by one after `new` is wordy and easy to forget. A **constructor** runs at creation time to initialize the object, so you can build it fully formed in one step. It looks like a method with the class's name and no return type <abbr title="The Java Language Specification, Java SE 21, §8.8">[5]</abbr>.
 
 ```java run
 class Rectangle {
@@ -255,7 +255,7 @@ public class Main {
 
 **Analysis.** `new Rectangle(3, 4)` called the constructor with `w = 3` and `h = 4`. The constructor set the fields before the object was handed back, so `r` arrives ready to use.
 
-A constructor has no return type, not even `void`. Its job is to initialize; `new` is what returns the object. A constructor is not a method: you cannot call it by name. `new` runs it, and so can another constructor, as shown below.
+A constructor has no return type, not even `void`. Its job is to initialize, and `new` is what returns the object. A constructor isn't a method, so you can't call it by name. `new` runs it, and so can another constructor, as you'll see below.
 
 **Intuition.**
 *Mechanism.* `new` works in a fixed order <abbr title="The Java Language Specification, Java SE 21, §12.5">[6]</abbr>:
@@ -264,9 +264,9 @@ A constructor has no return type, not even `void`. Its job is to initialize; `ne
 2. It runs the field initializers, such as `int width = 1;`, and then the constructor body.
 3. It returns the reference.
 
-If you write **no** constructor, javac adds a **default constructor**: no parameters, and none of your code <abbr title="The Java Language Specification, Java SE 21, §8.8.9">[7]</abbr>. That is why `new Rectangle()` worked in §1. The moment you declare *any* constructor, javac stops adding it.
+If you write **no** constructor, javac adds a **default constructor**: no parameters, and none of your code <abbr title="The Java Language Specification, Java SE 21, §8.8.9">[7]</abbr>. That's why `new Rectangle()` worked in §1. The moment you declare *any* constructor, javac stops adding it.
 
-*Concrete bite.* So adding a constructor that takes arguments removes the ability to call `new Rectangle()`:
+*Concrete bite.* So once you add a constructor that takes arguments, you can no longer call `new Rectangle()`:
 
 ```java run
 class Rectangle {
@@ -290,7 +290,7 @@ Main.java:8: error: constructor Rectangle in class Rectangle cannot be applied t
   required: int,int
 ```
 
-Once `Rectangle(int, int)` exists, the default constructor is gone, so `new Rectangle()` has nothing to match. If you want both, declare both. Constructors overload exactly like methods <abbr title="The Java Language Specification, Java SE 21, §8.8.8">[8]</abbr>. One constructor can hand its work to another with `this(…)`:
+Once `Rectangle(int, int)` exists, the default constructor is gone, so `new Rectangle()` has nothing to match. If you want both, declare both. Constructors overload just like methods <abbr title="The Java Language Specification, Java SE 21, §8.8.8">[8]</abbr>. One constructor can hand its work to another with `this(…)`:
 
 ```java run
 class Rectangle {
@@ -353,13 +353,13 @@ Main.java:11: error: constructor Rectangle in class Rectangle cannot be applied 
 1 error
 ```
 
-The class now has no constructor of its own, so javac added the default one: `required: no arguments`. The error points at the call, not at the stray `void`. Delete the `void`.
+The class now has no constructor of its own, so javac added the default one, hence `required: no arguments`. The error points at the call, not at the stray `void`. Delete the `void` to fix it.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use a constructor to guarantee every new object starts in a valid state, with its required fields supplied at creation.
+💡 **Earned rule.** Use a constructor to guarantee that every new object starts in a valid state, with its required fields supplied at creation.
 
-The cost is that declaring one constructor removes the default one. If some callers still need `new T()`, declare that no-argument constructor yourself. The benefit is that "an object with `width` set but `height` forgotten" becomes impossible to create.
+The cost is that declaring one constructor removes the default one. If some callers still need `new T()`, declare that no-argument constructor yourself. The payoff is that you simply can't create "an object with `width` set but `height` forgotten".
 
 </div>
 
@@ -367,7 +367,7 @@ The cost is that declaring one constructor removes the default one. If some call
 
 ## 3. `this` and per-instance state
 
-Constructor parameters often want the same names as the fields they set (`width`, `height`). When a parameter and a field share a name, the parameter **shadows** the field <abbr title="The Java Language Specification, Java SE 21, §6.4.1">[11]</abbr>. `this.field` says "the field of the current object", not the parameter.
+You'll often want constructor parameters to have the same names as the fields they set (`width`, `height`). When a parameter and a field share a name, the parameter **shadows** the field <abbr title="The Java Language Specification, Java SE 21, §6.4.1">[11]</abbr>. `this.field` says "the field of the current object", not the parameter.
 
 ```java run
 class Rectangle {
@@ -392,14 +392,14 @@ public class Main {
 12
 ```
 
-**Analysis.** Inside the constructor, the parameters are also named `width` and `height`, so a bare `width` means the *parameter*. `this.width` reaches past the parameter to the object's field, and `this.width = width` copies parameter into field.
+**Analysis.** Inside the constructor, the parameters are also named `width` and `height`, so a bare `width` means the *parameter*. `this.width` reaches past the parameter to the object's field, and `this.width = width` copies the parameter into the field.
 
-`this` is the current object <abbr title="The Java Language Specification, Java SE 21, §15.8.3">[12]</abbr>. In a constructor it is the object being built. In an instance method it is the object the method was called on.
+`this` is the current object <abbr title="The Java Language Specification, Java SE 21, §15.8.3">[12]</abbr>. In a constructor, it's the object being built. In an instance method, it's the object the method was called on.
 
 **Intuition.**
-*Mechanism.* `this` is an implicit reference to the receiver object. When a local variable or parameter shares a field's name, the nearer (local) name wins for an unqualified mention. `this.name` selects the field.
+*Mechanism.* `this` is an implicit reference to the receiver object. When a local variable or parameter shares a field's name, the nearer (local) name wins whenever you write the name on its own. `this.name` selects the field.
 
-*Concrete bite.* Forget the `this.` and the assignment does nothing useful. It assigns the parameter to itself, leaving the field at its default:
+*Concrete bite.* Forget the `this.`, and the assignment does nothing useful. It assigns the parameter to itself and leaves the field at its default:
 
 ```java run
 class Rectangle {
@@ -424,13 +424,13 @@ public class Main {
 0
 ```
 
-`width = width` reads the parameter and assigns it right back to the parameter. The *field* `width` is never touched, so it keeps its default `0`. With both fields still `0`, `area()` returns `0`, not `12`. The code compiled, ran, and gave a confidently wrong answer. javac gives no warning, even with `-Xlint:all`.
+`width = width` reads the parameter and assigns it right back to the parameter. The *field* `width` is never touched, so it keeps its default `0`. With both fields still `0`, `area()` returns `0`, not `12`. The code compiled, ran, and confidently gave the wrong answer. javac gives no warning, even with `-Xlint:all`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** When a parameter shadows a field, qualify the field with `this.`: `this.width = width`.
 
-The cost of reusing the field's name for the parameter is exactly this trap: a self-assignment that leaves fields at their defaults. The language allows it and javac stays silent, so make `this.` a habit in constructors and setters.
+Reusing the field's name for the parameter costs you exactly this trap: a self-assignment that leaves fields at their defaults. The language allows it and javac stays silent, so make `this.` a habit in constructors and setters.
 
 </div>
 
@@ -480,12 +480,12 @@ a -> cls: "instance of"
 b -> cls: "instance of"
 ```
 
-**Analysis.** `a` and `b` are two distinct `Counter` objects. Incrementing `a` twice and `b` once left `a.count` at `2` and `b.count` at `1`. They never interfered, because each holds its own `count`. The diagram shows two separate objects, both described by the one `Counter` class.
+**Analysis.** `a` and `b` are two distinct `Counter` objects. Incrementing `a` twice and `b` once left `a.count` at `2` and `b.count` at `1`. They never got in each other's way, because each one holds its own `count`. The diagram shows two separate objects, both described by the one `Counter` class.
 
 **Intuition.**
 *Mechanism.* `new` allocates a fresh object with its own fields. An object variable holds a **reference** to one such object. Assigning one object variable to another (`c = a`) copies the *reference*, not the object, so both names point at the **same** object.
 
-*Concrete bite.* That is **aliasing**: two variables, one object. Changes through either are visible through both:
+*Concrete bite.* That's **aliasing**: two variables, one object. A change through either one shows up through both:
 
 ```java run
 class Counter {
@@ -509,13 +509,13 @@ public class Main {
 2
 ```
 
-`Counter c = a` did **not** make a second counter; it made `c` another name for `a`'s object. So `a.increment()` and `c.increment()` both ticked the *same* `count`, ending at `2`. For a separate counter, call `new` again; `=` between object variables only copies the handle.
+`Counter c = a` did **not** make a second counter. It made `c` another name for `a`'s object. So `a.increment()` and `c.increment()` both ticked the *same* `count`, which ended at `2`. For a separate counter, call `new` again. `=` between object variables only copies the handle.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Reach for `new` whenever you need a distinct object. Assigning object variables aliases them; it does not copy the object.
+💡 **Earned rule.** Reach for `new` whenever you need a distinct object. Assigning object variables aliases them. It doesn't copy the object.
 
-The cost of references is exactly this aliasing surprise: "I changed `c` and `a` changed too". It is the same pass-by-value-of-a-reference effect from [Methods](/synapse/programming-languages/java/control-flow/methods). [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) draws the full picture.
+References cost you exactly this aliasing surprise: "I changed `c`, and `a` changed too". It's the same pass-by-value-of-a-reference effect you saw in [Methods](/synapse/programming-languages/java/control-flow/methods). [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) draws the full picture.
 
 </div>
 
@@ -591,7 +591,7 @@ public class Main {
 12.0
 ```
 
-`area()` takes no parameters: it reads the `radius` of the object it was called on. The constructor uses `this.radius`, because the parameter shadows the field.
+`area()` takes no parameters, because it reads the `radius` of the object it was called on. The constructor uses `this.radius`, because the parameter shadows the field.
 
 </details>
 
