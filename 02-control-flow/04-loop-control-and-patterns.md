@@ -6,13 +6,13 @@ prereqs: []
 
 # Loop Control & Patterns — Steering the Repetition
 
-A plain loop runs its body start to finish, every pass. Real loops need to *steer*: stop as soon as you've found what you're looking for, skip the passes that don't apply, or break out of a nested search entirely. Java gives you three controls:
+A plain loop runs its body from start to finish on every pass. Real loops need to *steer*. They stop as soon as they've found what they're looking for, skip the passes that don't apply, or break out of a nested search entirely. Java gives you three controls:
 
 - `break` leaves the loop now;
 - `continue` skips to the next pass;
 - a **labeled** `break` or `continue` acts on an *outer* loop.
 
-One quiet rule governs all of them: each affects only the **innermost** loop unless you name another. On top of these sit the handful of **accumulation patterns** that almost every loop turns out to be: sum, count, max, "found it?".
+One quiet rule governs all of them: each affects only the **innermost** loop unless you name another. On top of these sits a handful of **accumulation patterns**, and almost every loop turns out to be one of them: sum, count, max, "found it?".
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -55,7 +55,7 @@ This builds on [loops](/synapse/programming-languages/java/control-flow/loops) a
 
 ## 1. `break`: leave the loop now
 
-`break` stops a loop immediately and jumps to the code after it <abbr title="The Java Language Specification, Java SE 21, §14.15">[1]</abbr>. It is how you search: scan until you find a match, then stop. There is no point continuing.
+`break` stops a loop immediately and jumps to the code after it <abbr title="The Java Language Specification, Java SE 21, §14.15">[1]</abbr>. It's how you search: scan until you find a match, then stop. There's no point carrying on.
 
 ```java run
 public class Main {
@@ -77,11 +77,11 @@ public class Main {
 21
 ```
 
-**Analysis.** The loop checked `21` first; `21 % 7 == 0` is true, so it stored `21` in `found`. `break` ended the loop on the spot: it never tested `22`, `23`, or any later number. `break` turns "look at everything" into "look until you find it".
+**Analysis.** The loop checked `21` first. `21 % 7 == 0` is true, so it stored `21` in `found`. `break` ended the loop on the spot, so it never tested `22`, `23`, or any later number. `break` turns "look at everything" into "look until you find it".
 
-`found` starts at `-1`, a value no search can produce. If the loop ends without a match, `-1` says so. A value used this way, to mean "nothing", is a **sentinel**.
+`found` starts at `-1`, a value no search can produce. If the loop ends without a match, `-1` tells you so. A value used this way, to mean "nothing", is a **sentinel**.
 
-A statement straight after `break`, in the same block, can never run, and javac rejects it with `unreachable statement` <abbr title="The Java Language Specification, Java SE 21, §14.22">[5]</abbr>. A `break` outside any loop or `switch` fails too: `break outside switch or loop`.
+A statement right after `break`, in the same block, can never run, and javac rejects it with `unreachable statement` <abbr title="The Java Language Specification, Java SE 21, §14.22">[5]</abbr>. A `break` outside any loop or `switch` fails too: `break outside switch or loop`.
 
 A loop inside another loop is a **nested loop**. The inner loop runs all of its passes for *each* pass of the outer one:
 
@@ -104,12 +104,12 @@ public class Main {
 2,1  2,2  2,3  
 ```
 
-Two outer passes times three inner passes makes six pairs. The `println` after the inner loop ends each row.
+Two outer passes times three inner passes make six pairs. The `println` after the inner loop ends each row.
 
 **Intuition.**
-*Mechanism.* `break` exits the **innermost** statement that encloses it and that it can leave: a loop, or a `switch` <abbr title="The Java Language Specification, Java SE 21, §14.15">[1]</abbr>. It does not exit the method, and in nested loops it does not exit the outer loop.
+*Mechanism.* `break` exits the **innermost** statement that encloses it and that it can leave: a loop, or a `switch` <abbr title="The Java Language Specification, Java SE 21, §14.15">[1]</abbr>. It doesn't exit the method, and in nested loops it doesn't exit the outer loop.
 
-*Concrete bite.* Put a `break` in an inner loop and the outer loop keeps right on going:
+*Concrete bite.* Put a `break` in an inner loop, and the outer loop keeps right on going:
 
 ```java run
 public class Main {
@@ -131,7 +131,7 @@ public class Main {
 3,1
 ```
 
-For each `i`, the inner loop printed `j = 1`, then hit `break` at `j == 2`. But that `break` only ended the *inner* loop. The outer loop dutifully moved to the next `i` and started a fresh inner loop, three times over. `break` stopped the inner search, not the whole thing.
+For each `i`, the inner loop printed `j = 1`, then hit `break` at `j == 2`. But that `break` ended only the *inner* loop. The outer loop dutifully moved on to the next `i` and started a fresh inner loop, three times over. `break` stopped the inner search, not the whole thing.
 
 *Non-example: `break` inside a `switch`.* A colon-style `switch` from [Conditionals](/synapse/programming-languages/java/control-flow/conditionals) uses `break` to end each case. Inside a loop, that `break` leaves the `switch`, not the loop:
 
@@ -156,13 +156,13 @@ checked 3
 checked 4
 ```
 
-The search found `2` and kept going. The `break` was the `switch`'s, so the loop never saw it. A labeled `break`, next in §3, reaches the loop.
+The search found `2` and kept going. The `break` belonged to the `switch`, so the loop never saw it. A labeled `break`, coming up in §3, reaches the loop.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Use `break` to stop a scan the moment its job is done. Remember that it leaves only the innermost loop or `switch`.
 
-The cost of that scoping: a `break` meant to abandon a *nested* search stops only the inner loop, and silently lets the outer one continue. The labeled `break` in §3 fixes exactly that.
+That scoping has a cost. A `break` meant to abandon a *nested* search stops only the inner loop, and silently lets the outer one carry on. The labeled `break` in §3 fixes exactly that.
 
 </div>
 
@@ -170,7 +170,7 @@ The cost of that scoping: a `break` meant to abandon a *nested* search stops onl
 
 ## 2. `continue`: skip to the next pass
 
-`continue` abandons the *rest of the current pass* and jumps straight to the loop's next step: the update and test <abbr title="The Java Language Specification, Java SE 21, §14.16">[2]</abbr>. It is how you filter: skip the elements that don't qualify, keep looping for the ones that do.
+`continue` abandons the *rest of the current pass* and jumps straight to the loop's next step: the update and test <abbr title="The Java Language Specification, Java SE 21, §14.16">[2]</abbr>. It's how you filter: skip the elements that don't qualify, and keep looping for the ones that do.
 
 ```java run
 public class Main {
@@ -211,7 +211,7 @@ flowchart TD
   UPD --> T
 ```
 
-**Analysis.** When `i` was `2`, `continue` skipped the `print` and went to the next pass. So `2` is missing, but the loop did **not** stop: it printed `3` and `4` afterward. The diagram shows why: `continue` routes back to the update/test, while `break` routes out of the loop entirely.
+**Analysis.** When `i` was `2`, `continue` skipped the `print` and went to the next pass. So `2` is missing, but the loop did **not** stop: it printed `3` and `4` afterward. The diagram shows why. `continue` routes back to the update/test, while `break` routes out of the loop entirely.
 
 **Intuition.**
 *Mechanism.* `continue` jumps over everything *below* it in the body and proceeds to the loop's update-and-test.
@@ -219,7 +219,7 @@ flowchart TD
 - In a `for`, that update (`i++`) still runs, so the loop always advances.
 - In a `while`, the increment is part of the body, so a `continue` placed *before* it skips it.
 
-*Concrete bite.* "The rest of the body is skipped" is the whole behavior. The lines after `continue` run only on passes that don't `continue`:
+*Concrete bite.* "The rest of the body is skipped" is the whole story. The lines after `continue` run only on passes that don't `continue`:
 
 ```java run
 public class Main {
@@ -243,7 +243,7 @@ checking 3
   3 is odd
 ```
 
-`checking i` prints every pass (it is *above* the `continue`). `i is odd` prints only for odd `i`, because for even `i` the `continue` skipped it. The `continue` cut the body short without ending the loop.
+`checking i` prints on every pass, because it's *above* the `continue`. `i is odd` prints only for odd `i`, because for even `i` the `continue` skipped it. The `continue` cut the body short without ending the loop.
 
 *Non-example: `continue` in a `while`, above the update.* Here the `i++` sits below the `continue`:
 
@@ -267,7 +267,7 @@ public class Main {
 1
 ```
 
-At `i == 2`, `continue` jumped back to the test and skipped `i++`. `i` stayed `2`, so the same `continue` ran again, forever. Move the update above the `continue`:
+At `i == 2`, `continue` jumped back to the test and skipped `i++`. `i` stayed `2`, so the same `continue` ran again, and again, forever. Move the update above the `continue`:
 
 ```java run
 public class Main {
@@ -294,7 +294,7 @@ The counter now advances on every pass, so the loop skips `3` and still ends.
 
 💡 **Earned rule.** Use `continue` to skip the passes that don't apply, and keep the body flat instead of wrapping it all in an `if`.
 
-The cost is the `for`-vs-`while` asymmetry. A `for` always runs its update. A `while` whose increment sits below a `continue` skips the increment and spins forever. So in a `while`, advance the counter *before* any `continue`.
+The catch is the `for`-vs-`while` asymmetry. A `for` always runs its update. But a `while` whose increment sits below a `continue` skips the increment and spins forever. So in a `while`, advance the counter *before* any `continue`.
 
 </div>
 
@@ -302,7 +302,7 @@ The cost is the `for`-vs-`while` asymmetry. A `for` always runs its update. A `w
 
 ## 3. Labeled `break` and `continue`: nested loops
 
-When a `break` needs to leave more than the innermost loop, give the outer loop a **label**: a name followed by `:` <abbr title="The Java Language Specification, Java SE 21, §14.7">[3]</abbr>. Then write `break label`. That exits the named loop and everything inside it.
+When a `break` needs to leave more than the innermost loop, give the outer loop a **label**: a name followed by `:` <abbr title="The Java Language Specification, Java SE 21, §14.7">[3]</abbr>. Then write `break label`, which exits the named loop and everything inside it.
 
 ```java run
 public class Main {
@@ -332,7 +332,7 @@ stop at 2,2
 done
 ```
 
-**Analysis.** The loops ran until `i * j == 4` (at `i = 2, j = 2`). Then `break outer` left **both** loops at once: execution jumped past the outer loop to `done`. A plain `break` there would have ended only the inner loop and let the outer one continue to `i = 3`. The label is what made it abandon the whole nested search.
+**Analysis.** The loops ran until `i * j == 4` (at `i = 2, j = 2`). Then `break outer` left **both** loops at once, and execution jumped past the outer loop to `done`. A plain `break` there would have ended only the inner loop and let the outer one carry on to `i = 3`. The label is what made it abandon the whole nested search.
 
 The same label fixes the §1 `switch` non-example. Name the loop, and `break search` leaves the loop from inside the `switch`:
 
@@ -378,12 +378,12 @@ public class Main {
 1,1  2,1  2,2  3,1  3,2  3,3  
 ```
 
-For `i = 1`, the pair `1,2` fails the test, so `continue rows` abandoned the inner loop and moved `i` on to `2`. A plain `continue` would have skipped only `1,2`, then tried `1,3` for nothing.
+For `i = 1`, the pair `1,2` fails the test, so `continue rows` abandoned the inner loop and moved `i` on to `2`. A plain `continue` would have skipped only `1,2`, then tried `1,3` for no reason.
 
 **Intuition.**
-*Mechanism.* A label names a statement; `break label` exits *that* statement, and `continue label` starts that loop's next pass. The label must sit on an **enclosing** loop: you cannot break to a label that isn't above you in the nesting.
+*Mechanism.* A label names a statement. `break label` exits *that* statement, and `continue label` starts that loop's next pass. The label must sit on an **enclosing** loop. You can't break to a label that isn't above you in the nesting.
 
-*Concrete bite.* Reference a label that doesn't enclose the `break` and it won't compile:
+*Concrete bite.* Refer to a label that doesn't enclose the `break`, and it won't compile:
 
 ```java run
 public class Main {
@@ -406,13 +406,13 @@ Main.java:6: error: undefined label: inner
 1 error
 ```
 
-There is no label `inner` on any enclosing loop (the only label is `outer`), so the compiler rejects it. Labels are checked at compile time, so a mistyped one is caught immediately.
+No enclosing loop carries the label `inner` (the only label is `outer`), so the compiler rejects it. The compiler checks labels, so it catches a mistyped one right away.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Reach for a labeled `break` or `continue` only to leave or skip genuinely nested loops in one move. Name the label for what it leaves (`search:`, `rows:`).
 
-The cost is that labels are rare enough to surprise the next reader. Overusing them recreates the tangled "goto" control flow that structured loops were meant to replace. Java has no `goto` statement at all <abbr title="The Java Language Specification, Java SE 21, §14.7">[3]</abbr>. So prefer extracting the nested search into its own [method](/synapse/programming-languages/java/control-flow/methods), and `return`ing from it once that tool is available.
+The catch is that labels are rare enough to surprise the next reader. Overuse them, and you recreate the tangled "goto" control flow that structured loops were meant to replace. Java has no `goto` statement at all <abbr title="The Java Language Specification, Java SE 21, §14.7">[3]</abbr>. So prefer extracting the nested search into its own [method](/synapse/programming-languages/java/control-flow/methods), and `return`ing from it once that tool is available.
 
 </div>
 
@@ -420,7 +420,7 @@ The cost is that labels are rare enough to surprise the next reader. Overusing t
 
 ## 4. Accumulation patterns
 
-Most loops are one of a few shapes: build up a **sum**, keep a **count**, track a running **max** or **min**, or set a **flag** when something is found. The skeleton is always the same: initialize an **accumulator** (the variable that collects the result) before the loop, and update it each pass.
+Most loops take one of a few shapes: build up a **sum**, keep a **count**, track a running **max** or **min**, or set a **flag** when something turns up. The skeleton is always the same. Initialize an **accumulator** (the variable that collects the result) before the loop, and update it on each pass.
 
 ```java run viz=array:data
 public class Main {
@@ -448,9 +448,9 @@ sum=108 count=6 max=42
 - `count` ticks up once per element, ending at `6`;
 - `max` keeps the largest seen so far, ending at `42`.
 
-Each starts at a value that is correct for "nothing seen yet". `sum` and `count` start at `0`. `max` starts at `Integer.MIN_VALUE`, the smallest `int` <abbr title="Java SE 21 API, java.lang.Integer.MIN_VALUE">[4]</abbr>, so the very first element is guaranteed to beat it.
+Each one starts at a value that's correct for "nothing seen yet". `sum` and `count` start at `0`. `max` starts at `Integer.MIN_VALUE`, the smallest `int` <abbr title="Java SE 21 API, java.lang.Integer.MIN_VALUE">[4]</abbr>, so the very first element is guaranteed to beat it.
 
-**An average** is `sum / count`, and both are `int`s. So the division truncates, as [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) showed. Cast one side to keep the fraction:
+**An average** is `sum / count`, and both are `int`s. So the division truncates, just as [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) showed. Cast one side to keep the fraction:
 
 ```java run
 public class Main {
@@ -473,7 +473,7 @@ public class Main {
 7.5
 ```
 
-**A flag** answers "is there any …?". It starts `false`, and the first match sets it and stops the scan:
+**A flag** answers "is there any …?". It starts out `false`, and the first match sets it and stops the scan:
 
 ```java run
 public class Main {
@@ -501,7 +501,7 @@ true
 **Intuition.**
 *Mechanism.* An accumulator's **initial value** must be the right answer for an empty sequence. `0` adds nothing to a sum, and the smallest possible `int` loses to any real value in a `max`. The loop then folds each element into that running result.
 
-*Concrete bite.* Initialize a `max` to `0` and any all-negative data defeats it:
+*Concrete bite.* Initialize a `max` to `0`, and any all-negative data defeats it:
 
 ```java run viz=array:temps
 public class Main {
@@ -521,9 +521,9 @@ public class Main {
 0
 ```
 
-The real maximum is `-1`, but `0` was never in the data. It was a bad starting value that no negative element could beat, so the loop reported `0`, a value that isn't even in `temps`. The logic is right; the *seed* was wrong.
+The real maximum is `-1`, but `0` was never in the data. It was a bad starting value that no negative element could beat, so the loop reported `0`, a value that isn't even in `temps`. The logic is right. The *seed* was wrong.
 
-*Non-example: no data at all.* An empty list defeats the accumulators in a different way. The loop body never runs:
+*Non-example: no data at all.* An empty list defeats the accumulators in a different way, because the loop body never runs:
 
 ```java run
 public class Main {
@@ -547,7 +547,7 @@ count=0 max=-2147483648
 Exception in thread "main" java.lang.ArithmeticException: / by zero
 ```
 
-`max` kept its seed, a number that is not in the data. `sum / count` divided by `0` and threw. Check `count > 0` before you report a max or divide by the count.
+`max` kept its seed, a number that isn't in the data. `sum / count` divided by `0` and threw. Check `count > 0` before you report a max or divide by the count.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -557,7 +557,7 @@ Exception in thread "main" java.lang.ArithmeticException: / by zero
 - `Integer.MIN_VALUE` (or the first element) for a max, and `Integer.MAX_VALUE` for a min;
 - `false` for a found-it flag.
 
-Never seed a max or min with a "convenient" `0` that happens to be a valid value. The cost of a wrong seed is a silent wrong answer. It survives every test with positive data, and breaks only on the negative or empty case you forgot.
+Never seed a max or min with a "convenient" `0` that happens to be a valid value. A wrong seed costs you a silent wrong answer. It survives every test with positive data, and breaks only on the negative or empty case you forgot.
 
 </div>
 
@@ -625,7 +625,7 @@ One check per objective. Answer before you open anything.
 
 With a plain `break`, the program prints `1,1  3,1  3,2  3,3`. For `i = 1` the `break` came at `j = 2`. For `i = 2` it came at `j = 1`, before any print. For `i = 3`, no pair sums to `3`.
 
-With `break outer`, it prints only `1,1`: the first `break` ends both loops.
+With `break outer`, it prints only `1,1`, because the first `break` ends both loops.
 
 The `continue` loop prints `0 3`: every `i` not divisible by 3 is skipped.
 

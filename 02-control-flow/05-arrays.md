@@ -6,12 +6,12 @@ prereqs: []
 
 # Arrays — A Fixed Block of Slots
 
-So far each variable has held one value. An **array** holds *many* values of the **same type** in a single, fixed-size block: `scores[0]`, `scores[1]`, and so on. Each value is reached by an integer **index** counting from zero. Two properties define it and cause every array bug:
+So far, each variable has held one value. An **array** holds *many* values of the **same type** in a single, fixed-size block: `scores[0]`, `scores[1]`, and so on. You reach each value by an integer **index** that counts from zero. Two properties define an array, and they cause every array bug:
 
 - its **size is chosen when you create it and never changes**;
 - indices run from `0` to `length - 1`, and stepping outside that range fails at *run time*, because the compiler can't know the index in advance.
 
-Arrays are the raw, fast, fixed foundation. The growable collections of [The Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework) are built on top of this idea.
+Arrays are the raw, fast, fixed foundation. The growable collections in [The Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework) are built on top of this idea.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -97,11 +97,11 @@ primes: "int[] primes   (length = 4)" {
 }
 ```
 
-**Analysis.** `new int[3]` reserved three `int` slots, all `0`. We set two of them, and `scores[2]`, never touched, printed its default `0`.
+**Analysis.** `new int[3]` reserved three `int` slots, all `0`. We set two of them, and `scores[2]`, which we never touched, printed its default `0`.
 
-`primes` came pre-filled by its literal. `scores.length` is `3`, `primes.length` is `4`. The diagram shows the shape: `primes` is one block of four numbered slots.
+`primes` came pre-filled by its literal. `scores.length` is `3`, and `primes.length` is `4`. The diagram shows the shape: `primes` is one block of four numbered slots.
 
-You have used an array since your first program. `main(String[] args)` receives one: the words typed after `java Main`. The Run button types none, so it is empty:
+You've actually used an array since your very first program. `main(String[] args)` receives one, holding the words typed after `java Main`. The Run button types none, so it's empty:
 
 ```java run
 public class Main {
@@ -117,7 +117,7 @@ public class Main {
 ```
 
 **Intuition.**
-*Mechanism.* An array is one object holding `length` slots of its type, numbered from `0`. `new T[n]` fills every slot with the type's default <abbr title="The Java Language Specification, Java SE 21, §4.12.5">[2]</abbr>; a literal fills it with what you wrote. How the slots sit in memory is the JVM's business: the specification does not fix it <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.7">[3]</abbr>.
+*Mechanism.* An array is one object holding `length` slots of its type, numbered from `0`. `new T[n]` fills every slot with the type's default <abbr title="The Java Language Specification, Java SE 21, §4.12.5">[2]</abbr>, while a literal fills it with what you wrote. How the slots sit in memory is the JVM's business, because the specification doesn't pin it down <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.7">[3]</abbr>.
 
 The default depends on the type:
 
@@ -143,9 +143,9 @@ null
 
 A `String[]` slot starts as **`null`**: "no object yet". [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) covers `null` in full.
 
-*Concrete bite.* The size is fixed at creation: `.length` is a property of the array, not a target you can change. (You will feel that limit directly in §5.) For now the point is that every slot exists from the start. An unassigned `int` slot is `0`, not "empty" or "undefined".
+*Concrete bite.* The size is fixed at creation: `.length` is a property of the array, not a target you can change. (You'll feel that limit firsthand in §5.) For now, the point is that every slot exists from the start. An unassigned `int` slot is `0`, not "empty" or "undefined".
 
-*Non-example: a literal assigned later.* The `{…}` shorthand works only in a declaration <abbr title="The Java Language Specification, Java SE 21, §10.6">[1]</abbr>. Declare first and assign the braces later, and javac cannot parse it:
+*Non-example: a literal assigned later.* The `{…}` shorthand works only in a declaration <abbr title="The Java Language Specification, Java SE 21, §10.6">[1]</abbr>. Declare first and assign the braces later, and javac can't parse it:
 
 ```java run
 public class Main {
@@ -164,9 +164,9 @@ Main.java:4: error: illegal start of expression
             ^
 ```
 
-Name the type in front of the braces: `a = new int[] {1, 2, 3};` compiles and prints `3`. Do not give a size as well: `new int[3] {1, 2, 3}` is rejected with `array creation with both dimension expression and initialization is illegal`.
+Name the type in front of the braces: `a = new int[] {1, 2, 3};` compiles and prints `3`. Don't give a size as well, though. javac rejects `new int[3] {1, 2, 3}` with `array creation with both dimension expression and initialization is illegal`.
 
-**Seeing an array.** `println` on an array does not print its values. It prints a type code and a number:
+**Seeing an array.** `println` on an array doesn't print its values. It prints a type code and a number:
 
 ```java run
 public class Main {
@@ -208,13 +208,13 @@ public class Main {
 [0, 0, 0]
 ```
 
-The first loop assigned to a copy, as in [Loops](/synapse/programming-languages/java/control-flow/loops), and the array printed unchanged. The second wrote through the index, and every slot became `0`. §3 returns to that choice.
+The first loop assigned to a copy, as in [Loops](/synapse/programming-languages/java/control-flow/loops), so the array printed unchanged. The second wrote through the index, and every slot became `0`. §3 comes back to that choice.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Choose the form by what you know. Use a literal when you have the values up front. Use `new T[n]` when you'll fill the slots later, relying on the `0`/`false`/`null` defaults until you do. Print an array with `Arrays.toString`.
 
-The cost of the defaults: a slot you *forgot* to fill is silently `0`, not an error. So a half-initialized array reads as a fully-`0` one.
+The defaults have a cost: a slot you *forgot* to fill is silently `0`, not an error. So a half-initialized array looks just like one full of `0`s.
 
 </div>
 
@@ -222,7 +222,7 @@ The cost of the defaults: a slot you *forgot* to fill is silently `0`, not an er
 
 ## 2. Indexing: reading and writing slots
 
-`array[i]` is the slot at index `i`. Read it in an expression, or assign to it to change that slot. Indices start at `0`, so a length-3 array has valid indices `0`, `1`, `2`.
+`array[i]` is the slot at index `i`. Read it in an expression, or assign to it to change that slot. Indices start at `0`, so a length-3 array has the valid indices `0`, `1`, `2`.
 
 ```java run viz=array:a
 public class Main {
@@ -243,12 +243,12 @@ public class Main {
 30
 ```
 
-**Analysis.** `a[1] = 99` overwrote the middle slot; `a[0]` and `a[2]` were untouched. Reading and writing both use the same `a[i]` notation. On the left of `=` it names the slot to change; elsewhere it yields the slot's value.
+**Analysis.** `a[1] = 99` overwrote the middle slot, and `a[0]` and `a[2]` were untouched. Reading and writing both use the same `a[i]` notation. On the left of `=`, it names the slot to change. Anywhere else, it yields the slot's value.
 
 **Intuition.**
-*Mechanism.* Every array access is checked at run time <abbr title="The Java Language Specification, Java SE 21, §10.4">[6]</abbr>. An index below `0`, or equal to `length` or above, is refused with an exception. Java never lets you read or write past the ends of an array.
+*Mechanism.* Every array access is checked at run time <abbr title="The Java Language Specification, Java SE 21, §10.4">[6]</abbr>. An index below `0`, or at `length` or above, gets refused with an exception. Java never lets you read or write past the ends of an array.
 
-*Concrete bite.* Index past the end (or below `0`) and it throws. That happens at run time, because the index isn't known until then:
+*Concrete bite.* Index past the end (or below `0`), and it throws. That happens at run time, because nobody knows the index until then:
 
 ```java run
 public class Main {
@@ -264,13 +264,13 @@ public class Main {
 Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: Index 3 out of bounds for length 3
 ```
 
-`a` has length `3`, so the valid indices are `0`, `1`, `2`; `a[3]` is one past the end. The compiler accepted it (the index could have come from anywhere), and the JVM caught it when the line ran. The message names both the offending index and the length. `a[-1]` fails the same way, with `Index -1 out of bounds for length 3`.
+`a` has length `3`, so the valid indices are `0`, `1`, `2`, and `a[3]` is one past the end. The compiler accepted it (the index could have come from anywhere), and the JVM caught it when the line ran. The message names both the offending index and the length. `a[-1]` fails the same way, with `Index -1 out of bounds for length 3`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Index from `0` to `length - 1`. The last element is `a[a.length - 1]`, never `a[a.length]`.
 
-The cost of this run-time checking is that an out-of-range index is found late: when that line executes, often with real data. So when the index comes from a calculation or input, check it against `length` before using it.
+The price of run-time checking is that you find an out-of-range index late: when that line runs, often with real data. So when the index comes from a calculation or input, check it against `length` before you use it.
 
 </div>
 
@@ -281,7 +281,7 @@ The cost of this run-time checking is that an out-of-range index is found late: 
 Two loops walk an array.
 
 - The classic `for` gives you the **index**, so you can read `a[i]`, compare neighbours, or write back.
-- The enhanced `for` gives you each **value** directly, when the index is all you'd ignore.
+- The enhanced `for` gives you each **value** directly, for when you'd ignore the index anyway.
 
 ```java run viz=array:nums
 public class Main {
@@ -306,20 +306,20 @@ public class Main {
 5 10 15 
 ```
 
-**Analysis.** The first loop used `i` from `0` to `nums.length - 1`, printing each index alongside `nums[i]`. The second visited the values `5, 10, 15` with no index at all. Note `i < nums.length` (not a hard-coded `3`). Tie the boundary to the array, so it stays correct if the array's size changes.
+**Analysis.** The first loop used `i` from `0` to `nums.length - 1`, printing each index alongside `nums[i]`. The second visited the values `5, 10, 15` with no index at all. Notice `i < nums.length` (not a hard-coded `3`). Tie the boundary to the array, so it stays correct if the array's size changes.
 
 **Intuition.**
-*Mechanism.* The classic `for` reads `nums[i]` each pass from the index it controls. The enhanced `for` walks `0..length-1` for you and hands over each value <abbr title="The Java Language Specification, Java SE 21, §14.14.2">[7]</abbr>: a copy, as [Loops](/synapse/programming-languages/java/control-flow/loops) showed. Same traversal, different access.
+*Mechanism.* The classic `for` reads `nums[i]` on each pass, using the index it controls. The enhanced `for` walks `0..length-1` for you and hands over each value <abbr title="The Java Language Specification, Java SE 21, §14.14.2">[7]</abbr>: a copy, as [Loops](/synapse/programming-languages/java/control-flow/loops) showed. Same traversal, different access.
 
-*Concrete bite.* The choice has consequences beyond style: only the indexed `for` can write back. §1's `Arrays.toString` run showed it. `for (int n : nums) n = 0;` left `[5, 10, 15]`, and the indexed loop gave `[0, 0, 0]`.
+*Concrete bite.* The choice matters beyond style, because only the indexed `for` can write back. §1's `Arrays.toString` run showed it: `for (int n : nums) n = 0;` left `[5, 10, 15]`, while the indexed loop gave `[0, 0, 0]`.
 
-Walking backwards needs the index too. Start at the last index, `length - 1`, and stop after `0`: `for (int i = a.length - 1; i >= 0; i--)`. Starting at `a.length` throws at once; stopping at `i > 0` skips the first element.
+Walking backwards needs the index too. Start at the last index, `length - 1`, and stop after `0`: `for (int i = a.length - 1; i >= 0; i--)`. Start at `a.length`, and it throws at once. Stop at `i > 0`, and you skip the first element.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Use the enhanced `for` when you only read each value. Use the classic `for` when you need the index: to modify a slot, walk backwards, or compare an element to its neighbour.
 
-Each choice has a cost. Reaching for the index when you don't need it brings back the off-by-one risk that the enhanced `for` removes. Using the enhanced `for` when you *do* need the index means you can't write back.
+Each choice has a cost. Reach for the index when you don't need it, and you bring back the off-by-one risk that the enhanced `for` removes. Use the enhanced `for` when you *do* need the index, and you can't write back.
 
 </div>
 
@@ -327,7 +327,7 @@ Each choice has a cost. Reaching for the index when you don't need it brings bac
 
 ## 4. Multidimensional and jagged arrays
 
-An array's elements can themselves be arrays. `int[][]` is "an array of `int` arrays": a grid, addressed `grid[row][col]`. Iterating it takes [nested loops](/synapse/programming-languages/java/control-flow/loop-control-and-patterns).
+An array's elements can themselves be arrays. `int[][]` is "an array of `int` arrays", a grid you address as `grid[row][col]`. Iterating over it takes [nested loops](/synapse/programming-languages/java/control-flow/loop-control-and-patterns).
 
 ```java run viz=grid:grid
 public class Main {
@@ -381,9 +381,9 @@ public class Main {
 ```
 
 **Intuition.**
-*Mechanism.* A 2D array is a one-dimensional array whose elements are other arrays. Nothing forces those inner arrays to be the same length. A **jagged** array, where rows differ in size, is perfectly legal.
+*Mechanism.* A 2D array is a one-dimensional array whose elements are other arrays. Nothing forces those inner arrays to share a length. A **jagged** array, where rows differ in size, is perfectly legal.
 
-*Concrete bite.* So the bounds of one row tell you nothing about another, and assuming a rectangle throws:
+*Concrete bite.* So the bounds of one row tell you nothing about another, and if you assume a rectangle, it throws:
 
 ```java run viz=grid:jagged
 public class Main {
@@ -406,13 +406,13 @@ public class Main {
 Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: Index 1 out of bounds for length 1
 ```
 
-Row `0` has four elements but row `1` has only one, so `jagged[1][1]` is out of bounds for *that* row. Each row carries its own `length`; there is no single "column count" to trust.
+Row `0` has four elements but row `1` has only one, so `jagged[1][1]` is out of bounds for *that* row. Each row carries its own `length`, and there's no single "column count" to trust.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Treat a 2D array as rows that each have their own `length`. Iterate with `grid[i].length` per row, not one shared width. Reach for `new int[rows][cols]` when you want a rectangle.
 
-The cost of assuming uniformity is exactly this per-row `ArrayIndexOutOfBoundsException`. It shows up only when a short row is indexed past its end.
+Assume every row is the same length, and you pay with exactly this per-row `ArrayIndexOutOfBoundsException`. It shows up only when you index a short row past its end.
 
 </div>
 
@@ -420,7 +420,7 @@ The cost of assuming uniformity is exactly this per-row `ArrayIndexOutOfBoundsEx
 
 ## 5. Arrays are not growable lists
 
-The defining limit returns: an array's `length` is fixed forever at creation. You cannot append, insert, or remove: there is no `add`, no `length = …`. To "grow" one, you allocate a bigger array and copy. That rigidity is exactly what [The Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework) replaces with growable `List`s.
+Now the defining limit comes back: an array's `length` is fixed forever at creation. You can't append, insert, or remove. There's no `add`, and no `length = …`. To "grow" an array, you allocate a bigger one and copy. That rigidity is exactly what [The Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework) replaces with growable `List`s.
 
 ```java run
 public class Main {
@@ -441,10 +441,10 @@ Main.java:4: error: cannot find symbol
 1 error
 ```
 
-**Analysis.** Reaching for `a.length()`, with parentheses as if it were a method, fails. An array's `length` is a **field**, written `a.length` with no parentheses. (Contrast a `String`, where [`s.length()`](/synapse/programming-languages/java/first-steps/strings-the-basics) *is* a method.) The slip is a compile error, so it's caught immediately.
+**Analysis.** Writing `a.length()`, with parentheses as if it were a method, fails. An array's `length` is a **field**, written `a.length` with no parentheses. (Contrast a `String`, where [`s.length()`](/synapse/programming-languages/java/first-steps/strings-the-basics) *is* a method.) The slip is a compile error, so you catch it right away.
 
 **Intuition.**
-*Mechanism.* `length` is a `final` field fixed in the array at creation <abbr title="The Java Language Specification, Java SE 21, §10.7">[8]</abbr>. It is not a method, and it cannot be reassigned. No operation changes an array's size, because the array was created with exactly that many slots.
+*Mechanism.* `length` is a `final` field fixed in the array at creation <abbr title="The Java Language Specification, Java SE 21, §10.7">[8]</abbr>. It isn't a method, and you can't reassign it. No operation changes an array's size, because the array was created with exactly that many slots.
 
 **Growing by copying.** `Arrays.copyOf(a, n)` makes a *new* array of length `n`, copies `a` into it, and fills any extra slots with `0` <abbr title="Java SE 21 API, java.util.Arrays.copyOf">[4]</abbr>:
 
@@ -468,9 +468,9 @@ public class Main {
 [1, 2, 3, 4, 0]
 ```
 
-`a` is unchanged. Each "add" to a full array costs a new array and a copy of every element, O(N) work.
+`a` is unchanged. Each "add" to a full array costs a new array plus a copy of every element: O(N) work.
 
-*Non-example: `=` does not copy.* Assigning one array variable to another shares the array. It does not make a second one:
+*Non-example: `=` doesn't copy.* Assigning one array variable to another shares the array. It doesn't make a second one:
 
 ```java run
 public class Main {
@@ -519,7 +519,7 @@ Two arrays with equal contents are still two arrays. `Arrays.equals` compares th
 
 💡 **Earned rule.** Use an array when the size is known and fixed. Reach for an `ArrayList`, in [The Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework), the moment the collection needs to grow or shrink. Copy with `Arrays.copyOf`, compare with `Arrays.equals`, and never with `=` or `==`.
 
-The cost of forcing a growable problem onto an array is repeated allocate-and-copy. The cost of the array's fixed size is paid once, in choosing it only when the size is truly fixed.
+Force a growable problem onto an array, and you pay for allocate-and-copy over and over. Choose an array only when the size is truly fixed, and you pay for its fixed size just once, when you pick it.
 
 </div>
 
@@ -591,9 +591,9 @@ One check per objective. Answer before you open anything.
 
 `int[] a = new int[4]; a[0] = 5; a[3] = 9;` gives `a.length` = `4` and `a[1]` = `0` (a default). `a[4]` throws `ArrayIndexOutOfBoundsException: Index 4 out of bounds for length 4`.
 
-Summing `{ {1, 2}, {3, 4, 5} }` with nested for-each gives `15`. `m[0][2]` throws `Index 2 out of bounds for length 2`: row `0` has only two slots.
+Summing `{ {1, 2}, {3, 4, 5} }` with nested for-each gives `15`. `m[0][2]` throws `Index 2 out of bounds for length 2`, because row `0` has only two slots.
 
-Reversing needs the index, so use the classic `for`, starting at the last index, `v.length - 1`:
+Reversing needs the index, so use the classic `for`, and start at the last index, `v.length - 1`:
 
 `for (int i = v.length - 1; i >= 0; i--) { System.out.print(v[i] + " "); }`
 

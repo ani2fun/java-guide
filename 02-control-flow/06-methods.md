@@ -6,9 +6,9 @@ prereqs: []
 
 # Methods — Named, Reusable Blocks
 
-You have been writing one method since the first chapter: `main`. A **method** is a named block of code with typed **parameters** (its inputs) and a **return type** (its output). Calling it runs that block with the **arguments** you supply, and hands back a result. Methods are how programs avoid repetition, and how they are built from small, testable pieces.
+You've been writing one method since the first chapter: `main`. A **method** is a named block of code with typed **parameters** (its inputs) and a **return type** (its output). Calling it runs that block with the **arguments** you supply, and hands back a result. Methods are how programs avoid repetition, and how you build them from small, testable pieces.
 
-One rule governs every call and surprises nearly everyone: Java passes arguments **by value**. The method works on *copies*. That single fact, applied to object references, explains the difference between a method that can change your data and one that cannot.
+One rule governs every call, and it surprises nearly everyone: Java passes arguments **by value**. The method works on *copies*. Apply that single fact to object references, and it explains the difference between a method that can change your data and one that can't.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -54,7 +54,7 @@ This pulls together [conditionals](/synapse/programming-languages/java/control-f
 
 ## 1. Defining and calling a method
 
-A method declares a return type, a name, and a parenthesized list of typed parameters, then a body. `return` hands a value of the declared type back to the caller. Here `square` takes an `int` and returns an `int`:
+A method declares a return type, a name, and a list of typed parameters in parentheses, followed by a body. `return` hands a value of the declared type back to the caller. Here `square` takes an `int` and returns an `int`:
 
 ```java run
 public class Main {
@@ -85,11 +85,11 @@ sequenceDiagram
   Note over M: 25 is used in main
 ```
 
-**Analysis.** `square(5)` ran the body with `x` bound to `5`, returned `25`, and `println` showed it. `square(square(2))` evaluated inside-out: `square(2)` returned `4`, which became the argument to the outer call, returning `16`.
+**Analysis.** `square(5)` ran the body with `x` bound to `5`, returned `25`, and `println` showed it. `square(square(2))` evaluated inside-out: `square(2)` returned `4`, which became the argument to the outer call, which returned `16`.
 
-The `static` keyword, which `main` also has, means the method belongs to the class itself. That is enough for now. [`static` vs Instance](/synapse/programming-languages/java/classes-and-objects/static-vs-instance) gives `static` its full treatment once objects exist. Leave it off here, and `main` cannot call the method: javac says `non-static method square(int) cannot be referenced from a static context`.
+The `static` keyword, which `main` also has, means the method belongs to the class itself. That's all you need for now. [`static` vs Instance](/synapse/programming-languages/java/classes-and-objects/static-vs-instance) gives `static` its full treatment once objects exist. Leave it off here, and `main` can't call the method. javac says `non-static method square(int) cannot be referenced from a static context`.
 
-A call must match the parameter list: the same number of arguments, each of a fitting type. A mismatch is a compile error:
+A call must match the parameter list, with the same number of arguments, each of a fitting type. A mismatch is a compile error:
 
 ```java run
 public class Main {
@@ -114,12 +114,12 @@ Main.java:7: error: method square in class Main cannot be applied to given types
 1 error
 ```
 
-`required` is the parameter list; `found` is what the call passed. A `double` argument such as `square(2.5)` fails too, with `possible lossy conversion from double to int`, the rule from [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic).
+`required` is the parameter list, and `found` is what the call passed. A `double` argument such as `square(2.5)` fails too, with `possible lossy conversion from double to int`, the rule from [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic).
 
 **Intuition.**
-*Mechanism.* A call suspends the caller and binds each argument to the matching parameter. It runs the body until a `return`, then resumes the caller with the returned value substituted in.
+*Mechanism.* A call pauses the caller and binds each argument to the matching parameter. It runs the body until a `return`, then resumes the caller with the returned value dropped in place of the call.
 
-*Concrete bite.* A method that declares a non-`void` return type must return a value on every path, or it does not compile <abbr title="The Java Language Specification, Java SE 21, §8.4.7">[1]</abbr>. The compiler proves that you always return:
+*Concrete bite.* A method that declares a non-`void` return type must return a value on every path, or it won't compile <abbr title="The Java Language Specification, Java SE 21, §8.4.7">[1]</abbr>. The compiler proves that you always return:
 
 ```java run
 public class Main {
@@ -142,13 +142,13 @@ Main.java:5: error: missing return statement
 1 error
 ```
 
-When `x` is `0`, neither `if` returns, so there is a path with no value to hand back. That is a compile error, not a run-time surprise. Adding a final `return 0;` makes every path return. A statement straight after a `return`, in the same block, is the opposite mistake: it can never run, and javac rejects it with `unreachable statement`.
+When `x` is `0`, neither `if` returns, so there's a path with no value to hand back. That's a compile error, not a run-time surprise. Add a final `return 0;`, and every path returns. A statement right after a `return`, in the same block, is the opposite mistake: it can never run, and javac rejects it with `unreachable statement`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Give each method one clear job, name it for that job, and make sure every path through a value-returning method ends in a `return`.
 
-The cost of the compiler's insistence is that you must handle the cases you would prefer to ignore (what *is* the sign of `0`?). The benefit: "this method forgot to return" cannot reach run time.
+The compiler's insistence costs you something: you must handle the cases you'd rather ignore (what *is* the sign of `0`?). The payoff: "this method forgot to return" can never reach run time.
 
 </div>
 
@@ -156,7 +156,7 @@ The cost of the compiler's insistence is that you must handle the cases you woul
 
 ## 2. `void` and early `return`
 
-A method that does something but produces no value declares the return type `void`. Inside any method, a bare `return;` exits early. It is useful for handling a special case up front and skipping the rest.
+A method that does something but produces no value declares the return type `void`. Inside any method, a bare `return;` exits early. That's handy for dealing with a special case up front and skipping the rest.
 
 ```java run
 public class Main {
@@ -181,12 +181,12 @@ Hello, Ada
 (no name)
 ```
 
-**Analysis.** `greet("Ada")` skipped the early-exit branch and printed the greeting. `greet("")` found an empty name, printed `(no name)`, and `return;` ended the method right there: the greeting line never ran. A `void` method returns nothing, so `return;` carries no value; it only stops.
+**Analysis.** `greet("Ada")` skipped the early-exit branch and printed the greeting. `greet("")` found an empty name, printed `(no name)`, and `return;` ended the method right there, so the greeting line never ran. A `void` method returns nothing, so `return;` carries no value. It just stops.
 
 **Intuition.**
-*Mechanism.* `void` means "no result", so calling a `void` method is a statement, not an expression: there is nothing to assign <abbr title="The Java Language Specification, Java SE 21, §14.17">[2]</abbr>. A `return;` in any method ends it immediately; `return value;` ends it *and* supplies the result.
+*Mechanism.* `void` means "no result", so calling a `void` method is a statement, not an expression. There's nothing to assign <abbr title="The Java Language Specification, Java SE 21, §14.17">[2]</abbr>. A `return;` in any method ends it immediately, while `return value;` ends it *and* supplies the result.
 
-*Concrete bite.* Because a `void` call has no value, trying to use it as one fails to compile:
+*Concrete bite.* Because a `void` call has no value, using it as one fails to compile:
 
 ```java run
 public class Main {
@@ -208,13 +208,13 @@ Main.java:7: error: incompatible types: void cannot be converted to String
 1 error
 ```
 
-`greet` returns nothing to put in `s`. You met the same idea with the ternary and `if` in [Conditionals](/synapse/programming-languages/java/control-flow/conditionals): a thing that performs an action has no value to capture. The mirror mistake, `return 5;` inside a `void` method, gives `incompatible types: unexpected return value`.
+`greet` returns nothing to put in `s`. You met the same idea with the ternary and `if` in [Conditionals](/synapse/programming-languages/java/control-flow/conditionals): something that performs an action has no value to capture. The mirror mistake, `return 5;` inside a `void` method, gives `incompatible types: unexpected return value`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `void` for methods that act (print, change something) and a real return type for methods that compute. Reach for an early `return` to handle edge cases first and keep the main logic unindented.
+💡 **Earned rule.** Use `void` for methods that act (print, change something), and a real return type for methods that compute. Reach for an early `return` to handle edge cases first and keep the main logic unindented.
 
-The cost of early returns is that many scattered ones can obscure a method's flow. A guard or two at the top is clear. A dozen sprinkled throughout is harder to follow than a single structured path.
+The catch with early returns is that too many scattered ones can hide a method's flow. A guard or two at the top reads clearly. A dozen sprinkled throughout is harder to follow than a single structured path.
 
 </div>
 
@@ -222,7 +222,7 @@ The cost of early returns is that many scattered ones can obscure a method's flo
 
 ## 3. Scope: where parameters and local variables live
 
-A parameter, and any variable declared inside a method body, is a **local variable**. It exists only while that call runs, and only inside the block that declares it <abbr title="The Java Language Specification, Java SE 21, §6.3">[3]</abbr>. When the method returns, its locals are gone. Another method cannot see them:
+A parameter, and any variable declared inside a method body, is a **local variable**. It exists only while that call runs, and only inside the block that declares it <abbr title="The Java Language Specification, Java SE 21, §6.3">[3]</abbr>. When the method returns, its locals are gone, and no other method can see them:
 
 ```java run
 public class Main {
@@ -247,9 +247,9 @@ Main.java:8: error: cannot find symbol
 1 error
 ```
 
-`count` belongs to `setUp`, and it ended when `setUp` returned. To get a value out of a method, `return` it, and store the result: `int count = setUp();`.
+`count` belongs to `setUp`, and it ended when `setUp` returned. To get a value out of a method, `return` it, then store the result: `int count = setUp();`.
 
-This is the same rule you met in [Loops](/synapse/programming-languages/java/control-flow/loops): a variable lives from its declaration to the end of the block that holds it. A method body is one more block.
+It's the same rule you met in [Loops](/synapse/programming-languages/java/control-flow/loops): a variable lives from its declaration to the end of the block that holds it. A method body is just one more block.
 
 *Non-example: reusing a name inside its own scope.* Inside that range, the name is taken. Declaring it again in an inner block is an error, not a new variable <abbr title="The Java Language Specification, Java SE 21, §6.4">[4]</abbr>:
 
@@ -272,13 +272,13 @@ Main.java:5: error: variable x is already defined in method main(String[])
 1 error
 ```
 
-Two *different* methods may each use `x`, and two loops one after the other may each declare `i`. Their scopes do not overlap. (A local variable that hides a *field* of the class is legal; fields arrive in [Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects).)
+Two *different* methods may each use `x`, and two loops one after the other may each declare `i`, because their scopes don't overlap. (A local variable that hides a *field* of the class is legal. Fields arrive in [Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects).)
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Declare each variable in the smallest block that needs it, and pass values in through parameters and out through `return`.
 
-The cost is that nothing leaks out of a method on its own. That is also the benefit: each method can be read alone, because nothing outside can touch its locals.
+The cost is that nothing leaks out of a method on its own. That's also the payoff: you can read each method on its own, because nothing outside can touch its locals.
 
 </div>
 
@@ -286,7 +286,7 @@ The cost is that nothing leaks out of a method on its own. That is also the bene
 
 ## 4. Overloading: one name, several signatures
 
-Java lets several methods share a name as long as their **parameter lists** differ: different types, or a different number of parameters. This is **overloading** <abbr title="The Java Language Specification, Java SE 21, §8.4.9">[5]</abbr>. The compiler picks the right one from the argument types at the call site.
+Java lets several methods share a name, as long as their **parameter lists** differ in types or in the number of parameters. That's **overloading** <abbr title="The Java Language Specification, Java SE 21, §8.4.9">[5]</abbr>. The compiler picks the right one from the argument types at the call site.
 
 ```java run
 public class Main {
@@ -309,9 +309,9 @@ public class Main {
 ababab
 ```
 
-**Analysis.** Three methods named `triple`, distinguished by parameter type. `triple(5)` matched the `int` version (`15`), `triple(2.5)` the `double` version (`7.5`), and `triple("ab")` the `String` version (`ababab`). The compiler chose each based on the argument's type. The name alone is not enough to identify a method.
+**Analysis.** There are three methods named `triple`, told apart by parameter type. `triple(5)` matched the `int` version (`15`), `triple(2.5)` the `double` version (`7.5`), and `triple("ab")` the `String` version (`ababab`). The compiler chose each one from the argument's type. The name alone isn't enough to identify a method.
 
-With no exact match, the compiler widens the argument, and picks the *closest* fit <abbr title="The Java Language Specification, Java SE 21, §15.12.2">[6]</abbr>:
+When there's no exact match, the compiler widens the argument and picks the *closest* fit <abbr title="The Java Language Specification, Java SE 21, §15.12.2">[6]</abbr>:
 
 ```java run
 public class Main {
@@ -331,12 +331,12 @@ long 5
 double 5.0
 ```
 
-The `int` `5` fits both `long` and `double`, and `long` is the closer one. The `float` `5.0f` cannot become a `long`, so only `double` applies. When two overloads fit equally well, the compiler refuses to guess. With `pair(int, double)` and `pair(double, int)`, the call `pair(1, 2)` gives `reference to pair is ambiguous`.
+The `int` `5` fits both `long` and `double`, and `long` is the closer one. The `float` `5.0f` can't become a `long`, so only `double` applies. When two overloads fit equally well, the compiler refuses to guess. With `pair(int, double)` and `pair(double, int)`, the call `pair(1, 2)` gives `reference to pair is ambiguous`.
 
 **Intuition.**
 *Mechanism.* A method is identified by its **signature**: name plus parameter types, not its return type <abbr title="The Java Language Specification, Java SE 21, §8.4.2">[7]</abbr>. The compiler resolves an overloaded call by matching the argument types to a signature, entirely at compile time.
 
-*Concrete bite.* Because the return type is *not* part of the signature, two methods that differ only by return type are a duplicate definition:
+*Concrete bite.* Because the return type *isn't* part of the signature, two methods that differ only by return type count as a duplicate definition:
 
 ```java run
 public class Main {
@@ -357,13 +357,13 @@ Main.java:3: error: method f() is already defined in class Main
 1 error
 ```
 
-Both are `f()` with no parameters: identical signatures, so the second is "already defined". Changing the return type doesn't make a new method; only a different parameter list does.
+Both are `f()` with no parameters. Their signatures are identical, so the second is "already defined". Changing the return type doesn't make a new method. Only a different parameter list does.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Overload a name only when the methods do the *same conceptual thing* to different input types (`print(int)`, `print(String)`). Distinguish them by parameter list, never by return type alone.
 
-The cost of overloading is resolution surprises. With mixed argument types, the compiler may pick an overload you didn't expect, or refuse an ambiguous call. So keep overloads few, and their parameter types clearly distinct.
+Overloading costs you resolution surprises. With mixed argument types, the compiler may pick an overload you didn't expect, or refuse an ambiguous call. So keep overloads few, and keep their parameter types clearly distinct.
 
 </div>
 
@@ -371,7 +371,7 @@ The cost of overloading is resolution surprises. With mixed argument types, the 
 
 ## 5. Varargs: any number of arguments
 
-Some methods make sense for any number of arguments: a sum, a maximum. A **varargs** parameter, written with `...` after the type, accepts zero or more arguments <abbr title="The Java Language Specification, Java SE 21, §8.4.1">[8]</abbr>. Inside the method, it is an [array](/synapse/programming-languages/java/control-flow/arrays):
+Some methods make sense for any number of arguments, like a sum or a maximum. A **varargs** parameter, written with `...` after the type, accepts zero or more arguments <abbr title="The Java Language Specification, Java SE 21, §8.4.1">[8]</abbr>. Inside the method, it's an [array](/synapse/programming-languages/java/control-flow/arrays):
 
 ```java run
 public class Main {
@@ -400,9 +400,9 @@ public class Main {
 30
 ```
 
-`sum()` passed an empty array, so the loop never ran and `total` stayed `0`. The last call passed an array directly; that works too. `main(String... args)` is a legal way to write `main`, for the same reason.
+`sum()` passed an empty array, so the loop never ran and `total` stayed `0`. The last call passed an array directly, and that works too. For the same reason, `main(String... args)` is a legal way to write `main`.
 
-*Non-example: a varargs parameter that is not last.* The compiler matches arguments left to right, so the open-ended list must come at the end:
+*Non-example: a varargs parameter that isn't last.* The compiler matches arguments left to right, so the open-ended list has to come at the end:
 
 ```java run
 public class Main {
@@ -426,9 +426,9 @@ Write `log(String label, int... codes)`. A method may have at most one varargs p
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use varargs when callers naturally pass a short, variable list of values. Treat the parameter as an array inside, and handle the empty case: a caller may pass nothing.
+💡 **Earned rule.** Use varargs when callers naturally pass a short, variable list of values. Treat the parameter as an array inside, and handle the empty case, because a caller may pass nothing.
 
-The cost is that overload resolution tries varargs *last* <abbr title="The Java Language Specification, Java SE 21, §15.12.2">[6]</abbr>. A fixed-parameter overload with a fitting type always wins over it.
+The catch is that overload resolution tries varargs *last* <abbr title="The Java Language Specification, Java SE 21, §15.12.2">[6]</abbr>. A fixed-parameter overload with a fitting type always wins over it.
 
 </div>
 
@@ -436,7 +436,7 @@ The cost is that overload resolution tries varargs *last* <abbr title="The Java 
 
 ## 6. Pass-by-value: primitives
 
-When you call a method, each argument is **copied** into the parameter <abbr title="The Java Language Specification, Java SE 21, §8.4.1">[8]</abbr>. For a primitive, that means the method gets its own copy of the number, and changing the parameter cannot touch the caller's variable.
+When you call a method, each argument is **copied** into the parameter <abbr title="The Java Language Specification, Java SE 21, §8.4.1">[8]</abbr>. For a primitive, that means the method gets its own copy of the number, so changing the parameter can't touch the caller's variable.
 
 ```java run
 public class Main {
@@ -462,9 +462,9 @@ outside: 5
 **Analysis.** `addOne(x)` copied `x`'s value (`5`) into `n`. Incrementing `n` to `6` changed only that copy (`inside: 6`), while the caller's `x` stayed `5`, as `outside: 5` confirms. The method had no way to reach back and change `x`.
 
 **Intuition.**
-*Mechanism.* "Pass-by-value" means the argument's *value* is copied into the parameter. The parameter is a separate variable; assignments to it rewrite the copy, never the original. Java has no way to pass a primitive variable so the callee can change it.
+*Mechanism.* "Pass-by-value" means the argument's *value* is copied into the parameter. The parameter is a separate variable, so assignments to it rewrite the copy, never the original. Java has no way to pass a primitive variable so that the callee can change it.
 
-*Concrete bite.* The classic `swap` shows it. The method swaps its two copies, and the caller's variables never move:
+*Concrete bite.* The classic `swap` shows this. The method swaps its two copies, and the caller's variables never move:
 
 ```java run
 public class Main {
@@ -487,7 +487,7 @@ public class Main {
 1 2
 ```
 
-To reflect a change, a method must *return* the new value, and the caller must store it. Calling a value-returning method and ignoring the result changes nothing:
+To pass a change back, a method must *return* the new value, and the caller must store it. Call a value-returning method and ignore the result, and nothing changes:
 
 ```java run
 public class Main {
@@ -515,9 +515,9 @@ The first `addOne(x)` computed `6` and threw it away. Only `x = addOne(x);` put 
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Treat primitive parameters as inputs only; to communicate a result, return it, and assign it at the call.
+💡 **Earned rule.** Treat primitive parameters as inputs only. To communicate a result, return it, and assign it at the call.
 
-The cost is that a method cannot have a primitive "out-parameter" the way some languages do. The benefit is that a call can never secretly alter your local numbers. Reading `addOne(x)`, you know `x` is unchanged unless you assign the result.
+The cost is that a method can't have a primitive "out-parameter" the way some languages allow. The payoff is that a call can never secretly change your local numbers. Reading `addOne(x)`, you know `x` is unchanged unless you assign the result.
 
 </div>
 
@@ -525,7 +525,7 @@ The cost is that a method cannot have a primitive "out-parameter" the way some l
 
 ## 7. Pass-by-value: object references
 
-Java is pass-by-value *for object references too*. But the value being copied is the **reference** (the handle to the object), not the object itself.
+Java is pass-by-value *for object references too*. But what gets copied is the **reference** (the handle to the object), not the object itself.
 
 - The caller's variable and the parameter then point at the **same** object, so the method can **change** that shared object.
 - Reassigning the parameter only repoints its own copy.
@@ -561,14 +561,14 @@ public class Main {
 - `mutate(a)` received a *copy of the reference* that still points at the same array. So `arr[0] = 99` changed the one shared array, and the caller sees `a[0]` as `99`.
 - `reassign(a)` also got a copy of the reference, but `arr = new int[]{…}` pointed *that copy* at a brand-new array. The caller's `a` still points at the original, so `a[0]` is **still** `99`, not `7`.
 
-Mutation reached through to the shared object; reassignment did not.
+Mutation reached through to the shared object. Reassignment didn't.
 
 **Intuition.**
-*Mechanism.* The reference is copied, so caller and method hold two handles to the *same* object. Following a handle to change the object's contents (`arr[0] = …`) affects what both handles see. Overwriting the handle itself (`arr = …`) changes only that local copy. Java is *always* pass-by-value; for objects, the value is the reference.
+*Mechanism.* The reference is copied, so caller and method hold two handles to the *same* object. Following a handle to change the object's contents (`arr[0] = …`) affects what both handles see. Overwriting the handle itself (`arr = …`) changes only that local copy. Java is *always* pass-by-value. For objects, the value is the reference.
 
-*Concrete bite.* The two `99`s are the whole lesson: the mutation in `mutate` stuck, the reassignment in `reassign` did not. A method that "replaces your array" by assigning to its parameter silently does nothing to the caller, a real and common bug.
+*Concrete bite.* The two `99`s are the whole lesson: the mutation in `mutate` stuck, and the reassignment in `reassign` didn't. A method that "replaces your array" by assigning to its parameter silently does nothing to the caller. It's a real and common bug.
 
-A `String` parameter behaves like the `reassign` case every time. [Strings](/synapse/programming-languages/java/first-steps/strings-the-basics) cannot be changed, so a method can only point its copy at a new one:
+A `String` parameter behaves like the `reassign` case every time. You can't change [Strings](/synapse/programming-languages/java/first-steps/strings-the-basics), so a method can only point its copy at a new one:
 
 ```java run
 public class Main {
@@ -593,9 +593,9 @@ hi
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** A method can change the *contents* of an object you pass, but cannot change *which* object your variable points to. To hand back a different object, `return` it.
+💡 **Earned rule.** A method can change the *contents* of an object you pass, but it can't change *which* object your variable points to. To hand back a different object, `return` it.
 
-The cost of this model is the very confusion shown here ("I reassigned it and nothing happened"). The benefit is one consistent rule: everything is passed by value. The reference/object distinction it forces you to see is the heart of [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model).
+This model costs you the very confusion shown here ("I reassigned it and nothing happened"). The payoff is one consistent rule: everything is passed by value. The reference/object distinction it forces you to see is the heart of [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model).
 
 </div>
 
@@ -667,11 +667,11 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>The 🧪 box below: <code>doubled(a)</code>, <code>addOne</code> from <code>0</code>, and the two <code>area</code> overloads.</summary>
 
-`doubled(a)` then `a[0]` prints `2`. The method received a copy of the reference to the *same* array, and `in[i] *= 2` changed that array's contents. The returned array was ignored, and it did not matter: it is the same array.
+`doubled(a)` then `a[0]` prints `2`. The method received a copy of the reference to the *same* array, and `in[i] *= 2` changed that array's contents. The returned array was ignored, and that didn't matter, because it's the same array.
 
-With `x` at `0`, `addOne` prints `inside: 1`, then `outside: 0`. The method changed its copy only.
+With `x` at `0`, `addOne` prints `inside: 1`, then `outside: 0`. The method changed only its copy.
 
-`area(4)` gives `16` and `area(3, 5)` gives `15`. The compiler tells them apart by the number of parameters: the signatures `area(int)` and `area(int, int)` differ.
+`area(4)` gives `16` and `area(3, 5)` gives `15`. The compiler tells them apart by the number of parameters, because the signatures `area(int)` and `area(int, int)` differ.
 
 </details>
 
