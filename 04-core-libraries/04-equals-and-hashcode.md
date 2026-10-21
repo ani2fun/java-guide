@@ -1,6 +1,6 @@
 ---
 title: equals & hashCode
-summary: The default equals/hashCode compare by identity, so two value-equal objects are not "equal" and don't work in hash-based collections. Override equals to define value equality — but you MUST override hashCode to agree, or a HashSet/HashMap silently fails to find your object and stores duplicates. The contract, the breakage, the equals(Point) overload trap, the mutated-key trap, and the Objects.hash fix, all shown with verified output.
+summary: The default equals and hashCode compare by identity, so two objects with equal values aren't "equal", and they misbehave in hash-based collections. Override equals to define value equality, but you MUST override hashCode to agree. Otherwise a HashSet or HashMap silently fails to find your object and stores duplicates. Covers the contract, how it breaks, the equals(Point) overload trap, the mutated-key trap and the Objects.hash fix, all with verified output.
 prereqs: []
 ---
 

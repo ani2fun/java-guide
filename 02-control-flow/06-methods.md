@@ -1,6 +1,6 @@
 ---
 title: Methods
-summary: A method is a named, reusable block with typed parameters and a return type; calling it passes arguments by value — a copy — so changing a parameter never changes the caller's variable. Overloading gives one name several parameter lists; and because an object reference is itself copied, a method can mutate a shared object but cannot reassign the caller's variable. Every behavior shown with verified output.
+summary: A method is a named, reusable block with typed parameters and a return type. Java passes arguments by value, as copies, so changing a parameter never changes the caller's variable. Overloading gives one name several parameter lists. Because a reference is copied too, a method can change a shared object but can't reassign the caller's variable. Every behavior is shown with verified output.
 prereqs: []
 ---
 

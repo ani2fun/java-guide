@@ -1,6 +1,6 @@
 ---
 title: Loop Control & Patterns
-summary: break exits a loop early, continue skips to the next iteration, and a labeled break escapes nested loops — each affecting only the innermost loop unless labeled. Plus the accumulation idioms (running sum, count, max) that most loops are built from, and the accumulator-initialization trap. Every behavior shown with verified output.
+summary: break leaves a loop early, continue skips to the next pass, and a labeled break escapes nested loops. Each one affects only the innermost loop unless you name another. Also covers the accumulation idioms most loops are built from (running sum, count, max) and the trap of seeding an accumulator wrong. Every behavior is shown with verified output.
 prereqs: []
 ---
 

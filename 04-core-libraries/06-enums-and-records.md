@@ -1,6 +1,6 @@
 ---
 title: Enums & Records
-summary: An enum is a fixed, type-safe set of named constant instances that can carry fields and methods. A record is a data carrier that generates its constructor, accessors, equals, hashCode, and toString from its components — making the last lesson's contract free — with a compact constructor for validation, and immutability that is only shallow. And a sealed type restricts which classes may extend or implement it, so the compiler knows the whole family. Every feature shown with verified output.
+summary: An enum is a fixed, type-safe set of named constant instances that can carry fields and methods. A record is a data carrier that generates its constructor, accessors, equals, hashCode and toString from its components, which makes the last lesson's contract free. It validates in a compact constructor, and its immutability is only shallow. A sealed type restricts which types may extend or implement it, so the compiler knows the whole family. Every feature is shown with verified output.
 prereqs: []
 ---
 

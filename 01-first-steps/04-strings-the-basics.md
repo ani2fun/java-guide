@@ -1,6 +1,6 @@
 ---
 title: Strings, the Basics
-summary: A String is an immutable object, not a primitive — so every "change" makes a new String, methods that ignore their result do nothing, and comparing text needs .equals (characters) not == (identity), a distinction the String pool makes deceptively easy to get wrong. Creating strings, escape sequences, zero-based positions and substring, concatenation with its left-to-right trap, and a first look at == vs equals.
+summary: A String is an immutable object, not a primitive. Every "change" makes a new String, a call whose result you ignore does nothing, and comparing text needs .equals (characters), not == (identity). The String pool makes that last one easy to get wrong. Covers creating strings, escape sequences, zero-based positions and substring, concatenation and its left-to-right trap, and a first look at == vs equals.
 prereqs: []
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Concurrency: High-Level & Virtual Threads"
-summary: Raw threads and synchronized are low-level; java.util.concurrent gives you thread pools (ExecutorService) that run Runnable and Callable tasks and return results via Future, lock-free atomics that fix races without locking (and compareAndSet for compound updates), ConcurrentHashMap, and CompletableFuture for composing async work. Virtual threads (JDK 21) make blocking nearly free, so you can run millions — unless a synchronized block pins them. Every behavior shown with verified output, including 10,000 virtual threads finishing in a fraction of a second.
+summary: Raw threads and synchronized are low-level tools. java.util.concurrent gives you thread pools (ExecutorService) that run Runnable and Callable tasks and return results through Future, plus lock-free atomics that fix races without locking (with compareAndSet for compound updates), ConcurrentHashMap, and CompletableFuture for composing async work. Virtual threads (JDK 21) make blocking nearly free, so you can run millions of them, unless a synchronized block pins them. Every behavior is shown with verified output, including 10,000 virtual threads finishing in a fraction of a second.
 prereqs: []
 ---
 

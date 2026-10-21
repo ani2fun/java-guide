@@ -1,6 +1,6 @@
 ---
 title: Sealed Classes & Pattern Matching
-summary: Pattern matching tests a value's type and binds it in one step (o instanceof Circle c), with the binding in scope only where the test is known true. Switch pattern matching (JDK 21) dispatches on type, with when guards, case null, and dominance checks on case order — and record patterns deconstruct components directly, nesting as deep as the data. Over a sealed hierarchy the switch is exhaustive with NO default, so a forgotten case is a compile error. Together sealed + records + pattern switch are Java's data-oriented design. Every behavior shown with verified output.
+summary: Pattern matching tests a value's type and binds it in one step (o instanceof Circle c), and the binding is in scope only where the test is known to be true. Switch pattern matching (JDK 21) dispatches on type, with when guards, case null, and dominance checks on case order. Record patterns take components apart directly, nesting as deep as the data. Over a sealed hierarchy, the switch is exhaustive with NO default, so a forgotten case is a compile error. Together, sealed types, records and pattern switches are Java's data-oriented design. Every behavior is shown with verified output.
 prereqs: []
 ---
 

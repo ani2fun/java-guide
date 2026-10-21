@@ -1,6 +1,6 @@
 ---
 title: "Core Libraries & Data Structures: Overview"
-summary: Chapter 4 of the Java book — the standard data structures and the contracts that make objects work inside them. Strings in depth and StringBuilder, the Collections Framework (List/Set/Map), the equals/hashCode contract, generics and type erasure, enums/records/sealed for precise data modeling, and the java.time API for dates, times and time zones. Every example compiled and run.
+summary: Chapter 4 of the Java book: the standard data structures, and the contracts that make objects work inside them. Covers strings in depth and StringBuilder, the Collections Framework (List, Set, Map), the equals/hashCode contract, generics and type erasure, enums, records and sealed types for precise data modeling, and the java.time API for dates, times and time zones. Every example is compiled and run.
 prereqs: []
 ---
 

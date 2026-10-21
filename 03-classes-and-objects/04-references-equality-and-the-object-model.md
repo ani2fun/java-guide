@@ -1,6 +1,6 @@
 ---
 title: References, Equality & the Object Model
-summary: A variable is either a primitive that holds its value or a reference that holds the address of a heap object — and that split governs assignment, aliasing, equality, and null. == compares what the variable holds (a value, or an address); .equals compares meaning. The Integer cache and String pool make == deceptively "work"; dereferencing null throws. The flagship chapter, with a stack/heap picture and every trap shown live.
+summary: Every variable is either a primitive that holds its value or a reference that holds the address of a heap object. That split governs assignment, aliasing, equality and null. == compares what the variable holds (a value or an address), while .equals compares meaning. The Integer cache and String pool make == seem to work, and dereferencing null throws. The flagship lesson, with a stack/heap picture and every trap shown live.
 prereqs: []
 ---
 

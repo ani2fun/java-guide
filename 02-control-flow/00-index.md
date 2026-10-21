@@ -1,6 +1,6 @@
 ---
 title: "Control Flow: Overview"
-summary: Chapter 2 of the Java book. Six lessons take you from a single boolean decision to your first real programs — conditions, the four loop shapes, break/continue, arrays, and methods (including Java's pass-by-value rule). Every example compiled and run, with the recurring traps shown as real compiler errors and exceptions.
+summary: Chapter 2 of the Java book. Six lessons take you from a single boolean decision to your first real programs. You'll learn conditions, the four loop shapes, break and continue, arrays, and methods, including Java's pass-by-value rule. Every example is compiled and run, and the recurring traps appear as real compiler errors and exceptions.
 prereqs: []
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Advanced & Idiomatic: Overview"
-summary: Chapter 6 of the Java book — functional Java, concurrency and the memory model, I/O, modern idioms, and shipping. The Streams API, threads and the happens-before rule, high-level concurrency and virtual threads, the JIT and GC, NIO.2 files, how the modern features compose into data-oriented design, testing/build/packaging, and localization with Locale, resource bundles and MessageFormat. Every example compiled and run.
+summary: Chapter 6 of the Java book: functional Java, concurrency and the memory model, I/O, modern idioms, shipping and localization. Covers the Streams API, threads and the happens-before rule, high-level concurrency and virtual threads, the JIT and GC, NIO.2 files, how the modern features combine into data-oriented design, testing, builds and packaging, and localization with Locale, resource bundles and MessageFormat. Every example is compiled and run.
 prereqs: []
 ---
 

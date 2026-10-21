@@ -1,6 +1,6 @@
 ---
 title: Input & Output
-summary: I/O is method calls on stream objects — System.out for formatted output (printf), and a Scanner over System.in to turn typed characters into typed values. next, nextLine and nextInt and what each consumes, the leftover-newline trap and its fix, Integer.parseInt, the read→compute→output skeleton, and the exception each type of bad input throws, building on every earlier First Steps chapter.
+summary: Input and output are method calls on stream objects: System.out for formatted output with printf, and a Scanner over System.in that turns typed characters into typed values. Covers what next, nextLine and nextInt each consume, the leftover-newline trap and its fix, Integer.parseInt, the read→compute→output skeleton, and the exception each kind of bad input throws. Builds on every earlier First Steps lesson.
 prereqs: []
 ---
 

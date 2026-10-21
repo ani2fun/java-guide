@@ -1,6 +1,6 @@
 ---
 title: Inheritance & Polymorphism
-summary: A subclass extends a superclass to inherit and specialize it; its constructor runs the superclass constructor first, and private members stay behind. Overriding replaces a method, and super reaches the parent's version. The payoff is dynamic dispatch — calling an overridden method through a superclass reference runs the object's actual (runtime) type's version, not the declared type's. Fields and static methods don't dispatch; a downcast is checked at run time and can throw ClassCastException; final stops overriding; every object inherits Object's methods. Shown with verified output.
+summary: A subclass extends a superclass to inherit and specialize it. Its constructor runs the superclass constructor first, and private members stay behind. Overriding replaces a method, and super reaches the parent's version. The payoff is dynamic dispatch: calling an overridden method through a superclass reference runs the version for the object's actual run-time type, not the declared type. Fields and static methods don't dispatch, a downcast is checked at run time and can throw ClassCastException, final stops overriding, and every object inherits Object's methods. Shown with verified output.
 prereqs: []
 ---
 

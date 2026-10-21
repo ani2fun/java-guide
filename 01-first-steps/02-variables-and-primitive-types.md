@@ -1,6 +1,6 @@
 ---
 title: Variables & Primitive Types
-summary: Java is statically typed — every variable has a type fixed when you declare it and checked by the compiler on every line. The eight primitives hold their value directly; declarations, names, definite assignment, final, exact ranges, literals and their types, and var (inferred, not dynamic) — with every trap shown as a real compiler error.
+summary: Java is statically typed: every variable gets a type when you declare it, and the compiler checks that type on every line. The eight primitives hold their values directly. Covers declarations, names, definite assignment, final, exact ranges, literals and their types, and var (inferred, not dynamic), with every trap shown as a real compiler error.
 prereqs: []
 ---
 

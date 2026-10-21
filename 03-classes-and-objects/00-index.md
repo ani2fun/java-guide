@@ -1,6 +1,6 @@
 ---
 title: "Classes & Objects: Overview"
-summary: Chapter 3 of the Java book — the OOP leap. Four lessons move from procedural code to objects: defining classes, hiding state behind a controlled interface, the class-vs-instance distinction, and the reference model (stack/heap, == vs .equals, null) that underlies every Java surprise. Every example compiled and run.
+summary: Chapter 3 of the Java book, the leap to objects. Four lessons take you from procedural code to classes: defining them, hiding state behind a controlled interface, the class-vs-instance split, and the reference model (stack and heap, == vs .equals, null) behind every Java surprise. Every example is compiled and run.
 prereqs: []
 ---
 

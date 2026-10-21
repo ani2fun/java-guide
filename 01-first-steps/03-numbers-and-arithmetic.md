@@ -1,6 +1,6 @@
 ---
 title: Numbers & Arithmetic
-summary: Java arithmetic runs on fixed-width typed values, so the operands' types — not the math you intend — decide the result. Integer division truncates toward zero, % takes the dividend's sign, mixing types promotes to the wider one, casts and += convert deliberately, int overflow wraps silently, and double is approximate. Update operators, precedence and the Math class, with every trap shown as real output.
+summary: Java arithmetic works on fixed-width, typed values, so the operands' types decide the result, not the math you intend. Integer division truncates toward zero, % takes the dividend's sign, and mixed types promote to the wider one. Casts and += convert on purpose, int overflow wraps silently, and double is approximate. Also covers update operators, precedence and the Math class, with every trap shown as real output.
 prereqs: []
 ---
 

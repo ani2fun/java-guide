@@ -1,6 +1,6 @@
 ---
 title: Booleans & Logic
-summary: Java's boolean is its own type with exactly two values and no truthiness — a condition must be a real boolean, so boolean b = 1 (and if (1)) won't compile, and the =/== slip is caught at compile time. Comparisons, the logical operators &&/||/!, short-circuit evaluation as a guard, precedence, and the floating-point equality trap — every example compiled and run.
+summary: Java's boolean is its own type, with exactly two values and no truthiness. A condition must be a real boolean, so boolean b = 1 and if (1) won't compile, and the compiler catches the =/== slip. Covers comparisons, the logical operators &&, || and !, short-circuit evaluation as a guard, precedence, and the floating-point equality trap. Every example is compiled and run.
 prereqs: []
 ---
 

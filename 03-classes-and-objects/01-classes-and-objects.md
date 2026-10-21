@@ -1,6 +1,6 @@
 ---
 title: Defining Classes & Creating Objects
-summary: A class is a blueprint that bundles data (fields) with the operations on it (methods); new makes an object from it, each with its own state; a constructor initializes a new object; and this names the current object. The leap from procedural code to objects — with the shadowing, missing-constructor, and aliasing traps shown as real output.
+summary: A class is a blueprint that bundles data (fields) with the operations on it (methods). new builds an object from it, each with its own state, a constructor initializes the new object, and this names the current object. The leap from procedural code to objects, with the shadowing, missing-constructor and aliasing traps shown as real output.
 prereqs: []
 ---
 

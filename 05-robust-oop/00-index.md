@@ -1,6 +1,6 @@
 ---
 title: "Robust OOP & Error Handling: Overview"
-summary: Chapter 5 of the Java book — the full object model and the tools for robust, well-structured programs. Inheritance and dynamic dispatch, abstract classes and interfaces, exceptions, lambdas and functional interfaces, sealed types with pattern matching, and how real projects are packaged and built. Every example compiled and run.
+summary: Chapter 5 of the Java book: the full object model, and the tools for robust, well-structured programs. Covers inheritance and dynamic dispatch, abstract classes and interfaces, exceptions, lambdas and functional interfaces, sealed types with pattern matching, and how real projects are packaged and built. Every example is compiled and run.
 prereqs: []
 ---
 

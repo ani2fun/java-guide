@@ -1,6 +1,6 @@
 ---
 title: Testing, Tooling & Packaging
-summary: Tests turn "I think it works" into "the machine proves it works every build." Java's assert is disabled by default, and a disabled assert does nothing at all, side effects included — which is why you use JUnit, whose @Test methods with assertEquals and assertThrows always run, via mvn test. Build tools (Maven/Gradle) resolve dependencies transitively, test and package your code; an executable JAR ships it, and a missing library shows up as NoClassDefFoundError. Reading a stack trace and a log level round it off. The capstone, shown with real terminal sessions.
+summary: Tests turn "I think it works" into "the machine proves it works on every build." Java's assert is disabled by default, and a disabled assert does nothing at all, side effects included. That's why you use JUnit, whose @Test methods with assertEquals and assertThrows always run, via mvn test. Build tools (Maven, Gradle) resolve dependencies transitively, then test and package your code. An executable JAR ships it, and a missing library shows up as NoClassDefFoundError. Reading a stack trace and choosing a log level round it off. Shown with real terminal sessions.
 prereqs: []
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: Modern Java Idioms & the Type System
-summary: The modern features aren't separate tricks — they compose into one design. records (immutable data) + sealed (closed type sets) + pattern matching (consume by shape) give data-oriented programming with compiler-checked exhaustiveness, and a default branch throws that check away; Optional is a return type for "no result", never a null field; an unmodifiable view is not a copy; var with a diamond infers Object. A synthesis of Core Libraries, Robust OOP and Functional Java, shown with verified output.
+summary: The modern features aren't separate tricks. They combine into one design. Records (immutable data), sealed types (closed type sets) and pattern matching (consume by shape) give you data-oriented programming with compiler-checked exhaustiveness, and a default branch throws that check away. Optional is a return type for "no result", never a null field. An unmodifiable view isn't a copy, and var with a diamond infers Object. A synthesis of Core Libraries, Robust OOP and Functional Java, shown with verified output.
 prereqs: []
 ---
 

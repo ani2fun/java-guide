@@ -1,6 +1,6 @@
 ---
 title: Functional Java & the Streams API
-summary: A stream is a lazy pipeline of operations over a sequence — filter/map/reduce as composable steps that don't run until a terminal operation pulls them, separating what to compute from how to iterate. Sorting, flatMap and concat reshape a stream; reduce, collectors (groupingBy, partitioningBy, toMap) and primitive streams (sum, average) finish it; Optional makes "maybe absent" a type instead of null; and parallel streams trade safety for cores. Every behavior shown with verified output, including a real data race.
+summary: A stream is a lazy pipeline over a sequence. filter, map and reduce are composable steps that don't run until a terminal operation pulls them, which separates what to compute from how to iterate. Sorting, flatMap and concat reshape a stream, and reduce, collectors (groupingBy, partitioningBy, toMap) and primitive streams (sum, average) finish it. Optional makes "maybe absent" a type instead of null, and parallel streams trade safety for cores. Every behavior is shown with verified output, including a real data race.
 prereqs: []
 ---
 

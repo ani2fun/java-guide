@@ -1,6 +1,6 @@
 ---
 title: Packages, Modules & the Build
-summary: Packages namespace classes and the classpath finds them; access modifiers gain a second meaning across package boundaries. The JPMS module system (module-info.java) makes a JAR's dependencies and exported packages explicit, enforcing strong encapsulation even on public types; opens grants reflection, provides/uses wire services through ServiceLoader, and classpath code and plain JARs land in the unnamed and automatic modules. JARs bundle compiled classes, jlink builds a trimmed runtime image, and Maven/Gradle automate the whole build. Shown with real, verified terminal sessions.
+summary: Packages give classes a namespace, and the classpath finds them. Across package boundaries, access modifiers take on a second meaning. The JPMS module system (module-info.java) makes a JAR's dependencies and exported packages explicit, enforcing strong encapsulation even on public types. opens grants reflection, provides and uses wire up services through ServiceLoader, and classpath code and plain JARs land in the unnamed and automatic modules. JARs bundle compiled classes, jlink builds a trimmed runtime image, and Maven and Gradle automate the whole build. Shown with real, verified terminal sessions.
 prereqs: []
 ---
 

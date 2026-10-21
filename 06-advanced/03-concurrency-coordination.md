@@ -1,6 +1,6 @@
 ---
 title: "Concurrency: Coordination"
-summary: Mutual exclusion is only half of concurrency — threads also have to wait for each other. wait/notify implements guarded waiting on the monitor you already have (and an if instead of a while breaks it); ReentrantLock adds tryLock and timed acquisition, and leaks if unlock is not in finally; ReadWriteLock lets readers share; CountDownLatch, Semaphore, and CyclicBarrier are pre-built rendezvous; and BlockingQueue is the producer/consumer pattern done for you. Includes a real deadlock, captured with jstack, and its two escapes.
+summary: Mutual exclusion is only half of concurrency, because threads also have to wait for each other. wait/notify implements guarded waiting on the monitor you already hold, and using if instead of while breaks it. ReentrantLock adds tryLock and timed acquisition, and leaks if unlock isn't in finally. ReadWriteLock lets readers share. CountDownLatch, Semaphore and CyclicBarrier are ready-made rendezvous points, and BlockingQueue gives you producer/consumer for free. Includes a real deadlock, captured with jstack, and its two escapes.
 prereqs: []
 ---
 

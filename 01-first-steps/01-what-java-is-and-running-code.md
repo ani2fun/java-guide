@@ -1,6 +1,6 @@
 ---
 title: What Java Is & Running Code
-summary: Java is a compiled language — you write source, javac translates the whole file into portable bytecode, and the JVM runs it, so running Java is always compile-then-run and can fail at either step. Your first program, the javac/java/jshell tools, why public static void main looks the way it does, println, and comments — every example compiled and run.
+summary: Java is a compiled language. You write source code, javac translates the whole file into portable bytecode, and the JVM runs it. So running Java is always compile-then-run, and it can fail at either step. Covers your first program, the javac, java and jshell tools, why public static void main looks the way it does, println, and comments. Every example is compiled and run.
 prereqs: []
 ---
 

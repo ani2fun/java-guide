@@ -1,6 +1,6 @@
 ---
 title: Generics
-summary: Generics parameterize code over a type, so List<String> guarantees only Strings at compile time. Generic classes and methods, raw types, type inference (the diamond, var), bounded types (T extends Comparable) that unlock the bound's methods, wildcards (? extends / ? super, PECS) for flexible APIs, and type erasure — generics are compile-time only, so List<String> and List<Integer> are one class at run time. Every behavior and limit shown with verified output.
+summary: Generics parameterize code over a type, so a List<String> is guaranteed at compile time to hold only Strings. Covers generic classes and methods, raw types, type inference (the diamond and var), bounded types (T extends Comparable) that unlock the bound's methods, and wildcards (? extends, ? super, PECS) for flexible APIs. Type erasure makes generics compile-time only, so List<String> and List<Integer> are one class at run time. Every behavior and limit is shown with verified output.
 prereqs: []
 ---
 

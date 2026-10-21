@@ -1,6 +1,6 @@
 ---
 title: "First Steps: Overview"
-summary: Chapter 1 of the Java book, for readers with zero programming background. Five lessons take you from "what is a program?" to a working interactive program — compiling and running code, values and the eight primitives, arithmetic and its traps, text, and input/output — with every example compiled and run, and every compiler error shown for real.
+summary: Chapter 1 of the Java book, for readers with zero programming background. In five lessons you go from "what is a program?" to a working interactive program. You'll compile and run code, meet values and the eight primitives, learn arithmetic and its traps, work with text, and handle input and output. Every example is compiled and run, and every compiler error is real.
 prereqs: []
 ---
 

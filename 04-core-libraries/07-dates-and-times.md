@@ -1,6 +1,6 @@
 ---
 title: Dates & Times
-summary: The java.time API gives one type per question — LocalDate, LocalTime and LocalDateTime for what a calendar or clock shows, Instant and ZonedDateTime for a moment on Earth, Period and Duration for an amount of time. Month-end arithmetic, counting days, time zones, daylight saving gaps and overlaps, and DateTimeFormatter patterns and their traps. Every example compiled and run.
+summary: The java.time API gives you one type per question. LocalDate, LocalTime and LocalDateTime describe what a calendar or clock shows, Instant and ZonedDateTime a moment on Earth, and Period and Duration an amount of time. Covers month-end arithmetic, counting days, time zones, daylight-saving gaps and overlaps, and DateTimeFormatter patterns and their traps. Every example is compiled and run.
 prereqs: []
 ---
 

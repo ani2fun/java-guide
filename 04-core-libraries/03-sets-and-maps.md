@@ -1,6 +1,6 @@
 ---
 title: Sets & Maps
-summary: A Set stores unique elements; a Map stores key→value associations. The hash-based versions (HashSet/HashMap) give constant-time membership and lookup by scattering entries into buckets — trading order for speed — while Tree* keep keys sorted and LinkedHash* keep insertion order. Updating, removing and iterating a map, the getOrDefault counting idiom, and the get-returns-null unboxing trap, shown with verified output.
+summary: A Set stores unique elements, and a Map stores key→value pairs. HashSet and HashMap give constant-time membership and lookup by scattering entries into buckets, trading order for speed. The Tree* versions keep keys sorted, and the LinkedHash* versions keep insertion order. Covers updating, removing and iterating a map, the getOrDefault counting idiom, and the get-returns-null unboxing trap, all with verified output.
 prereqs: []
 ---
 

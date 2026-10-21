@@ -1,6 +1,6 @@
 ---
 title: Conditionals
-summary: if/else chooses a path from a boolean; else-if chains pick one of many in order; the switch statement selects on a value (and falls through without break); switch expressions (arrow form) return a value with no fall-through and must be exhaustive; and the ternary ?: is a conditional that yields a value. Every branch shown with verified output, including the missing-braces, mis-ordered-chain, and fall-through traps.
+summary: if/else picks a path from a boolean, and an else-if chain picks one of many, in order. A switch statement selects on a value and falls through without break. A switch expression (arrow form) returns a value, never falls through, and must be exhaustive. The ternary ?: is a conditional that yields a value. Every branch is shown with verified output, including the missing-braces, misordered-chain and fall-through traps.
 prereqs: []
 ---
 

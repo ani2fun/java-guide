@@ -1,6 +1,6 @@
 ---
 title: Java
-summary: A single progressive Java text, absolute beginner to advanced. Thirty-seven lessons in six chapters, in strict read order, each deriving the language's behaviour from one generative idea rather than listing features — built on verified, compiled-and-run code and a three-move "Intuition" standard that turns rules into things you can re-derive. The throughline: the compiler is a proof-checker you run before your program ever touches data.
+summary: A single, progressive Java book that takes you from absolute beginner to advanced. Thirty-seven lessons in six chapters, read in strict order. Each one derives the language's behaviour from one core idea instead of listing features. Every example is compiled and run, and a three-move "Intuition" standard turns rules into things you can re-derive. The throughline: the compiler is a proof-checker you run before your program ever touches data.
 prereqs: []
 ---
 

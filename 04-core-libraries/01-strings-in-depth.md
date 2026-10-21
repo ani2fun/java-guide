@@ -1,6 +1,6 @@
 ---
 title: Strings in Depth
-summary: A String is immutable, so every "change" allocates a new object — which makes building a string with + in a loop quadratic, and StringBuilder the O(n) fix. Plus intern(), why StringBuilder doesn't override equals, splitting on a regex and joining, formatting with formatted(), and multi-line text blocks (JDK 15). Every behavior shown with verified output.
+summary: A String is immutable, so every "change" allocates a new object. That makes building a string with + in a loop quadratic, and StringBuilder is the O(n) fix. Also covers intern(), why StringBuilder doesn't override equals, splitting on a regex and joining, formatted(), and multi-line text blocks (JDK 15). Every behavior is shown with verified output.
 prereqs: []
 ---
 

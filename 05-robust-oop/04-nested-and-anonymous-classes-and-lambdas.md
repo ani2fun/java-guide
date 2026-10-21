@@ -1,6 +1,6 @@
 ---
 title: Nested & Anonymous Classes; Lambdas
-summary: Classes can nest inside classes (static nested, or inner with a link to the enclosing instance, which every inner object gets when it is created); an anonymous class implements an interface inline; and a lambda is a compact implementation of a functional interface — one abstract method — turning behavior into a value you can pass and store. Lambdas capture only effectively final locals; java.util.function supplies Predicate, Function, Supplier and Consumer; and method references shorten lambdas that only call a method, in four forms. The bridge from objects to functional style, shown with verified output.
+summary: Classes can nest inside other classes: static nested, or inner, where every inner object gets a link to its enclosing instance when it's created. An anonymous class implements an interface inline. A lambda is a compact implementation of a functional interface (one abstract method), turning behavior into a value you can pass and store. Lambdas capture only effectively final locals, java.util.function supplies Predicate, Function, Supplier and Consumer, and method references, in four forms, shorten lambdas that just call a method. The bridge from objects to functional style, shown with verified output.
 prereqs: []
 ---
 

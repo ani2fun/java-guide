@@ -1,6 +1,6 @@
 ---
 title: The Collections Framework
-summary: A collection is an interface you program to (List), not an implementation you marry (ArrayList/LinkedList). A List grows where an array can't, holds Integer rather than int (autoboxing, and the remove(int) trap), and the Iterator behind for-each forbids modifying it mid-loop. Plus sorting (natural order, Comparable, reverse and case-insensitive), the Deque as stack and queue, and choosing an implementation. Every behavior shown with verified output.
+summary: Program to an interface (List), not an implementation you marry (ArrayList or LinkedList). A List grows where an array can't, and it holds Integer, not int, which brings autoboxing and the remove(int) trap. The Iterator behind for-each forbids changing the list mid-loop. Also covers sorting (natural order, Comparable, reverse and case-insensitive), the Deque as a stack and a queue, and choosing an implementation. Every behavior is shown with verified output.
 prereqs: []
 ---
 

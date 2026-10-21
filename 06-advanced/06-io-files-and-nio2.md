@@ -1,6 +1,6 @@
 ---
 title: I/O, Files & NIO.2
-summary: I/O moves bytes (binary) or characters (text, via an encoding). NIO.2 — Path and Files — is the modern, concise file API, with Files.list and Files.walk for directories; Files.lines() returns a java.util.stream.Stream, clarifying the name clash between I/O "streams" and the Stream API. Text is bytes through a charset (UTF-8), so a character can be several bytes and the wrong charset mangles it; readers, writers and buffering batch the costly system calls; and serialization turns objects into bytes, with a security warning attached. Every behavior shown with verified output.
+summary: I/O moves bytes (binary) or characters (text, through an encoding). NIO.2, with Path and Files, is the modern, concise file API, and Files.list and Files.walk handle directories. Files.lines() returns a java.util.stream.Stream, which clears up the name clash between I/O "streams" and the Stream API. Text is bytes through a charset (UTF-8), so one character can take several bytes, and the wrong charset mangles it. Readers, writers and buffering batch the costly system calls, and serialization turns objects into bytes, with a security warning attached. Every behavior is shown with verified output.
 prereqs: []
 ---
 

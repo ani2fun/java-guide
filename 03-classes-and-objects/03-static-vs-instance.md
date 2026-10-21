@@ -1,6 +1,6 @@
 ---
 title: static vs Instance
-summary: static members belong to the class — one shared copy — while instance members belong to each object. A static method has no this, so it cannot touch instance fields; static final makes shared constants; and a static block initializes class state once, lazily, when the class is first used. Every distinction shown with verified output.
+summary: static members belong to the class, as one shared copy, while instance members belong to each object. A static method has no this, so it can't touch instance fields. static final makes shared constants, and a static block sets up class state once, lazily, when the class is first used. Every distinction is shown with verified output.
 prereqs: []
 ---
 

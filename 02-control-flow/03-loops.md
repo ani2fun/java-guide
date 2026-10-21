@@ -1,6 +1,6 @@
 ---
 title: Loops
-summary: A loop repeats a block while a boolean condition holds. while tests first (may run zero times); do-while tests after (runs at least once); the classic for packs init/test/update into one line; the enhanced for (for-each) walks elements without an index. Off-by-one boundaries, loop-variable scope, and the for-each "copy" surprise — all shown with verified output.
+summary: A loop repeats a block while a boolean condition holds. while tests first, so it may run zero times, and do-while tests after, so it runs at least once. The classic for packs init, test and update into one line, and the enhanced for (for-each) walks elements without an index. Covers off-by-one boundaries, loop-variable scope and the for-each "copy" surprise, all with verified output.
 prereqs: []
 ---
 

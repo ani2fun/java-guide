@@ -1,6 +1,6 @@
 ---
 title: Exceptions
-summary: Exceptions separate error handling from normal logic. Java splits them into checked (the compiler forces you to handle or declare them — recoverable conditions) and unchecked (RuntimeException — programming bugs). try/catch recovers, several catch clauses or one multi-catch handle different types, throw raises, throws declares, finally always cleans up, and try-with-resources auto-closes in reverse order and keeps close failures as suppressed exceptions. The hierarchy, stack traces, custom exceptions, and the return-in-finally trap — every behavior shown with verified output.
+summary: Exceptions keep error handling apart from normal logic. Java splits them into checked exceptions, which the compiler forces you to handle or declare (recoverable conditions), and unchecked ones (RuntimeException, for programming bugs). try/catch recovers, several catch clauses or one multi-catch handle different types, throw raises, throws declares, and finally always cleans up. try-with-resources closes resources automatically in reverse order and keeps close failures as suppressed exceptions. Also covers the hierarchy, stack traces, custom exceptions and the return-in-finally trap, all with verified output.
 prereqs: []
 ---
 

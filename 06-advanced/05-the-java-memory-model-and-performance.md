@@ -1,6 +1,6 @@
 ---
 title: The Java Memory Model & Performance
-summary: volatile guarantees visibility but not atomicity; happens-before is the set of rules that decide when one thread's writes are seen by another; safe publication — final fields, volatile, a lock, or the class-initialization holder idiom — is how a constructed object crosses to another thread intact, and double-checked locking is its classic trap. On performance, the JVM interprets then JIT-compiles hot code to native, and a generational garbage collector reclaims memory in short pauses — but cannot reclaim what you keep reachable. Every behavior shown with verified output, including a real stale-read hang and real JIT and GC logs.
+summary: volatile guarantees visibility but not atomicity. Happens-before is the set of rules that decides when one thread sees another's writes. Safe publication (final fields, volatile, a lock, or the class-initialization holder idiom) is how a constructed object reaches another thread intact, and double-checked locking is its classic trap. On performance, the JVM interprets code, then JIT-compiles hot code to native. A generational garbage collector reclaims memory in short pauses, but it can't reclaim what you keep reachable. Every behavior is shown with verified output, including a real stale-read hang and real JIT and GC logs.
 prereqs: []
 ---
 

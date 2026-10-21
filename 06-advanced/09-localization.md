@@ -1,6 +1,6 @@
 ---
 title: Localization
-summary: A Locale names a language and a region, and every locale-sensitive API reads one — NumberFormat for numbers, currency and percentages, DateTimeFormatter for localized dates, ResourceBundle for translated text, and MessageFormat for sentences with values in them. The lookup chain and its fallback to the default locale, the invisible no-break spaces in French and English output, the apostrophe trap, and why text for programs uses Locale.ROOT. Every example compiled and run.
+summary: A Locale names a language and a region, and every locale-sensitive API reads one: NumberFormat for numbers, currency and percentages, DateTimeFormatter for localized dates, ResourceBundle for translated text, and MessageFormat for sentences with values in them. Covers the lookup chain and its fallback to the default locale, the invisible no-break spaces in French and English output, the apostrophe trap, and why text meant for programs uses Locale.ROOT. Every example is compiled and run.
 prereqs: []
 ---
 

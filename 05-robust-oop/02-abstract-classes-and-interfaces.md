@@ -1,6 +1,6 @@
 ---
 title: Abstract Classes & Interfaces
-summary: An abstract class is a partial type — it can hold fields, constructors and concrete methods beside abstract methods with no body, and cannot be instantiated, forcing subclasses to fill in the blanks. An interface is a contract a class implements; default methods give interfaces concrete behavior, private methods share code between them, and static methods belong to the interface alone. A class extends one class but implements many interfaces, so interfaces deliver multiple inheritance of type, and a clash between two defaults is a compile error you resolve with X.super.m(). Every rule shown with verified output.
+summary: An abstract class is a partial type. It can hold fields, constructors and concrete methods next to abstract methods with no body, and you can't instantiate it, so subclasses must fill in the blanks. An interface is a contract that a class implements. Default methods give it concrete behavior, private methods share code between them, and static methods belong to the interface alone. A class extends one class but implements many interfaces, so interfaces give multiple inheritance of type. A clash between two defaults is a compile error you resolve with X.super.m(). Every rule is shown with verified output.
 prereqs: []
 ---
 

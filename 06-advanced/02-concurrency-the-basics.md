@@ -1,6 +1,6 @@
 ---
 title: "Concurrency: the Basics"
-summary: A thread runs code concurrently; sharing mutable state across threads without coordination produces race conditions — lost updates and stale reads — that are silent and nondeterministic. start() vs run(), the six thread states, synchronized methods and blocks on one consistent lock, and the Java Memory Model's happens-before rule that makes one thread's writes visible to another. Every behavior shown with verified output, including a real race captured across runs.
+summary: A thread runs code concurrently. Share mutable state across threads without coordination, and you get race conditions: lost updates and stale reads that are silent and nondeterministic. Covers start() vs run(), the six thread states, synchronized methods and blocks on one consistent lock, and the Java Memory Model's happens-before rule, which makes one thread's writes visible to another. Every behavior is shown with verified output, including a real race captured across runs.
 prereqs: []
 ---
 

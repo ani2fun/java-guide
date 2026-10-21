@@ -1,6 +1,6 @@
 ---
 title: Arrays
-summary: An array is a fixed-size block of same-typed slots, indexed 0..length-1; its size is set at creation and never changes, and an out-of-range index throws at run time, not compile time. Creation and defaults, indexing, iteration, multidimensional and jagged arrays, and why a fixed array is not a growable list — every behavior shown with verified output.
+summary: An array is a fixed-size block of same-typed slots, indexed from 0 to length-1. Its size is set at creation and never changes, and an out-of-range index throws at run time, not compile time. Covers creation and defaults, indexing, iteration, multidimensional and jagged arrays, and why a fixed array isn't a growable list. Every behavior is shown with verified output.
 prereqs: []
 ---
 

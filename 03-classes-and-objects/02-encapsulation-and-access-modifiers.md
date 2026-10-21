@@ -1,6 +1,6 @@
 ---
 title: Encapsulation & Access Modifiers
-summary: Encapsulation hides an object's data behind a controlled interface — fields go private, reached only through methods that can enforce invariants. private/package-private/protected/public set visibility; getters and setters gate access; and final fields with no setters make an object immutable and safe to share. Every rule shown as real output or a real compiler error.
+summary: Encapsulation hides an object's data behind a controlled interface. Fields go private, and only methods that can enforce invariants reach them. private, package-private, protected and public set visibility, getters and setters gate access, and final fields with no setters make an object immutable and safe to share. Every rule is shown as real output or a real compiler error.
 prereqs: []
 ---
 
