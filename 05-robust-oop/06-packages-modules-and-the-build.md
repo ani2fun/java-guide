@@ -6,12 +6,12 @@ prereqs: []
 
 # Packages, Modules & the Build — Organizing and Shipping Code
 
-Everything so far has been one file. Real programs are hundreds of classes across many files, pulling in libraries, built and shipped as artifacts. Java has a layered system for that:
+Everything so far has fit in a single file. Real programs are hundreds of classes spread across many files, pulling in libraries, and they get built and shipped as artifacts. Java has a layered system for all of that:
 
 - **Packages** group related classes into namespaces, and the **classpath** tells the tools where to find them.
-- **Access modifiers** gain their full meaning: `public` vs package-private is a *boundary*, enforced between packages.
-- The **module system** (JPMS, `module-info.java`) goes a level up. A module declares which packages it **exports** and which modules it **requires**, so even a `public` class stays hidden unless its package is exported.
-- **JARs** bundle compiled classes into one file. **Maven/Gradle** automate compiling, dependency-fetching, and packaging.
+- **Access modifiers** take on their full meaning: `public` vs package-private becomes a *boundary*, enforced between packages.
+- The **module system** (JPMS, `module-info.java`) goes one level higher. A module declares which packages it **exports** and which modules it **requires**, so even a `public` class stays hidden unless its package is exported.
+- **JARs** bundle compiled classes into a single file. **Maven/Gradle** automate compiling, fetching dependencies, and packaging.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -24,9 +24,9 @@ Everything so far has been one file. Real programs are hundreds of classes acros
 
 </div>
 
-These examples span *multiple files* and use the `javac`, `jar`, `java` and `jlink` tools, so they're shown as terminal sessions. The in-page ▶ Run sandbox compiles a single file, so it can't build a multi-package project. Every command and its output below was run on JDK 21 and pasted, not typed.
+These examples span *multiple files* and use the `javac`, `jar`, `java` and `jlink` tools, so they're shown as terminal sessions. The in-page ▶ Run sandbox compiles only a single file, so it can't build a multi-package project. Every command and output below was run on JDK 21 and pasted in, not typed by hand.
 
-**You'll be able to:** predict where `javac -d` puts a class file, and which `java -cp` command runs it; predict whether code in another package or another module can use a type, from its modifier and the module's `exports` and `requires`; explain why `exports` is not enough for reflection, and fix it with `opens`; wire a service with `provides … with`, `uses` and `ServiceLoader`; name the module that a plain JAR on the module path becomes, and build a runtime image with `jlink`.
+**You'll be able to:** predict where `javac -d` puts a class file, and which `java -cp` command runs it; predict from a type's modifier and its module's `exports` and `requires` whether code in another package or module can use it; explain why `exports` isn't enough for reflection, and fix it with `opens`; wire up a service with `provides … with`, `uses` and `ServiceLoader`; name the module that a plain JAR on the module path becomes, and build a runtime image with `jlink`.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -58,7 +58,7 @@ These examples span *multiple files* and use the `javac`, `jar`, `java` and `jli
 
 ## 1. Packages and the classpath
 
-A class declares its **package** with a `package` line. By convention its source file sits in a directory path that matches the package name. Other packages reach it by its fully-qualified name or an `import`. Here a `Main` in `com.example` imports a utility from `com.example.util`:
+A class declares its **package** with a `package` line. By convention, its source file sits in a directory path that matches the package name. Code in other packages reaches it by its fully-qualified name, or through an `import`. Here, a `Main` in `com.example` imports a utility from `com.example.util`:
 
 ```java
 // requires: two source files in two packages — not runnable in the sandbox
@@ -78,7 +78,7 @@ public class Main {
 }
 ```
 
-Compile all sources into an output directory, then run by fully-qualified class name:
+Compile all the sources into an output directory, then run the program by its fully-qualified class name:
 
 ```
 $ javac -d out $(find src -name '*.java')
@@ -93,14 +93,14 @@ HELLO!
 
 **Analysis.**
 
-- `javac -d out` wrote the compiled classes in directories that mirror the package names: `out/com/example/Main.class` and `out/com/example/util/Text.class`.
-- `java -cp out com.example.Main` set the **classpath** to `out`, and ran the class by its full name `com.example.Main`.
+- `javac -d out` wrote the compiled classes into directories that mirror the package names: `out/com/example/Main.class` and `out/com/example/util/Text.class`.
+- `java -cp out com.example.Main` set the **classpath** to `out`, and ran the class by its full name, `com.example.Main`.
 - The `import` let `Main` write `Text` instead of `com.example.util.Text`. It's a compile-time shorthand, nothing more <abbr title="The Java Language Specification, Java SE 21, §7.5">[2]</abbr>.
 
 **Intuition.**
-*Mechanism.* A package is a namespace. The classpath is the list of roots where the JVM looks for `.class` files. `java com.example.Main` means "find `com/example/Main.class` under some classpath root." The JLS leaves this file-system mapping to the host system <abbr title="The Java Language Specification, Java SE 21, §7.2">[1]</abbr>; the JDK tools use directories.
+*Mechanism.* A package is a namespace. The classpath is the list of root locations where the JVM looks for `.class` files. So `java com.example.Main` means "find `com/example/Main.class` under one of the classpath roots." The JLS leaves this file-system mapping up to the host system <abbr title="The Java Language Specification, Java SE 21, §7.2">[1]</abbr>, and the JDK tools use directories.
 
-*Concrete bite.* The directory rule binds the *class files*, not the sources. `javac` compiled both files from a single `src/anywhere/` folder, and `-d out` still wrote `out/com/example/util/Text.class`. Move that class file out of its package directory, and the JVM cannot find it when `Main` first needs it:
+*Concrete bite.* The directory rule applies to the *class files*, not the sources. Even if `javac` compiled both files from a single `src/anywhere/` folder, `-d out` would still write `out/com/example/util/Text.class`. Move that class file out of its package directory, and the JVM can't find it when `Main` first needs it:
 
 ```
 $ mv out/com/example/util/Text.class out/
@@ -110,14 +110,14 @@ Exception in thread "main" java.lang.NoClassDefFoundError: com/example/util/Text
 Caused by: java.lang.ClassNotFoundException: com.example.util.Text
 ```
 
-`Main` was found and started; `Text` was not, so the failure came at the first line that used it. The short name fails too: `java -cp out Main` gives `Could not find or load main class Main`, because the class is `com.example.Main`.
+`Main` was found and started, but `Text` wasn't, so the failure came at the first line that used it. The short name fails too: `java -cp out Main` gives `Could not find or load main class Main`, because the class's real name is `com.example.Main`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Organize classes into packages by feature or layer, keep source directories matching package names, and let `javac -d` lay out the class files. Run with the right classpath and the fully-qualified name.
+💡 **Earned rule.** Organize classes into packages by feature or layer, keep your source directories matching the package names, and let `javac -d` lay out the class files. Then run with the right classpath and the fully-qualified name.
 
-- The cost: the directory discipline and getting the classpath right (a frequent "could not find or load main class" cause).
-- The benefit: namespaced, collision-free organization that scales from one file to thousands.
+- The cost: the directory discipline, plus getting the classpath right (a frequent cause of "could not find or load main class").
+- The payoff: namespaced, collision-free organization that scales from one file to thousands.
 
 </div>
 
@@ -125,7 +125,7 @@ Caused by: java.lang.ClassNotFoundException: com.example.util.Text
 
 ## 2. Encapsulation across packages
 
-[Access modifiers](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers) showed their full meaning needs packages. A `public` member is visible everywhere; a **package-private** one (no modifier) is visible only *within its own package*. Across a package boundary, package-private is invisible — even to code that can see the class.
+Back in [Access modifiers](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers), you saw that their full meaning depends on packages. A `public` member is visible everywhere, while a **package-private** one (no modifier) is visible only *within its own package*. Across a package boundary, a package-private member is invisible — even to code that can see the class.
 
 ```java
 // requires: two packages — as one file, both classes share a package and this compiles
@@ -154,19 +154,19 @@ src2/com/example/Main.java:5: error: whisper(String) is not public in Text; cann
                                ^
 ```
 
-**Analysis.** `Text` is `public` (so `Main` can use it) and `shout` is `public` (so `Main` can call it). But `whisper` is package-private, belonging to `com.example.util`. `Main` lives in `com.example`, a *different* package. So `whisper` is off-limits: "not public … cannot be accessed from outside package." The boundary is the package, and the default (no modifier) stops at it.
+**Analysis.** `Text` is `public` (so `Main` can use it), and `shout` is `public` (so `Main` can call it). But `whisper` is package-private, belonging to `com.example.util`, and `Main` lives in `com.example` — a *different* package. So `whisper` is off-limits: "not public … cannot be accessed from outside package." The boundary is the package, and the default (no modifier) stops right at it.
 
 **Intuition.**
-*Mechanism.* The compiler resolves each access against the member's modifier *and* the accessing code's package <abbr title="The Java Language Specification, Java SE 21, §6.6.1">[3]</abbr>. Package-private grants access only to code in the same package. Crossing a package boundary requires `public` (or `protected` for subclasses).
+*Mechanism.* The compiler checks each access against both the member's modifier *and* the package of the code doing the accessing <abbr title="The Java Language Specification, Java SE 21, §6.6.1">[3]</abbr>. Package-private grants access only to code in the same package. Crossing a package boundary requires `public` (or `protected`, for subclasses).
 
-*Concrete bite.* This is real encapsulation, not convention. A package can expose a `public` API while keeping helper classes and methods package-private, and no outside code can reach them: the compiler enforces it. It's how libraries hide their internals from consumers.
+*Concrete bite.* This is real encapsulation, not just a convention. A package can expose a `public` API while keeping helper classes and methods package-private, and no outside code can reach them, because the compiler enforces it. That's how libraries hide their internals from the code that uses them.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Make a package's intended API `public`, and keep everything else package-private (the default), so internals stay internal across the boundary.
 
-- The cost: thinking about what belongs to the API.
-- The benefit: a package's surface is exactly what you marked `public`. But, as the next section shows, the classpath has a hole this can't close.
+- The cost: thinking carefully about what belongs in the API.
+- The payoff: a package's surface is exactly what you marked `public`. But, as the next section shows, the classpath has a hole that this can't close.
 
 </div>
 
@@ -174,7 +174,7 @@ src2/com/example/Main.java:5: error: whisper(String) is not public in Text; cann
 
 ## 3. Modules: `module-info.java`
 
-On the classpath, any `public` type in any package is reachable by anyone. Package-private hides *members*, but a `public` class in an "internal" package is still exposed. The **module system** (JPMS, JDK 9) <abbr title="JEP 261: Module System (JDK 9)">[8]</abbr> closes that. A module declares which packages it `exports` and which modules it `requires`, in a `module-info.java` at its root <abbr title="The Java Language Specification, Java SE 21, §7.7">[4]</abbr>.
+On the classpath, any `public` type in any package is reachable by anyone. Package-private hides *members*, but a `public` class in an "internal" package is still exposed. The **module system** (JPMS, JDK 9) <abbr title="JEP 261: Module System (JDK 9)">[8]</abbr> closes that gap. A module declares which packages it `exports` and which modules it `requires`, in a `module-info.java` file at its root <abbr title="The Java Language Specification, Java SE 21, §7.7">[4]</abbr>.
 
 ```java
 // requires: a module source tree — a module-info.java is not a program
@@ -215,18 +215,18 @@ client -> mod.api: "can use"
 client -> mod.internal: "cannot access"
 ```
 
-**Analysis.** The module compiled and ran the same program. But now `com.example.app` controls its surface explicitly:
+**Analysis.** The module compiled and ran the same program as before. But now `com.example.app` controls its surface explicitly:
 
 - `exports com.example` makes that package visible to other modules.
 - `com.example.util` is **not** exported. `Text` is `public`, yet no other module can use it.
-- `requires` makes every dependency explicit, so the module graph is known at compile and launch time.
+- `requires` makes every dependency explicit, so the module graph is known at both compile time and launch time.
 
-The diagram shows the boundary: a requiring module reaches the exported package and is blocked from the internal one.
+The diagram shows the boundary: a module that requires this one can reach the exported package, but is blocked from the internal one.
 
 **Intuition.**
-*Mechanism.* A module is a named set of packages, plus a `module-info` declaring `exports` (its API to other modules) and `requires` (its dependencies). The module system enforces both at compile *and* run time.
+*Mechanism.* A module is a named set of packages, plus a `module-info` that declares `exports` (its API to other modules) and `requires` (its dependencies). The module system enforces both, at compile time *and* at run time.
 
-*Concrete bite.* Here is the diagram as javac sees it. A second module, `com.example.client`, declares `requires com.example.app;` and imports `com.example.util.Text`:
+*Concrete bite.* Here's the diagram as javac sees it. A second module, `com.example.client`, declares `requires com.example.app;` and imports `com.example.util.Text`:
 
 ```
 $ javac -d out --module-source-path src $(find src -name '*.java')
@@ -237,7 +237,7 @@ import com.example.util.Text;
 1 error
 ```
 
-`Text` is `public`, and it is still unreachable: its package is not exported. Now drop the `requires` line and import the *exported* `com.example.Main` instead. The error changes to the other half of the rule:
+`Text` is `public`, yet it's still unreachable, because its package isn't exported. Now drop the `requires` line, and import the *exported* `com.example.Main` instead. The error switches to the other half of the rule:
 
 ```
 src/com.example.client/com/client/Client.java:2: error: package com.example is not visible
@@ -247,16 +247,16 @@ import com.example.Main;
 1 error
 ```
 
-A module **reads** another only if it `requires` it. With `requires com.example.app;` back in place, the client compiles and prints `HELLO!`.
+A module **reads** another module only if it `requires` it. Put `requires com.example.app;` back, and the client compiles and prints `HELLO!`.
 
-This is "strong encapsulation": the classpath's hole (public-but-internal types leaking) is sealed. It's why the JDK itself is modularized — `java.base`, `java.sql`, and more. Since JDK 17, the JDK's own internals are strongly encapsulated too, and reaching into them needs an explicit `--add-opens` <abbr title="JEP 403: Strongly Encapsulate JDK Internals (JDK 17)">[10]</abbr>.
+This is called "strong encapsulation": the classpath's hole (public-but-internal types leaking out) is sealed. It's also why the JDK itself is modularized — into `java.base`, `java.sql`, and more. Since JDK 17, the JDK's own internals are strongly encapsulated too, and reaching into them requires an explicit `--add-opens` <abbr title="JEP 403: Strongly Encapsulate JDK Internals (JDK 17)">[10]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use modules when you ship a library or a large app and want to *enforce* its API surface and dependencies, not only document them.
+💡 **Earned rule.** Use modules when you ship a library or a large app, and you want to *enforce* its API surface and dependencies, not just document them.
 
 - The cost is real friction: every dependency must be `requires`d, reflective and classpath tricks break, and much of the ecosystem still runs on the classpath.
-- The benefit: reliable, declared boundaries. For application code the classpath is often fine; modules earn their keep for libraries and platforms.
+- The payoff: reliable, declared boundaries. For application code, the classpath is often fine; modules earn their keep in libraries and platforms.
 
 </div>
 
@@ -264,9 +264,9 @@ This is "strong encapsulation": the classpath's hole (public-but-internal types 
 
 ## 4. Reflection and `opens`
 
-**Reflection** is code that inspects classes while the program runs: it can list a class's fields and read them by name. JSON and database libraries use it to fill objects without knowing their classes in advance. `exports` does not grant reflective access to `private` members. That takes `opens` <abbr title="The Java Language Specification, Java SE 21, §7.7.2">[5]</abbr>.
+**Reflection** is code that inspects classes while the program runs: it can list a class's fields and read them by name. JSON and database libraries use it to fill in objects without knowing their classes in advance. But `exports` doesn't grant reflective access to `private` members. For that, you need `opens` <abbr title="The Java Language Specification, Java SE 21, §7.7.2">[5]</abbr>.
 
-Module `com.lib` exports `com.lib.model`, whose `Secret` class has a `private` field. A second module reads the field by reflection:
+Here, module `com.lib` exports `com.lib.model`, whose `Secret` class has a `private` field. A second module tries to read that field by reflection:
 
 ```java
 // requires: two modules, com.lib and com.inspect — not runnable in the sandbox
@@ -299,24 +299,24 @@ $ java --module-path out -m com.inspect/com.inspect.Peek
 Exception in thread "main" java.lang.reflect.InaccessibleObjectException: Unable to make field private java.lang.String com.lib.model.Secret.value accessible: module com.lib does not "opens com.lib.model" to module com.inspect
 ```
 
-**Analysis.** It compiled, because reflection names the field as a string. It failed at run time, at `setAccessible(true)`. The message names the missing line. Add `opens com.lib.model;` to `com.lib`'s `module-info.java`, recompile, and the same command prints `value = hidden`.
+**Analysis.** It compiled, because reflection names the field as a string. It failed at run time instead, at `setAccessible(true)` — and the message even names the missing line. Add `opens com.lib.model;` to `com.lib`'s `module-info.java`, recompile, and the same command prints `value = hidden`.
 
 **Intuition.**
 *Mechanism.* `exports` and `opens` grant different things <abbr title="The Java Language Specification, Java SE 21, §7.7.2">[5]</abbr>:
 
 - `exports` grants compile-time and run-time access to the package's `public` and `protected` types and members.
-- `opens` grants run-time access only, but to *all* members, `private` ones included, through reflection.
+- `opens` grants run-time access only, but to *all* members — `private` ones included — through reflection.
 
-A package can be exported, opened, both, or neither. `opens com.lib.model to some.module;` limits it to one module.
+A package can be exported, opened, both, or neither. Writing `opens com.lib.model to some.module;` limits the opening to a single module.
 
-*Concrete bite.* On the classpath, the same `Peek` prints `value = hidden` with no `opens` at all. Classpath code lives in the unnamed module, which opens everything (§6). Code that worked on the classpath can therefore fail the day it moves to the module path: frameworks hit exactly this.
+*Concrete bite.* On the classpath, the same `Peek` prints `value = hidden` without any `opens` at all. That's because classpath code lives in the unnamed module, which opens everything (§6). So code that worked fine on the classpath can fail the day it moves to the module path — and frameworks hit exactly this problem.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** `exports` what other modules compile against. `opens` only what a framework must reach by reflection, and prefer `opens … to` that framework's module.
+💡 **Earned rule.** `exports` the packages other modules compile against. `opens` only what a framework must reach by reflection, and prefer `opens … to` that framework's module.
 
-- The cost: one more line to keep in step when a library starts to use reflection.
-- The benefit: `private` stays private, except where you chose to open it.
+- The cost: one more line to keep in step whenever a library starts using reflection.
+- The payoff: `private` stays private, except where you chose to open it.
 
 </div>
 
@@ -324,10 +324,10 @@ A package can be exported, opened, both, or neither. `opens com.lib.model to som
 
 ## 5. Services: `provides`, `uses` and `ServiceLoader`
 
-A **service** lets a module use an implementation it does not name, or even `require`. Three modules share the work <abbr title="The Java Language Specification, Java SE 21, §7.7.3–7.7.4">[6]</abbr>:
+A **service** lets a module use an implementation that it doesn't name — or even `require`. In this example, three modules share the work <abbr title="The Java Language Specification, Java SE 21, §7.7.3–7.7.4">[6]</abbr>:
 
 - `greet.api` exports an interface, `com.greet.api.Greeter`.
-- `greet.english` implements it, and says so with `provides … with`. Its package is not exported.
+- `greet.english` implements it, and announces that with `provides … with`. Its package isn't exported.
 - `greet.app` declares `uses com.greet.api.Greeter`, and asks `ServiceLoader` for implementations <abbr title="java.util.ServiceLoader, Java SE 21 API">[12]</abbr>.
 
 ```java
@@ -365,7 +365,7 @@ public class Main {
 }
 ```
 
-`Greeter` declares `String greet(String name)`, and `EnglishGreeter` returns `"Hello, " + name`. With all three modules on the module path:
+`Greeter` declares `String greet(String name)`, and `EnglishGreeter` returns `"Hello, " + name`. With all three modules on the module path, you get:
 
 ```
 $ javac -d out --module-source-path src $(find src -name '*.java')
@@ -386,7 +386,7 @@ app -> api: "requires"
 app -> english: "ServiceLoader finds\n(no requires)" { style.stroke-dash: 4 }
 ```
 
-**Analysis.** `greet.app` never mentions `greet.english`. `ServiceLoader.load(Greeter.class)` found the provider because `greet.english` was on the module path and declared `provides`. Take that module off the path, and the same program still runs:
+**Analysis.** `greet.app` never mentions `greet.english`. `ServiceLoader.load(Greeter.class)` found the provider because `greet.english` was on the module path and declared `provides`. Take that module off the path, and the same program still runs — it just finds nothing:
 
 ```
 $ java --module-path out-noeng -m greet.app/com.greet.app.Main
@@ -394,9 +394,9 @@ $ java --module-path out-noeng -m greet.app/com.greet.app.Main
 ```
 
 **Intuition.**
-*Mechanism.* `provides` registers an implementation in the module's descriptor. `uses` tells the module system that this module will look one up. At run time, `ServiceLoader` searches the modules that were resolved for providers of that interface. The consumer depends only on the interface.
+*Mechanism.* `provides` registers an implementation in the module's descriptor, and `uses` tells the module system that this module will look one up. At run time, `ServiceLoader` searches the resolved modules for providers of that interface. The consumer depends only on the interface itself.
 
-*Concrete bite.* Forget `uses` in `greet.app`, and it still compiles. The lookup fails at run time instead:
+*Concrete bite.* Forget the `uses` in `greet.app`, and it still compiles. The lookup fails at run time instead:
 
 ```
 Exception in thread "main" java.util.ServiceConfigurationError: com.greet.api.Greeter: module greet.app does not declare `uses`
@@ -404,10 +404,10 @@ Exception in thread "main" java.util.ServiceConfigurationError: com.greet.api.Gr
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use a service when the consumer should work with whichever implementations are installed: plug-ins, drivers, formats. Put the interface in its own exported module, `provides` in each implementation, and `uses` in the consumer.
+💡 **Earned rule.** Use a service when the consumer should work with whichever implementations happen to be installed: plug-ins, drivers, formats. Put the interface in its own exported module, `provides` in each implementation, and `uses` in the consumer.
 
-- The cost: three modules instead of one, and a lookup that can find zero providers.
-- The benefit: add or remove an implementation by changing the module path, without recompiling the consumer.
+- The cost: three modules instead of one, and a lookup that might find zero providers.
+- The payoff: you can add or remove an implementation just by changing the module path, without recompiling the consumer.
 
 </div>
 
@@ -415,12 +415,12 @@ Exception in thread "main" java.util.ServiceConfigurationError: com.greet.api.Gr
 
 ## 6. The unnamed module and automatic modules
 
-Not all code is modular, and the module system has a place for all of it <abbr title="The Java Language Specification, Java SE 21, §7.7.5">[7]</abbr>:
+Not all code is modular, but the module system has a place for all of it <abbr title="The Java Language Specification, Java SE 21, §7.7.5">[7]</abbr>:
 
-- Code on the **classpath** belongs to the **unnamed module**. It reads every module, and exports and opens all its packages. No named module can `require` it, because it has no name.
-- A plain JAR, with no `module-info.class`, placed on the **module path** becomes an **automatic module**. Its name comes from the manifest's `Automatic-Module-Name`, or else from the JAR file name <abbr title="java.lang.module.ModuleFinder, Java SE 21 API (of)">[13]</abbr>. It reads every other module, and all its packages are exported and open <abbr title="java.lang.module.ModuleDescriptor, Java SE 21 API">[15]</abbr>.
+- Code on the **classpath** belongs to the **unnamed module**. It reads every module, and exports and opens all of its packages. No named module can `require` it, because it has no name to require.
+- A plain JAR with no `module-info.class`, placed on the **module path**, becomes an **automatic module**. Its name comes from the manifest's `Automatic-Module-Name`, or failing that, from the JAR's file name <abbr title="java.lang.module.ModuleFinder, Java SE 21 API (of)">[13]</abbr>. It reads every other module, and all of its packages are exported and open <abbr title="java.lang.module.ModuleDescriptor, Java SE 21 API">[15]</abbr>.
 
-A classpath program can ask which module it is in:
+A classpath program can ask which module it's in:
 
 ```java
 // requires: a package directory, run from the classpath — shown as a terminal session
@@ -442,9 +442,9 @@ name: null
 String is in: java.base
 ```
 
-`Where` is in the unnamed module, and `String` is in the JDK's named module `java.base`.
+`Where` is in the unnamed module, while `String` is in the JDK's named module, `java.base`.
 
-Now package `com.example.util.Text` alone into a plain JAR named `text-utils.jar`, and ask `jar` how it would be seen on the module path:
+Now package `com.example.util.Text` on its own into a plain JAR named `text-utils.jar`, and ask `jar` how the module path would see it:
 
 ```
 $ jar --create --file libs/text-utils.jar -C lib-classes .
@@ -456,7 +456,7 @@ requires java.base mandated
 contains com.example.util
 ```
 
-The file name `text-utils.jar` gave the module name `text.utils`: the `.jar` is dropped, and the `-` becomes a `.`. A named module can now `requires text.utils;`:
+The file name `text-utils.jar` produced the module name `text.utils`: the `.jar` is dropped, and the `-` becomes a `.`. A named module can now declare `requires text.utils;`:
 
 ```
 $ javac -d out --module-path libs --module-source-path src $(find src -name '*.java')
@@ -466,19 +466,19 @@ text.utils
 com.example.auto
 ```
 
-`Main` printed `Text.shout("automatic")`, then the module of `Text`, then its own.
+`Main` printed `Text.shout("automatic")`, then the module that `Text` lives in, then its own module.
 
 **Intuition.**
-*Mechanism.* Automatic modules are the bridge for migration. A modular application can depend on a library that has not been modularized yet, by putting its JAR on the module path.
+*Mechanism.* Automatic modules are the bridge for migration. By putting a library's JAR on the module path, a modular application can depend on that library even before it's been modularized.
 
-*Concrete bite.* An automatic name taken from a file name is fragile: rename the JAR, and every `requires` breaks. That is why libraries set `Automatic-Module-Name` in their manifest before they add a real `module-info`.
+*Concrete bite.* An automatic name taken from a file name is fragile: rename the JAR, and every `requires` breaks. That's why libraries set `Automatic-Module-Name` in their manifest before they add a real `module-info`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Classpath code is in the unnamed module and sees everything; that is why it runs unchanged on modern JDKs. When a modular app needs a plain JAR, put it on the module path as an automatic module, and check its name with `jar --describe-module`.
+💡 **Earned rule.** Classpath code lives in the unnamed module and sees everything — which is why it runs unchanged on modern JDKs. When a modular app needs a plain JAR, put it on the module path as an automatic module, and check its name with `jar --describe-module`.
 
-- The cost: automatic modules export everything, so they give no encapsulation.
-- The benefit: you can modularize an application before all its libraries are modular.
+- The cost: automatic modules export everything, so they give you no encapsulation.
+- The payoff: you can modularize an application before all of its libraries are modular.
 
 </div>
 
@@ -486,7 +486,7 @@ com.example.auto
 
 ## 7. JARs, runtime images and build tools
 
-A **JAR** (Java ARchive) is a zip of compiled classes plus a manifest. With a `Main-Class`, it's *executable* — `java -jar` runs it directly:
+A **JAR** (Java ARchive) is a zip file of compiled classes, plus a manifest. Give it a `Main-Class`, and it becomes *executable* — `java -jar` runs it directly:
 
 ```
 $ jar --create --file app.jar --main-class com.example.Main -C out .
@@ -499,9 +499,9 @@ HELLO!
 HELLO!
 ```
 
-**Analysis.** `jar --create` bundled the `out` directory's classes into `app.jar`, and recorded `com.example.Main` as the entry point in the manifest. So `java -jar app.jar` found and ran it <abbr title="The jar command, JDK 21 documentation">[14]</abbr>. A JAR is the standard unit of distribution: one file to ship, put on a classpath, or run.
+**Analysis.** `jar --create` bundled the `out` directory's classes into `app.jar`, and recorded `com.example.Main` in the manifest as the entry point. That's how `java -jar app.jar` found and ran it <abbr title="The jar command, JDK 21 documentation">[14]</abbr>. A JAR is Java's standard unit of distribution: one file to ship, put on a classpath, or run.
 
-A JAR that contains a `module-info.class` is a **modular JAR**. `jar --describe-module` prints its descriptor (path shortened here):
+A JAR that contains a `module-info.class` is called a **modular JAR**. `jar --describe-module` prints its descriptor (the path is shortened here):
 
 ```
 $ jar --create --file mlib/app.jar --main-class com.example.Main -C out/com.example.app .
@@ -516,9 +516,9 @@ $ java --module-path mlib -m com.example.app
 HELLO!
 ```
 
-The same modular JAR also works on the classpath (`java -cp mlib/app.jar com.example.Main` prints `HELLO!`). Its classes then belong to the unnamed module <abbr title="java.lang.Module, Java SE 21 API">[16]</abbr>.
+The same modular JAR works on the classpath too (`java -cp mlib/app.jar com.example.Main` prints `HELLO!`). In that case, its classes belong to the unnamed module <abbr title="java.lang.Module, Java SE 21 API">[16]</abbr>.
 
-**A runtime image with `jlink`.** `jlink` links your modules with only the JDK modules they need into a self-contained directory: a **runtime image** with its own `java` <abbr title="JEP 282: jlink: The Java Linker (JDK 9)">[9]</abbr> <abbr title="The jlink command, JDK 21 documentation">[11]</abbr>. The machine that runs it needs no JDK installed.
+**A runtime image with `jlink`.** `jlink` links your modules, together with only the JDK modules they need, into a self-contained directory: a **runtime image** with its own `java` <abbr title="JEP 282: jlink: The Java Linker (JDK 9)">[9]</abbr> <abbr title="The jlink command, JDK 21 documentation">[11]</abbr>. The machine that runs it doesn't need a JDK installed.
 
 ```
 $ jlink --module-path out --add-modules com.example.app --launcher hello=com.example.app/com.example.Main --output image
@@ -531,14 +531,14 @@ java.base@21.0.12.1
 
 **Analysis.**
 
-- The image holds two modules: the app, and `java.base`, the one JDK module it `requires`.
-- `--launcher` wrote the script `image/bin/hello`.
-- On this machine the image took 48 MB, against 335 MB for the full JDK it came from (`du -sh`). Your `java.base` version and the sizes will differ.
+- The image holds just two modules: the app, and `java.base`, the one JDK module it `requires`.
+- `--launcher` wrote the launcher script `image/bin/hello`.
+- On this machine, the image took 48 MB, compared with 335 MB for the full JDK it came from (`du -sh`). Your `java.base` version and the sizes will differ.
 
-`jlink` needs modules: a classpath-only application has no module graph to link.
+Note that `jlink` needs modules: a classpath-only application has no module graph to link.
 
 **Intuition.**
-*Mechanism.* **Maven** and **Gradle** are build tools. From a project descriptor, they download declared dependencies (from repositories like Maven Central), compile, test, and package into a JAR. They turn the manual `javac`/`jar` dance into one command (`mvn package`, `gradle build`). They define the project's coordinates, dependencies, and lifecycle.
+*Mechanism.* **Maven** and **Gradle** are build tools. Working from a project descriptor, they download your declared dependencies (from repositories such as Maven Central), compile, test, and package everything into a JAR. They turn the manual `javac`/`jar` dance into a single command (`mvn package`, `gradle build`), and they define the project's coordinates, dependencies, and lifecycle.
 
 *Concrete bite.* The descriptor is the project's source of truth. A Maven `pom.xml` dependency —
 ```
@@ -548,14 +548,14 @@ java.base@21.0.12.1
   <version>33.0.0-jre</version>
 </dependency>
 ```
-or the Gradle equivalent `implementation("com.google.guava:guava:33.0.0-jre")` — declares a library by coordinates. The tool resolves it, and *its* dependencies transitively, so you never manage JARs by hand.
+or the Gradle equivalent, `implementation("com.google.guava:guava:33.0.0-jre")` — declares a library by its coordinates. The tool resolves it, along with *its* dependencies, transitively, so you never have to manage JARs by hand.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `javac`, `jar` and `jlink` to understand what's happening, but use a build tool (Maven or Gradle) for any real project. Declare dependencies by coordinates, and let it handle resolution, compilation, and packaging.
+💡 **Earned rule.** Use `javac`, `jar` and `jlink` to understand what's going on under the hood, but use a build tool (Maven or Gradle) for any real project. Declare dependencies by coordinates, and let the tool handle resolution, compilation, and packaging.
 
 - The cost: learning the tool and its conventions.
-- The benefit: reproducible builds with managed, transitive dependencies. Past a couple of files, that is non-negotiable. [Testing, Tooling & Packaging](/synapse/programming-languages/java/advanced/testing-tooling-and-packaging) returns to build tools, alongside testing and shipping a runnable JAR.
+- The payoff: reproducible builds with managed, transitive dependencies. Once you're past a couple of files, that's non-negotiable. [Testing, Tooling & Packaging](/synapse/programming-languages/java/advanced/testing-tooling-and-packaging) returns to build tools, alongside testing and shipping a runnable JAR.
 
 </div>
 
@@ -623,9 +623,9 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>The 🧪 box below: the directory for <code>com.shop.model</code>, <code>validate()</code>, and <code>com.shop.internal</code>.</summary>
 
-- `package com.shop.model;` belongs in `…/com/shop/model/`. For the source file that is the convention; for the class file it is required, and `javac -d` puts it there (§1).
-- From `com.shop.web`, the `public` field of `Order` is accessible. The package-private `validate()` is not: `validate() is not public in Order; cannot be accessed from outside package`.
-- A module that declares only `exports com.shop.api;` hides every `public` class in `com.shop.internal`: `package com.shop.internal is not visible` (§3). The one line that changes it is `exports com.shop.internal;`.
+- `package com.shop.model;` belongs in `…/com/shop/model/`. For the source file, that's a convention; for the class file, it's required, and `javac -d` puts it there (§1).
+- From `com.shop.web`, the `public` field of `Order` is accessible. The package-private `validate()` isn't: you get `validate() is not public in Order; cannot be accessed from outside package`.
+- A module that declares only `exports com.shop.api;` hides every `public` class in `com.shop.internal`: `package com.shop.internal is not visible` (§3). The one line that changes that is `exports com.shop.internal;`.
 
 </details>
 
@@ -656,9 +656,9 @@ One check per objective. Answer before you open anything.
 
 🧪 **Predict, then check.**
 
-1. Given `package com.shop.model;` in a file, predict which directory it must live in.
+1. Given `package com.shop.model;` at the top of a file, predict which directory it must live in.
 2. If `com.shop.model.Order` has a `public` field and a package-private `validate()` method, predict which one a class in `com.shop.web` can access.
-3. For a module that declares only `exports com.shop.api;`, predict whether another module can use a `public` class in `com.shop.internal`, and what one line in `module-info.java` would change the answer.
+3. For a module that declares only `exports com.shop.api;`, predict whether another module can use a `public` class in `com.shop.internal`, and which single line in `module-info.java` would change the answer.
 
 </div>
 

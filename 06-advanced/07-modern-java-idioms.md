@@ -12,13 +12,13 @@ You've met the modern features one at a time:
 - [`Optional` and streams](/synapse/programming-languages/java/advanced/functional-java-and-streams);
 - [`var`](/synapse/programming-languages/java/first-steps/variables-and-primitive-types) and [immutable classes](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers).
 
-This lesson shows they're not a grab-bag of tricks but a **coherent design**:
+This lesson shows that they're not a grab-bag of tricks, but a **coherent design**:
 
-- **`record` + `sealed` + pattern matching** give *data-oriented programming*: model your data as a closed set of immutable shapes, and let the compiler force you to handle every one.
-- **`Optional`** pushes `null` out of your domain at the edges.
+- **`record` + `sealed` + pattern matching** give you *data-oriented programming*: model your data as a closed set of immutable shapes, and let the compiler force you to handle every one.
+- **`Optional`** pushes `null` out of your domain, at the edges.
 - **Immutability** makes objects safe to share, and **`var`** removes redundant noise.
 
-The thesis is composition. Each feature is good alone, but their real power is how they fit together into code that is concise, safe, and checked.
+The thesis is composition. Each feature is good on its own, but the real power lies in how they fit together into code that's concise, safe, and checked.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -33,7 +33,7 @@ The thesis is composition. Each feature is good alone, but their real power is h
 
 This lesson draws on the chapters [Core Libraries](/synapse/programming-languages/java/core-libraries/enums-and-records) and [Robust OOP](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching), and on [Functional Java & the Streams API](/synapse/programming-languages/java/advanced/functional-java-and-streams). Every output below was produced by compiling and running the code.
 
-**You'll be able to:** predict whether a pattern `switch` over a sealed type still compiles after a new case is added, and explain why a `default` branch hides the new case; pick `Optional` as a return type, and predict what a `null` `Optional` field and a failing `map` do; pick between an unmodifiable view and a copy, and predict what `var` infers from a diamond; write a program that composes records, a sealed interface, a pattern `switch`, a stream and `Optional`.
+**You'll be able to:** predict whether a pattern `switch` over a sealed type still compiles after a new case is added, and explain why a `default` branch hides the new case; choose `Optional` as a return type, and predict what a `null` `Optional` field and a failing `map` do; choose between an unmodifiable view and a copy, and predict what `var` infers from a diamond; write a program that composes records, a sealed interface, a pattern `switch`, a stream and `Optional`.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -62,13 +62,13 @@ This lesson draws on the chapters [Core Libraries](/synapse/programming-language
 
 ## 1. Data-oriented design: records + sealed + patterns
 
-The three features lock together:
+These three features lock together:
 
 - a **`sealed`** interface defines a closed set of cases;
 - each case is an immutable **`record`**;
-- a **pattern `switch`** consumes them, destructuring components. Because the set is closed, the compiler checks it for exhaustiveness with no `default`.
+- a **pattern `switch`** consumes them, destructuring their components. Because the set is closed, the compiler checks it for exhaustiveness, with no `default` needed.
 
-A plain class that implements a sealed interface must say `final`, `sealed` or `non-sealed`, or javac reports `sealed, non-sealed or final modifiers expected`. A record needs none of the three: a record class is implicitly `final` <abbr title="The Java Language Specification, Java SE 21, §8.1.1.2">[2]</abbr>.
+A plain class that implements a sealed interface must say `final`, `sealed` or `non-sealed`; otherwise, javac reports `sealed, non-sealed or final modifiers expected`. A record needs none of the three, because a record class is implicitly `final` <abbr title="The Java Language Specification, Java SE 21, §8.1.1.2">[2]</abbr>.
 
 ```java run viz=array:shapes
 sealed interface Shape permits Circle, Rectangle, Triangle {}
@@ -121,16 +121,16 @@ dop -> exhaustive: "guarantees"
 
 **Analysis.**
 
-- Each shape is a one-line `record`: private `final` fields, accessors, and generated `equals`/`hashCode`/`toString` <abbr title="The Java Language Specification, Java SE 21, §8.10.3">[1]</abbr>.
+- Each shape is a one-line `record`, with private `final` fields, accessors, and generated `equals`/`hashCode`/`toString` <abbr title="The Java Language Specification, Java SE 21, §8.10.3">[1]</abbr>.
 - `sealed` declares the *complete* set.
 - The pattern `switch` destructures each shape (`Circle(double r)`) to compute its area, with **no `default`** <abbr title="JEP 440: Record Patterns (JDK 21)">[5]</abbr> <abbr title="JEP 441: Pattern Matching for switch (JDK 21)">[6]</abbr>.
 
-The data lives in the records, and the behavior lives in the `switch`, outside the data. The type system guarantees every case is handled. That's data-oriented programming: a closed algebra of data, with operations added externally.
+The data lives in the records, while the behavior lives in the `switch`, outside the data. And the type system guarantees that every case is handled. That's data-oriented programming: a closed algebra of data, with operations added from outside.
 
 **Intuition.**
-*Mechanism.* `sealed` gives the compiler the full list of subtypes. A `switch` whose cases cover every permitted subtype is **exhaustive** <abbr title="The Java Language Specification, Java SE 21, §14.11.1.1">[3]</abbr>. A `switch` *expression* that is not exhaustive is a compile-time error <abbr title="The Java Language Specification, Java SE 21, §15.28.1">[4]</abbr>.
+*Mechanism.* `sealed` gives the compiler the full list of subtypes. A `switch` whose cases cover every permitted subtype is **exhaustive** <abbr title="The Java Language Specification, Java SE 21, §14.11.1.1">[3]</abbr>, and a `switch` *expression* that isn't exhaustive is a compile-time error <abbr title="The Java Language Specification, Java SE 21, §15.28.1">[4]</abbr>.
 
-*Concrete bite.* The payoff is the compiler as a checklist. Add a fourth permitted shape, `Pentagon`, and leave `area` alone:
+*Concrete bite.* The payoff is that the compiler becomes your checklist. Add a fourth permitted shape, `Pentagon`, and leave `area` alone:
 
 ```java run
 sealed interface Shape permits Circle, Rectangle, Triangle, Pentagon {}
@@ -162,9 +162,9 @@ Main.java:9: error: the switch expression does not cover all possible input valu
 1 error
 ```
 
-Every such `switch` in the program stops compiling until it handles `Pentagon`. [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching) met this error first.
+Every such `switch` in the program stops compiling until it handles `Pentagon`. You first met this error in [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching).
 
-*Non-example: a `default` over a sealed type.* A `default` makes any `switch` exhaustive <abbr title="The Java Language Specification, Java SE 21, §14.11.1.1">[3]</abbr>. So it also makes the check above go quiet:
+*Non-example: a `default` over a sealed type.* A `default` makes any `switch` exhaustive <abbr title="The Java Language Specification, Java SE 21, §14.11.1.1">[3]</abbr> — which also silences the check above:
 
 ```java run
 // ⚠️ ANTI-PATTERN — a default branch over a sealed type.  Do not copy it.
@@ -201,19 +201,19 @@ Pentagon -> 0.00
 Pentagon compiled, and its area is silently wrong
 ```
 
-The `default` caught `Pentagon`, and a pentagon with side 3 got area `0.00`. The compile error would have pointed at this exact `switch`; the `default` turned it into a wrong number at run time.
+The `default` caught `Pentagon`, so a pentagon with side 3 got an area of `0.00`. The compile error would have pointed you straight at this `switch`; instead, the `default` turned it into a wrong number at run time.
 
-Compare the [inheritance](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism) alternative, an `abstract double area()` in each subclass:
+Compare this with the [inheritance](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism) alternative, an `abstract double area()` in each subclass:
 
 - use polymorphism when behavior travels *with* open subtypes;
-- use sealed + patterns when the type set is *closed* and operations are added from outside.
+- use sealed types + patterns when the type set is *closed*, and operations get added from outside.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Reach for `record` + `sealed` + pattern `switch` to model closed sets of structured data — results, events, AST nodes, protocol messages — and process them exhaustively. Leave out the `default`, so a new case is a compile error and not a silent wrong answer.
+💡 **Earned rule.** Reach for `record` + `sealed` + pattern `switch` to model closed sets of structured data — results, events, AST nodes, protocol messages — and process them exhaustively. Leave out the `default`, so that a new case is a compile error rather than a silent wrong answer.
 
-- The cost: choosing this over class polymorphism, and maintaining the `permits` list, which the compiler enforces.
-- The benefit: concise, immutable data plus operations the compiler proves complete. A whole class of "forgot a case" bugs is gone.
+- The cost: choosing this style over class polymorphism, and maintaining the `permits` list (which the compiler enforces).
+- The payoff: concise, immutable data, plus operations that the compiler proves complete. A whole class of "forgot a case" bugs disappears.
 
 </div>
 
@@ -221,7 +221,7 @@ Compare the [inheritance](/synapse/programming-languages/java/robust-oop/inherit
 
 ## 2. `Optional` over `null`
 
-`null` is what its inventor, Tony Hoare, called his "billion dollar mistake" <abbr title="Tony Hoare, Null References: The Billion Dollar Mistake, QCon 2009">[12]</abbr>. It is invisible in the type, and fatal when dereferenced ([References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model)). The idiom is to keep `null` out of your domain:
+Its own inventor, Tony Hoare, called `null` his "billion dollar mistake" <abbr title="Tony Hoare, Null References: The Billion Dollar Mistake, QCon 2009">[12]</abbr>. It's invisible in the type, and fatal when dereferenced ([References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model)). The idiom is to keep `null` out of your domain entirely:
 
 - wrap a maybe-absent value in `Optional` at the boundary;
 - chain `map`/`filter`/`orElse` to handle absence declaratively.
@@ -254,20 +254,20 @@ us-east
 8080
 ```
 
-**Analysis.** `lookup` wraps the possibly-`null` `map.get` in `Optional.ofNullable`. Absence becomes a typed `Optional.empty()`, never a raw `null` escaping into the program. The callers then *compose*:
+**Analysis.** `lookup` wraps the possibly-`null` result of `map.get` in `Optional.ofNullable`. Absence becomes a typed `Optional.empty()`, never a raw `null` escaping into the program. The callers can then *compose*:
 
-- `host` was present, so `map(String::toUpperCase)` ran and `orElse` was skipped;
-- `region` was absent, so `map` was skipped and `orElse("us-east")` supplied the default;
-- `port` was present and parsed.
+- `host` was present, so `map(String::toUpperCase)` ran, and `orElse` was skipped;
+- `region` was absent, so `map` was skipped, and `orElse("us-east")` supplied the default;
+- `port` was present, and got parsed.
 
-No `if (x != null)`, no `NullPointerException`: absence is handled by the chain.
+There's no `if (x != null)`, and no `NullPointerException`: the chain handles absence for you.
 
 **Intuition.**
-*Mechanism.* `Optional` makes "might be absent" part of the *type*. An `Optional<String>` is not a `String`, so the compiler makes you unwrap it before use. `map` transforms only if a value is present; `orElse`/`orElseGet` supply defaults. The unsafe unwrap, `get()` on an empty `Optional`, throws `NoSuchElementException` ([Functional Java & the Streams API](/synapse/programming-languages/java/advanced/functional-java-and-streams) shows it).
+*Mechanism.* `Optional` makes "might be absent" part of the *type*. An `Optional<String>` isn't a `String`, so the compiler makes you unwrap it before use. `map` transforms the value only if one is present, and `orElse`/`orElseGet` supply defaults. The unsafe unwrap — `get()` on an empty `Optional` — throws `NoSuchElementException` (as [Functional Java & the Streams API](/synapse/programming-languages/java/advanced/functional-java-and-streams) shows).
 
-*Concrete bite.* `Optional` is a return type. Its API says it is "primarily intended for use as a method return type where there is a clear need to represent 'no result'" <abbr title="Java SE 21 API, java.util.Optional">[7]</abbr>. The same note adds that a variable of type `Optional` "should never itself be `null`".
+*Concrete bite.* `Optional` is meant as a return type. Its API says it's "primarily intended for use as a method return type where there is a clear need to represent 'no result'" <abbr title="Java SE 21 API, java.util.Optional">[7]</abbr>. The same note adds that a variable of type `Optional` "should never itself be `null`".
 
-*Non-example: an `Optional` field left `null`.* A field of type `Optional` starts as `null`, like any other reference field:
+*Non-example: an `Optional` field left `null`.* A field of type `Optional` starts out as `null`, just like any other reference field:
 
 ```java run
 // ⚠️ ANTI-PATTERN — an Optional field left null.  Do not copy it.
@@ -295,9 +295,9 @@ display:
 Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.util.Optional.orElse(Object)" because "this.nickname" is null
 ```
 
-The code *looks* null-safe, and it crashed with the very exception `Optional` exists to prevent. That is the worst of both worlds. For a field, use a plain nullable reference or a real default, and return `Optional` from the getter.
+The code *looks* null-safe, yet it crashed with the very exception that `Optional` exists to prevent — the worst of both worlds. For a field, use a plain nullable reference or a real default, and return `Optional` from the getter instead.
 
-*Edge: `Optional` handles absence, not failure.* `orElse` covers the empty case only. If the function inside `map` throws, the exception passes straight through:
+*Edge: `Optional` handles absence, not failure.* `orElse` covers only the empty case. If the function inside `map` throws, the exception passes straight through:
 
 ```java run
 import java.util.Map;
@@ -319,14 +319,14 @@ parsing...
 Exception in thread "main" java.lang.NumberFormatException: For input string: "abc"
 ```
 
-`"abc"` was present, so `map` called `Integer.parseInt("abc")`, and it threw. `orElse(80)` never ran. Validate the text, or catch the exception inside the mapping function.
+`"abc"` was present, so `map` called `Integer.parseInt("abc")`, which threw — and `orElse(80)` never ran. Validate the text first, or catch the exception inside the mapping function.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Return `Optional<T>` from methods that may find nothing. Build it with `ofNullable` at boundaries, and consume it with `map`/`filter`/`orElse`. Keep `null` out of your domain logic.
+💡 **Earned rule.** Return `Optional<T>` from methods that may find nothing. Build it with `ofNullable` at the boundaries, and consume it with `map`/`filter`/`orElse`. Keep `null` out of your domain logic.
 
-- The cost: wrapping and unwrapping, and discipline about where `Optional` belongs (returns, not fields).
-- The benefit: "absent" is a typed, composable case instead of a run-time crash.
+- The cost: wrapping and unwrapping, plus discipline about where `Optional` belongs (in return types, not fields).
+- The payoff: "absent" becomes a typed, composable case, instead of a run-time crash.
 
 </div>
 
@@ -334,7 +334,7 @@ Exception in thread "main" java.lang.NumberFormatException: For input string: "a
 
 ## 3. Immutability and `var`
 
-Modern Java leans on **immutable** objects: `record`s and `final` fields. An object that can't change is safe to share, cache, and use as a key. It needs no defensive copies and gives no aliasing surprises. And **`var`** removes redundant type noise where the right-hand side already says the type.
+Modern Java leans heavily on **immutable** objects: `record`s and `final` fields. An object that can't change is safe to share, to cache, and to use as a key. It needs no defensive copies, and gives you no aliasing surprises. Meanwhile, **`var`** removes redundant type noise wherever the right-hand side already states the type.
 
 ```java run
 import java.util.List;
@@ -364,18 +364,18 @@ Point[x=3, y=4]
 
 **Analysis.**
 
-- `Point` is immutable, so `translate` doesn't mutate. It returns a *new* `Point`: `origin` is untouched (`Point[x=0, y=0]`), and `moved` is the new value (`Point[x=3, y=4]`).
-- This "transform by producing a new value" is the immutable idiom, like a `String` operation.
-- `var` inferred the types — `Point`, `Point`, `List<String>` — from the initializers. The [static type](/synapse/programming-languages/java/first-steps/variables-and-primitive-types) is still there; you did not write it.
+- `Point` is immutable, so `translate` doesn't mutate anything. Instead, it returns a *new* `Point`: `origin` is untouched (`Point[x=0, y=0]`), and `moved` holds the new value (`Point[x=3, y=4]`).
+- This "transform by producing a new value" approach is the immutable idiom, just like a `String` operation.
+- `var` inferred the types — `Point`, `Point`, `List<String>` — from the initializers. The [static type](/synapse/programming-languages/java/first-steps/variables-and-primitive-types) is still there; you just didn't write it.
 
-`var` changes nothing about scope. A `var` local lives in its block like any other local ([Methods](/synapse/programming-languages/java/control-flow/methods), §3). It shadows a field by the same rules ([Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects)).
+`var` changes nothing about scope. A `var` local lives in its block like any other local ([Methods](/synapse/programming-languages/java/control-flow/methods), §3), and it shadows a field by the same rules ([Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects)).
 
 **Intuition.**
-*Mechanism.* An immutable object's state is fixed at construction; "changes" allocate a new object. Nothing can change it behind your back, so aliases are harmless. A record's fields are `private final` <abbr title="The Java Language Specification, Java SE 21, §8.10.3">[1]</abbr>, and `final` fields are what make an object safe to hand between threads <abbr title="The Java Language Specification, Java SE 21, §17.5">[13]</abbr> ([The Java Memory Model & Performance](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance)). `var` is compile-time inference: the variable has a concrete type that you did not spell out <abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[11]</abbr>.
+*Mechanism.* An immutable object's state is fixed at construction, and "changes" allocate a new object. Since nothing can change it behind your back, aliases are harmless. A record's fields are `private final` <abbr title="The Java Language Specification, Java SE 21, §8.10.3">[1]</abbr>, and `final` fields are what make an object safe to hand between threads <abbr title="The Java Language Specification, Java SE 21, §17.5">[13]</abbr> ([The Java Memory Model & Performance](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance)). `var` is compile-time inference: the variable has a concrete type, which you simply didn't spell out <abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[11]</abbr>.
 
-*Concrete bite: `final` is shallow.* A record's `final` field fixes the *reference*, not the object it points to. A record holding a caller's `ArrayList` changes when the caller changes the list. [Enums & Records](/synapse/programming-languages/java/core-libraries/enums-and-records) shows it, and the fix: `List.copyOf` in a compact constructor.
+*Concrete bite: `final` is shallow.* A record's `final` field fixes the *reference*, not the object it points to. So a record holding a caller's `ArrayList` changes whenever the caller changes the list. [Enums & Records](/synapse/programming-languages/java/core-libraries/enums-and-records) shows this, along with the fix: `List.copyOf` in a compact constructor.
 
-*Non-example: an unmodifiable view is not a copy.* `Collections.unmodifiableList` looks like the same fix, but it returns a **view**. Reads "read through" to the original list <abbr title="Java SE 21 API, java.util.Collections.unmodifiableList">[8]</abbr>. `List.copyOf` returns an unmodifiable list that "will not reflect" later changes <abbr title="Java SE 21 API, java.util.List.copyOf">[9]</abbr>:
+*Non-example: an unmodifiable view is not a copy.* `Collections.unmodifiableList` looks like the same fix, but it returns a **view**, and reads "read through" to the original list <abbr title="Java SE 21 API, java.util.Collections.unmodifiableList">[8]</abbr>. `List.copyOf`, by contrast, returns an unmodifiable list that "will not reflect" later changes <abbr title="Java SE 21 API, java.util.List.copyOf">[9]</abbr>:
 
 ```java run
 import java.util.ArrayList;
@@ -406,9 +406,9 @@ copy: [Ada]
 view.add: UnsupportedOperationException
 ```
 
-Nobody can change the list *through* `view`: `add` threw. But `source` could, and `view` showed `Linus`. The copy kept `[Ada]`.
+Nobody can change the list *through* `view` — `add` threw. But `source` still could, and `view` showed `Linus`. The copy, meanwhile, kept `[Ada]`.
 
-*Non-example: `var` with a diamond.* `var` copies its type from the initializer. `new ArrayList<>()` with nothing to infer from gives `ArrayList<Object>`. OpenJDK's style guide calls this "DANGEROUS" <abbr title="OpenJDK, Local Variable Type Inference: Style Guidelines, G6">[10]</abbr>:
+*Non-example: `var` with a diamond.* `var` copies its type from the initializer, and `new ArrayList<>()` with nothing to infer from gives `ArrayList<Object>`. OpenJDK's style guide calls this "DANGEROUS" <abbr title="OpenJDK, Local Variable Type Inference: Style Guidelines, G6">[10]</abbr>:
 
 ```java run
 import java.util.ArrayList;
@@ -431,14 +431,14 @@ Main.java:7: error: incompatible types: Object cannot be converted to String
 1 error
 ```
 
-`names` is an `ArrayList<Object>`, so `get(0)` returns an `Object`. Write the type argument: `var names = new ArrayList<String>();`.
+`names` is an `ArrayList<Object>`, so `get(0)` returns an `Object`. The fix is to write the type argument: `var names = new ArrayList<String>();`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Default to immutability for data you share or use as keys: `record`s, `final` fields, transform-by-new, and `List.copyOf` for any list you keep. Use `var` where the initializer makes the type obvious, and never with a bare diamond.
+💡 **Earned rule.** Default to immutability for data you share or use as keys: `record`s, `final` fields, transform-by-new, and `List.copyOf` for any list you keep. Use `var` where the initializer makes the type obvious — and never with a bare diamond.
 
-- The cost: extra allocations and verbose deep updates (immutability), and hidden types if `var` is overused.
-- The benefit: data that's safe to share without defensive copies, and code with less ceremony.
+- The cost: extra allocations and verbose deep updates (for immutability), and hidden types if you overuse `var`.
+- The payoff: data that's safe to share without defensive copies, and code with less ceremony.
 
 </div>
 
@@ -446,7 +446,7 @@ Main.java:7: error: incompatible types: Object cannot be converted to String
 
 ## 4. Composing it all
 
-The features earn their keep *together*. Here a small domain, payments, uses:
+The features earn their keep *together*. Here, a small payments domain uses:
 
 - `sealed` + `record`s for the data;
 - a pattern `switch` for behavior;
@@ -493,31 +493,31 @@ total fees: 7.50
 biggest: Card
 ```
 
-**Analysis.** Five features in one short program:
+**Analysis.** That's five features in one short program:
 
 - `sealed Payment`, a closed set of `record`s (immutable data);
-- a pattern `switch` computing each payment's `fee`: cash is free, card is 3%, so `6.00 + 1.50 = 7.50`;
-- `stream().mapToDouble(...).sum()` aggregating the fees;
-- `stream().max(...)` returning an `Optional<Payment>`, consumed with `map(...).orElse("none")`.
+- a pattern `switch` that computes each payment's `fee`: cash is free, and card is 3%, so `6.00 + 1.50 = 7.50`;
+- `stream().mapToDouble(...).sum()`, which aggregates the fees;
+- `stream().max(...)`, which returns an `Optional<Payment>`, consumed with `map(...).orElse("none")`.
 
-The compiler checks that both switches are exhaustive, and `null` is nowhere in sight. `amountOf` exists only because `Payment` declares no methods. The ✅ section shows how a record's accessor can replace it.
+The compiler checks that both switches are exhaustive, and `null` is nowhere in sight. `amountOf` exists only because `Payment` declares no methods; the ✅ section shows how a record's accessor can replace it.
 
 **Intuition.**
-*Mechanism.* The composition works because the features share a philosophy:
+*Mechanism.* The composition works because the features share a common philosophy:
 
 - make data explicit and immutable (records);
 - make the set of cases closed and checkable (sealed);
 - make operations declarative (patterns, streams);
 - make absence a type (`Optional`).
 
-*Concrete bite.* This is data-oriented Java: declarative, like the [stream pipelines](/synapse/programming-languages/java/advanced/functional-java-and-streams) earlier in this chapter, with the compiler enforcing exhaustiveness and types throughout. The trade-off is knowing when to use it. This style shines for data processing and for modeling closed domains. Classic OOP, with encapsulated mutable objects and polymorphic behavior, still fits stateful, open-ended designs.
+*Concrete bite.* This is data-oriented Java: declarative, like the [stream pipelines](/synapse/programming-languages/java/advanced/functional-java-and-streams) from earlier in this chapter, with the compiler enforcing exhaustiveness and types throughout. The trade-off is knowing when to use it. This style shines for data processing, and for modeling closed domains. Classic OOP, with encapsulated mutable objects and polymorphic behavior, is still the better fit for stateful, open-ended designs.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Compose the modern features when modeling and transforming data: sealed records for data, pattern switches and streams for operations, `Optional` for absence. Reach for classic object-oriented design (mutable state, inheritance) when behavior and identity dominate.
+💡 **Earned rule.** Compose the modern features when you model and transform data: sealed records for data, pattern switches and streams for operations, and `Optional` for absence. Reach for classic object-oriented design (mutable state, inheritance) when behavior and identity dominate.
 
-- The cost: judgment about which paradigm fits.
-- The benefit: for the large class of data-shaped problems, modern Java is concise, immutable, and compiler-verified end to end.
+- The cost: the judgment to know which paradigm fits.
+- The payoff: for the large class of data-shaped problems, modern Java is concise, immutable, and compiler-verified from end to end.
 
 </div>
 
@@ -585,7 +585,7 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>In §4, how many payments are cards? Count them with a stream and <code>instanceof</code>. Then make <code>amountOf</code> unnecessary.</summary>
 
-Two. Declare `double amount();` in `Payment`. Each record already has a public accessor `amount()` with that name and return type <abbr title="The Java Language Specification, Java SE 21, §8.10.3">[1]</abbr>, so it implements the interface method with no extra code. `Payment::amount` then replaces `amountOf`:
+Two. Now declare `double amount();` in `Payment`. Each record already has a public accessor `amount()` with that exact name and return type <abbr title="The Java Language Specification, Java SE 21, §8.10.3">[1]</abbr>, so it implements the interface method with no extra code. `Payment::amount` can then replace `amountOf`:
 
 ```java run
 import java.util.List;
@@ -644,7 +644,7 @@ total: 350.0
 2. Predict what §2 prints if `config` held `"port" -> "abc"` and you parsed it with `.map(Integer::parseInt)`. Would `orElse(80)` save you?
 3. Extend §4 to print the *count* of `Card` payments, using a stream `filter` with `p instanceof Card`, and predict the result.
 
-§1's bite, §2's edge and the ✅ `<details>` answer each one.
+§1's bite, §2's edge and the ✅ `<details>` answer each one in turn.
 
 </div>
 

@@ -6,12 +6,12 @@ prereqs: []
 
 # Abstract Classes & Interfaces — Contracts and Partial Types
 
-[Inheritance](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism) let a subclass specialize a concrete superclass. Two more tools let you specify behavior a type *must* provide without saying how:
+With [inheritance](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism), a subclass specializes a concrete superclass. Java has two more tools that let you specify behavior a type *must* provide, without saying how:
 
-- An **abstract class** is a partial implementation. It can declare **abstract methods** (signatures with no body), and it cannot itself be instantiated. So every concrete subclass is forced to supply the missing pieces.
-- An **interface** is a **contract**: methods that any class can `implement`, with no instance fields.
+- An **abstract class** is a partial implementation. It can declare **abstract methods** (signatures with no body), and it can't be instantiated itself. That forces every concrete subclass to supply the missing pieces.
+- An **interface** is a **contract**: a set of methods that any class can `implement`, with no instance fields.
 
-The crucial asymmetry: a class `extends` exactly **one** class but `implements` **many** interfaces. So interfaces give Java multiple inheritance of *type* (a class can be many things), with no multiple inheritance of *state*. This is the machinery behind "[program to the interface](/synapse/programming-languages/java/core-libraries/the-collections-framework)."
+Here's the crucial asymmetry: a class `extends` exactly **one** class, but it `implements` as **many** interfaces as it likes. So interfaces give Java multiple inheritance of *type* (a class can be many things), without multiple inheritance of *state*. This is the machinery behind "[program to the interface](/synapse/programming-languages/java/core-libraries/the-collections-framework)."
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -26,7 +26,7 @@ The crucial asymmetry: a class `extends` exactly **one** class but `implements` 
 
 Every output below was produced by compiling and running the code on Java 21.
 
-**You'll be able to:** write an abstract class with a field, a constructor and a concrete method, and predict the error when it is instantiated or a subclass skips an abstract method; write an interface whose `default` methods share a `private` helper, and call its `static` method by the interface's name; predict whether an implementing method compiles, from its access level; resolve two inherited `default` methods that clash, with `X.super.m()`; pick an abstract class or an interface for a design.
+**You'll be able to:** write an abstract class with a field, a constructor and a concrete method, and predict the error you get when it's instantiated or when a subclass skips an abstract method; write an interface whose `default` methods share a `private` helper, and call its `static` method through the interface's name; predict from its access level whether an implementing method compiles; resolve a clash between two inherited `default` methods with `X.super.m()`; choose between an abstract class and an interface for a design.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -56,7 +56,7 @@ Every output below was produced by compiling and running the code on Java 21.
 
 ## 1. Abstract classes
 
-An `abstract` class can declare `abstract` methods: a signature with no body <abbr title="The Java Language Specification, Java SE 21, §8.4.3.1">[2]</abbr>. Each one says "every subclass must provide this." Because it has unfinished methods, an abstract class cannot be instantiated; only its concrete subclasses can.
+An `abstract` class can declare `abstract` methods — signatures with no body <abbr title="The Java Language Specification, Java SE 21, §8.4.3.1">[2]</abbr>. Each one says, "every subclass must provide this." Because it has unfinished methods, an abstract class can't be instantiated; only its concrete subclasses can.
 
 ```java run viz=array:shapes
 abstract class Shape {
@@ -91,9 +91,9 @@ public class Main {
 9.00
 ```
 
-**Analysis.** `Shape` declares `area()` with no body: it knows every shape *has* an area, but not how to compute it. `Circle` and `Square` each supply their own, and the polymorphic loop calls the right one (`12.57`, `9.00`). `Shape` provides the common type and contract; the subclasses provide the specifics.
+**Analysis.** `Shape` declares `area()` with no body: it knows that every shape *has* an area, but not how to compute it. `Circle` and `Square` each supply their own version, and the polymorphic loop calls the right one (`12.57`, `9.00`). `Shape` provides the common type and contract, while the subclasses provide the specifics.
 
-An abstract class is still a class. Beside its abstract methods it can hold fields, constructors and ordinary methods. Its constructor runs whenever a subclass object is created <abbr title="The Java Language Specification, Java SE 21, §8.1.1.1">[1]</abbr>. The concrete `describe()` below calls the abstract `area()`, which dispatches to the subclass:
+Don't forget that an abstract class is still a class. Alongside its abstract methods, it can hold fields, constructors and ordinary methods. Its constructor runs whenever a subclass object is created <abbr title="The Java Language Specification, Java SE 21, §8.1.1.1">[1]</abbr>. Below, the concrete `describe()` calls the abstract `area()`, which dispatches to the subclass:
 
 ```java run
 abstract class Shape {
@@ -132,9 +132,9 @@ square with area 9.00
 `Shape` owns the shared state (`name`) and the shared sentence (`describe()`). Each subclass writes only the part that differs: `area()`.
 
 **Intuition.**
-*Mechanism.* An abstract method has no implementation. An object of the abstract class would have a "hole": a method with nothing to run. So the compiler forbids creating one <abbr title="The Java Language Specification, Java SE 21, §8.1.1.1">[1]</abbr>. It also requires every concrete subclass to override all inherited abstract methods.
+*Mechanism.* An abstract method has no implementation. So an object of the abstract class would have a "hole" in it: a method with nothing to run. That's why the compiler forbids creating one <abbr title="The Java Language Specification, Java SE 21, §8.1.1.1">[1]</abbr>. It also requires every concrete subclass to override all of the abstract methods it inherits.
 
-*Concrete bite.* Try to instantiate the abstract class directly and it won't compile:
+*Concrete bite.* Try to instantiate the abstract class directly, and it won't compile:
 
 ```java run
 abstract class Shape { abstract double area(); }
@@ -153,9 +153,9 @@ Main.java:5: error: Shape is abstract; cannot be instantiated
                   ^
 ```
 
-`new Shape()` is rejected — `Shape.area()` has no body, so there's no complete object to make. You can hold a `Shape` reference (to a `Circle` or `Square`), but you can't create a bare `Shape`.
+`new Shape()` is rejected, because `Shape.area()` has no body, so there's no complete object to make. You can hold a `Shape` reference (pointing to a `Circle` or a `Square`), but you can't create a bare `Shape`.
 
-*Non-example: a subclass that forgets the abstract method.* A class that is not `abstract` may not have an abstract method, declared or inherited <abbr title="The Java Language Specification, Java SE 21, §8.1.1.1">[1]</abbr>. `Triangle` inherits `area()` without a body:
+*Non-example: a subclass that forgets the abstract method.* A class that isn't `abstract` may not have an abstract method, whether declared or inherited <abbr title="The Java Language Specification, Java SE 21, §8.1.1.1">[1]</abbr>. Here, `Triangle` inherits `area()` without a body:
 
 ```java run
 abstract class Shape { abstract double area(); }
@@ -177,14 +177,14 @@ class Triangle extends Shape {
 1 error
 ```
 
-The message offers both fixes: override `area()`, or declare `Triangle` `abstract` too. The same message appears if you write `abstract double area();` inside a class you forgot to mark `abstract`: that class is told it does not override its own method.
+The message hints at both fixes: override `area()`, or declare `Triangle` `abstract` too. You'll see the same message if you write `abstract double area();` inside a class you forgot to mark `abstract` — oddly, that class is told it doesn't override its own method.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use an abstract class when subtypes share both a common type *and* some implementation or state, but a key operation must differ per subtype (`area()`).
+💡 **Earned rule.** Use an abstract class when subtypes share both a common type *and* some implementation or state, but a key operation (like `area()`) must differ per subtype.
 
 - The cost: a class can extend only one abstract class (single inheritance).
-- The benefit: shared code plus an enforced contract. The compiler guarantees no subclass forgets to implement the abstract methods.
+- The payoff: shared code plus an enforced contract. The compiler guarantees that no subclass forgets to implement the abstract methods.
 
 </div>
 
@@ -192,7 +192,7 @@ The message offers both fixes: override `area()`, or declare `Triangle` `abstrac
 
 ## 2. Interfaces
 
-An **interface** is a contract: a set of method signatures, with no instance fields to inherit. A class `implements` an interface by providing all its methods. Code can then be written against the interface, working with any implementer.
+An **interface** is a contract: a set of method signatures, with no instance fields to inherit. A class `implements` an interface by providing all of its methods. You can then write code against the interface, and it works with any implementer.
 
 ```java run
 interface Drawable {
@@ -216,15 +216,15 @@ public class Main {
 drawing a circle
 ```
 
-**Analysis.** `Drawable` declares `draw()` with no body; `Circle implements Drawable` and supplies it. A `Drawable` reference can point at any implementer and call the contracted method — the same "program to the interface" you used with `List`.
+**Analysis.** `Drawable` declares `draw()` with no body, and `Circle implements Drawable` supplies it. A `Drawable` reference can point at any implementer and call the contracted method — the same "program to the interface" idea you used with `List`.
 
 - An interface method with no body is implicitly `abstract` <abbr title="The Java Language Specification, Java SE 21, §9.4">[3]</abbr>.
 - An interface method with no access modifier is implicitly `public` <abbr title="The Java Language Specification, Java SE 21, §9.4">[3]</abbr>. So the implementing method must be `public` too.
 
 **Intuition.**
-*Mechanism.* An interface defines a type and a method contract. It has no instance fields and no constructor: there's nothing to instantiate, only to implement. A field declared in an interface is implicitly `public static final`: a constant <abbr title="The Java Language Specification, Java SE 21, §9.3">[4]</abbr>. A class declaring `implements` promises to provide every abstract method; the compiler verifies it.
+*Mechanism.* An interface defines a type and a method contract. It has no instance fields and no constructor: there's nothing to instantiate, only something to implement. Any field you declare in an interface is implicitly `public static final` — in other words, a constant <abbr title="The Java Language Specification, Java SE 21, §9.3">[4]</abbr>. A class that declares `implements` promises to provide every abstract method, and the compiler checks that promise.
 
-*Concrete bite.* Leave a contracted method unimplemented and the class won't compile:
+*Concrete bite.* Leave a contracted method unimplemented, and the class won't compile:
 
 ```java run
 interface Drawable { void draw(); }
@@ -243,9 +243,9 @@ class Circle implements Drawable { }
 ^
 ```
 
-`Circle` claims to be `Drawable` but never provides `draw()`, so it's incomplete — either implement the method or declare `Circle` itself `abstract`. The contract is enforced at compile time.
+`Circle` claims to be `Drawable` but never provides `draw()`, so it's incomplete. Either implement the method, or declare `Circle` itself `abstract`. Either way, the contract is enforced at compile time.
 
-*Non-example: an implementation without `public`.* `draw()` in the interface is `public`. Write the implementation with no modifier, and it narrows the access, which an override may not do <abbr title="The Java Language Specification, Java SE 21, §8.4.8.3">[8]</abbr>:
+*Non-example: an implementation without `public`.* `draw()` in the interface is `public`. If you write the implementation with no modifier, you narrow the access — and an override may not do that <abbr title="The Java Language Specification, Java SE 21, §8.4.8.3">[8]</abbr>:
 
 ```java run
 interface Drawable { void draw(); }
@@ -270,14 +270,14 @@ Main.java:4: error: draw() in Circle cannot implement draw() in Drawable
 1 error
 ```
 
-The interface never wrote `public`, yet `draw()` is `public`. Add `public` to the implementation.
+The interface never wrote `public`, yet `draw()` is `public` anyway. The fix is to add `public` to the implementation.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Define an interface to specify *what* a type can do without dictating *how* or sharing state, and program against it so any implementer fits.
+💡 **Earned rule.** Define an interface to specify *what* a type can do, without dictating *how* or sharing state. Then program against it, so any implementer fits.
 
-- The cost: a plain interface carries no implementation (until `default` methods, next).
-- The benefit: a contract decoupled from any class. It is the foundation for swappable implementations and for [lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas).
+- The cost: a plain interface carries no implementation (until `default` methods, coming up next).
+- The payoff: a contract decoupled from any class. It's the foundation for swappable implementations, and for [lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas).
 
 </div>
 
@@ -285,7 +285,7 @@ The interface never wrote `public`, yet `draw()` is `public`. Add `public` to th
 
 ## 3. `default` methods
 
-Since JDK 8, an interface method can have a body, marked `default` <abbr title="JEP 126: Lambda Expressions & Virtual Extension Methods (JDK 8)">[10]</abbr>. Implementers inherit it for free and may override it. This lets an interface ship behavior, not only signatures. It is how you add a method to an interface without breaking every existing implementer.
+Since JDK 8, an interface method can have a body, as long as it's marked `default` <abbr title="JEP 126: Lambda Expressions & Virtual Extension Methods (JDK 8)">[10]</abbr>. Implementers inherit it for free, and may override it if they like. This lets an interface ship actual behavior, not just signatures. It's also how you add a method to an interface without breaking every existing implementer.
 
 ```java run
 interface Greeter {
@@ -312,19 +312,19 @@ public class Main {
 Hello, Ada
 ```
 
-**Analysis.** `Person` implemented only `name()`; it inherited `greet()` from the interface's `default` body, which called `name()` polymorphically (`"Hello, Ada"`). A `default` method is concrete behavior built on the interface's abstract methods — the interface provides the *how* in terms of the implementer's *what*.
+**Analysis.** `Person` implemented only `name()`. It inherited `greet()` from the interface's `default` body, which called `name()` polymorphically (`"Hello, Ada"`). A `default` method is concrete behavior built on top of the interface's abstract methods: the interface provides the *how*, in terms of the implementer's *what*.
 
 **Intuition.**
-*Mechanism.* A `default` method has an implementation that lives in the interface; implementers inherit it unless they override <abbr title="The Java Language Specification, Java SE 21, §9.4">[3]</abbr>. It can call the interface's abstract methods (like `name()`), which dispatch to the implementing class. So the default's behavior specializes per implementer.
+*Mechanism.* A `default` method's implementation lives in the interface, and implementers inherit it unless they override it <abbr title="The Java Language Specification, Java SE 21, §9.4">[3]</abbr>. It can call the interface's abstract methods (like `name()`), which dispatch to the implementing class. So the default's behavior adapts to each implementer.
 
-*Concrete bite.* Defaults are what let interfaces evolve. Before JDK 8, adding a method to a widely-implemented interface stopped every implementer from compiling: each one suddenly lacked it. A `default` method adds the capability with a fallback, so old implementers keep compiling. The cost surfaces only when a class inherits *two* defaults with the same signature. §5 shows that clash, and its fix.
+*Concrete bite.* Defaults are what let interfaces evolve. Before JDK 8, adding a method to a widely implemented interface broke every implementer's compile, because each one suddenly lacked the new method. A `default` method adds the capability along with a fallback, so old implementers keep compiling. The cost shows up only when a class inherits *two* defaults with the same signature. §5 shows that clash, and how to fix it.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use a `default` method to provide optional or derivable behavior on an interface (especially to extend an existing one compatibly), keeping the interface's core as abstract signatures.
+💡 **Earned rule.** Use a `default` method to provide optional or derivable behavior on an interface — especially to extend an existing interface compatibly — while keeping the interface's core as abstract signatures.
 
-- The cost: an interface with many defaults drifts toward an abstract class, still without state.
-- The benefit: interfaces that carry useful behavior and can grow without breaking implementers.
+- The cost: an interface with many defaults drifts toward being an abstract class, just without state.
+- The payoff: interfaces that carry useful behavior, and can grow without breaking implementers.
 
 </div>
 
@@ -334,8 +334,8 @@ Hello, Ada
 
 An interface can hold two more kinds of method with a body <abbr title="The Java Language Specification, Java SE 21, §9.4">[3]</abbr>:
 
-- A **`static` method** (JDK 8) belongs to the interface itself <abbr title="The Java Language Specification, Java SE 8 Edition, §9.4">[13]</abbr>. You call it as `Interface.method()`, without any object. It suits helpers that go with the type.
-- A **`private` method** (JDK 9) is a helper for the interface's own bodies <abbr title="JEP 213: Milling Project Coin (JDK 9)">[11]</abbr>. Two `default` methods can share its code without making it part of the contract.
+- A **`static` method** (JDK 8) belongs to the interface itself <abbr title="The Java Language Specification, Java SE 8 Edition, §9.4">[13]</abbr>. You call it as `Interface.method()`, without any object. It's a good home for helpers that go with the type.
+- A **`private` method** (JDK 9) is a helper for the interface's own method bodies <abbr title="JEP 213: Milling Project Coin (JDK 9)">[11]</abbr>. Two `default` methods can share its code without making it part of the contract.
 
 ```java run
 interface Temperature {
@@ -374,15 +374,15 @@ public class Main {
 
 **Analysis.**
 
-- `Kettle` wrote only `celsius()`. It inherited `report()` and `reportF()`.
-- Both defaults format through the one `private` helper, `label(...)`.
-- `reportF()` calls the `static` `toFahrenheit` by its simple name, from inside the interface.
-- `main` calls it as `Temperature.toFahrenheit(37)`: the interface's name, no object.
+- `Kettle` wrote only `celsius()`, and inherited `report()` and `reportF()`.
+- Both defaults do their formatting through a single `private` helper, `label(...)`.
+- `reportF()` calls the `static` `toFahrenheit` by its simple name, since it's inside the interface.
+- `main` calls it as `Temperature.toFahrenheit(37)`: the interface's name, and no object.
 
 **Intuition.**
-*Mechanism.* A class does not inherit `private` or `static` methods from its interfaces <abbr title="The Java Language Specification, Java SE 21, §8.4.8">[5]</abbr>. The `private` helper is invisible outside the interface. The `static` method stays attached to the interface, and is reached only through its name.
+*Mechanism.* A class doesn't inherit `private` or `static` methods from its interfaces <abbr title="The Java Language Specification, Java SE 21, §8.4.8">[5]</abbr>. The `private` helper is invisible outside the interface. The `static` method stays attached to the interface, and you can reach it only through the interface's name.
 
-*Concrete bite.* Call the `static` method through an implementing class, and javac cannot find it:
+*Concrete bite.* Call the `static` method through an implementing class, and javac can't find it:
 
 ```java run
 interface Temperature {
@@ -411,7 +411,7 @@ Main.java:12: error: cannot find symbol
 1 error
 ```
 
-`Kettle` implements `Temperature`, but `toFahrenheit` is not a member of `Kettle`. Through a `Kettle` variable, `k.toFahrenheit(37)` fails the same way (`location: variable k of type Kettle`). This differs from a class's `static` method, which a subclass *does* inherit <abbr title="The Java Language Specification, Java SE 21, §8.4.8">[5]</abbr>.
+`Kettle` implements `Temperature`, but `toFahrenheit` isn't a member of `Kettle`. Calling it through a `Kettle` variable, as `k.toFahrenheit(37)`, fails the same way (`location: variable k of type Kettle`). Note that this differs from a class's `static` method, which a subclass *does* inherit <abbr title="The Java Language Specification, Java SE 21, §8.4.8">[5]</abbr>.
 
 *Non-example: calling the `private` helper from outside.*
 
@@ -443,14 +443,14 @@ Main.java:15: error: label(double,String) has private access in Temperature
 1 error
 ```
 
-`label` is an implementation detail of `Temperature`. Callers get `report()` and `reportF()`; they never see the helper.
+`label` is an implementation detail of `Temperature`. Callers get `report()` and `reportF()`, and never see the helper.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Put a helper that belongs with the type in a `static` interface method, and call it by the interface's name. Put code shared by several `default` methods in a `private` method.
+💡 **Earned rule.** Put a helper that belongs with the type in a `static` interface method, and call it by the interface's name. Put code that several `default` methods share in a `private` method.
 
-- The cost: a `static` interface method is never reached through an implementer, so callers must name the interface.
-- The benefit: the contract stays small. Only the abstract and `default` methods are what implementers and callers see.
+- The cost: you can never reach a `static` interface method through an implementer, so callers must name the interface.
+- The payoff: the contract stays small. Implementers and callers see only the abstract and `default` methods.
 
 </div>
 
@@ -458,7 +458,7 @@ Main.java:15: error: label(double,String) has private access in Temperature
 
 ## 5. One class, many interfaces
 
-The defining difference: a class `extends` **one** class but `implements` **many** interfaces <abbr title="The Java Language Specification, Java SE 21, §8.1.4">[9]</abbr>. So a type can *be* several things at once — an interface gives multiple inheritance of type, which a single superclass can't.
+Here's the defining difference: a class `extends` **one** class, but `implements` **many** interfaces <abbr title="The Java Language Specification, Java SE 21, §8.1.4">[9]</abbr>. That means a type can *be* several things at once. Interfaces give you multiple inheritance of type, which a single superclass can't.
 
 ```java run
 interface Swimmer { default String move() { return "swimming"; } }
@@ -490,12 +490,12 @@ classDiagram
   Flyer <|.. Duck
 ```
 
-**Analysis.** `Duck` implements *both* `Swimmer` and `Flyer`, inheriting `move()` and `fly()`. It is simultaneously a `Swimmer` and a `Flyer`, so a method taking either type accepts a `Duck`. The diagram shows the two `implements` arrows (`<|..`). No single superclass could give `Duck` both identities; interfaces can.
+**Analysis.** `Duck` implements *both* `Swimmer` and `Flyer`, inheriting `move()` and `fly()`. It's a `Swimmer` and a `Flyer` at the same time, so a method that takes either type will accept a `Duck`. The diagram shows the two `implements` arrows (`<|..`). No single superclass could give `Duck` both identities, but interfaces can.
 
 **Intuition.**
-*Mechanism.* Interfaces carry no instance fields, so combining several raises no question about *state*: which constructor sets which field. That is one reason Java allows many interfaces but only one superclass <abbr title="The Java Tutorials, Multiple Inheritance of State, Implementation, and Type">[12]</abbr>. `default` methods do bring one form of multiple inheritance of *implementation* <abbr title="The Java Tutorials, Multiple Inheritance of State, Implementation, and Type">[12]</abbr>. When two of them collide, the compiler makes you choose.
+*Mechanism.* Interfaces carry no instance fields, so combining several of them raises no questions about *state* — such as which constructor sets which field. That's one reason Java allows many interfaces but only one superclass <abbr title="The Java Tutorials, Multiple Inheritance of State, Implementation, and Type">[12]</abbr>. `default` methods do bring in one form of multiple inheritance of *implementation* <abbr title="The Java Tutorials, Multiple Inheritance of State, Implementation, and Type">[12]</abbr>. When two of them collide, the compiler makes you choose.
 
-*Concrete bite.* Try to extend two classes and it's a syntax error — single inheritance of implementation is a hard rule:
+*Concrete bite.* Try to extend two classes, and you get a syntax error — a class has one superclass, and that's a hard rule:
 
 ```java run
 class A {}
@@ -514,9 +514,9 @@ class C extends A, B {}
                  ^
 ```
 
-`extends A, B` isn't even valid syntax — a class has at most one superclass. To be "both," `A` and `B` would need to be interfaces and `C` would `implement` them.
+`extends A, B` isn't even valid syntax, because a class has at most one superclass. For `C` to be "both," `A` and `B` would need to be interfaces, and `C` would `implement` them.
 
-*Non-example: two defaults with the same signature.* Give `Swimmer` and a new `Walker` interface each a `default` `move()`. A class that implements both inherits two bodies for one method, which is a compile-time error <abbr title="The Java Language Specification, Java SE 21, §8.4.8.4">[6]</abbr>:
+*Non-example: two defaults with the same signature.* Give `Swimmer` and a new `Walker` interface each a `default` `move()`. A class that implements both now inherits two bodies for one method, and that's a compile-time error <abbr title="The Java Language Specification, Java SE 21, §8.4.8.4">[6]</abbr>:
 
 ```java run
 interface Swimmer { default String move() { return "swimming"; } }
@@ -540,7 +540,7 @@ class Duck implements Swimmer, Walker { }
 1 error
 ```
 
-The fix is to override `move()` in `Duck`. Inside it, `Swimmer.super.move()` calls one interface's default by name <abbr title="The Java Language Specification, Java SE 21, §15.12.1">[7]</abbr>:
+The fix is to override `move()` in `Duck`. Inside the override, `Swimmer.super.move()` calls one specific interface's default by name <abbr title="The Java Language Specification, Java SE 21, §15.12.1">[7]</abbr>:
 
 ```java run
 interface Swimmer { default String move() { return "swimming"; } }
@@ -563,14 +563,14 @@ public class Main {
 swimming and walking
 ```
 
-`Duck` chose both, in its own order. It could equally pick one, or write something new. javac reports the clash when it compiles `Duck`, so it cannot slip by unnoticed.
+`Duck` chose both, in its own order. It could just as well pick one, or write something entirely new. Because javac reports the clash when it compiles `Duck`, it can't slip by unnoticed.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Reach for an interface (or several) when a type needs to play multiple roles, or you want maximum decoupling. Reach for an abstract class when subtypes share state and implementation.
+💡 **Earned rule.** Reach for an interface (or several) when a type needs to play multiple roles, or when you want maximum decoupling. Reach for an abstract class when subtypes share state and implementation.
 
 - The cost of interfaces: they can't hold instance state.
-- The benefit: a class can implement many, modeling "is-a-kind-of-capability" freely. That is why most Java APIs are built on interfaces, with abstract classes as an implementation convenience.
+- The payoff: a class can implement as many as it needs, freely modeling "is-a-kind-of-capability." That's why most Java APIs are built on interfaces, with abstract classes as an implementation convenience.
 
 </div>
 
@@ -698,8 +698,8 @@ swimming and flying
 ```
 
 - `Triangle(3, 4)` has area `0.5 * 3 * 4 = 6.00`.
-- `loudGreet()` is a second `default` built on the first.
-- `Robot` compiles with an empty body: both interfaces supply their methods as defaults, and the names differ. Two interfaces are fine because they bring no fields. Two classes are not, because a class has one superclass.
+- `loudGreet()` is a second `default` built on top of the first.
+- `Robot` compiles with an empty body: both interfaces supply their methods as defaults, and the names differ. Two interfaces are fine because they bring no fields along. Two classes aren't, because a class has only one superclass.
 
 </details>
 
@@ -727,8 +727,8 @@ swimming and flying
 
 🧪 **Predict, then check.**
 
-1. Add a `Triangle extends Shape` with `area()` returning `0.5 * base * height`. Predict the three areas printed for a `Circle(1)`, `Square(2)`, `Triangle(3, 4)`.
-2. Give `Greeter` a second `default` method `loudGreet()` returning `greet().toUpperCase()`, and predict `new Person("Ada").loudGreet()`.
+1. Add a `Triangle extends Shape` whose `area()` returns `0.5 * base * height`. Predict the three areas printed for a `Circle(1)`, a `Square(2)` and a `Triangle(3, 4)`.
+2. Give `Greeter` a second `default` method, `loudGreet()`, that returns `greet().toUpperCase()`, and predict `new Person("Ada").loudGreet()`.
 3. Predict whether `class Robot implements Swimmer, Flyer {}` compiles, and what `move()` and `fly()` return on a `Robot`. Explain why two interfaces are fine but two classes are not.
 
 </div>

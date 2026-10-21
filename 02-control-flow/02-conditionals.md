@@ -6,7 +6,7 @@ prereqs: []
 
 # Conditionals — Choosing a Path
 
-A program that always does the same thing is a calculator with one button. **Conditionals** let it choose: run this code when a condition holds, that code otherwise. Every choice rests on a `boolean`, the [yes/no type from the last chapter](/synapse/programming-languages/java/control-flow/booleans-and-logic). Java offers four shapes for branching:
+A program that always does the same thing is a calculator with one button. **Conditionals** let it choose: run this code when a condition holds, and that code otherwise. Every choice rests on a `boolean`, the [yes/no type from the last chapter](/synapse/programming-languages/java/control-flow/booleans-and-logic). Java gives you four shapes for branching:
 
 - `if`/`else` for one decision;
 - `else if` chains for many;
@@ -57,7 +57,7 @@ Every output below was produced by compiling and running the code.
 
 ## 1. `if` and `else`
 
-An `if` runs its block only when a `boolean` condition is `true`. An optional `else` runs when it is `false`.
+An `if` runs its block only when a `boolean` condition is `true`. An optional `else` runs when it's `false`.
 
 ```java run
 public class Main {
@@ -79,7 +79,7 @@ cold
 
 **Analysis.** `temp < 10` is `true`, so the `if` block ran and the `else` block was skipped. Exactly one of the two blocks runs, never both.
 
-The condition must be a `boolean` <abbr title="The Java Language Specification, Java SE 21, §14.9">[1]</abbr>. [Booleans & Logic](/synapse/programming-languages/java/control-flow/booleans-and-logic) promised that a number is refused, and here is the refusal:
+The condition must be a `boolean` <abbr title="The Java Language Specification, Java SE 21, §14.9">[1]</abbr>. [Booleans & Logic](/synapse/programming-languages/java/control-flow/booleans-and-logic) promised that Java refuses a number, and here's the refusal:
 
 ```java run
 public class Main {
@@ -103,9 +103,9 @@ Main.java:4: error: incompatible types: int cannot be converted to boolean
 Write the question out: `if (count != 0)`.
 
 **Intuition.**
-*Mechanism.* `if (cond) { … }` guards a **block**: everything inside the braces. Without braces, `if (cond) stmt;` guards only the *single statement* that immediately follows it. The next statement is not part of the `if` at all, no matter how it is indented.
+*Mechanism.* `if (cond) { … }` guards a **block**: everything inside the braces. Without braces, `if (cond) stmt;` guards only the *single statement* right after it. The next statement isn't part of the `if` at all, however it's indented.
 
-*Concrete bite.* That single-statement rule, plus misleading indentation, is a classic trap:
+*Concrete bite.* That single-statement rule, combined with misleading indentation, is a classic trap:
 
 ```java run
 public class Main {
@@ -122,9 +122,9 @@ public class Main {
 leave the house
 ```
 
-`cold` is `false`, so `wear a coat` is correctly skipped, but `leave the house` printed anyway. The indentation suggests both lines are guarded; in fact only the first is. The braceless `if` controls exactly one statement, and the second runs unconditionally.
+`cold` is `false`, so `wear a coat` is correctly skipped, but `leave the house` printed anyway. The indentation suggests both lines are guarded, but only the first one is. The braceless `if` controls exactly one statement, and the second runs no matter what.
 
-*Non-example: a stray semicolon.* A `;` on its own is a statement too: the **empty statement**, which does nothing <abbr title="The Java Language Specification, Java SE 21, §14.6">[3]</abbr>. Put one after the condition, and the `if` guards that nothing:
+*Non-example: a stray semicolon.* A `;` on its own is a statement too. It's the **empty statement**, and it does nothing <abbr title="The Java Language Specification, Java SE 21, §14.6">[3]</abbr>. Put one after the condition, and the `if` guards that nothing:
 
 ```java run
 public class Main {
@@ -142,9 +142,9 @@ public class Main {
 cold
 ```
 
-`25 < 10` is `false`, and `cold` printed anyway. The `if` ended at the `;`. The braces after it form an ordinary block that always runs.
+`25 < 10` is `false`, yet `cold` printed anyway. The `if` ended at the `;`, so the braces after it form an ordinary block that always runs.
 
-*The dangling `else`.* With two braceless `if`s, an `else` belongs to the **nearest** `if`, whatever the indentation says <abbr title="The Java Language Specification, Java SE 21, §14.5">[2]</abbr>:
+*The dangling `else`.* With two braceless `if`s, an `else` belongs to the **nearest** `if`, whatever the indentation claims <abbr title="The Java Language Specification, Java SE 21, §14.5">[2]</abbr>:
 
 ```java run
 public class Main {
@@ -165,7 +165,7 @@ public class Main {
 done
 ```
 
-The indentation says a non-member pays `full price`. But the `else` belongs to `if (sale)`, and that inner `if` sits inside `if (member)`. `member` is `false`, so neither line ran. Braces put the `else` where the indentation meant it:
+The indentation says a non-member pays `full price`. But the `else` actually belongs to `if (sale)`, and that inner `if` sits inside `if (member)`. `member` is `false`, so neither line ran. Braces put the `else` where the indentation meant it to be:
 
 ```java run
 public class Main {
@@ -188,9 +188,9 @@ full price
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Always use braces, even for a one-line body: `if (cond) { … }`. The cost is two extra characters.
+💡 **Earned rule.** Always use braces, even for a one-line body: `if (cond) { … }`. It costs you two extra characters.
 
-The benefit: "what does this `if` control?" has one answer, the block. Without braces, the answer depends on where the semicolons fall and which `if` is nearest. That is how a guarded line and an always-run line end up looking identical.
+The payoff: "what does this `if` control?" has one answer, the block. Without braces, the answer depends on where the semicolons fall and which `if` is nearest. That's how a guarded line and an always-run line end up looking identical.
 
 </div>
 
@@ -198,9 +198,9 @@ The benefit: "what does this `if` control?" has one answer, the block. Without b
 
 ## 2. `else if` chains
 
-To choose among more than two paths, chain `else if`. Java tests each condition in order and runs the **first** block whose condition is `true`, skipping the rest.
+To choose among more than two paths, chain `else if`. Java tests each condition in order, runs the **first** block whose condition is `true`, and skips the rest.
 
-`else if` is not a keyword of its own. It is an `else` whose one statement is another `if` <abbr title="The Java Language Specification, Java SE 21, §14.9">[1]</abbr>. A chain is `if`s nested inside `else`s, written flat.
+`else if` isn't a keyword of its own. It's an `else` whose one statement happens to be another `if` <abbr title="The Java Language Specification, Java SE 21, §14.9">[1]</abbr>. So a chain is really `if`s nested inside `else`s, written flat.
 
 ```java run
 public class Main {
@@ -239,14 +239,14 @@ flowchart TD
   Q3 -->|"false"| F["print F"]
 ```
 
-**Analysis.** `score` is `85`. The chain checks `>= 90` (false), then `>= 80` (true), so it prints `B`. It skips the remaining tests, including `>= 70`, which would also have been true. First match wins; the rest never run.
+**Analysis.** `score` is `85`. The chain checks `>= 90` (false), then `>= 80` (true), so it prints `B`. It skips the remaining tests, including `>= 70`, which would also have been true. The first match wins, and the rest never run.
 
-This chain leaves out the braces so each branch fits on one line. Every branch is a single statement, so nothing can dangle. Add a second statement to any branch, and the braces become necessary.
+This chain leaves out the braces so each branch fits on one line. Every branch is a single statement, so nothing can dangle. Add a second statement to any branch, though, and you'll need the braces.
 
 **Intuition.**
-*Mechanism.* The chain is evaluated top to bottom, and the first true condition's block executes. Once one matches, the entire chain is done. So a later condition is reached only when every earlier one was false: order encodes priority.
+*Mechanism.* Java evaluates the chain top to bottom and runs the block of the first true condition. Once one matches, the whole chain is done. So Java reaches a later condition only when every earlier one was false. In other words, order encodes priority.
 
-*Concrete bite.* Put a broad condition before a narrow one and the narrow one becomes unreachable:
+*Concrete bite.* Put a broad condition before a narrow one, and the narrow one becomes unreachable:
 
 ```java run
 public class Main {
@@ -264,9 +264,9 @@ public class Main {
 C
 ```
 
-`95` deserves an `A`, but `score >= 70` is checked first and matches. So it prints `C` and never reaches `>= 90`. The compiler sees nothing wrong: the logic is legal, only ordered backwards.
+`95` deserves an `A`, but `score >= 70` is checked first and matches. So it prints `C` and never reaches `>= 90`. The compiler sees nothing wrong. The logic is legal, just ordered backwards.
 
-*Non-example: a chain with no final `else`.* A chain often sets a variable. Without an `else`, some values set nothing, and the compiler sees that path <abbr title="The Java Language Specification, Java SE 21, Chapter 16">[10]</abbr>:
+*Non-example: a chain with no final `else`.* A chain often sets a variable. Without an `else`, some values set nothing, and the compiler spots that path <abbr title="The Java Language Specification, Java SE 21, Chapter 16">[10]</abbr>:
 
 ```java run
 public class Main {
@@ -291,15 +291,15 @@ Main.java:10: error: variable grade might not have been initialized
 1 error
 ```
 
-`score` is `85` here, so `grade` would be `"B"`. The compiler does not run the program, though. It checks every path, and a score below `80` passes through both tests with `grade` unset.
+`score` is `85` here, so `grade` would be `"B"`. But the compiler doesn't run the program. It checks every path, and a score below `80` passes through both tests with `grade` unset.
 
-This is the rule from [Variables & Primitive Types](/synapse/programming-languages/java/first-steps/variables-and-primitive-types): a variable must have a value before it is read. A final `else { grade = "F"; }` closes the gap.
+This is the rule from [Variables & Primitive Types](/synapse/programming-languages/java/first-steps/variables-and-primitive-types): a variable must have a value before you read it. A final `else { grade = "F"; }` closes the gap.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** In an `else if` chain, order conditions from most specific (narrowest) to least, because the first match wins. End a chain that sets a variable with an `else`.
 
-The cost of a misordered chain is a *silent* misclassification, not an error. When ranges overlap, read the chain as "first true wins", and put the tightest test on top.
+A misordered chain costs you a *silent* misclassification, not an error. When ranges overlap, read the chain as "first true wins", and put the tightest test on top.
 
 </div>
 
@@ -307,7 +307,7 @@ The cost of a misordered chain is a *silent* misclassification, not an error. Wh
 
 ## 3. The `switch` statement
 
-When you are choosing based on one value against several constants, a `switch` is clearer than a long chain.
+When you're choosing by matching one value against several constants, a `switch` reads more clearly than a long chain.
 
 - Each `case` labels a constant.
 - `break` ends the chosen branch.
@@ -335,9 +335,9 @@ Wed
 **Analysis.** `day` is `3`, so execution jumped to `case 3`, printed `Wed`, and `break` ended the switch. The other cases were skipped entirely.
 
 **Intuition.**
-*Mechanism.* A `switch` statement *jumps* to the matching `case` label and then runs **straight down** until it hits a `break` (or the end) <abbr title="The Java Language Specification, Java SE 21, §14.11.3">[5]</abbr>. The `break` is not decoration. Without it, execution "falls through" into the next case's code, ignoring that case's label.
+*Mechanism.* A `switch` statement *jumps* to the matching `case` label and then runs **straight down** until it hits a `break` (or the end) <abbr title="The Java Language Specification, Java SE 21, §14.11.3">[5]</abbr>. The `break` isn't decoration. Without it, execution "falls through" into the next case's code and ignores that case's label.
 
-*Concrete bite.* Drop the `break`s and one match runs several cases:
+*Concrete bite.* Drop the `break`s, and one match runs several cases:
 
 ```java run
 public class Main {
@@ -362,7 +362,7 @@ Wed
 
 `day` is `1`, so it entered `case 1` and printed `Mon`. Then, with no `break`, it fell through into `case 2` (`Tue`) and `case 3` (`Wed`), stopping only at the `break`. One value, three lines printed.
 
-**What a `switch` can test.** The value in `switch ( … )` is the **selector**. It can be a `char`, `byte`, `short` or `int`, or an object such as a `String` <abbr title="The Java Language Specification, Java SE 21, §14.11">[4]</abbr>. A `String` case matches with `.equals`, so letter case counts:
+**What a `switch` can test.** The value in `switch ( … )` is the **selector**. It can be a `char`, `byte`, `short` or `int`, or an object such as a `String` <abbr title="The Java Language Specification, Java SE 21, §14.11">[4]</abbr>. A `String` case matches with `.equals`, so upper and lower case matter:
 
 ```java run
 public class Main {
@@ -389,7 +389,7 @@ halted
 unknown: Stop
 ```
 
-A `long`, `float`, `double` or `boolean` selector is refused:
+Java refuses a `long`, `float`, `double` or `boolean` selector:
 
 ```java run
 public class Main {
@@ -411,13 +411,13 @@ Main.java:4: error: selector type long is not allowed
 1 error
 ```
 
-Each `case` label must also be a **constant**: a literal, or a `final` variable set from one <abbr title="The Java Language Specification, Java SE 21, §14.11">[4]</abbr>. An ordinary variable after `case` gives `constant expression required`.
+Each `case` label must also be a **constant**: a literal, or a `final` variable set from one <abbr title="The Java Language Specification, Java SE 21, §14.11">[4]</abbr>. Put an ordinary variable after `case`, and you get `constant expression required`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** End every `case` of a `switch` *statement* with `break` (or `return`) unless you deliberately want fall-through.
 
-The cost of the colon-and-`break` form is exactly this footgun. A forgotten `break` is silent and runs too much code. The arrow form in the next section removes it.
+This footgun is exactly what the colon-and-`break` form costs you. A forgotten `break` is silent and runs too much code. The arrow form in the next section gets rid of it.
 
 </div>
 
@@ -425,7 +425,7 @@ The cost of the colon-and-`break` form is exactly this footgun. A forgotten `bre
 
 ## 4. `switch` expressions
 
-Since JDK 14, a `switch` can be an **expression** that produces a value, using `case … ->` arrows <abbr title="JEP 361: Switch Expressions (JDK 14)">[8]</abbr>. There is no fall-through, and you can assign the whole thing to a variable.
+Since JDK 14, a `switch` can be an **expression** that produces a value, using `case … ->` arrows <abbr title="JEP 361: Switch Expressions (JDK 14)">[8]</abbr>. There's no fall-through, and you can assign the whole thing to a variable.
 
 ```java run
 public class Main {
@@ -447,7 +447,7 @@ public class Main {
 Wed
 ```
 
-**Analysis.** The `switch (day) { … }` evaluated to `"Wed"`, which was assigned to `name`. Each arrow case yields a value and *only* that case runs: no `break` needed, no fall-through possible. The trailing `;` ends the assignment statement.
+**Analysis.** The `switch (day) { … }` evaluated to `"Wed"`, and that went into `name`. Each arrow case yields a value, and *only* that case runs. No `break` needed, and no fall-through possible. The trailing `;` ends the assignment statement.
 
 One case can list several values, separated by commas. And the arrow form works in a plain `switch` statement too, one that produces no value:
 
@@ -475,7 +475,7 @@ weekend
 sleep in
 ```
 
-When a case needs more than one expression, give it a block in braces. The block hands its value back with **`yield`** <abbr title="The Java Language Specification, Java SE 21, §14.21">[7]</abbr>:
+When a case needs more than one expression, give it a block in braces. The block hands back its value with **`yield`** <abbr title="The Java Language Specification, Java SE 21, §14.21">[7]</abbr>:
 
 ```java run
 public class Main {
@@ -525,9 +525,9 @@ Main.java:7: error: switch rule completes without providing a value
 ```
 
 **Intuition.**
-*Mechanism.* An arrow `case X -> value` runs only its right-hand side and produces a value for the whole `switch`. Because the result is *used* (assigned, returned, printed), the compiler insists the `switch` is **exhaustive**: every possible input must be covered, or it will not compile <abbr title="The Java Language Specification, Java SE 21, §15.28.1">[6]</abbr>.
+*Mechanism.* An arrow `case X -> value` runs only its right-hand side and produces a value for the whole `switch`. Because the result is *used* (assigned, returned, printed), the compiler insists that the `switch` is **exhaustive**. Every possible input must be covered, or it won't compile <abbr title="The Java Language Specification, Java SE 21, §15.28.1">[6]</abbr>.
 
-*Concrete bite.* Leave a gap with no `default` and the compiler refuses:
+*Concrete bite.* Leave a gap with no `default`, and the compiler refuses:
 
 ```java run
 public class Main {
@@ -550,13 +550,13 @@ Main.java:4: error: the switch expression does not cover all possible input valu
 1 error
 ```
 
-An `int` can be more than `1` or `2`, and a `switch` *expression* must always produce a value. So the missing cases are a compile error, not a run-time surprise. Add a `default ->` and it compiles.
+An `int` can be more than `1` or `2`, and a `switch` *expression* must always produce a value. So the missing cases are a compile error, not a run-time surprise. Add a `default ->`, and it compiles.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Prefer arrow `switch` expressions when you are computing a value from one of several cases. They cannot fall through, and exhaustiveness is checked at compile time.
+💡 **Earned rule.** Prefer arrow `switch` expressions when you're computing a value from one of several cases. They can't fall through, and the compiler checks exhaustiveness for you.
 
-The cost is that you must handle every case (or add a `default`). That is the point: the compiler turns "I forgot a branch" from a run-time bug into a build error. Java 21 extends this to `sealed` types and pattern matching <abbr title="JEP 441: Pattern Matching for switch (JDK 21)">[11]</abbr>, in [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching).
+The cost is that you must handle every case (or add a `default`). But that's the whole point: the compiler turns "I forgot a branch" from a run-time bug into a build error. Java 21 extends this to `sealed` types and pattern matching <abbr title="JEP 441: Pattern Matching for switch (JDK 21)">[11]</abbr>, in [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching).
 
 </div>
 
@@ -564,7 +564,7 @@ The cost is that you must handle every case (or add a `default`). That is the po
 
 ## 5. The ternary operator `?:`
 
-For the smallest choice, picking one of two *values* based on a condition, use the ternary operator `cond ? a : b`. It is a conditional that is itself an expression: it evaluates to `a` when `cond` is true, else `b` <abbr title="The Java Language Specification, Java SE 21, §15.25">[9]</abbr>.
+For the smallest choice, picking one of two *values* based on a condition, use the ternary operator `cond ? a : b`. It's a conditional that is itself an expression: it evaluates to `a` when `cond` is true, and to `b` otherwise <abbr title="The Java Language Specification, Java SE 21, §15.25">[9]</abbr>.
 
 ```java run
 public class Main {
@@ -584,9 +584,9 @@ adult
 7
 ```
 
-**Analysis.** `age >= 18` is true, so the ternary produced `"adult"`. In the second, `a > b` is true, so it produced `a` (`7`): a one-line "max". The ternary *yields a value*, so it can sit on the right of `=` or inside a `println`.
+**Analysis.** `age >= 18` is true, so the ternary produced `"adult"`. In the second, `a > b` is true, so it produced `a` (`7`), a one-line "max". Because the ternary *yields a value*, it can sit on the right of `=` or inside a `println`.
 
-When the two values are different numeric types, the result takes the wider type, as in [arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) <abbr title="The Java Language Specification, Java SE 21, §15.25.2">[9]</abbr>. Even the branch that was chosen changes type:
+When the two values are different numeric types, the result takes the wider type, just as in [arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) <abbr title="The Java Language Specification, Java SE 21, §15.25.2">[9]</abbr>. Even the branch that was chosen changes type:
 
 ```java run
 public class Main {
@@ -605,9 +605,9 @@ public class Main {
 The condition chose `1`, and `1` became `1.0`, because the whole expression has one type, `double`.
 
 **Intuition.**
-*Mechanism.* `?:` is an **expression**: it has a value. `if` is a **statement**: it does not. That is why a ternary can be assigned or printed directly, and an `if` cannot.
+*Mechanism.* `?:` is an **expression**, so it has a value. `if` is a **statement**, so it doesn't. That's why you can assign or print a ternary directly, but not an `if`.
 
-*Concrete bite.* Try to use `if` where a value is required and it fails to compile, because a statement has no value to assign:
+*Concrete bite.* Try to use `if` where a value is required, and it fails to compile, because a statement has no value to assign:
 
 ```java run
 public class Main {
@@ -626,9 +626,9 @@ Main.java:4: error: illegal start of expression
                    ^
 ```
 
-`if` cannot start an expression, so `String s = if …` is rejected. The ternary `String s = cond ? "yes" : "no";` is the expression form that works.
+`if` can't start an expression, so Java rejects `String s = if …`. The ternary `String s = cond ? "yes" : "no";` is the expression form that works.
 
-*Non-example: a ternary inside a `+` chain.* `?:` binds looser than `+` and every comparison. Without parentheses, the text joins the number first:
+*Non-example: a ternary inside a `+` chain.* `?:` binds more loosely than `+` and every comparison. Without parentheses, the text joins the number first:
 
 ```java run
 public class Main {
@@ -649,13 +649,13 @@ Main.java:4: error: bad operand types for binary operator '>='
 1 error
 ```
 
-`"status: " + age` became the text `"status: 20"`, and `>=` cannot compare text with `18`. Wrap the ternary: `"status: " + (age >= 18 ? "adult" : "minor")` prints `status: adult`.
+`"status: " + age` became the text `"status: 20"`, and `>=` can't compare text with `18`. Wrap the ternary: `"status: " + (age >= 18 ? "adult" : "minor")` prints `status: adult`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Reach for `?:` to choose between two *values* in one expression (`max = a > b ? a : b`), and `if` to choose between two *actions*. Put a ternary in parentheses whenever it sits inside a longer expression.
 
-The cost of `?:` is readability. Nested ternaries (`a ? b : c ? d : e`) become unreadable fast. Keep each to a single, simple choice, and use `if`/`else` or a `switch` expression for anything branchier.
+`?:` costs you readability. Nested ternaries (`a ? b : c ? d : e`) get unreadable fast. Keep each one to a single, simple choice, and use `if`/`else` or a `switch` expression for anything branchier.
 
 </div>
 
@@ -730,7 +730,7 @@ The chain prints `A` for 90, `C` for 70 and `F` for 69.
 
 With every `break`, `day = 2` prints `Tue`. With every `break` removed, it falls through to the end: `Tue`, `Wed`, `other`.
 
-A `case` needs a constant, not a range, so switch on the tens digit. `score / 10` is integer division, so 85 becomes `8`:
+A `case` needs a constant, not a range, so switch on the tens digit instead. `score / 10` is integer division, so 85 becomes `8`:
 
 `String grade = switch (score / 10) { case 10, 9 -> "A"; case 8 -> "B"; case 7 -> "C"; default -> "F"; };`
 

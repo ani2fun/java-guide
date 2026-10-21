@@ -6,14 +6,14 @@ prereqs: []
 
 # I/O, Files & NIO.2 — Reading and Writing the World
 
-A program that cannot read or write outside itself is sealed off. **I/O** (input/output) connects it to files, the network and the console. It comes in two flavours:
+A program that can't read or write anything outside itself is sealed off from the world. **I/O** (input/output) connects it to files, the network and the console. It comes in two flavours:
 
-- **Byte** I/O moves raw binary.
+- **Byte** I/O moves raw binary data.
 - **Character** I/O moves text: bytes interpreted through a **charset** (an encoding), such as UTF-8.
 
-The modern file API, **NIO.2** (`java.nio.file`, since JDK 7), is built on `Path` (a location) and `Files` (static operations), and it makes common tasks one line. It also bridges to the [Streams API](/synapse/programming-languages/java/advanced/functional-java-and-streams): `Files.lines()` returns a `java.util.stream.Stream<String>`. That is the moment to clear up a real confusion: the word "stream" means two different things in Java, an I/O byte stream and the functional `Stream` pipeline.
+The modern file API, **NIO.2** (`java.nio.file`, since JDK 7), is built on `Path` (a location) and `Files` (static operations), and it turns common tasks into one-liners. It also bridges to the [Streams API](/synapse/programming-languages/java/advanced/functional-java-and-streams): `Files.lines()` returns a `java.util.stream.Stream<String>`. That's the perfect moment to clear up a real source of confusion — the word "stream" means two different things in Java: an I/O byte stream, and the functional `Stream` pipeline.
 
-Three more realities round it out. Text is bytes through an encoding, so one character can be several bytes. **Buffering** batches the expensive system calls that I/O is made of. And **serialization** turns whole objects into bytes, with a security warning attached.
+Three more realities round out the picture. Text is bytes through an encoding, so one character can take several bytes. **Buffering** batches up the expensive system calls that I/O is made of. And **serialization** turns whole objects into bytes — with a security warning attached.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -26,9 +26,9 @@ Three more realities round it out. Text is bytes through an encoding, so one cha
 
 </div>
 
-This uses [streams](/synapse/programming-languages/java/advanced/functional-java-and-streams) and [try-with-resources](/synapse/programming-languages/java/robust-oop/exceptions). Every output below was produced by compiling and running the code. Each program writes and reads files in its working directory.
+This lesson uses [streams](/synapse/programming-languages/java/advanced/functional-java-and-streams) and [try-with-resources](/synapse/programming-languages/java/robust-oop/exceptions). Every output below was produced by compiling and running the code, and each program writes and reads files in its own working directory.
 
-**You'll be able to:** read and write files and list directories with `Path` and `Files`, and predict where a missing file fails; pick between `readAllLines` and `Files.lines`, and close a file-backed stream; predict a file's byte and character counts, and what the wrong charset does to text; read the console and files line by line with a `BufferedReader`, and explain why buffering matters; serialize and deserialize an object, and predict what `transient` and a non-`Serializable` class do.
+**You'll be able to:** read and write files and list directories with `Path` and `Files`, and predict where a missing file fails; choose between `readAllLines` and `Files.lines`, and close a file-backed stream; predict a file's byte and character counts, and what the wrong charset does to text; read the console and files line by line with a `BufferedReader`, and explain why buffering matters; serialize and deserialize an object, and predict what `transient` and a non-`Serializable` class do.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -60,7 +60,7 @@ This uses [streams](/synapse/programming-languages/java/advanced/functional-java
 
 ## 1. NIO.2: `Path` and `Files`
 
-A `Path` names a file or directory location. The `Files` class holds static methods that operate on paths: `writeString`, `readString`, `size`, and dozens more <abbr title="Java SE 21 API, java.nio.file.Files">[1]</abbr>. What used to be many lines of stream-and-close ceremony becomes one call.
+A `Path` names the location of a file or directory. The `Files` class holds static methods that operate on paths: `writeString`, `readString`, `size`, and dozens more <abbr title="Java SE 21 API, java.nio.file.Files">[1]</abbr>. What used to take many lines of open-a-stream-and-close-it ceremony becomes a single call.
 
 ```java run
 import java.nio.file.*;
@@ -87,11 +87,11 @@ size: 26 bytes
 **Analysis.** Four calls, four jobs:
 
 - `Path.of("greeting.txt")` named a file.
-- `Files.writeString` created it and wrote the text, opening, writing and closing in one call.
+- `Files.writeString` created it and wrote the text — opening, writing and closing, all in one call.
 - `Files.readString` read it all back.
-- `Files.size` reported `26` bytes: the 24 visible characters plus two newlines.
+- `Files.size` reported `26` bytes: the 24 visible characters, plus two newlines.
 
-No streams to open or close by hand: `Files` handles the resource management. The methods declare `IOException`, a [checked exception](/synapse/programming-languages/java/robust-oop/exceptions), so `main` must handle or declare it.
+There are no streams to open or close by hand, because `Files` handles the resource management for you. The methods declare `IOException`, a [checked exception](/synapse/programming-languages/java/robust-oop/exceptions), so `main` must handle or declare it.
 
 A `Path` also has operations of its own, and none of them touches the disk <abbr title="Java SE 21 API, java.nio.file.Path">[2]</abbr>:
 
@@ -122,14 +122,14 @@ relativize: ../photos/cat.png
 absolute?  false
 ```
 
-- `resolve` joins a path onto another; `normalize` removes the `..` and `.` parts.
-- `getFileName` and `getParent` split a path; `relativize` gives the path from one location to another.
-- None of these directories exists, and nothing failed: a `Path` is only a name. The output uses `/`, the separator on Linux and macOS.
+- `resolve` joins one path onto another, and `normalize` removes the `..` and `.` parts.
+- `getFileName` and `getParent` split a path apart, and `relativize` gives the path from one location to another.
+- None of these directories exists, yet nothing failed, because a `Path` is only a name. The output uses `/`, the separator on Linux and macOS.
 
 **Intuition.**
-*Mechanism.* A `Path` is a value describing a location; it does not touch the disk. `Files` methods are where the I/O happens. Each performs the open, operate, close cycle, and translates operating-system errors into Java exceptions.
+*Mechanism.* A `Path` is a value that describes a location; it never touches the disk. The `Files` methods are where the I/O actually happens. Each one performs the open-operate-close cycle, and translates operating-system errors into Java exceptions.
 
-*Concrete bite.* Because a `Path` is only a name, operating on one that does not exist fails at the `Files` call, not at `Path.of`:
+*Concrete bite.* Since a `Path` is only a name, operating on one that doesn't exist fails at the `Files` call, not at `Path.of`:
 
 ```java run
 import java.nio.file.*;
@@ -148,13 +148,13 @@ public class Main {
 Exception in thread "main" java.nio.file.NoSuchFileException: does-not-exist.txt
 ```
 
-`Path.of(...)` succeeded, because it is only a name. The failure came when `Files.readString` tried to read a file that is not there. Constructing a `Path` never throws for a missing file; the `Files` operation does.
+`Path.of(...)` succeeded, because it's only a name. The failure came when `Files.readString` tried to read a file that isn't there. Constructing a `Path` never throws for a missing file; the `Files` operation does.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use NIO.2 (`Path` + `Files`) for file work: it is concise, manages resources for you, and gives precise exceptions. Reach for raw streams only when you need fine control.
+💡 **Earned rule.** Use NIO.2 (`Path` + `Files`) for file work: it's concise, it manages resources for you, and it gives precise exceptions. Reach for raw streams only when you need fine-grained control.
 
-The cost is handling `IOException`: file I/O can fail, through missing files, permissions or full disks. The benefit is one-line reads and writes, instead of the open-read-close-in-`finally` boilerplate of the old `java.io` API.
+The cost is handling `IOException`, since file I/O can fail — through missing files, permissions or full disks. The payoff is one-line reads and writes, instead of the open-read-close-in-`finally` boilerplate of the old `java.io` API.
 
 </div>
 
@@ -162,7 +162,7 @@ The cost is handling `IOException`: file I/O can fail, through missing files, pe
 
 ## 2. Reading lines as text
 
-Most files are line-oriented text. `Files.write(path, List<String>)` writes each element as a line, and `Files.readAllLines` reads them back into a `List<String>`.
+Most files are line-oriented text. `Files.write(path, List<String>)` writes each element as a line, and `Files.readAllLines` reads them all back into a `List<String>`.
 
 ```java run viz=array:lines
 import java.nio.file.*;
@@ -186,18 +186,18 @@ lines: 3
 banana
 ```
 
-**Analysis.** `Files.write` wrote three lines, adding a line separator after each. `Files.readAllLines` read them into a `List` of three strings, so `lines.get(1)` is the second, `"banana"`. This is the everyday text-file pattern: write a list of lines, read a list of lines. The encoding (UTF-8 for these methods) is handled, and the file is closed for you.
+**Analysis.** `Files.write` wrote three lines, adding a line separator after each one. `Files.readAllLines` read them into a `List` of three strings, so `lines.get(1)` is the second one, `"banana"`. This is the everyday text-file pattern: write a list of lines, read back a list of lines. The encoding (UTF-8, for these methods) is handled for you, and so is closing the file.
 
 **Intuition.**
-*Mechanism.* `readAllLines` reads the *entire* file into memory as a `List<String>`. It splits on line terminators and decodes bytes to characters through the charset. It is eager: convenient for small and medium files, all in memory at once.
+*Mechanism.* `readAllLines` reads the *entire* file into memory as a `List<String>`. It splits on line terminators, and decodes bytes into characters through the charset. It's eager: convenient for small and medium files, with everything in memory at once.
 
-*Concrete bite.* "All into memory" is the limit. `readAllLines` on a multi-gigabyte log loads the whole thing, and can exhaust the heap. The API says so about `readString`: "It is not intended for reading very large files" <abbr title="Java SE 21 API, java.nio.file.Files.readString(Path)">[1]</abbr>. For large or unbounded files, process line by line *without* holding them all, as the next section does.
+*Concrete bite.* "Everything in memory" is exactly the limit. `readAllLines` on a multi-gigabyte log loads the whole thing, and can exhaust the heap. The API says as much about `readString`: "It is not intended for reading very large files" <abbr title="Java SE 21 API, java.nio.file.Files.readString(Path)">[1]</abbr>. For large or unbounded files, process them line by line *without* holding them all at once, as the next section shows.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Use `readAllLines`/`readString` for files that fit comfortably in memory (configuration, small data), and the streaming `Files.lines` for large ones.
 
-The cost of the eager methods is memory in proportion to the file's size. The benefit is simplicity: a whole file as a `String` or a `List`, when you can afford to hold it.
+The cost of the eager methods is memory in proportion to the file's size. The payoff is simplicity: a whole file as a `String` or a `List`, whenever you can afford to hold it.
 
 </div>
 
@@ -205,12 +205,12 @@ The cost of the eager methods is memory in proportion to the file's size. The be
 
 ## 3. The `Stream` name clash
 
-"Stream" means two unrelated things in Java, and it trips people up:
+In Java, "stream" means two unrelated things, and that trips people up:
 
 - A **java.io stream** (`InputStream`/`OutputStream`) is a flow of *bytes*.
 - A **java.util.stream.Stream** is the *functional pipeline* from [Functional Java & the Streams API](/synapse/programming-languages/java/advanced/functional-java-and-streams).
 
-They are different types from different packages. `Files.lines()` returns the *latter*, so you can process a file with a stream pipeline.
+They're different types, from different packages. `Files.lines()` returns the *second* kind, so you can process a file with a stream pipeline.
 
 ```java run
 import java.nio.file.*;
@@ -236,20 +236,20 @@ public class Main {
 lines > 2: 3
 ```
 
-**Analysis.** `Files.lines(file)` returned a `java.util.stream.Stream<String>`: a lazy pipeline over the file's lines. So we `filter`ed and `count`ed as with any stream (3, 4 and 5 are greater than 2).
+**Analysis.** `Files.lines(file)` returned a `java.util.stream.Stream<String>`: a lazy pipeline over the file's lines. So we could `filter` and `count` just as with any other stream (3, 4 and 5 are greater than 2).
 
-Crucially, it sits in a `try`-with-resources. This stream is backed by an *open file*, so it must be closed, unlike the in-memory streams of the streams lesson. It reads lazily, so it never holds the whole file in memory.
+Crucially, the stream sits in a `try`-with-resources. It's backed by an *open file*, so it must be closed — unlike the in-memory streams from the streams lesson. And because it reads lazily, it never holds the whole file in memory.
 
 **Intuition.**
-*Mechanism.* `Files.lines` opens the file and exposes its lines as a lazy `Stream<String>`, reading on demand as the pipeline pulls. It holds an operating-system file handle, so it must be closed. The API is explicit: "This method must be used within a try-with-resources statement or similar control structure to ensure that the stream's open file is closed promptly" <abbr title="Java SE 21 API, java.nio.file.Files.lines(Path)">[1]</abbr>. The unrelated `java.io` byte streams (`FileInputStream` and friends) are a separate, lower-level world for binary data.
+*Mechanism.* `Files.lines` opens the file and exposes its lines as a lazy `Stream<String>`, reading on demand as the pipeline pulls. It holds an operating-system file handle, so it has to be closed. The API is explicit about this: "This method must be used within a try-with-resources statement or similar control structure to ensure that the stream's open file is closed promptly" <abbr title="Java SE 21 API, java.nio.file.Files.lines(Path)">[1]</abbr>. The unrelated `java.io` byte streams (`FileInputStream` and friends) are a separate, lower-level world for binary data.
 
-*Concrete bite.* The name clash causes real confusion. An `InputStream` is *not* a `Stream`: it has no `map` or `filter`, and it is not interchangeable. Forgetting `try`-with-resources on `Files.lines` leaks the file handle, while a `list.stream()` holds no resource. Same word, two meanings, two lifecycles.
+*Concrete bite.* The name clash causes real confusion. An `InputStream` is *not* a `Stream`: it has no `map` or `filter`, and the two aren't interchangeable. Forgetting `try`-with-resources on `Files.lines` leaks the file handle, whereas a `list.stream()` holds no resource at all. Same word, two meanings, two lifecycles.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Read "stream" by package. `java.util.stream.Stream` is the functional pipeline (`map`/`filter`/`collect`); `java.io` streams are byte channels. Close `Files.lines`, and any resource-backed stream, with `try`-with-resources.
+💡 **Earned rule.** Read "stream" by its package. `java.util.stream.Stream` is the functional pipeline (`map`/`filter`/`collect`), while `java.io` streams are byte channels. Close `Files.lines`, and any other resource-backed stream, with `try`-with-resources.
 
-The cost is the terminology overhead. The benefit is that `Files.lines` brings the whole Stream API to a file, processing huge files lazily without loading them.
+The cost is the terminology overhead. The payoff is that `Files.lines` brings the whole Stream API to a file, processing even huge files lazily without loading them.
 
 </div>
 
@@ -257,7 +257,7 @@ The cost is the terminology overhead. The benefit is that `Files.lines` brings t
 
 ## 4. Bytes vs characters
 
-Under text lie bytes. A `String`'s **characters** become **bytes** through a charset. In UTF-8, a non-ASCII character takes *more than one* byte. So a file's byte count and its character count differ:
+Underneath all text lie bytes. A `String`'s **characters** become **bytes** through a charset, and in UTF-8, a non-ASCII character takes *more than one* byte. So a file's byte count and its character count can differ:
 
 ```java run
 import java.nio.file.*;
@@ -281,14 +281,14 @@ bytes: 5
 chars: 4
 ```
 
-**Analysis.** `"Café"` is **4 characters**, but **5 bytes** on disk. `C`, `a` and `f` are one byte each in UTF-8, while `é` is two. `readAllBytes` sees the raw bytes (`5`); `readString` decodes them back to characters (`4`).
+**Analysis.** `"Café"` is **4 characters**, but **5 bytes** on disk. `C`, `a` and `f` take one byte each in UTF-8, while `é` takes two. `readAllBytes` sees the raw bytes (`5`), and `readString` decodes them back into characters (`4`).
 
-Text is an *interpretation* of bytes, and the charset decides the bytes. The `Files` text methods use UTF-8 unless you pass another charset <abbr title="Java SE 21 API, java.nio.file.Files.readString(Path)">[1]</abbr>. Since JDK 18, UTF-8 is also Java's default charset everywhere else <abbr title="JEP 400: UTF-8 by Default (JDK 18)">[3]</abbr>. Before that, relying on the platform's default charset was a classic source of "works on my machine" bugs.
+Text is an *interpretation* of bytes, and the charset decides which bytes. The `Files` text methods use UTF-8 unless you pass a different charset <abbr title="Java SE 21 API, java.nio.file.Files.readString(Path)">[1]</abbr>. Since JDK 18, UTF-8 is also Java's default charset everywhere else <abbr title="JEP 400: UTF-8 by Default (JDK 18)">[3]</abbr>. Before that, relying on the platform's default charset was a classic source of "works on my machine" bugs.
 
 **Intuition.**
-*Mechanism.* Encoding turns characters into bytes; decoding turns bytes back into characters. Both need the *same* charset. Decode with a different one, and the bytes are read as different characters.
+*Mechanism.* Encoding turns characters into bytes, and decoding turns bytes back into characters. Both directions need the *same* charset. Decode with a different one, and the bytes get read as different characters.
 
-*Concrete bite.* Write in one charset and read in another, and the text is mangled, or rejected:
+*Concrete bite.* Write in one charset and read in another, and the text gets mangled — or rejected:
 
 ```java run
 import java.io.IOException;
@@ -318,14 +318,14 @@ written as ISO-8859-1, read as UTF-8:
 Exception in thread "main" java.nio.charset.MalformedInputException: Input length = 1
 ```
 
-- UTF-8's two bytes for `é`, read as ISO-8859-1, are two characters: `Ã©`. No error; the text is silently wrong.
-- ISO-8859-1 writes `é` as one byte, `0xE9`, which is not valid UTF-8 on its own. `readString` refuses it with `MalformedInputException`.
+- UTF-8's two bytes for `é`, read as ISO-8859-1, become two characters: `Ã©`. There's no error; the text is just silently wrong.
+- ISO-8859-1 writes `é` as a single byte, `0xE9`, which isn't valid UTF-8 on its own. So `readString` refuses it with `MalformedInputException`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use character I/O with an explicit charset for text, UTF-8 unless a file format says otherwise. Use byte I/O (`readAllBytes`, `InputStream`) for binary data.
+💡 **Earned rule.** For text, use character I/O with an explicit charset — UTF-8, unless a file format says otherwise. For binary data, use byte I/O (`readAllBytes`, `InputStream`).
 
-The cost is being deliberate about encoding at every boundary. The benefit is text that does not silently change when it crosses a machine or a file format.
+The cost is being deliberate about encoding at every boundary. The payoff is text that doesn't silently change when it crosses to another machine or file format.
 
 </div>
 
@@ -333,14 +333,14 @@ The cost is being deliberate about encoding at every boundary. The benefit is te
 
 ## 5. Readers, writers, the console and buffering
 
-Below the one-line `Files` helpers sit four families of classes in `java.io` <abbr title="Java SE 21 API, java.io package summary">[4]</abbr>:
+Underneath the one-line `Files` helpers sit four families of classes in `java.io` <abbr title="Java SE 21 API, java.io package summary">[4]</abbr>:
 
 | | Bytes | Characters |
 |---|---|---|
 | In | `InputStream` | `Reader` |
 | Out | `OutputStream` | `Writer` |
 
-A **`BufferedReader`** reads characters in large blocks, and hands them out a line at a time with `readLine()`. It returns `null` at the end of the input. A **`BufferedWriter`** collects writes in memory and sends them in large blocks. `Files.newBufferedReader` and `Files.newBufferedWriter` open one on a file, with the charset you name:
+A **`BufferedReader`** reads characters in large blocks, and hands them out a line at a time through `readLine()`, which returns `null` at the end of the input. A **`BufferedWriter`** collects writes in memory and sends them out in large blocks. `Files.newBufferedReader` and `Files.newBufferedWriter` open one of these on a file, using the charset you name:
 
 ```java run
 import java.io.BufferedReader;
@@ -376,7 +376,7 @@ read: event 2
 read: event 3
 ```
 
-**The console.** `System.in` is an `InputStream`: bytes. An `InputStreamReader` decodes it into characters, and a `BufferedReader` around that reads whole lines. It is the classic alternative to the [`Scanner`](/synapse/programming-languages/java/first-steps/input-and-output) from the first chapter:
+**The console.** `System.in` is an `InputStream`, so it delivers bytes. An `InputStreamReader` decodes it into characters, and a `BufferedReader` wrapped around that reads whole lines. This is the classic alternative to the [`Scanner`](/synapse/programming-languages/java/first-steps/input-and-output) from the first chapter:
 
 ```java
 import java.io.BufferedReader;
@@ -400,7 +400,7 @@ Your name: Hello, Ada!
 next readLine: null
 ```
 
-After `Ada`, the input ended, so the second `readLine()` returned `null`. The page does not show your keystrokes; in a terminal you would see `Ada` after the prompt. Here is the **runnable twin**: the same `BufferedReader`, over a fixed `String` instead of the keyboard:
+After `Ada`, the input ended, so the second `readLine()` returned `null`. The page doesn't show your keystrokes; in a terminal, you'd see `Ada` after the prompt. Here's the **runnable twin**: the same `BufferedReader`, reading from a fixed `String` instead of the keyboard:
 
 ```java run
 import java.io.BufferedReader;
@@ -423,12 +423,12 @@ Hello, Ada!
 next readLine: null
 ```
 
-A `BufferedReader` works the same over any `Reader`: a file, the console, or a `String`.
+A `BufferedReader` works the same way over any `Reader`: a file, the console, or a `String`.
 
 **Intuition.**
-*Mechanism.* Each `read` or `write` on an unbuffered file stream can be a **system call**: a request to the operating system, which is slow. A buffer turns many small requests into a few large ones.
+*Mechanism.* Each `read` or `write` on an unbuffered file stream can be a **system call** — a request to the operating system, which is slow. A buffer turns many small requests into a few large ones.
 
-*Concrete bite.* Count the bytes of a 2 MB file one `read()` at a time, with and without a buffer:
+*Concrete bite.* Count the bytes of a 2 MB file one `read()` at a time, first without a buffer and then with one:
 
 ```java run
 import java.io.BufferedInputStream;
@@ -469,13 +469,13 @@ unbuffered: 2000000 bytes in 1133 ms
 buffered:   2000000 bytes in 41 ms
 ```
 
-The same two million `read()` calls, about 30 times faster with a buffer. `read()` returns `-1` at the end of a stream, which is how the loop stops.
+It's the same two million `read()` calls, but about 30 times faster with a buffer. (`read()` returns `-1` at the end of a stream, which is how the loop knows to stop.)
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Wrap raw file streams, readers and writers in their buffered forms, or use `Files.newBufferedReader`/`newBufferedWriter`. Read text line by line with `readLine()` until it returns `null`.
 
-The cost is one more wrapper, and remembering that a `BufferedWriter` holds data until it is flushed or closed; `try`-with-resources closes it. The benefit is I/O that does not crawl one system call at a time.
+The cost is one more wrapper, plus remembering that a `BufferedWriter` holds onto data until it's flushed or closed (`try`-with-resources closes it). The payoff is I/O that doesn't crawl along one system call at a time.
 
 </div>
 
@@ -483,7 +483,7 @@ The cost is one more wrapper, and remembering that a `BufferedWriter` holds data
 
 ## 6. Directories: `Files.list` and `Files.walk`
 
-`Files.createDirectories` makes a directory and any missing parents. Two methods read a directory as a `Stream<Path>`, and both hold it open, so both go in `try`-with-resources <abbr title="Java SE 21 API, java.nio.file.Files.list(Path) and walk(Path, FileVisitOption...)">[1]</abbr>:
+`Files.createDirectories` creates a directory, along with any missing parents. Two methods read a directory as a `Stream<Path>`, and both hold it open, so both belong in a `try`-with-resources <abbr title="Java SE 21 API, java.nio.file.Files.list(Path) and walk(Path, FileVisitOption...)">[1]</abbr>:
 
 - `Files.list(dir)` gives the entries directly inside `dir`.
 - `Files.walk(dir)` gives `dir` itself, then everything below it, at every depth.
@@ -522,13 +522,13 @@ walk: src/app
 walk: src/app/Main.java
 ```
 
-**Analysis.** `list` saw the two entries at the top: `README.md` and the directory `src`. `walk` saw five paths: the root itself (relative to itself, the empty path), then every file and directory below it. The program sorts the names, because a directory's entries come "in no specific order" <abbr title="Java SE 21 API, java.nio.file.DirectoryStream">[9]</abbr>.
+**Analysis.** `list` saw the two entries at the top level: `README.md` and the directory `src`. `walk` saw five paths: the root itself (which, relative to itself, is the empty path), then every file and directory below it. The program sorts the names, because a directory's entries come back "in no specific order" <abbr title="Java SE 21 API, java.nio.file.DirectoryStream">[9]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `Files.list` for one level and `Files.walk` for a whole tree, inside `try`-with-resources, and sort when order matters.
+💡 **Earned rule.** Use `Files.list` for one level and `Files.walk` for a whole tree, always inside `try`-with-resources, and sort whenever order matters.
 
-The cost is that `walk` visits everything below the root, which can be millions of entries; pass a maximum depth, `Files.walk(dir, 2)`, to limit it. The benefit is a directory tree as an ordinary stream, ready for `filter` and `map`.
+The cost is that `walk` visits everything below the root, which could be millions of entries; pass a maximum depth, as in `Files.walk(dir, 2)`, to limit it. The payoff is a directory tree as an ordinary stream, ready for `filter` and `map`.
 
 </div>
 
@@ -536,14 +536,14 @@ The cost is that `walk` visits everything below the root, which can be millions 
 
 ## 7. Serialization
 
-**Serialization** turns an object into a stream of bytes, and **deserialization** rebuilds an object from them. "Serializability of a class is enabled by the class implementing the `java.io.Serializable` interface" <abbr title="Java SE 21 API, java.io.Serializable">[5]</abbr>. `Serializable` has no methods; it is a marker.
+**Serialization** turns an object into a stream of bytes, and **deserialization** rebuilds an object from those bytes. "Serializability of a class is enabled by the class implementing the `java.io.Serializable` interface" <abbr title="Java SE 21 API, java.io.Serializable">[5]</abbr>. `Serializable` has no methods; it's just a marker.
 
-- `ObjectOutputStream.writeObject` writes an object; "Objects referenced by this object are written transitively" <abbr title="Java SE 21 API, java.io.ObjectOutputStream.writeObject(Object)">[11]</abbr>.
-- `ObjectInputStream.readObject` reads one back, as an `Object` that you cast.
-- A field marked `transient` is "not part of the persistent state of an object" <abbr title="The Java Language Specification, Java SE 21, §8.3.1.3">[6]</abbr>: it is not written, and comes back with its default value.
-- `serialVersionUID` is a version number for the class's serialized form. Change the class in an incompatible way, and bump it.
+- `ObjectOutputStream.writeObject` writes an object, and "Objects referenced by this object are written transitively" <abbr title="Java SE 21 API, java.io.ObjectOutputStream.writeObject(Object)">[11]</abbr>.
+- `ObjectInputStream.readObject` reads one back, as an `Object` that you then cast.
+- A field marked `transient` is "not part of the persistent state of an object" <abbr title="The Java Language Specification, Java SE 21, §8.3.1.3">[6]</abbr>: it isn't written, and comes back with its default value.
+- `serialVersionUID` is a version number for the class's serialized form. If you change the class in an incompatible way, bump it.
 
-This program serializes into a byte array in memory, so it needs no file:
+This program serializes into a byte array in memory, so it doesn't need a file:
 
 ```java run
 import java.io.*;
@@ -589,9 +589,9 @@ owner=Ada balance=120 sessionToken=null
 same object? false
 ```
 
-**Analysis.** The `Account` became 82 bytes, then a *new* object with the same `owner` and `balance`. The `transient` token was not written, so it came back `null`. `readObject` declares `ClassNotFoundException`, because the reading JVM must have the class to rebuild the object.
+**Analysis.** The `Account` became 82 bytes, and then a *new* object with the same `owner` and `balance`. The `transient` token wasn't written, so it came back as `null`. `readObject` declares `ClassNotFoundException`, because the reading JVM must have the class in order to rebuild the object.
 
-*Non-example: a class that is not `Serializable`.* Every object in the graph must be serializable. Otherwise `writeObject` throws:
+*Non-example: a class that isn't `Serializable`.* Every object in the graph must be serializable. Otherwise, `writeObject` throws:
 
 ```java run
 import java.io.*;
@@ -617,7 +617,7 @@ Exception in thread "main" java.io.NotSerializableException: Main$Point
 
 `Main$Point` is the binary name of the nested class `Point`.
 
-*Edge: records.* A record is rebuilt through its canonical constructor: "During deserialization the record's canonical constructor is invoked to construct the record object" <abbr title="Java SE 21 API, java.io.ObjectInputStream, &quot;Records&quot;">[7]</abbr>. So a record's validation runs again on the way in:
+*Edge: records.* A record gets rebuilt through its canonical constructor: "During deserialization the record's canonical constructor is invoked to construct the record object" <abbr title="Java SE 21 API, java.io.ObjectInputStream, &quot;Records&quot;">[7]</abbr>. That means a record's validation runs again on the way in:
 
 ```java run
 import java.io.*;
@@ -649,19 +649,19 @@ canonical constructor ran for x=3
 read back: Point[x=3, y=4]
 ```
 
-The constructor ran twice: once for `new Point(3, 4)`, once during `readObject`. An ordinary class is rebuilt *without* its own constructor: "the no-arg constructor for the first non-serializable supertype is run" <abbr title="Java Object Serialization Specification, Java SE 21, §3.1">[10]</abbr>. Its own checks never run, so crafted bytes can bypass them.
+The constructor ran twice: once for `new Point(3, 4)`, and once during `readObject`. An ordinary class, by contrast, is rebuilt *without* its own constructor: "the no-arg constructor for the first non-serializable supertype is run" <abbr title="Java Object Serialization Specification, Java SE 21, §3.1">[10]</abbr>. Its own checks never run, so carefully crafted bytes can bypass them.
 
 <div style="border-left:4px solid #da5233;background:rgba(218,82,51,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-⚠️ **Security warning.** The `ObjectInputStream` docs open with it: "Deserialization of untrusted data is inherently dangerous and should be avoided" <abbr title="Java SE 21 API, java.io.ObjectInputStream">[7]</abbr>. `readObject` can build objects of any serializable class on the classpath, from bytes an attacker controls. If you must read serialized data from outside, restrict the classes it may contain with an `ObjectInputFilter` <abbr title="Java SE 21 API, java.io.ObjectInputFilter">[8]</abbr>. For data that crosses a trust boundary, prefer an explicit format such as JSON, and validate it.
+⚠️ **Security warning.** The `ObjectInputStream` docs open with this warning: "Deserialization of untrusted data is inherently dangerous and should be avoided" <abbr title="Java SE 21 API, java.io.ObjectInputStream">[7]</abbr>. `readObject` can build objects of any serializable class on the classpath, from bytes that an attacker controls. If you must read serialized data from outside, restrict the classes it may contain with an `ObjectInputFilter` <abbr title="Java SE 21 API, java.io.ObjectInputFilter">[8]</abbr>. For data that crosses a trust boundary, prefer an explicit format such as JSON, and validate it.
 
 </div>
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use Java serialization only between programs you trust, for classes you control. Mark fields that must not be saved `transient`, declare a `serialVersionUID`, and prefer records, whose constructor checks run on the way in.
+💡 **Earned rule.** Use Java serialization only between programs you trust, for classes you control. Mark fields that must not be saved as `transient`, declare a `serialVersionUID`, and prefer records, whose constructor checks run again on the way in.
 
-The cost of serialization is its security and versioning traps. The benefit is a whole object graph saved and restored in two calls.
+The cost of serialization is its security and versioning traps. The payoff is a whole object graph saved and restored in just two calls.
 
 </div>
 
@@ -766,9 +766,9 @@ chars: 3
 sum: 14
 ```
 
-- `"a€b"` is 3 characters and 5 bytes: `a` and `b` are one byte each, `€` is three.
-- `Files.readString(Path.of("nope.txt"))` fails at `readString`, with `NoSuchFileException: nope.txt`; `Path.of` only builds a name (§1).
-- `Files.lines` holds an open file, so it needs `try`-with-resources. `List.stream()` reads a list already in memory, and holds nothing to close.
+- `"a€b"` is 3 characters but 5 bytes: `a` and `b` take one byte each, and `€` takes three.
+- `Files.readString(Path.of("nope.txt"))` fails at `readString`, with `NoSuchFileException: nope.txt`, because `Path.of` only builds a name (§1).
+- `Files.lines` holds an open file, so it needs `try`-with-resources. `List.stream()` reads a list that's already in memory, and holds nothing to close.
 
 </details>
 
@@ -794,9 +794,9 @@ sum: 14
 
 🧪 **Predict, then check.**
 
-1. Predict the byte count and character count that `Files.writeString`, then `readAllBytes`/`readString`, report for the string `"a€b"` (the euro sign `€` is 3 bytes in UTF-8).
-2. Predict whether `Files.readString(Path.of("nope.txt"))` throws at `Path.of` or at `readString`, and the exception.
-3. Rewrite the §3 example to *sum* the numbers in the file with a stream, and decide why the `Files.lines` stream needs a `try`-with-resources where a `List.stream()` would not.
+1. Predict the byte count and character count that `Files.writeString`, followed by `readAllBytes`/`readString`, report for the string `"a€b"` (the euro sign `€` is 3 bytes in UTF-8).
+2. Predict whether `Files.readString(Path.of("nope.txt"))` throws at `Path.of` or at `readString`, and which exception it throws.
+3. Rewrite the §3 example to *sum* the numbers in the file with a stream, and work out why the `Files.lines` stream needs a `try`-with-resources where a `List.stream()` wouldn't.
 
 </div>
 

@@ -6,12 +6,12 @@ prereqs: []
 
 # Functional Java & the Streams API — Pipelines Over Data
 
-[Lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas) made behavior a value. The **Streams API** uses that to transform sequences declaratively.
+[Lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas) turned behavior into a value. The **Streams API** builds on that to let you transform sequences declaratively.
 
-- A **stream** is a *pipeline* of operations over a source, such as `filter`, `map` and `reduce` chained together. It describes **what** to compute and leaves **how** to iterate to the library.
-- Pipelines are **lazy**. Nothing runs until a *terminal* operation pulls the data through, so work is fused into one pass and can stop early.
-- **`Optional`** turns "maybe absent" from a [`null` waiting to crash](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) into a type you must handle.
-- **Parallel** streams split the work across processor cores. They are fast when the operations are stateless, and wrong when they share mutable state.
+- A **stream** is a *pipeline* of operations over a source, such as `filter`, `map` and `reduce` chained together. It describes **what** to compute, and leaves **how** to iterate up to the library.
+- Pipelines are **lazy**. Nothing runs until a *terminal* operation pulls the data through, so the work is fused into a single pass, and can stop early.
+- **`Optional`** turns "maybe absent" from a [`null` waiting to crash](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) into a type you're forced to handle.
+- **Parallel** streams split the work across processor cores. They're fast when the operations are stateless, and wrong when they share mutable state.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -24,9 +24,9 @@ prereqs: []
 
 </div>
 
-This builds on [generics](/synapse/programming-languages/java/core-libraries/generics) and [lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas). Every output below was produced by compiling and running the code.
+This lesson builds on [generics](/synapse/programming-languages/java/core-libraries/generics) and [lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas). Every output below was produced by compiling and running the code.
 
-**You'll be able to:** write a pipeline that filters, maps, sorts, flattens and collects, and predict its result; pick `reduce`, a collector or a primitive stream for an aggregate, and name the error when a key repeats in `toMap`; trace which elements a lazy pipeline touches, and predict when `peek` prints nothing; consume an `Optional` without `get()`, and predict when `orElse` evaluates its argument; explain why a parallel stream that writes shared state gives a wrong count, and rewrite it as a reduction.
+**You'll be able to:** write a pipeline that filters, maps, sorts, flattens and collects, and predict its result; choose `reduce`, a collector or a primitive stream for an aggregate, and name the error you get when a key repeats in `toMap`; trace which elements a lazy pipeline touches, and predict when `peek` prints nothing; consume an `Optional` without `get()`, and predict when `orElse` evaluates its argument; explain why a parallel stream that writes shared state gives a wrong count, and rewrite it as a reduction.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -57,10 +57,10 @@ This builds on [generics](/synapse/programming-languages/java/core-libraries/gen
 
 ## 1. A stream pipeline
 
-`collection.stream()` starts a pipeline <abbr title="Java SE 21 API, java.util.stream package summary, &quot;Stream operations and pipelines&quot;">[1]</abbr>:
+Calling `collection.stream()` starts a pipeline, which has three parts <abbr title="Java SE 21 API, java.util.stream package summary, &quot;Stream operations and pipelines&quot;">[1]</abbr>:
 
 - A **source** supplies the elements: a collection, an array, or a generator.
-- **Intermediate** operations (`filter`, `map`) each return a new stream, so they chain.
+- **Intermediate** operations (`filter`, `map`) each return a new stream, so you can chain them.
 - A **terminal** operation (`collect`) ends the pipeline and produces a result.
 
 ```java run viz=array:result
@@ -104,18 +104,18 @@ flowchart LR
 
 **Analysis.** The pipeline has three steps:
 
-- `filter` kept names longer than 3 characters, and dropped `"Ada"`.
+- `filter` kept the names longer than 3 characters, dropping `"Ada"`.
 - `map` upper-cased each name that was left.
 - `collect(toList())` gathered them into a `List`.
 
-The chain reads as a description: *keep the long names, upper-case them, collect*. There is no loop, no index and no intermediate variable. Each lambda or method reference is the behavior for one step.
+The chain reads like a description: *keep the long names, upper-case them, collect them*. There's no loop, no index and no intermediate variable. Each lambda or method reference supplies the behavior for one step.
 
-Since Java 16 a stream also has `toList()` as a shorter terminal <abbr title="Java SE 21 API, java.util.stream.Stream.toList() (since 16)">[2]</abbr>. The two differ in one way that bites:
+Since Java 16, a stream also has `toList()` as a shorter terminal operation <abbr title="Java SE 21 API, java.util.stream.Stream.toList() (since 16)">[2]</abbr>. The two differ in one way that can bite you:
 
 - `Stream.toList()` returns an **unmodifiable** list.
 - `Collectors.toList()` makes "no guarantees on the type, mutability, serializability, or thread-safety" of its list <abbr title="Java SE 21 API, java.util.stream.Collectors.toList()">[3]</abbr>.
 
-When you need to add to the result, ask for a list type by name, with `Collectors.toCollection(ArrayList::new)`:
+When you need to add to the result, ask for a specific list type by name, using `Collectors.toCollection(ArrayList::new)`:
 
 ```java run
 import java.util.ArrayList;
@@ -141,9 +141,9 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 ```
 
 **Intuition.**
-*Mechanism.* `stream()` produces a stream object. Each intermediate operation wraps it in another stream that records the operation and does nothing yet. Only the terminal `collect` drives elements through the whole chain. The pipeline expresses *what*; the library owns the *how* (the iteration).
+*Mechanism.* `stream()` produces a stream object. Each intermediate operation wraps it in another stream that records the operation, but doesn't do anything yet. Only the terminal `collect` drives elements through the whole chain. The pipeline expresses the *what*, and the library owns the *how* (the iteration).
 
-*Concrete bite.* A stream is single-use and not a collection. The API says a stream "should be operated on (invoking an intermediate or terminal stream operation) only once" <abbr title="Java SE 21 API, java.util.stream.Stream">[2]</abbr>. Use it a second time, and it throws:
+*Concrete bite.* A stream is single-use, and it isn't a collection. The API says a stream "should be operated on (invoking an intermediate or terminal stream operation) only once" <abbr title="Java SE 21 API, java.util.stream.Stream">[2]</abbr>. Use it a second time, and it throws:
 
 ```java run
 import java.util.List;
@@ -164,13 +164,13 @@ public class Main {
 Exception in thread "main" java.lang.IllegalStateException: stream has already been operated upon or closed
 ```
 
-The first `count()` consumed the stream. A stream is a *view of a computation*, not data you can revisit. Call `stream()` on the list again for a fresh pipeline.
+The first `count()` consumed the stream. A stream is a *view of a computation*, not data you can come back to. For a fresh pipeline, call `stream()` on the list again.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use a stream pipeline when you transform or query a sequence (`filter`/`map`/`collect`). Keep an explicit loop for side-effecting iteration, or when a plain `for` is clearer.
+💡 **Earned rule.** Use a stream pipeline when you transform or query a sequence (`filter`/`map`/`collect`). Stick with an explicit loop for side-effecting iteration, or whenever a plain `for` is clearer.
 
-The cost is a new mental model, and streams are one-shot. The benefit is declarative, composable data processing that reads as intent, and that the library can optimize.
+The cost is learning a new mental model, plus the fact that streams are one-shot. The payoff is declarative, composable data processing that reads as intent, and that the library is free to optimize.
 
 </div>
 
@@ -178,13 +178,13 @@ The cost is a new mental model, and streams are one-shot. The benefit is declara
 
 ## 2. Sorting, flattening and joining streams
 
-Three more intermediate operations reshape a stream rather than filter or transform single elements <abbr title="Java SE 21 API, java.util.stream.Stream">[2]</abbr>:
+Three more intermediate operations reshape a stream, rather than filtering or transforming single elements <abbr title="Java SE 21 API, java.util.stream.Stream">[2]</abbr>:
 
-- `sorted()` puts the elements in natural order; `sorted(comparator)` uses the [`Comparator`](/synapse/programming-languages/java/core-libraries/the-collections-framework) you pass.
-- `flatMap(f)` replaces each element with the elements of the stream `f` returns, so nested lists become one flat stream.
+- `sorted()` puts the elements in natural order, while `sorted(comparator)` uses the [`Comparator`](/synapse/programming-languages/java/core-libraries/the-collections-framework) you pass in.
+- `flatMap(f)` replaces each element with the elements of the stream that `f` returns, so nested lists become one flat stream.
 - `Stream.concat(a, b)` is a static method that joins two streams: all of `a`, then all of `b`.
 
-`Comparator.comparing(key)` builds a `Comparator` from a function that extracts a sort key. `Comparator.comparing(String::length)` orders strings by their length <abbr title="Java SE 21 API, java.util.Comparator.comparing(Function)">[4]</abbr>.
+`Comparator.comparing(key)` builds a `Comparator` from a function that extracts a sort key. For example, `Comparator.comparing(String::length)` orders strings by their length <abbr title="Java SE 21 API, java.util.Comparator.comparing(Function)">[4]</abbr>.
 
 ```java run
 import java.util.Comparator;
@@ -212,11 +212,11 @@ public class Main {
 **Analysis.** Three sorts, and one untouched source:
 
 - `sorted()` used `String`'s natural order.
-- `sorted(Comparator.comparing(String::length))` ordered by length. `Grace` and `Linus` both have 5 letters, and kept their original order: this sort is *stable* for an ordered stream <abbr title="Java SE 21 API, java.util.stream.Stream.sorted(Comparator)">[2]</abbr>.
+- `sorted(Comparator.comparing(String::length))` ordered by length. `Grace` and `Linus` both have 5 letters, and they kept their original order, because this sort is *stable* for an ordered stream <abbr title="Java SE 21 API, java.util.stream.Stream.sorted(Comparator)">[2]</abbr>.
 - `limit(2)` kept the first two elements of the reverse-sorted stream.
-- The last line printed `names` itself, unchanged. A stream reads its source; it never reorders it.
+- The last line printed `names` itself, unchanged. A stream reads its source, but never reorders it.
 
-`flatMap` is how a stream takes nested data apart. `map` gives one output element per input element, so a stream of lists stays a stream of lists. `flatMap` gives *zero or more* per input:
+`flatMap` is how a stream takes nested data apart. `map` produces exactly one output element per input element, so a stream of lists stays a stream of lists. `flatMap`, on the other hand, produces *zero or more* per input:
 
 ```java run
 import java.util.List;
@@ -244,7 +244,7 @@ concat:  [a, b, c]
 ```
 
 **Intuition.**
-*Mechanism.* `flatMap(List::stream)` turned each inner list into a stream, and poured those streams into one. The empty list gave zero elements, so it vanished. `Stream.of(…)` makes a stream from the values you list, and `concat` ran one stream after the other.
+*Mechanism.* `flatMap(List::stream)` turned each inner list into a stream, and poured all those streams into one. The empty list contributed zero elements, so it simply vanished. `Stream.of(…)` makes a stream from the values you list, and `concat` ran one stream after the other.
 
 *Concrete bite.* The `map` line is the non-example: it printed `[[1, 2], [3], []]`, still three lists. Asking `map` to flatten does nothing, because `map` never changes the number of elements.
 
@@ -252,7 +252,7 @@ concat:  [a, b, c]
 
 💡 **Earned rule.** Sort inside a pipeline with `sorted(Comparator.comparing(key))`. Flatten nested data with `flatMap`, not `map`. Join two streams with `Stream.concat`.
 
-The cost: `sorted` must see every element before it passes on the first one, which §4 shows. The benefit is that ordering and flattening become steps of the pipeline, not loops around it.
+The cost: `sorted` must see every element before it passes on the first one, as §4 shows. The payoff is that ordering and flattening become steps in the pipeline, instead of loops wrapped around it.
 
 </div>
 
@@ -260,7 +260,7 @@ The cost: `sorted` must see every element before it passes on the first one, whi
 
 ## 3. `reduce`, collectors and primitive streams
 
-Terminal operations turn a stream into a result. `reduce` folds elements into a single value with a combining function. **Collectors** gather them into structures: a `List`, a joined `String`, a grouping `Map`.
+Terminal operations turn a stream into a result. `reduce` folds the elements into a single value using a combining function. **Collectors** gather them into structures: a `List`, a joined `String`, a grouping `Map`.
 
 ```java run viz=hashmap:byParity
 import java.util.List;
@@ -292,14 +292,14 @@ even=[2, 4]
 
 **Analysis.** Three terminals over the same five numbers:
 
-- `reduce(0, Integer::sum)` folded `1..5` into `15`. It started at `0` and combined each element with `sum`.
+- `reduce(0, Integer::sum)` folded `1..5` into `15`. It started at `0`, and combined each element using `sum`.
 - `Collectors.joining(", ")` produced `"1, 2, 3, 4, 5"`.
-- `Collectors.groupingBy(...)` built a `Map` from each element's group key (`"odd"`/`"even"`) to the list of elements in that group. It is the stream form of [the counting and grouping idioms](/synapse/programming-languages/java/core-libraries/sets-and-maps), in one expression.
+- `Collectors.groupingBy(...)` built a `Map` from each element's group key (`"odd"`/`"even"`) to the list of elements in that group. It's the stream form of [the counting and grouping idioms](/synapse/programming-languages/java/core-libraries/sets-and-maps), packed into one expression.
 
 **Intuition.**
-*Mechanism.* `reduce(identity, accumulator)` applies the accumulator again and again, starting from the identity. The API requires that "the `identity` value must be an identity for the accumulator function" <abbr title="Java SE 21 API, java.util.stream.Stream.reduce(Object, BinaryOperator)">[2]</abbr>: `0` for a sum, `""` for concatenation. A `Collector` is a recipe for gathering elements into a container. `groupingBy`, `toList`, `joining`, `counting` and `partitioningBy` cover most needs <abbr title="Java SE 21 API, java.util.stream.Collectors">[3]</abbr>.
+*Mechanism.* `reduce(identity, accumulator)` applies the accumulator over and over, starting from the identity. The API requires that "the `identity` value must be an identity for the accumulator function" <abbr title="Java SE 21 API, java.util.stream.Stream.reduce(Object, BinaryOperator)">[2]</abbr>: `0` for a sum, `""` for concatenation. A `Collector`, meanwhile, is a recipe for gathering elements into a container. `groupingBy`, `toList`, `joining`, `counting` and `partitioningBy` cover most needs <abbr title="Java SE 21 API, java.util.stream.Collectors">[3]</abbr>.
 
-*Concrete bite.* Seed a sum with `1`, the identity for *multiplication*, and every result is off by one:
+*Concrete bite.* Seed a sum with `1` — the identity for *multiplication* — and every result is off by one:
 
 ```java run
 import java.util.List;
@@ -319,9 +319,9 @@ public class Main {
 16
 ```
 
-The seed is part of the computation. It is the same lesson as the [accumulator-seed trap](/synapse/programming-languages/java/control-flow/loop-control-and-patterns).
+The seed is part of the computation — the same lesson as the [accumulator-seed trap](/synapse/programming-languages/java/control-flow/loop-control-and-patterns).
 
-**Partitioning** is grouping by a yes/no test. `partitioningBy(test)` always returns a map with the two keys `false` and `true`. A second collector, such as `counting()`, is applied inside each group:
+**Partitioning** is grouping by a yes/no test. `partitioningBy(test)` always returns a map with exactly two keys, `false` and `true`. You can pass a second collector, such as `counting()`, to apply inside each group:
 
 ```java run
 import java.util.List;
@@ -347,7 +347,7 @@ public class Main {
 {false=2, true=3}
 ```
 
-*Non-example: `toMap` with a repeated key.* `Collectors.toMap(keyFn, valueFn)` builds one entry per element. When two elements give the same key, it throws <abbr title="Java SE 21 API, java.util.stream.Collectors.toMap(Function, Function)">[3]</abbr>:
+*Non-example: `toMap` with a repeated key.* `Collectors.toMap(keyFn, valueFn)` builds one entry per element. When two elements produce the same key, it throws <abbr title="Java SE 21 API, java.util.stream.Collectors.toMap(Function, Function)">[3]</abbr>:
 
 ```java run
 import java.util.List;
@@ -369,9 +369,9 @@ public class Main {
 Exception in thread "main" java.lang.IllegalStateException: Duplicate key A (attempted merging values Ada and Al)
 ```
 
-`"Ada"` and `"Al"` both map to `'A'`. Use `groupingBy` when a key can repeat, or pass `toMap` a third argument that merges two values.
+`"Ada"` and `"Al"` both map to `'A'`. When a key can repeat, use `groupingBy` instead, or pass `toMap` a third argument that merges the two values.
 
-**Primitive streams.** A `Stream<Integer>` holds boxed `Integer` objects. `IntStream`, `LongStream` and `DoubleStream` hold primitive values, and add arithmetic terminals such as `sum()` and `average()` <abbr title="Java SE 21 API, java.util.stream.IntStream">[5]</abbr>. `mapToInt` turns a stream of objects into an `IntStream`:
+**Primitive streams.** A `Stream<Integer>` holds boxed `Integer` objects. `IntStream`, `LongStream` and `DoubleStream` hold primitive values instead, and add arithmetic terminals such as `sum()` and `average()` <abbr title="Java SE 21 API, java.util.stream.IntStream">[5]</abbr>. `mapToInt` turns a stream of objects into an `IntStream`:
 
 ```java run
 import java.util.List;
@@ -399,13 +399,13 @@ OptionalDouble.empty
 0.0
 ```
 
-`sum()` of no elements is `0`, but an average of no elements has no value. So `average()` returns an `OptionalDouble`, the primitive cousin of the `Optional` in §5.
+The `sum()` of no elements is `0`, but an average of no elements has no value at all. That's why `average()` returns an `OptionalDouble`, the primitive cousin of the `Optional` you'll meet in §5.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `reduce` for a single folded value with a neutral identity. Use `Collectors` for structured results: `toList`, `joining`, `groupingBy`, `partitioningBy`. Use `toMap` only when keys are unique. Use `mapToInt` and friends for arithmetic.
+💡 **Earned rule.** Use `reduce` for a single folded value with a neutral identity. Use `Collectors` for structured results: `toList`, `joining`, `groupingBy`, `partitioningBy`. Use `toMap` only when the keys are unique. And use `mapToInt` and friends for arithmetic.
 
-The cost is learning the collector vocabulary. The benefit is that aggregation, grouping and joining, loops you would otherwise write by hand, become one declarative line.
+The cost is learning the collector vocabulary. The payoff is that aggregation, grouping and joining — loops you'd otherwise write by hand — each become one declarative line.
 
 </div>
 
@@ -413,7 +413,7 @@ The cost is learning the collector vocabulary. The benefit is that aggregation, 
 
 ## 4. Lazy evaluation
 
-Intermediate operations are **lazy**: they process nothing until a terminal operation runs <abbr title="Java SE 21 API, java.util.stream package summary, &quot;Stream operations and pipelines&quot;">[1]</abbr>. Then elements flow through one at a time. This lets the pipeline **short-circuit**: stop as soon as the answer is known.
+Intermediate operations are **lazy**: they process nothing until a terminal operation runs <abbr title="Java SE 21 API, java.util.stream package summary, &quot;Stream operations and pipelines&quot;">[1]</abbr>. Once it does, elements flow through one at a time. That lets the pipeline **short-circuit** — stop as soon as the answer is known.
 
 ```java run
 import java.util.List;
@@ -437,17 +437,17 @@ peek 2
 found: 2
 ```
 
-**Analysis.** `peek` prints each element as it flows by, and the output stops at `peek 2`. The pipeline never looked at `3`, `4` or `5`. `findFirst` needed only the first even number, so once `filter` let `2` through, the whole pipeline stopped. A loop that first built a filtered list would have visited all five.
+**Analysis.** `peek` prints each element as it flows by, and the output stops at `peek 2`. The pipeline never even looked at `3`, `4` or `5`. `findFirst` needed only the first even number, so once `filter` let `2` through, the whole pipeline stopped. A loop that first built a filtered list would have visited all five.
 
 **Intuition.**
-*Mechanism.* The terminal operation pulls elements through the pipeline, one at a time, top to bottom:
+*Mechanism.* The terminal operation pulls elements through the pipeline one at a time, from top to bottom:
 
 1. `peek(1)`, then `filter` rejects `1`.
 2. `peek(2)`, then `filter` accepts `2`, and `findFirst` is satisfied and halts.
 
-Stateless steps such as `filter` and `map` keep nothing between elements. A short-circuiting terminal (`findFirst`, `anyMatch`) or intermediate (`limit`) stops early.
+Stateless steps such as `filter` and `map` remember nothing between elements. A short-circuiting terminal (`findFirst`, `anyMatch`) or intermediate operation (`limit`) stops early.
 
-*Concrete bite.* The `peek` output is the proof: only `1` and `2` were processed. This is why a stream can have an infinite source. `Stream.iterate(1, n -> n * 2)` generates 1, 2, 4, 8, … without end, and a short-circuiting step still finishes:
+*Concrete bite.* The `peek` output is the proof: only `1` and `2` were processed. This is also why a stream can have an infinite source. `Stream.iterate(1, n -> n * 2)` generates 1, 2, 4, 8, … forever, yet a short-circuiting step still lets it finish:
 
 ```java run
 import java.util.stream.Stream;
@@ -470,7 +470,7 @@ public class Main {
 [1, 2, 4, 8, 16]
 ```
 
-*Non-example: a stateful step breaks the one-at-a-time flow.* `sorted` is **stateful**: it cannot pass on the smallest element until it has seen them all <abbr title="Java SE 21 API, java.util.stream package summary, stateless and stateful operations">[1]</abbr>. Put it before `findFirst`, and every element is pulled:
+*Non-example: a stateful step breaks the one-at-a-time flow.* `sorted` is **stateful**: it can't pass on the smallest element until it has seen them all <abbr title="Java SE 21 API, java.util.stream package summary, stateless and stateful operations">[1]</abbr>. Put it before `findFirst`, and every element gets pulled:
 
 ```java run
 import java.util.List;
@@ -498,9 +498,9 @@ peek 2
 found: 2
 ```
 
-All five elements were peeked, because `sorted` needed all five before `filter` saw any.
+All five elements were peeked, because `sorted` needed every one of them before `filter` could see any.
 
-*Non-example: `peek` as logic.* Laziness also means a side effect in a pipeline may never run:
+*Non-example: `peek` as logic.* Laziness also means that a side effect inside a pipeline might never run:
 
 ```java run
 import java.util.List;
@@ -522,16 +522,16 @@ no terminal operation, so no peek lines
 count = 3
 ```
 
-- The first pipeline had no terminal operation, so nothing ran.
-- The second had one, `count()`, and still printed no `peek` line. The list knows its own size, and the API lets `count()` skip the pipeline "if it is capable of computing the count directly from the stream source" <abbr title="Java SE 21 API, java.util.stream.Stream.count()">[2]</abbr>.
+- The first pipeline had no terminal operation, so nothing ran at all.
+- The second one did have a terminal operation, `count()`, and *still* printed no `peek` line. The list knows its own size, and the API lets `count()` skip the pipeline "if it is capable of computing the count directly from the stream source" <abbr title="Java SE 21 API, java.util.stream.Stream.count()">[2]</abbr>.
 
-The API says `peek` "exists mainly to support debugging" <abbr title="Java SE 21 API, java.util.stream.Stream.peek(Consumer)">[2]</abbr>. Never put work there that must happen.
+The API says `peek` "exists mainly to support debugging" <abbr title="Java SE 21 API, java.util.stream.Stream.peek(Consumer)">[2]</abbr>. Never put work there that has to happen.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Lean on laziness for efficiency. Put cheap, selective `filter`s early, and end with a short-circuiting terminal (`findFirst`, `anyMatch`) or a `limit` to stop as soon as possible.
+💡 **Earned rule.** Lean on laziness for efficiency. Put cheap, selective `filter`s early, and end with a short-circuiting terminal (`findFirst`, `anyMatch`) or a `limit`, so the pipeline stops as soon as possible.
 
-The cost: side effects inside a pipeline run in a non-obvious order, only as far as needed, and sometimes not at all. So `peek` is for debugging, not logic. A stateful step such as `sorted` reads the whole source. The benefit is that only the necessary work runs.
+The cost: side effects inside a pipeline run in a non-obvious order, only as far as needed, and sometimes not at all. So `peek` is for debugging, not logic. And a stateful step such as `sorted` reads the whole source. The payoff is that only the necessary work runs.
 
 </div>
 
@@ -539,7 +539,7 @@ The cost: side effects inside a pipeline run in a non-obvious order, only as far
 
 ## 5. `Optional`
 
-A stream query that might find nothing returns an **`Optional<T>`**: a container that holds a value or is empty. It makes "absent" a *type*. You must handle the missing case, instead of risking a [`NullPointerException`](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model).
+A stream query that might find nothing returns an **`Optional<T>`**: a container that either holds a value or is empty. It turns "absent" into a *type*, so you have to handle the missing case, instead of risking a [`NullPointerException`](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model).
 
 ```java run
 import java.util.Optional;
@@ -564,18 +564,18 @@ Linus
 none
 ```
 
-**Analysis.** The first query found `"Linus"`, so `found` was present and `orElse` returned the value. The second matched nothing, so `missing` was empty and `orElse("none")` supplied the fallback. The *type* `Optional<String>` made the possibility of absence visible in the signature. You cannot use a missing value by accident, the way you can with `null`.
+**Analysis.** The first query found `"Linus"`, so `found` was present, and `orElse` returned the value. The second query matched nothing, so `missing` was empty, and `orElse("none")` supplied the fallback. The *type* `Optional<String>` made the possibility of absence visible right in the signature. You can't use a missing value by accident, the way you can with `null`.
 
 **Intuition.**
-*Mechanism.* `Optional` wraps "value or nothing" <abbr title="Java SE 21 API, java.util.Optional">[6]</abbr>:
+*Mechanism.* `Optional` wraps the idea of "a value, or nothing" <abbr title="Java SE 21 API, java.util.Optional">[6]</abbr>:
 
 - `orElse` and `orElseGet` supply a default.
-- `map` transforms the value only if one is present; `filter` keeps it only if it passes a test.
+- `map` transforms the value only if one is present, and `filter` keeps it only if it passes a test.
 - `ifPresent` runs an action only if a value is present.
 
-None of them exposes a raw `null`.
+None of them ever exposes a raw `null`.
 
-*Concrete bite.* Calling `get()` on an empty `Optional` defeats the purpose and throws:
+*Concrete bite.* Calling `get()` on an empty `Optional` defeats the whole purpose, and throws:
 
 ```java run
 import java.util.Optional;
@@ -593,9 +593,9 @@ public class Main {
 Exception in thread "main" java.util.NoSuchElementException: No value present
 ```
 
-`empty.get()` is the `Optional` form of dereferencing `null`: it asserts a value is present when it isn't. Use `orElse`, `orElseThrow(...)` with a meaningful exception, or `ifPresent` instead of a bare `get()`.
+`empty.get()` is the `Optional` version of dereferencing `null`: it asserts that a value is present when it isn't. Instead of a bare `get()`, use `orElse`, `orElseThrow(...)` with a meaningful exception, or `ifPresent`.
 
-*Edge: `orElse` always evaluates its argument.* `orElse(x)` is an ordinary method call, so Java computes `x` before the call, even when the `Optional` has a value. `orElseGet(supplier)` calls the supplier only when the `Optional` is empty <abbr title="Java SE 21 API, java.util.Optional.orElseGet(Supplier)">[6]</abbr>:
+*Edge: `orElse` always evaluates its argument.* `orElse(x)` is an ordinary method call, so Java computes `x` before making the call — even when the `Optional` already has a value. `orElseGet(supplier)`, by contrast, calls the supplier only when the `Optional` is empty <abbr title="Java SE 21 API, java.util.Optional.orElseGet(Supplier)">[6]</abbr>:
 
 ```java run
 import java.util.Optional;
@@ -629,13 +629,13 @@ Linus
 0
 ```
 
-`fallback()` ran for `orElse` although its result was thrown away. Use `orElseGet` when the default is costly to compute. The last two lines show `map` on a present value (`5`) and on an empty one (the fallback `0`).
+`fallback()` ran for `orElse`, even though its result was thrown away. So use `orElseGet` when the default is costly to compute. The last two lines show `map` on a present value (`5`) and on an empty one (the fallback `0`).
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Return `Optional<T>` from methods that may find nothing, and consume it with `orElse`/`orElseGet`/`map`/`ifPresent`, never a naked `get()`.
+💡 **Earned rule.** Return `Optional<T>` from methods that may find nothing, and consume it with `orElse`/`orElseGet`/`map`/`ifPresent` — never a naked `get()`.
 
-The cost is the wrapping and unwrapping. `Optional` is meant "primarily … for use as a method return type" <abbr title="Java SE 21 API, java.util.Optional, API note">[6]</abbr>, not for fields or parameters. The benefit: "this might be absent" is visible at the boundary, so a class of run-time `NullPointerException`s becomes handled cases.
+The cost is the wrapping and unwrapping. Also, `Optional` is meant "primarily … for use as a method return type" <abbr title="Java SE 21 API, java.util.Optional, API note">[6]</abbr>, not for fields or parameters. The payoff: "this might be absent" is visible right at the boundary, so a whole class of run-time `NullPointerException`s turns into handled cases.
 
 </div>
 
@@ -643,9 +643,9 @@ The cost is the wrapping and unwrapping. `Optional` is meant "primarily … for 
 
 ## 6. Parallel streams and their hazards
 
-A **thread** is one independent path of execution through a program. A program can run several threads at once, and on a machine with several processor cores they run side by side. The [concurrency lessons](/synapse/programming-languages/java/advanced/concurrency-the-basics) cover them in depth.
+A **thread** is one independent path of execution through a program. A program can run several threads at once, and on a machine with several processor cores, they genuinely run side by side. The [concurrency lessons](/synapse/programming-languages/java/advanced/concurrency-the-basics) cover threads in depth.
 
-`parallelStream()` (or `.parallel()`) splits a stream's work across several threads <abbr title="Java SE 21 API, java.util.stream package summary, &quot;Parallelism&quot;">[1]</abbr>. It can speed up **stateless** operations on large data. It is a trap when the pipeline touches **shared mutable state**, because the threads race.
+`parallelStream()` (or `.parallel()`) splits a stream's work across several threads <abbr title="Java SE 21 API, java.util.stream package summary, &quot;Parallelism&quot;">[1]</abbr>. It can speed up **stateless** operations on large data. But it's a trap when the pipeline touches **shared mutable state**, because the threads race each other.
 
 ```java run
 import java.util.stream.LongStream;
@@ -663,14 +663,14 @@ public class Main {
 500000500000
 ```
 
-**Analysis.** The parallel `sum` over one million numbers gave the correct `500000500000`, on every run. `sum` is a proper reduction: each thread sums a chunk, and the chunks combine associatively with no shared state. This is the safe way to parallelize: a stateless pipeline ending in a reduction or collector.
+**Analysis.** The parallel `sum` over one million numbers gave the correct `500000500000`, on every run. `sum` is a proper reduction: each thread sums its own chunk, and the chunks combine associatively, with no shared state. This is the safe way to parallelize: a stateless pipeline that ends in a reduction or a collector.
 
 **Intuition.**
-*Mechanism.* A parallel stream splits the source into chunks, processes them on a pool of threads, and combines the partial results. This is correct when the operations are stateless and the combination is associative <abbr title="Java SE 21 API, java.util.stream package summary, &quot;Associativity&quot;">[1]</abbr>. `sum`, `map`, `filter` and `collect` all qualify.
+*Mechanism.* A parallel stream splits the source into chunks, processes them on a pool of threads, and then combines the partial results. That's correct as long as the operations are stateless and the combination is associative <abbr title="Java SE 21 API, java.util.stream package summary, &quot;Associativity&quot;">[1]</abbr>. `sum`, `map`, `filter` and `collect` all qualify.
 
-*Concrete bite.* Touch shared mutable state and the threads corrupt it. This is a **data race**, with no error, only wrong answers.
+*Concrete bite.* Touch shared mutable state, and the threads corrupt it. This is called a **data race**, and it produces no error — only wrong answers.
 
-First, why the example below counts in an `int[]`. A lambda may use a local variable only if it is effectively final <abbr title="The Java Language Specification, Java SE 21, §15.27.2">[7]</abbr>, so the obvious `total += n` does not compile:
+First, a word on why the example below counts in an `int[]`. A lambda may use a local variable only if it's effectively final <abbr title="The Java Language Specification, Java SE 21, §15.27.2">[7]</abbr>, so the obvious `total += n` doesn't compile:
 
 ```java run
 import java.util.List;
@@ -692,7 +692,7 @@ Main.java:6: error: local variables referenced from a lambda expression must be 
 1 error
 ```
 
-The compiler is protecting you. An array slot is not a local variable, so `counter[0]++` gets past the rule, and the race below is the result:
+Here, the compiler is protecting you. An array slot isn't a local variable, though, so `counter[0]++` slips past the rule — and the race below is the result:
 
 ```java run
 import java.util.stream.IntStream;
@@ -711,13 +711,13 @@ public class Main {
 141528
 ```
 
-Many threads ran `counter[0]++` at once, and each `++` is three steps: read, add one, write.
+Many threads ran `counter[0]++` at the same time, and each `++` is really three steps: read, add one, write.
 
 - Two threads read the same value, both write value + 1, and one update is lost.
-- The count is wrong and *different every run*.
-- There is no exception, only silent corruption.
+- The count is wrong, and *different on every run*.
+- There's no exception, only silent corruption.
 
-The fix is to let the stream do the counting, as a reduction. Same scenario, same million elements:
+The fix is to let the stream do the counting itself, as a reduction. Same scenario, same million elements:
 
 ```java run
 import java.util.stream.IntStream;
@@ -740,9 +740,9 @@ public class Main {
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Parallelize only stateless pipelines that end in a reduction or collector, on data large enough to outweigh the cost of splitting. Never let a parallel stream write to shared mutable state.
+💡 **Earned rule.** Parallelize only stateless pipelines that end in a reduction or collector, and only on data large enough to outweigh the cost of splitting it up. Never let a parallel stream write to shared mutable state.
 
-The cost is that parallelism is correct only under those conditions, and can be *slower* on small data. The benefit, when they hold, is a multi-core speedup from one word: `stream()` becomes `parallelStream()`.
+The cost is that parallelism is correct only under those conditions, and it can actually be *slower* on small data. The payoff, when the conditions hold, is a multi-core speedup from a one-word change: `stream()` becomes `parallelStream()`.
 
 </div>
 
@@ -837,9 +837,9 @@ false
 none
 ```
 
-- The evens are `2` and `4`; their squares are `[4, 16]`.
-- Only `10` is peeked: `findFirst` stops after the first element, which `map` turns into `11`.
-- No string is longer than 5, so the `Optional` is empty and `orElse` gives `none`. A method returning `null` would compile the same, and fail only when a caller forgot the check. `Optional<String>` puts the check in the type.
+- The evens are `2` and `4`, and their squares are `[4, 16]`.
+- Only `10` is peeked, because `findFirst` stops after the first element, which `map` turns into `11`.
+- No string is longer than 5, so the `Optional` is empty, and `orElse` gives `none`. A method returning `null` would compile just the same, and fail only when some caller forgot the check. `Optional<String>` puts that check into the type.
 
 </details>
 
@@ -863,7 +863,7 @@ none
 
 1. Predict the output of `Stream.of(1,2,3,4).filter(n -> n % 2 == 0).map(n -> n * n).collect(Collectors.toList())`.
 2. Predict the `peek` lines printed by `Stream.of(10,20,30).peek(System.out::println).map(n -> n + 1).findFirst()`.
-3. Predict whether `List.of("a","bb","ccc").stream().filter(s -> s.length() > 5).findFirst()` is present, and what `.orElse("none")` returns. Explain why `Optional` is safer here than returning `null`.
+3. Predict whether `List.of("a","bb","ccc").stream().filter(s -> s.length() > 5).findFirst()` is present, and what `.orElse("none")` returns. Then explain why `Optional` is safer here than returning `null`.
 
 </div>
 

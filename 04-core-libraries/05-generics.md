@@ -6,23 +6,23 @@ prereqs: []
 
 # Generics — Type Safety Without Casts
 
-You've used generics since [the Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework): `List<Integer>` is "a list of `Integer`". Generics let a class or method work over *a* type the caller chooses, while the compiler enforces it. So `List<String>` accepts only `String`s and returns `String`s, with no casting.
+You've been using generics ever since [the Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework): `List<Integer>` simply means "a list of `Integer`". Generics let a class or method work over *a* type that the caller chooses, and the compiler enforces that choice. So a `List<String>` accepts only `String`s and hands back only `String`s — no casting required.
 
-The catch, and the second half of this lesson, is that generics are a **compile-time** device. The compiler **erases** them, so at run time `List<String>` and `List<Integer>` are the *same* class. That **type erasure** explains why generics cost no extra classes, and also what they cannot do, such as `new T[10]`.
+Here's the catch, and it's the second half of this lesson: generics are a **compile-time** device. The compiler **erases** them, so at run time `List<String>` and `List<Integer>` are the *same* class. This **type erasure** explains why generics cost you no extra classes. It also explains what they can't do, such as `new T[10]`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **The core idea.**
 
-- Generics parameterize code over **a type the caller picks** — `List<String>` with no casts.
-- The compiler enforces it; generics are a **compile-time** device.
-- The JVM **erases** them, so `List<String>` and `List<Integer>` are one class at run time — free, but limited.
+- Generics parameterize code over **a type the caller picks** — think `List<String>`, with no casts.
+- The compiler enforces that type, because generics are a **compile-time** device.
+- The type is then **erased**, so `List<String>` and `List<Integer>` are one class at run time — free, but limited.
 
 </div>
 
 Every output below was produced by compiling and running the code on Java 21.
 
-**You'll be able to:** write a generic class and a generic method, and predict when the compiler rejects a misuse; predict the type the compiler infers for a diamond, a `var` and a generic call; add a bound when a method needs `compareTo`, and read the error when it is missing; pick `? extends T` or `? super T` for a parameter, and predict which calls compile; explain what erasure removes, and predict which `instanceof` and `new T[]` forms compile.
+**You'll be able to:** write a generic class and a generic method, and predict when the compiler rejects a misuse; predict the type the compiler infers for a diamond, a `var` and a generic call; add a bound when a method needs `compareTo`, and read the error you get when the bound is missing; choose `? extends T` or `? super T` for a parameter, and predict which calls compile; explain what erasure removes, and predict which forms of `instanceof` and `new T[]` compile.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -51,7 +51,7 @@ Every output below was produced by compiling and running the code on Java 21.
 
 ## 1. Generic classes: type parameters
 
-A class can declare a **type parameter**, written `<T>`, and use `T` as a stand-in type throughout <abbr title="The Java Language Specification, Java SE 21, §8.1.2">[1]</abbr>. The caller supplies a **type argument**, the real type, such as `String` in `Box<String>` <abbr title="The Java Language Specification, Java SE 21, §4.5">[2]</abbr>. The compiler then enforces it everywhere.
+A class can declare a **type parameter**, written `<T>`, and then use `T` as a stand-in type throughout its body <abbr title="The Java Language Specification, Java SE 21, §8.1.2">[1]</abbr>. The caller fills in the real type by supplying a **type argument**, such as `String` in `Box<String>` <abbr title="The Java Language Specification, Java SE 21, §4.5">[2]</abbr>. From then on, the compiler enforces that type everywhere.
 
 ```java run
 class Box<T> {
@@ -77,14 +77,14 @@ HELLO
 43
 ```
 
-**Analysis.** `Box<String>` made `T` mean `String`, so `get()` returned a `String`, usable as one (`toUpperCase`) with no cast. `Box<Integer>`'s `get()` returned an `Integer`, usable in arithmetic. One class definition gave two type-safe uses.
+**Analysis.** `Box<String>` made `T` mean `String`, so `get()` returned a `String` that you could use as one (`toUpperCase`) without a cast. Likewise, `Box<Integer>`'s `get()` returned an `Integer`, ready for arithmetic. One class definition, two type-safe uses.
 
-`new Box<>("hello")` uses the diamond from [the Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework): the compiler infers `String` from the variable's type. §2 shows more of this **type inference**.
+`new Box<>("hello")` uses the diamond you met in [the Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework): the compiler infers `String` from the variable's type. You'll see more of this **type inference** in §2.
 
 **Intuition.**
-*Mechanism.* The compiler checks every use of a `Box<String>` as if `T` were `String`. The guarantee is static: code that makes a `Box<String>` hold or return anything but a `String` does not compile.
+*Mechanism.* The compiler checks every use of a `Box<String>` as if `T` were `String`. The guarantee is static: any code that makes a `Box<String>` hold or return something other than a `String` simply doesn't compile.
 
-*Concrete bite.* That guarantee shows up as a compile error the moment you misuse it:
+*Concrete bite.* You feel that guarantee as a compile error the moment you misuse the box:
 
 ```java run
 class Box<T> {
@@ -110,9 +110,9 @@ Main.java:10: error: incompatible types: String cannot be converted to Integer
 1 error
 ```
 
-`sb.get()` is statically a `String`, so assigning it to an `Integer` is rejected: the type argument carried `String` all the way to the return type. The error comes at compile time, not as a `ClassCastException` at run time.
+`sb.get()` is statically a `String`, so the compiler refuses to assign it to an `Integer`: the type argument carried `String` all the way through to the return type. Notice *when* the error arrives — at compile time, not as a `ClassCastException` at run time.
 
-*Non-example: a raw type.* Leave out the type argument, and you get a **raw type**: `List` instead of `List<String>`. The JLS allows raw types "only as a concession to compatibility of legacy code", written before Java 5 added generics <abbr title="The Java Language Specification, Java SE 21, §4.8">[3]</abbr>. The compiler then checks nothing:
+*Non-example: a raw type.* If you leave out the type argument, you get a **raw type**: `List` instead of `List<String>`. The JLS allows raw types "only as a concession to compatibility of legacy code" — code written before Java 5 added generics <abbr title="The Java Language Specification, Java SE 21, §4.8">[3]</abbr>. With a raw type, the compiler checks nothing:
 
 ```java run
 import java.util.ArrayList;
@@ -137,13 +137,13 @@ public class Main {
 Exception in thread "main" java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
 ```
 
-javac compiled it with only a note: `Main.java uses unchecked or unsafe operations.` The `42` went in unchecked. The crash came far from the mistake, when the loop read it as a `String`.
+javac compiled this with nothing more than a note: `Main.java uses unchecked or unsafe operations.` The `42` went in unchecked. The crash came much later and far from the mistake, when the loop tried to read it as a `String`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Parameterize a container or wrapper with `<T>` so its callers get type safety and skip casts. Never write a raw type in new code.
+💡 **Earned rule.** Parameterize a container or wrapper with `<T>`, so its callers get type safety and never need a cast. Never write a raw type in new code.
 
-The cost is a more abstract class definition, and `T` must be a reference type: `Box<int>` won't compile, only `Box<Integer>`. The benefit is that misuse becomes a compile error instead of a run-time cast failure.
+The cost is a more abstract class definition, plus one restriction: `T` must be a reference type. `Box<int>` won't compile; only `Box<Integer>` will. The payoff is that misuse becomes a compile error instead of a run-time cast failure.
 
 </div>
 
@@ -151,7 +151,7 @@ The cost is a more abstract class definition, and `T` must be a reference type: 
 
 ## 2. Generic methods and bounded types
 
-A *method* can have its own type parameter, declared before the return type: `<T> T pick(...)` <abbr title="The Java Language Specification, Java SE 21, §8.4.4">[4]</abbr>. A **bound**, `<T extends Something>`, restricts `T` to subtypes of `Something`. That unlocks `Something`'s methods on `T`.
+A *method* can have its own type parameter too. You declare it just before the return type: `<T> T pick(...)` <abbr title="The Java Language Specification, Java SE 21, §8.4.4">[4]</abbr>. Add a **bound**, `<T extends Something>`, and `T` is restricted to subtypes of `Something`. In exchange, you can call `Something`'s methods on `T`.
 
 ```java run
 public class Main {
@@ -172,14 +172,14 @@ public class Main {
 banana
 ```
 
-**Analysis.** `max` works for any `T` that is `Comparable<T>`, so one definition found the larger `Integer` (`7`) and the later `String` (`"banana"`). The bound `T extends Comparable<T>` is what lets the body call `a.compareTo(b)`. Without it, the compiler knows nothing about `T` beyond `Object`'s methods.
+**Analysis.** `max` works for any `T` that is `Comparable<T>`. So a single definition found both the larger `Integer` (`7`) and the alphabetically later `String` (`"banana"`). The bound `T extends Comparable<T>` is what allows the body to call `a.compareTo(b)`. Without it, the compiler knows nothing about `T` beyond `Object`'s methods.
 
-Nobody wrote `<Integer>` at the call. The compiler **inferred** `T` from the arguments <abbr title="The Java Language Specification, Java SE 21, §18 Type Inference">[5]</abbr>. You may also write it explicitly: `Main.<Integer>max(3, 7)` prints `7`.
+Notice that nobody wrote `<Integer>` at the call site. The compiler **inferred** `T` from the arguments <abbr title="The Java Language Specification, Java SE 21, §18 Type Inference">[5]</abbr>. You can still spell it out if you like: `Main.<Integer>max(3, 7)` prints `7`.
 
 **Intuition.**
-*Mechanism.* A bound is a compile-time promise about `T`'s capabilities. `T extends Comparable<T>` tells the compiler every `T` has `compareTo`, so the call type-checks; the caller, in turn, may only pass `Comparable` types.
+*Mechanism.* A bound is a compile-time promise about what `T` can do. `T extends Comparable<T>` tells the compiler that every `T` has `compareTo`, so the call type-checks. In return, callers may pass only `Comparable` types.
 
-*Concrete bite.* Drop the bound and the method can't use anything type-specific:
+*Concrete bite.* Drop the bound, and the method can't use anything type-specific:
 
 ```java run
 public class Main {
@@ -199,9 +199,9 @@ Main.java:3: error: cannot find symbol
   symbol:   method compareTo(T)
 ```
 
-With an unbounded `T`, `a` is known only to be an `Object`, which has no `compareTo`, so the call won't compile. The bound isn't decoration; it is what makes `T`'s methods available.
+With an unbounded `T`, all the compiler knows about `a` is that it's an `Object`. `Object` has no `compareTo`, so the call won't compile. The bound isn't decoration — it's exactly what makes `T`'s methods available.
 
-Inference has limits too. `max(3, "banana")` asks for one `T` that is both `Integer` and `String`:
+Inference has its limits, too. `max(3, "banana")` asks for a single `T` that is both an `Integer` and a `String`:
 
 ```java run
 public class Main {
@@ -226,7 +226,7 @@ Main.java:8: error: method max in class Main cannot be applied to given types;
   reason: inference variable T has incompatible bounds
 ```
 
-*Non-example: `var` with a diamond.* The diamond infers from the variable's declared type. With `var` there is none, so the compiler infers the widest type, `Object`:
+*Non-example: `var` with a diamond.* The diamond infers its type from the variable's declared type. With `var`, there is no declared type, so the compiler falls back to the widest type, `Object`:
 
 ```java run
 import java.util.ArrayList;
@@ -248,13 +248,13 @@ Main.java:8: error: incompatible types: Object cannot be converted to String
                                ^
 ```
 
-`list` is an `ArrayList<Object>`, so it accepted both `"a"` and `1`, and `get` returns `Object`. Write `var list = new ArrayList<String>();`, or `List<String> list = new ArrayList<>();`.
+`list` turned out to be an `ArrayList<Object>`. That's why it happily accepted both `"a"` and `1`, and why `get` returns `Object`. To fix it, write `var list = new ArrayList<String>();`, or `List<String> list = new ArrayList<>();`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use a generic method when one algorithm applies across many types, and add a bound (`extends`) exactly when the body needs methods beyond `Object`'s. Let the compiler infer type arguments, but give it a declared type to infer from.
+💡 **Earned rule.** Use a generic method when one algorithm applies across many types. Add a bound (`extends`) exactly when the body needs methods beyond `Object`'s. Let the compiler infer type arguments — but give it a declared type to infer from.
 
-The cost of a bound is narrowing what callers may pass. The benefit is that the body can *do* something with `T` (compare it, call its interface's methods) while staying type-safe.
+The cost of a bound is that it narrows what callers may pass. The payoff is that the body can actually *do* something with `T` (compare it, call its interface's methods) while staying type-safe.
 
 </div>
 
@@ -262,9 +262,9 @@ The cost of a bound is narrowing what callers may pass. The benefit is that the 
 
 ## 3. Wildcards and PECS
 
-`Integer` is a subtype of `Number`, but `List<Integer>` is **not** a `List<Number>`: "subtyping does not extend through parameterized types" <abbr title="The Java Language Specification, Java SE 21, §4.10">[6]</abbr>. Generics are *invariant*, so a method taking `List<Number>` rejects a `List<Integer>`.
+`Integer` is a subtype of `Number`, but here's a surprise: `List<Integer>` is **not** a `List<Number>`. In the JLS's words, "subtyping does not extend through parameterized types" <abbr title="The Java Language Specification, Java SE 21, §4.10">[6]</abbr>. Generics are *invariant*, so a method that takes a `List<Number>` rejects a `List<Integer>`.
 
-**Wildcards** restore flexibility <abbr title="The Java Language Specification, Java SE 21, §4.5.1">[7]</abbr>. `? extends Number` means "some unknown subtype of `Number`", and accepts `List<Integer>`, `List<Double>`, and so on.
+**Wildcards** bring the flexibility back <abbr title="The Java Language Specification, Java SE 21, §4.5.1">[7]</abbr>. `? extends Number` means "some unknown subtype of `Number`", so it accepts `List<Integer>`, `List<Double>`, and so on.
 
 ```java run
 import java.util.List;
@@ -294,15 +294,15 @@ public class Main {
 4.0
 ```
 
-**Analysis.** `sum` accepts `List<? extends Number>`, so it summed both a `List<Integer>` (`6.0`) and a `List<Double>` (`4.0`). Every element is *some* `Number`, which is all `sum` needs to call `doubleValue()`. The wildcard widened the parameter from "exactly `List<Number>`" to "a list of any `Number` subtype".
+**Analysis.** Because `sum` accepts `List<? extends Number>`, it could sum both a `List<Integer>` (`6.0`) and a `List<Double>` (`4.0`). Every element is *some* kind of `Number`, and that's all `sum` needs in order to call `doubleValue()`. The wildcard widened the parameter from "exactly `List<Number>`" to "a list of any `Number` subtype".
 
 **Intuition.**
-*Mechanism.* Without a wildcard, `List<Number>` matches only `List<Number>`. It has to: otherwise you could pass a `List<Integer>` and put a `Double` into it.
+*Mechanism.* Without a wildcard, `List<Number>` matches only `List<Number>`. It has to work that way: otherwise you could pass in a `List<Integer>` and then put a `Double` into it.
 
-- `? extends Number` is a **producer**: you can *read* `Number`s out, but not *add*, because the exact element type is unknown.
-- Its mirror, `? super Integer`, is a **consumer**: you can *add* `Integer`s, but read only `Object`s.
+- `? extends Number` is a **producer**. You can *read* `Number`s out of it, but you can't *add* to it, because the exact element type is unknown.
+- Its mirror image, `? super Integer`, is a **consumer**. You can *add* `Integer`s to it, but you can read only `Object`s back.
 
-Hence the mnemonic **PECS**: *Producer `extends`, Consumer `super`*. A consumer in action:
+That gives us the mnemonic **PECS**: *Producer `extends`, Consumer `super`*. Here's a consumer in action:
 
 ```java run
 import java.util.ArrayList;
@@ -333,7 +333,7 @@ public class Main {
 1
 ```
 
-`addOnes` accepted a `List<Number>` and a `List<Object>`: both can hold an `Integer`. The producer side refuses to add, even a value that looks safe:
+`addOnes` accepted both a `List<Number>` and a `List<Object>`, since both can hold an `Integer`. The producer side, on the other hand, refuses to add anything — even a value that looks perfectly safe:
 
 ```java run
 import java.util.ArrayList;
@@ -356,9 +356,9 @@ Main.java:7: error: incompatible types: int cannot be converted to CAP#1
     CAP#1 extends Number from capture of ? extends Number
 ```
 
-`CAP#1` is javac's name for "the unknown type behind `?`". The list might be a `List<Double>`, so no `Integer` may go in.
+`CAP#1` is javac's name for "the unknown type behind `?`". For all the compiler knows, the list might be a `List<Double>`, so no `Integer` is allowed in.
 
-*Concrete bite.* Declare the parameter as the invariant `List<Number>` and the same call is rejected:
+*Concrete bite.* Declare the parameter as the invariant `List<Number>`, and the same call is rejected:
 
 ```java run
 import java.util.List;
@@ -386,13 +386,13 @@ Main.java:14: error: incompatible types: List<Integer> cannot be converted to Li
                                ^
 ```
 
-`List<Integer>` is not a `List<Number>`, so `sum(ints)` won't compile: invariance in action. The `? extends Number` wildcard is the fix.
+Since `List<Integer>` is not a `List<Number>`, `sum(ints)` won't compile. That's invariance in action, and the `? extends Number` wildcard is the fix.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `? extends T` for parameters you only **read** from (producers), and `? super T` for parameters you only **write** to (consumers): PECS.
+💡 **Earned rule.** Use `? extends T` for parameters you only **read** from (producers), and `? super T` for parameters you only **write** to (consumers). That's PECS.
 
-The cost is wildcard syntax and its restriction: a `? extends` list can't be added to. The benefit is APIs that accept the whole family of related generic types instead of one exact match.
+The cost is the wildcard syntax and its restriction: you can't add to a `? extends` list. The payoff is APIs that accept a whole family of related generic types, instead of one exact match.
 
 </div>
 
@@ -400,7 +400,7 @@ The cost is wildcard syntax and its restriction: a `? extends` list can't be add
 
 ## 4. Type erasure
 
-Generics exist only at compile time. The compiler checks types and then **erases** them <abbr title="The Java Language Specification, Java SE 21, §4.6">[8]</abbr>. At run time there is only `ArrayList`: `ArrayList<String>` and `ArrayList<Integer>` are the *same* class.
+Generics exist only at compile time. The compiler checks the types and then **erases** them <abbr title="The Java Language Specification, Java SE 21, §4.6">[8]</abbr>. By run time, there is only `ArrayList`: `ArrayList<String>` and `ArrayList<Integer>` are the *same* class.
 
 ```java run
 import java.util.List;
@@ -422,10 +422,10 @@ true
 ArrayList
 ```
 
-**Analysis.** Both lists report the *same* class, `ArrayList`, and `getClass() == getClass()` is `true`: at run time the `<String>` and `<Integer>` are gone. Generics were enforced during compilation and then erased. This is why generics need no extra classes, and why some things are impossible.
+**Analysis.** Both lists report the *same* class, `ArrayList`, and `getClass() == getClass()` is `true`. At run time, the `<String>` and `<Integer>` are simply gone: generics were enforced during compilation, then erased. That's why generics need no extra classes — and why some things are impossible.
 
 **Intuition.**
-*Mechanism.* Erasure replaces each type variable with the erasure of its bound, or `Object` when there is none <abbr title="The Java Language Specification, Java SE 21, §4.6">[8]</abbr>. The compiler inserts casts where the code needs the real type. `javap -c`, the JDK's bytecode printer, shows both for the §1 `Box<String>` program:
+*Mechanism.* Erasure replaces each type variable with the erasure of its bound, or with `Object` when there is no bound <abbr title="The Java Language Specification, Java SE 21, §4.6">[8]</abbr>. Wherever the code needs the real type, the compiler inserts a cast. You can see both effects with `javap -c`, the JDK's bytecode printer, on the §1 `Box<String>` program:
 
 ```text
 $ javap -c Main
@@ -433,9 +433,9 @@ $ javap -c Main
       14: checkcast     #18                 // class java/lang/String
 ```
 
-`Box.get` returns `Object` in the bytecode, and a `checkcast` to `String` follows the call. The cast cannot fail here, because the compiler proved the types first. A raw type, as in §1, skips that proof, and the inserted cast is what threw.
+In the bytecode, `Box.get` returns `Object`, and a `checkcast` to `String` follows the call. That cast can't fail here, because the compiler already proved the types. A raw type, as in §1, skips that proof — and the inserted cast is exactly what threw.
 
-*Concrete bite.* Because the type argument is gone at run time, the JVM cannot check it. So `instanceof` accepts `List<String>` only when the compiler can prove the answer about `<String>` in advance <abbr title="The Java Language Specification, Java SE 21, §15.20.2">[9]</abbr>. From an `Object`, it cannot:
+*Concrete bite.* Because the type argument is gone at run time, the JVM has no way to check it. So `instanceof` accepts `List<String>` only when the compiler can prove the `<String>` part in advance <abbr title="The Java Language Specification, Java SE 21, §15.20.2">[9]</abbr>. Starting from an `Object`, it can't:
 
 ```java run
 import java.util.List;
@@ -458,7 +458,7 @@ Main.java:5: error: Object cannot be safely cast to List<String>
             ^
 ```
 
-At run time there's only `List`, so `obj instanceof List<String>` can't be checked, and the compiler rejects it. From a `Collection<String>`, the same test compiles, because `<String>` is already known:
+At run time there's only `List`, so nothing can check `obj instanceof List<String>`, and the compiler rejects it. Start from a `Collection<String>`, though, and the same test compiles, because `<String>` is already known:
 
 ```java run
 import java.util.ArrayList;
@@ -481,7 +481,7 @@ true
 true
 ```
 
-From an `Object`, test `instanceof List<?>`: "some list". For the same reason, an array of a type variable cannot be created <abbr title="The Java Language Specification, Java SE 21, §15.10.1">[10]</abbr>; there is no run-time `T` to allocate:
+From an `Object`, test `instanceof List<?>` instead, which means "some list". The same reasoning explains why you can't create an array of a type variable <abbr title="The Java Language Specification, Java SE 21, §15.10.1">[10]</abbr>: there's no run-time `T` to allocate:
 
 ```java run
 class Stack<T> {
@@ -502,9 +502,9 @@ Main.java:2: error: generic array creation
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Rely on generics for compile-time safety, and remember the run-time blind spot: the type argument does not exist there. So no `instanceof List<String>` on an `Object`, and no `new T[]`.
+💡 **Earned rule.** Rely on generics for compile-time safety, but remember the run-time blind spot: the type argument doesn't exist there. That means no `instanceof List<String>` on an `Object`, and no `new T[]`.
 
-The cost of erasure is these gaps, and the "unchecked" warnings when you mix in raw types. The benefit is compatibility: generic code runs on the same classes as the code written before generics.
+The cost of erasure is these gaps, plus the "unchecked" warnings you get when you mix in raw types. The payoff is compatibility: generic code runs on the very same classes as code written before generics existed.
 
 </div>
 
@@ -571,7 +571,7 @@ One check per objective. Answer before you open anything.
 - `new Pair<String, Integer>("x", 1).second() + 1` is `2`: `second()` returns an `Integer`, which unboxes for the `+`.
 - `static <T> T firstOrNull(List<T> xs)` compiles. Adding `xs.get(0).compareTo(...)` inside it does not: `cannot find symbol`, as in §2, until `T` gets a bound.
 - `new ArrayList<String>().getClass() == new ArrayList<Double>().getClass()` is `true`: erasure leaves one class.
-- `obj instanceof Map<String,Integer>` is rejected because the JVM keeps no type arguments, so it cannot check `<String,Integer>`, and from an `Object` the compiler cannot prove it either.
+- `obj instanceof Map<String,Integer>` is rejected because the JVM keeps no type arguments, so it can't check `<String,Integer>` — and starting from an `Object`, the compiler can't prove it either.
 
 ```java run
 import java.util.ArrayList;
@@ -628,7 +628,7 @@ true
 
 🧪 **Predict, then check.**
 
-1. Write a `Pair<A, B>` class with two type parameters and a `first()` and `second()`. Predict what `new Pair<String, Integer>("x", 1).second() + 1` evaluates to.
+1. Write a `Pair<A, B>` class with two type parameters, plus a `first()` and a `second()`. Predict what `new Pair<String, Integer>("x", 1).second() + 1` evaluates to.
 2. Predict whether `static <T> T firstOrNull(List<T> xs)` compiles, and whether adding `xs.get(0).compareTo(...)` inside it does.
 3. Predict `new ArrayList<String>().getClass() == new ArrayList<Double>().getClass()`.
 4. Explain in one sentence why `obj instanceof Map<String,Integer>` is rejected when `obj` is an `Object`.

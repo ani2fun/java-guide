@@ -6,9 +6,9 @@ prereqs: []
 
 # Control Flow: Overview
 
-This is Chapter 2. With [First Steps](/synapse/programming-languages/java/first-steps/what-java-is-and-running-code) behind you — values, numbers, text, I/O — these six lessons give a program the power to *decide* and to *repeat*, which is where it stops being a calculator and starts being software. You'll make choices with `boolean` logic and `if`/`switch`, repeat work with loops, steer that repetition with `break`/`continue`, store many values in arrays, and package logic into reusable methods.
+Welcome to Chapter 2. With [First Steps](/synapse/programming-languages/java/first-steps/what-java-is-and-running-code) behind you — values, numbers, text, I/O — these six lessons give a program the power to *decide* and to *repeat*. That's the point where it stops being a calculator and starts being software. You'll make choices with `boolean` logic and `if`/`switch`, repeat work with loops, steer that repetition with `break`/`continue`, store many values in arrays, and package logic into reusable methods.
 
-Six lessons, in order:
+There are six lessons, in this order:
 
 1. [**Booleans & Logic**](/synapse/programming-languages/java/control-flow/booleans-and-logic) — the yes/no type with no truthiness, comparisons, `&&`/`||`/`!`, and short-circuit evaluation as a guard.
 2. [**Conditionals**](/synapse/programming-languages/java/control-flow/conditionals) — `if`/`else if`/`else`, the `switch` statement and its fall-through trap, exhaustive `switch` expressions, and the ternary `?:`.
@@ -17,7 +17,7 @@ Six lessons, in order:
 5. [**Arrays**](/synapse/programming-languages/java/control-flow/arrays) — a fixed block of indexed slots, bounds checking at run time, iteration, jagged 2D arrays, and why an array isn't a growable list.
 6. [**Methods**](/synapse/programming-languages/java/control-flow/methods) — parameters, return types, `void`, overloading, and Java's pass-by-value rule (including how object references are passed by value).
 
-Every code block with a ▶ Run button is live — change it, run it again, and watch what the compiler or the JVM says. The fastest way to learn in this chapter is to **perturb working examples**: move a `break`, flip a `<` to `<=`, forget a `return`, and see exactly which kind of error you get — compile-time or run-time.
+Every code block with a ▶ Run button is live — change it, run it again, and watch what the compiler or the JVM says. The fastest way to learn in this chapter is to **perturb working examples**: move a `break`, flip a `<` to `<=`, forget a `return`, and see exactly which kind of error you get, compile-time or run-time.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 

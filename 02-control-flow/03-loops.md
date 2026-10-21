@@ -6,14 +6,14 @@ prereqs: []
 
 # Loops — Repeating Work
 
-Computers are good at doing the same thing many times, and a **loop** is how you ask for that: repeat a block of code while a `boolean` condition stays true. Java gives you four loop shapes. They differ only in *when* the condition is checked and *what* drives the repetition:
+Computers are great at doing the same thing over and over, and a **loop** is how you ask for that: repeat a block of code while a `boolean` condition stays true. Java gives you four loop shapes. They differ only in *when* they check the condition and *what* drives the repetition:
 
 - `while` checks before each pass;
 - `do-while` checks after each pass;
 - the classic `for` bundles a counter's setup, test and step onto one line;
 - the enhanced `for` walks a collection of values directly.
 
-Master the counter and the boundary, and every loop you meet is a variation on these.
+Master the counter and the boundary, and every loop you'll meet is a variation on these.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -56,7 +56,7 @@ This rests on [boolean conditions](/synapse/programming-languages/java/control-f
 
 ## 1. `while`: test before each pass
 
-A `while` loop checks its condition, and if it is `true`, runs the body. Then it checks again, and again, until the condition becomes `false` <abbr title="The Java Language Specification, Java SE 21, §14.12">[1]</abbr>. Something inside the body must move toward that end, or the loop never stops.
+A `while` loop checks its condition, and if it's `true`, runs the body. Then it checks again, and again, until the condition becomes `false` <abbr title="The Java Language Specification, Java SE 21, §14.12">[1]</abbr>. Something inside the body has to move toward that end, or the loop never stops.
 
 ```java run
 public class Main {
@@ -76,10 +76,10 @@ public class Main {
 0 1 2 3 4 
 ```
 
-**Analysis.** `i` starts at `0`. The loop printed `0`, incremented to `1`, checked `1 < 5` (true), and so on, printing `0 1 2 3 4`. When `i` reached `5`, the test `5 < 5` was `false`, so the loop stopped *before* printing `5`. The `i++` is what advanced the counter toward the exit.
+**Analysis.** `i` starts at `0`. The loop printed `0`, incremented to `1`, checked `1 < 5` (true), and so on, printing `0 1 2 3 4`. When `i` reached `5`, the test `5 < 5` was `false`, so the loop stopped *before* printing `5`. The `i++` is what moved the counter toward the exit.
 
 **Intuition.**
-*Mechanism.* `while (cond)` evaluates `cond` *before* each pass; the body runs only while it is true. If the body never changes what `cond` depends on, the condition stays true forever. That is an **infinite loop**.
+*Mechanism.* `while (cond)` evaluates `cond` *before* each pass, and the body runs only while it's true. If the body never changes what `cond` depends on, the condition stays true forever. That's an **infinite loop**.
 
 *Non-example: the missing update.* Leave out the `i++`, and nothing ever makes `i < 3` false:
 
@@ -103,9 +103,9 @@ public class Main {
 before the loop
 ```
 
-There is no error message. The program keeps running, and `after the loop` never prints. On a terminal, stop a runaway program with Ctrl+C.
+There's no error message. The program just keeps running, and `after the loop` never prints. In a terminal, you stop a runaway program with Ctrl+C.
 
-*Concrete bite.* The boundary is where loops go wrong. Change `<` to `<=` and the loop runs one extra time:
+*Concrete bite.* The boundary is where loops go wrong. Change `<` to `<=`, and the loop runs one extra time:
 
 ```java run
 public class Main {
@@ -125,13 +125,13 @@ public class Main {
 0 1 2 3 4 5 
 ```
 
-The same loop with `<=` prints `0` through `5`: six numbers, not five. "Count five things starting at zero" means `i < 5` (indices `0..4`); `i <= 5` is the **off-by-one** that does one too many.
+The same loop with `<=` prints `0` through `5`: six numbers, not five. "Count five things starting at zero" means `i < 5` (indices `0..4`). `i <= 5` is the **off-by-one** that does one too many.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Write the condition so the body advances toward making it false, and pin down the boundary deliberately: `i < n` counts `n` times from `0`.
 
-The cost of a loose boundary is an off-by-one: one pass too many or too few. The cost of *no* advance is an infinite loop. It produces no wrong output and no error, only a program that never returns.
+A loose boundary costs you an off-by-one: one pass too many or too few. Forgetting the advance *entirely* costs you an infinite loop. You get no wrong output and no error, just a program that never returns.
 
 </div>
 
@@ -139,7 +139,7 @@ The cost of a loose boundary is an off-by-one: one pass too many or too few. The
 
 ## 2. `do-while`: test after each pass
 
-A `do-while` runs the body **first**, then checks the condition <abbr title="The Java Language Specification, Java SE 21, §14.13">[2]</abbr>. So the body always executes at least once, even if the condition is false from the start.
+A `do-while` runs the body **first**, then checks the condition <abbr title="The Java Language Specification, Java SE 21, §14.13">[2]</abbr>. So the body always runs at least once, even when the condition is false from the start.
 
 ```java run
 public class Main {
@@ -162,17 +162,17 @@ do body
 do done
 ```
 
-**Analysis.** Both loops start with their variable at `10` and a condition `< 5` that is already false.
+**Analysis.** Both loops start with their variable at `10` and a condition, `< 5`, that's already false.
 
 - The `while` checked first, found `10 < 5` false, and ran its body **zero** times: `while body` never printed.
 - The `do-while` ran its body **once** before checking, so `do body` printed. Then `11 < 5` was false and it stopped.
 
-Note the `;` after `while (m < 5)`. A `do-while` ends with one, and javac reports `';' expected` without it.
+Notice the `;` after `while (m < 5)`. A `do-while` ends with one, and javac reports `';' expected` if you leave it out.
 
 **Intuition.**
-*Mechanism.* The only difference is the order of test and body. `while` is test-then-body (zero or more passes); `do-while` is body-then-test (one or more passes).
+*Mechanism.* The only difference is the order of test and body. `while` is test-then-body (zero or more passes), and `do-while` is body-then-test (one or more passes).
 
-*Concrete bite.* A variable declared *inside* the `do` body ends with the body's closing brace. The condition sits after that brace, so it cannot see the variable:
+*Concrete bite.* A variable declared *inside* the `do` body ends at the body's closing brace. The condition sits after that brace, so it can't see the variable:
 
 ```java run
 public class Main {
@@ -199,9 +199,9 @@ A variable lives from its declaration to the end of the block that holds it <abb
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `do-while` only when the body *must* run once before any test makes sense: prompting for input you then validate, for instance.
+💡 **Earned rule.** Use `do-while` only when the body *must* run once before any test makes sense, such as prompting for input you then validate.
 
-The cost of reaching for it by habit is a body that runs even when it shouldn't. `while` (or `for`) is the right default, because most loops should be able to run zero times.
+Reach for it out of habit, and you pay with a body that runs even when it shouldn't. `while` (or `for`) is the right default, because most loops should be able to run zero times.
 
 </div>
 
@@ -209,7 +209,7 @@ The cost of reaching for it by habit is a body that runs even when it shouldn't.
 
 ## 3. The classic `for`
 
-Counting loops have three moving parts: a starting value, a continue-condition, and a step. The `for` loop puts all three on one line: `for (init; test; update)` <abbr title="The Java Language Specification, Java SE 21, §14.14.1">[3]</abbr>. It is the same logic as the `while` in §1, gathered in one place.
+Counting loops have three moving parts: a starting value, a continue-condition, and a step. The `for` loop puts all three on one line: `for (init; test; update)` <abbr title="The Java Language Specification, Java SE 21, §14.14.1">[3]</abbr>. It's the same logic as the `while` in §1, gathered in one place.
 
 ```java run
 public class Main {
@@ -245,7 +245,7 @@ flowchart TD
   T -->|"false"| E["done"]
 ```
 
-**Analysis.** `int i = 1` ran once at the start. Then the cycle: test `i <= 5`; if true, run the body; then `i++`; then test again. This time the boundary is `<= 5` *because* the count starts at `1`, printing `1 2 3 4 5`. The init, test and update sit together, which makes the loop's intent easy to read at a glance.
+**Analysis.** `int i = 1` ran once at the start. Then the cycle begins: test `i <= 5`, run the body if it's true, do `i++`, and test again. This time the boundary is `<= 5` *because* the count starts at `1`, so it prints `1 2 3 4 5`. The init, test and update sit side by side, so you can read the loop's intent at a glance.
 
 Each part can hold more than one thing, separated by commas. Here two counters walk toward each other:
 
@@ -266,12 +266,12 @@ public class Main {
 2 3
 ```
 
-After the third pass, `i` is `3` and `j` is `2`, so `i < j` fails. Each part is also optional: `for (;;)` has no test at all, and runs until something inside it leaves the loop. [Loop Control & Patterns](/synapse/programming-languages/java/control-flow/loop-control-and-patterns) shows how.
+After the third pass, `i` is `3` and `j` is `2`, so `i < j` fails. Each part is optional, too. `for (;;)` has no test at all, and it runs until something inside it leaves the loop. [Loop Control & Patterns](/synapse/programming-languages/java/control-flow/loop-control-and-patterns) shows how.
 
 **Intuition.**
-*Mechanism.* The `init` runs once; then `test`, `body`, `update`, `test`, … until `test` is false. The loop variable declared in `init` lives **only inside the loop**: its scope is the `for` and its body, nothing after <abbr title="The Java Language Specification, Java SE 21, §6.3">[5]</abbr>.
+*Mechanism.* The `init` runs once. Then comes `test`, `body`, `update`, `test`, … until `test` is false. The loop variable declared in `init` lives **only inside the loop**: its scope is the `for` and its body, and nothing after <abbr title="The Java Language Specification, Java SE 21, §6.3">[5]</abbr>.
 
-*Concrete bite.* Use the loop variable after the loop and the compiler can't find it:
+*Concrete bite.* Use the loop variable after the loop, and the compiler can't find it:
 
 ```java run
 public class Main {
@@ -294,7 +294,7 @@ Main.java:6: error: cannot find symbol
 1 error
 ```
 
-`i` exists only within the `for`; after the closing brace it is gone, so referencing it is a compile error. If you need the final value afterward, declare the variable *before* the loop:
+`i` exists only within the `for`. After the closing brace it's gone, so referring to it is a compile error. If you need the final value afterward, declare the variable *before* the loop:
 
 ```java run
 public class Main {
@@ -316,9 +316,9 @@ public class Main {
 after: 3
 ```
 
-The last value is `3`, not `2`: the loop stops only when the test fails, and it fails at `3`.
+The last value is `3`, not `2`. The loop stops only when the test fails, and it fails at `3`.
 
-*Non-example: a stray semicolon.* As with `if` in [Conditionals](/synapse/programming-languages/java/control-flow/conditionals), a `;` after the header is the whole body:
+*Non-example: a stray semicolon.* Just as with `if` in [Conditionals](/synapse/programming-languages/java/control-flow/conditionals), a `;` after the header becomes the whole body:
 
 ```java run
 public class Main {
@@ -335,9 +335,9 @@ public class Main {
 hi
 ```
 
-The loop ran three times with an empty body. Then the block after it ran once, on its own. (A `while (i < 3);` is worse: its empty body never changes `i`, so it never ends.)
+The loop ran three times with an empty body. Then the block after it ran once, on its own. (A `while (i < 3);` is even worse: its empty body never changes `i`, so it never ends.)
 
-*Non-example: a `double` counter.* A counter that steps by `0.1` inherits the rounding from [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic):
+*Non-example: a `double` counter.* A counter that steps by `0.1` inherits the rounding you saw in [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic):
 
 ```java run
 public class Main {
@@ -356,7 +356,7 @@ public class Main {
 11
 ```
 
-Ten steps of `0.1` should reach `1.0`. The sum lands a hair below it, at `0.9999999999999999`, so `x < 1.0` passes an eleventh time. Count with an `int`, and compute the `double` from it:
+Ten steps of `0.1` should reach `1.0`. But the sum lands a hair below it, at `0.9999999999999999`, so `x < 1.0` passes an eleventh time. Count with an `int` instead, and compute the `double` from it:
 
 ```java run
 public class Main {
@@ -380,7 +380,7 @@ public class Main {
 
 💡 **Earned rule.** Use a `for` when you know the counting structure up front (a fixed range, a step), and let its declared variable stay scoped to the loop. Count with an `int`, never a `double`.
 
-The cost of that tidy scoping is that the counter vanishes at the loop's end. The benefit: you cannot accidentally read a stale loop counter later, and two adjacent loops can both use `i` without colliding.
+That tidy scoping costs you the counter, which vanishes at the loop's end. The payoff: you can't accidentally read a stale loop counter later, and two loops side by side can both use `i` without colliding.
 
 </div>
 
@@ -390,7 +390,7 @@ The cost of that tidy scoping is that the counter vanishes at the loop's end. Th
 
 When you want *each element* of a collection, use the enhanced `for` <abbr title="The Java Language Specification, Java SE 21, §14.14.2">[4]</abbr>. Read `for (T x : items)` as "for each `x` in `items`". It hands you the elements one at a time, with no counter and no index to manage.
 
-Here we iterate an **array**, a fixed list of values. Arrays get their full treatment in [Arrays](/synapse/programming-languages/java/control-flow/arrays); for now, read `int[] nums = {2, 4, 6}` as "a list of numbers".
+Here we iterate over an **array**, a fixed list of values. Arrays get their full treatment in [Arrays](/synapse/programming-languages/java/control-flow/arrays). For now, read `int[] nums = {2, 4, 6}` as "a list of numbers".
 
 ```java run
 public class Main {
@@ -410,9 +410,9 @@ public class Main {
 12
 ```
 
-**Analysis.** The loop ran once per element: `n` was `2`, then `4`, then `6`, adding each to `sum` (`0 → 2 → 6 → 12`). No index, no boundary to get wrong: the loop visits every element exactly once and stops. This is the safest loop when "every element, in order" is all you need.
+**Analysis.** The loop ran once per element: `n` was `2`, then `4`, then `6`, adding each to `sum` (`0 → 2 → 6 → 12`). There's no index and no boundary to get wrong. The loop visits every element exactly once and stops. It's the safest loop when "every element, in order" is all you need.
 
-*Non-example: a `String` is not a list here.* A `String` holds characters, but the enhanced `for` accepts only an array or an `Iterable`, the type behind Java's collections:
+*Non-example: a `String` isn't a list here.* A `String` holds characters, but the enhanced `for` accepts only an array or an `Iterable`, the type behind Java's collections:
 
 ```java run
 public class Main {
@@ -457,7 +457,7 @@ a-b-c-
 **Intuition.**
 *Mechanism.* Each pass copies the next element into the loop variable <abbr title="The Java Language Specification, Java SE 21, §14.14.2">[4]</abbr>. That variable is a **copy** of the element, not the slot it came from. So assigning to it changes the copy, never the array.
 
-*Concrete bite.* Trying to modify elements through the loop variable does nothing:
+*Concrete bite.* Try to modify elements through the loop variable, and nothing happens:
 
 ```java run
 public class Main {
@@ -480,16 +480,16 @@ public class Main {
 6
 ```
 
-The first loop "multiplied each element by 10", yet the second loop sums to `6` (`1 + 2 + 3`), not `60`. That is proof the array was never touched. `n = n * 10` updated a throwaway copy each pass.
+The first loop "multiplied each element by 10", yet the second loop sums to `6` (`1 + 2 + 3`), not `60`. That proves the array was never touched. `n = n * 10` updated a throwaway copy on each pass.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Reach for the enhanced `for` whenever you need each element and nothing more. It removes the index, and with it the off-by-one bugs.
+💡 **Earned rule.** Reach for the enhanced `for` whenever you need each element and nothing more. It removes the index, and the off-by-one bugs go with it.
 
 The cost is exactly what it hides:
 
-- you get no index, so you cannot say "the 3rd element" or compare neighbours;
-- you cannot write *back* into the array through the loop variable.
+- you get no index, so you can't say "the 3rd element" or compare neighbours;
+- you can't write *back* into the array through the loop variable.
 
 When you need the position, or want to modify elements in place, use the classic `for` with `nums[i]`.
 
@@ -559,7 +559,7 @@ One check per objective. Answer before you open anything.
 
 `for (int i = 10; i > 0; i -= 2)` prints five numbers: `10 8 6 4 2`. At `0`, the test `0 > 0` fails.
 
-With the variable at `3` and the condition `< 3`, the `while` body runs **0** times and the `do-while` body runs **1** time.
+With the variable at `3` and the condition `< 3`, the `while` body runs **0** times, and the `do-while` body runs **1** time.
 
 The §1 loop as a `for`:
 

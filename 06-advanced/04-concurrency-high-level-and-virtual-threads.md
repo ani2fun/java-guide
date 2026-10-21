@@ -6,29 +6,29 @@ prereqs: []
 
 # Concurrency: High-Level & Virtual Threads
 
-The last two lessons showed the raw material: [threads, races, and `synchronized`](/synapse/programming-languages/java/advanced/concurrency-the-basics), then [waiting, several locks, and the synchronizers](/synapse/programming-languages/java/advanced/concurrency-coordination). They are correct, but low-level and error-prone: manual lifecycle, manual locking, a real deadlock. The `java.util.concurrent` library packages those primitives, so you mostly stop writing them:
+The last two lessons showed you the raw material: first [threads, races, and `synchronized`](/synapse/programming-languages/java/advanced/concurrency-the-basics), then [waiting, multiple locks, and the synchronizers](/synapse/programming-languages/java/advanced/concurrency-coordination). Those tools are correct, but low-level and error-prone: manual lifecycles, manual locking, even a real deadlock. The `java.util.concurrent` library packages those primitives up, so you mostly stop writing them yourself:
 
-- An **`ExecutorService`** manages a pool of threads that you *submit* tasks to. It hands back a **`Future`** for each result.
+- An **`ExecutorService`** manages a pool of threads that you *submit* tasks to, and hands back a **`Future`** for each result.
 - **Atomics** such as `AtomicInteger` fix the counter race without a lock.
 - **`CompletableFuture`** composes asynchronous steps into pipelines.
 - **Concurrent collections** such as `ConcurrentHashMap` are safe to share.
 
-The headline JDK 21 feature, **virtual threads**, changes the economics. A virtual thread is so cheap that blocking one costs almost nothing, so you can have *millions*. You write simple blocking code and get massive scalability.
+Then there's the headline JDK 21 feature, **virtual threads**, which changes the economics entirely. A virtual thread is so cheap that blocking one costs almost nothing, so you can have *millions* of them. You write simple blocking code, and get massive scalability.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **The core idea.**
 
-- `java.util.concurrent` packages the raw primitives so you stop writing them.
-- An **`ExecutorService`** runs a thread pool returning a **`Future`**; **atomics** fix races lock-free.
+- `java.util.concurrent` packages the raw primitives, so you stop writing them.
+- An **`ExecutorService`** runs a thread pool that returns a **`Future`**; **atomics** fix races without locks.
 - **`CompletableFuture`** composes async steps; concurrent collections are safe to share.
 - **Virtual threads** (JDK 21) make blocking nearly free — run *millions*.
 
 </div>
 
-This is the deep pass of [concurrency basics](/synapse/programming-languages/java/advanced/concurrency-the-basics), using [lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas) as tasks. Every output below was produced by compiling and running the code. Timings are illustrative and vary per machine.
+This lesson takes a deeper pass at [concurrency basics](/synapse/programming-languages/java/advanced/concurrency-the-basics), using [lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas) as tasks. Every output below was produced by compiling and running the code. Timings are illustrative, and vary from machine to machine.
 
-**You'll be able to:** submit a `Callable` and a `Runnable` to an executor, and predict what each `Future` holds and what `get()` throws when a task fails; shut an executor down and wait for it to finish; fix a shared counter with an atomic, and explain why `set(get() + 1)` still races; compose asynchronous steps with `thenCombine`, `thenCompose` and `exceptionally`, and pick `thenCompose` over `thenApply`; predict when virtual threads help, and when they do not (CPU-bound work, a pinned carrier).
+**You'll be able to:** submit a `Callable` and a `Runnable` to an executor, and predict what each `Future` holds and what `get()` throws when a task fails; shut an executor down and wait for it to finish; fix a shared counter with an atomic, and explain why `set(get() + 1)` still races; compose asynchronous steps with `thenCombine`, `thenCompose` and `exceptionally`, and know when to choose `thenCompose` over `thenApply`; predict when virtual threads help, and when they don't (CPU-bound work, a pinned carrier).
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -57,7 +57,7 @@ This is the deep pass of [concurrency basics](/synapse/programming-languages/jav
 
 ## 1. `ExecutorService` and `Future`
 
-Instead of creating `Thread`s by hand, you **submit** tasks to an `ExecutorService`, a managed thread pool. Each `submit` returns a `Future`: a handle to a result that may not exist yet. `get()` blocks until it does <abbr title="Java SE 21 API, java.util.concurrent.ExecutorService and Future">[1]</abbr>.
+Instead of creating `Thread`s by hand, you **submit** tasks to an `ExecutorService`, which is a managed thread pool. Each `submit` returns a `Future`: a handle to a result that may not exist yet. Calling `get()` blocks until it does <abbr title="Java SE 21 API, java.util.concurrent.ExecutorService and Future">[1]</abbr>.
 
 ```java run
 import java.util.concurrent.*;
@@ -103,13 +103,13 @@ queue -> pool.w2: "dequeue + run"
 pool.w1 -> result: "completes"
 ```
 
-**Analysis.** Two tasks (lambdas returning a value) were submitted to a pool of two threads. Each `Future.get()` returned its task's result (`42`, `101`).
+**Analysis.** Two tasks (lambdas that return a value) were submitted to a pool of two threads, and each `Future.get()` returned its task's result (`42`, `101`).
 
-- We never created or started a `Thread`: the pool owns the threads and reuses them across tasks.
-- The diagram shows the model: tasks queue up, idle workers pull and run them, and the `Future` is how you retrieve each result.
-- `shutdown()` lets the pool finish and stop. Without it, the pool's threads keep the JVM alive.
+- We never created or started a `Thread` ourselves: the pool owns its threads and reuses them across tasks.
+- The diagram shows the model: tasks queue up, idle workers pull them off and run them, and the `Future` is how you retrieve each result.
+- `shutdown()` lets the pool finish its work and stop. Without it, the pool's threads would keep the JVM alive.
 
-**Two kinds of task.** A lambda that returns a value is a **`Callable<V>`**, whose one method is `V call() throws Exception`. A lambda that returns nothing is a `Runnable`. The API puts the difference in one sentence: "A `Runnable`, however, does not return a result and cannot throw a checked exception" <abbr title="Java SE 21 API, java.util.concurrent.Callable">[2]</abbr>. So `submit(runnable)` gives a `Future<?>` whose `get()` returns `null`:
+**Two kinds of task.** A lambda that returns a value is a **`Callable<V>`**, whose one method is `V call() throws Exception`. A lambda that returns nothing is a `Runnable`. The API sums up the difference in one sentence: "A `Runnable`, however, does not return a result and cannot throw a checked exception" <abbr title="Java SE 21 API, java.util.concurrent.Callable">[2]</abbr>. That's why `submit(runnable)` gives you a `Future<?>` whose `get()` returns `null`:
 
 ```java run
 import java.util.concurrent.Callable;
@@ -142,7 +142,7 @@ runnable's future holds: null
 callable returned: 42
 ```
 
-The `Callable` called `Thread.sleep`, which throws the checked `InterruptedException`, with no `try`: `call()` is declared `throws Exception`. The same body as a `Runnable` does not compile, because `run()` declares no checked exception:
+The `Callable` called `Thread.sleep`, which throws the checked `InterruptedException`, without any `try`. That's fine, because `call()` is declared `throws Exception`. The same body as a `Runnable` doesn't compile, because `run()` declares no checked exception:
 
 ```java run
 public class Main {
@@ -165,9 +165,9 @@ Main.java:4: error: unreported exception InterruptedException; must be caught or
 ```
 
 **Intuition.**
-*Mechanism.* An `ExecutorService` holds a queue and a set of worker threads that loop, pulling tasks. `submit` enqueues a task and returns a `Future`. A worker runs the task and stores the result in the `Future`, and `get()` blocks to retrieve it. Thread *creation* (expensive) is separated from task *submission* (cheap).
+*Mechanism.* An `ExecutorService` holds a queue, plus a set of worker threads that loop, pulling tasks off it. `submit` enqueues a task and returns a `Future`. A worker runs the task and stores the result in the `Future`, and `get()` blocks to retrieve it. This separates thread *creation* (expensive) from task *submission* (cheap).
 
-*Concrete bite.* A task's exception is not lost. The `Future` captures it, and `get()` re-throws it wrapped in an `ExecutionException`:
+*Concrete bite.* A task's exception doesn't get lost. The `Future` captures it, and `get()` re-throws it, wrapped in an `ExecutionException`:
 
 ```java run
 import java.util.concurrent.*;
@@ -190,15 +190,15 @@ public class Main {
 Exception in thread "main" java.util.concurrent.ExecutionException: java.lang.ArithmeticException: / by zero
 ```
 
-The task threw `ArithmeticException` on its worker thread. The `Future` stored it, and `get()` re-threw it wrapped in `ExecutionException`; call `getCause()` for the original. A raw `Thread` has no caller to hand an exception to: its uncaught exception is printed, and the thread ends. A pool delivers it to whoever awaits the result.
+The task threw `ArithmeticException` on its worker thread. The `Future` stored it, and `get()` re-threw it wrapped in `ExecutionException`; call `getCause()` to get the original. A raw `Thread` has no caller to hand an exception to, so its uncaught exception just gets printed, and the thread ends. A pool, by contrast, delivers the exception to whoever is waiting for the result.
 
-Shutdown has three distinct methods, and production code uses all three:
+Shutting down involves three distinct methods, and production code uses all three:
 
 - `shutdown()` stops *intake*, but lets queued tasks finish.
-- `shutdownNow()` also interrupts running tasks, and returns the never-started ones.
+- `shutdownNow()` also interrupts running tasks, and returns the ones that never started.
 - `awaitTermination(timeout)` is how the caller *waits* for the wind-down.
 
-Neither `shutdown()` nor `shutdownNow()` waits by itself <abbr title="Java SE 21 API, java.util.concurrent.ExecutorService">[1]</abbr>:
+Note that neither `shutdown()` nor `shutdownNow()` waits by itself <abbr title="Java SE 21 API, java.util.concurrent.ExecutorService">[1]</abbr>:
 
 ```java run
 import java.util.concurrent.*;
@@ -233,15 +233,15 @@ task 4 done
 awaitTermination returned true: isTerminated=true
 ```
 
-`isShutdown` flipped at once: intake closed. `isTerminated` stayed `false` while the four queued tasks drained through two workers. Only after `awaitTermination` saw the last task finish did it become `true`. The graceful-shutdown idiom is this sequence: `shutdown()`, `awaitTermination(deadline)`, and `shutdownNow()` only if the deadline passes.
+`isShutdown` flipped immediately, because intake closed. `isTerminated` stayed `false` while the four queued tasks drained through the two workers. It became `true` only after `awaitTermination` saw the last task finish. The graceful-shutdown idiom is this sequence: `shutdown()`, then `awaitTermination(deadline)`, and `shutdownNow()` only if the deadline passes.
 
-Since Java 19 an `ExecutorService` is also `AutoCloseable`. Its `close()` "invokes `shutdown()` and waits for tasks to complete" <abbr title="Java SE 21 API, java.util.concurrent.ExecutorService.close() (since 19)">[1]</abbr>, so a `try`-with-resources block does the whole idiom for you. The `Callable` example above used it.
+Since Java 19, an `ExecutorService` is also `AutoCloseable`. Its `close()` "invokes `shutdown()` and waits for tasks to complete" <abbr title="Java SE 21 API, java.util.concurrent.ExecutorService.close() (since 19)">[1]</abbr>, so a `try`-with-resources block handles the whole idiom for you. The `Callable` example above used exactly that.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use an `ExecutorService` instead of raw `Thread`s. Submit tasks, collect results through `Future`, and shut down deliberately: `shutdown()` → `awaitTermination` → `shutdownNow()`, or `try`-with-resources. Size a fixed pool near the core count for CPU-bound work. For work that mostly *blocks*, do not tune a bigger pool: use §4's virtual threads.
+💡 **Earned rule.** Use an `ExecutorService` instead of raw `Thread`s. Submit tasks, collect results through `Future`, and shut down deliberately: `shutdown()` → `awaitTermination` → `shutdownNow()`, or `try`-with-resources. For CPU-bound work, size a fixed pool near the core count. For work that mostly *blocks*, don't tune a bigger pool — use §4's virtual threads instead.
 
-The cost is owning the lifecycle and unwrapping `ExecutionException`. The benefit is pooled, reusable threads, queued tasks, and exceptions that reach the caller instead of disappearing.
+The cost is owning the lifecycle, and unwrapping `ExecutionException`. The payoff is pooled, reusable threads, queued tasks, and exceptions that reach the caller instead of disappearing.
 
 </div>
 
@@ -249,7 +249,7 @@ The cost is owning the lifecycle and unwrapping `ExecutionException`. The benefi
 
 ## 2. Atomics and concurrent collections
 
-The [counter race](/synapse/programming-languages/java/advanced/concurrency-the-basics) has a fix without a lock: `AtomicInteger`. Its `incrementAndGet()` performs the read-modify-write as one indivisible operation. Four threads incrementing it land on the correct total, with no `synchronized`.
+The [counter race](/synapse/programming-languages/java/advanced/concurrency-the-basics) has a fix that needs no lock: `AtomicInteger`. Its `incrementAndGet()` performs the read-modify-write as a single, indivisible operation. Four threads incrementing it land on the correct total, without any `synchronized`.
 
 ```java run
 import java.util.concurrent.atomic.AtomicInteger;
@@ -275,12 +275,12 @@ public class Main {
 400000
 ```
 
-**Analysis.** Always exactly 400,000: the same workload that gave random, too-small totals with a plain `int++` in [the basics lesson](/synapse/programming-languages/java/advanced/concurrency-the-basics). `incrementAndGet()` is atomic, so no two threads interleave inside it, and no update is lost. No thread blocks, either: the package is "a small toolkit of classes that support lock-free thread-safe programming on single variables" <abbr title="Java SE 21 API, java.util.concurrent.atomic package summary">[3]</abbr>.
+**Analysis.** It's always exactly 400,000 — the same workload that gave random, too-small totals with a plain `int++` in [the basics lesson](/synapse/programming-languages/java/advanced/concurrency-the-basics). `incrementAndGet()` is atomic, so no two threads interleave inside it, and no update is lost. No thread blocks, either: the package describes itself as "a small toolkit of classes that support lock-free thread-safe programming on single variables" <abbr title="Java SE 21 API, java.util.concurrent.atomic package summary">[3]</abbr>.
 
 **Intuition.**
-*Mechanism.* An `AtomicInteger` holds a value that it updates with the processor's atomic instructions. Each operation is all-or-nothing. Each also has the memory effects of a `volatile` read or write <abbr title="Java SE 21 API, java.util.concurrent.atomic.AtomicInteger">[4]</abbr>, so it is both atomic *and* visible, without a lock.
+*Mechanism.* An `AtomicInteger` holds a value that it updates using the processor's atomic instructions, so each operation is all-or-nothing. Each one also has the memory effects of a `volatile` read or write <abbr title="Java SE 21 API, java.util.concurrent.atomic.AtomicInteger">[4]</abbr>, so it's both atomic *and* visible, without a lock.
 
-*Concrete bite.* Atomicity is per *operation*. `get()` is atomic and `set()` is atomic, but the pair `counter.set(counter.get() + 1)` is not. Another thread can change the value between the `get` and the `set`:
+*Concrete bite.* Atomicity applies per *operation*. `get()` is atomic, and `set()` is atomic, but the pair `counter.set(counter.get() + 1)` isn't. Another thread can change the value between the `get` and the `set`:
 
 ```java run
 // ⚠️ ANTI-PATTERN — get() and set() are each atomic, but the pair is not.  Do not copy it.
@@ -310,10 +310,10 @@ public class Main {
 violation: a read and a write, each atomic, are still a race together
 ```
 
-For a compound update, use one atomic method that does the whole thing:
+For a compound update, use a single atomic method that does the whole thing:
 
 - `compareAndSet(expected, next)` sets the new value only if the current value is still `expected`, and returns whether it did.
-- `updateAndGet(f)` applies a function atomically, retrying if another thread got in first.
+- `updateAndGet(f)` applies a function atomically, retrying if another thread got there first.
 
 ```java run
 import java.util.concurrent.atomic.AtomicInteger;
@@ -335,9 +335,9 @@ false -> 4
 40
 ```
 
-The second `compareAndSet` failed: it expected `5`, but the value was `4`. It changed nothing and said so.
+The second `compareAndSet` failed: it expected `5`, but the value was `4`. So it changed nothing, and said so.
 
-The same applies to collections. The `HashMap` docs require that a map changed by several threads "must be synchronized externally" <abbr title="Java SE 21 API, java.util.HashMap">[5]</abbr>. **`ConcurrentHashMap`** is the safe replacement, with atomic compound operations such as `merge` and `computeIfAbsent` <abbr title="Java SE 21 API, java.util.concurrent.ConcurrentHashMap">[6]</abbr>. Four threads counting words into one map:
+The same idea applies to collections. The `HashMap` docs require that a map changed by several threads "must be synchronized externally" <abbr title="Java SE 21 API, java.util.HashMap">[5]</abbr>. **`ConcurrentHashMap`** is the safe replacement, with atomic compound operations such as `merge` and `computeIfAbsent` <abbr title="Java SE 21 API, java.util.concurrent.ConcurrentHashMap">[6]</abbr>. Here, four threads count words into one shared map:
 
 ```java run
 import java.util.Map;
@@ -369,13 +369,13 @@ public class Main {
 {blue=80000, green=40000, red=120000}
 ```
 
-Each `merge` reads the old count and writes the new one as one atomic step. `red` appears 3 times in `words`, so 4 threads × 10,000 rounds × 3 gives exactly `120000`.
+Each `merge` reads the old count and writes the new one in a single atomic step. `red` appears 3 times in `words`, so 4 threads × 10,000 rounds × 3 gives exactly `120000`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use atomics (`AtomicInteger`, `AtomicLong`, `AtomicReference`) for single shared values, and concurrent collections (`ConcurrentHashMap`) for shared maps. Keep `synchronized` for critical sections of several steps.
+💡 **Earned rule.** Use atomics (`AtomicInteger`, `AtomicLong`, `AtomicReference`) for single shared values, and concurrent collections (`ConcurrentHashMap`) for shared maps. Save `synchronized` for critical sections that span several steps.
 
-The cost is that atomics make only *individual* operations atomic. Compound logic needs `compareAndSet`, `updateAndGet`, `merge`, or a lock. The benefit is correctness without blocking, for the common case of one shared counter or reference.
+The cost is that atomics make only *individual* operations atomic, so compound logic needs `compareAndSet`, `updateAndGet`, `merge`, or a lock. The payoff is correctness without blocking, for the common case of one shared counter or reference.
 
 </div>
 
@@ -383,7 +383,7 @@ The cost is that atomics make only *individual* operations atomic. Compound logi
 
 ## 3. `CompletableFuture`
 
-A plain `Future` only lets you *block* for a result. **`CompletableFuture`** lets you *compose* asynchronous work. You describe a pipeline of steps (`supplyAsync` → `thenApply` → …) that run as each predecessor completes, without blocking until the end.
+A plain `Future` only lets you *block* while waiting for a result. **`CompletableFuture`** lets you *compose* asynchronous work instead. You describe a pipeline of steps (`supplyAsync` → `thenApply` → …) that each run as their predecessor completes, with no blocking until the very end.
 
 ```java run
 import java.util.concurrent.CompletableFuture;
@@ -403,15 +403,15 @@ public class Main {
 42
 ```
 
-**Analysis.** `supplyAsync(() -> 21)` ran a task on a pool, the `ForkJoinPool.commonPool()` unless you pass an executor <abbr title="Java SE 21 API, java.util.concurrent.CompletableFuture.supplyAsync(Supplier)">[7]</abbr>, and produced `21`. `thenApply(n -> n * 2)` scheduled a *follow-up* that runs when the first completes, giving `42`. The pipeline reads like a [stream](/synapse/programming-languages/java/advanced/functional-java-and-streams), but over *asynchronous* values. Each stage is a callback wired to its predecessor's completion, so nothing blocks until the final `get()`.
+**Analysis.** `supplyAsync(() -> 21)` ran a task on a pool — the `ForkJoinPool.commonPool()`, unless you pass in an executor <abbr title="Java SE 21 API, java.util.concurrent.CompletableFuture.supplyAsync(Supplier)">[7]</abbr> — and produced `21`. `thenApply(n -> n * 2)` scheduled a *follow-up* that runs once the first step completes, giving `42`. The pipeline reads like a [stream](/synapse/programming-languages/java/advanced/functional-java-and-streams), but over *asynchronous* values. Each stage is a callback wired to its predecessor's completion, so nothing blocks until the final `get()`.
 
-The real power appears when the pipeline branches and rejoins:
+The real power shows up when the pipeline branches and rejoins:
 
 - `thenCombine` **joins two independent** async results.
-- `thenCompose` **chains a dependent** async call. The next call needs the previous result and returns a `CompletableFuture` itself, which `thenCompose` flattens instead of nesting.
-- `exceptionally` catches a failure anywhere upstream and substitutes a fallback.
+- `thenCompose` **chains a dependent** async call. The next call needs the previous result, and returns a `CompletableFuture` itself, which `thenCompose` flattens instead of nesting.
+- `exceptionally` catches a failure anywhere upstream and substitutes a fallback value.
 
-Here is a full composition, running:
+Here's a full composition in action:
 
 ```java run
 import java.util.concurrent.CompletableFuture;
@@ -464,11 +464,11 @@ flowchart LR
   D -. any failure .-> X
 ```
 
-**Analysis.** The two `supplyAsync` calls started *concurrently*; neither waited for the other.
+**Analysis.** The two `supplyAsync` calls started *concurrently*, and neither waited for the other.
 
-- `thenCombine` fired only when both were ready.
-- `thenCompose` then launched the score lookup that *needed* the combined label: `"user-7 (premium)"`, 16 characters, gives 160.
-- The diagram is the dependency graph the executor drives. Work advances edge by edge as results arrive, and no thread sits blocked between stages.
+- `thenCombine` fired only once both were ready.
+- `thenCompose` then launched the score lookup that *needed* the combined label: `"user-7 (premium)"` is 16 characters, which gives 160.
+- The diagram is the dependency graph that the executor drives. Work advances edge by edge as results arrive, and no thread sits blocked between stages.
 
 When a stage fails, the error takes the dotted path instead:
 
@@ -492,12 +492,12 @@ public class Main {
 fallback: service down
 ```
 
-The `thenApply` stage never ran. A failed stage completes the future *exceptionally*, later value stages are skipped, and the exception travels down the chain until `exceptionally` turns it back into a value. The handler receives it wrapped in a `CompletionException`, which is why the code calls `getCause()`. Without the handler, the exception would surface at `get()`, wrapped in `ExecutionException`, as in §1.
+The `thenApply` stage never ran. A failed stage completes the future *exceptionally*, later value stages get skipped, and the exception travels down the chain until `exceptionally` turns it back into a value. The handler receives it wrapped in a `CompletionException`, which is why the code calls `getCause()`. Without the handler, the exception would surface at `get()`, wrapped in `ExecutionException`, just as in §1.
 
 **Intuition.**
-*Mechanism.* A `CompletableFuture` stands for a value that will be ready later, plus a graph of continuations. `thenApply`, `thenCompose` and `thenCombine` register callbacks that fire on completion. You build a dependency graph that the executor drives, instead of blocking thread by thread. Failures travel the same graph as values: every stage completes either *normally* or *exceptionally*.
+*Mechanism.* A `CompletableFuture` represents a value that will be ready later, plus a graph of continuations. `thenApply`, `thenCompose` and `thenCombine` register callbacks that fire on completion. So instead of blocking thread by thread, you build a dependency graph that the executor drives. Failures travel through the same graph as values do: every stage completes either *normally* or *exceptionally*.
 
-*Concrete bite.* The classic type error: `thenApply` where you meant `thenCompose`. When the function you apply returns a `CompletableFuture` itself, `thenApply` wraps it again, giving a future *of a future*:
+*Concrete bite.* Here's the classic type error: `thenApply` where you meant `thenCompose`. When the function you apply itself returns a `CompletableFuture`, `thenApply` wraps it again, giving you a future *of a future*:
 
 ```java run
 import java.util.concurrent.CompletableFuture;
@@ -524,7 +524,7 @@ thenApply:   CompletableFuture
 thenCompose: 60
 ```
 
-`nested.get()` returned another future, not a number. Declare the result as `CompletableFuture<Integer>` and use `thenApply`, and javac refuses:
+`nested.get()` returned another future, not a number. Declare the result as `CompletableFuture<Integer>` while still using `thenApply`, and javac refuses:
 
 ```java run
 import java.util.concurrent.CompletableFuture;
@@ -551,13 +551,13 @@ Main.java:10: error: incompatible types: inference variable U has incompatible b
     lower bounds: CompletableFuture<Integer>
 ```
 
-It is the same map-vs-flatMap distinction as [`map` and `flatMap` on streams](/synapse/programming-languages/java/advanced/functional-java-and-streams).
+It's the same map-vs-flatMap distinction you saw with [`map` and `flatMap` on streams](/synapse/programming-languages/java/advanced/functional-java-and-streams).
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `CompletableFuture` to compose several asynchronous operations (call services, combine results) without blocking between them. A plain `Future.get()` is fine for a single result you need at once. Use `thenCompose` whenever the next step returns a future.
+💡 **Earned rule.** Use `CompletableFuture` to compose several asynchronous operations (calling services, combining results) without blocking between them. A plain `Future.get()` is fine for a single result you need right away. And use `thenCompose` whenever the next step returns a future.
 
-The cost is a richer API and careful exception handling (`exceptionally`, `handle`). The benefit is non-blocking pipelines that scale far better than a thread blocked at each step.
+The cost is a richer API, plus careful exception handling (`exceptionally`, `handle`). The payoff is non-blocking pipelines that scale far better than a thread blocked at every step.
 
 </div>
 
@@ -565,9 +565,9 @@ The cost is a richer API and careful exception handling (`exceptionally`, `handl
 
 ## 4. Virtual threads
 
-A platform thread maps to an OS thread, with a large stack: 1024 KB or 2048 KB by default, depending on the platform ([the basics lesson](/synapse/programming-languages/java/advanced/concurrency-the-basics) lists them). So you can have thousands, not millions.
+A platform thread maps to an OS thread, with a large stack: 1024 KB or 2048 KB by default, depending on the platform ([the basics lesson](/synapse/programming-languages/java/advanced/concurrency-the-basics) lists them). That means you can have thousands of them, but not millions.
 
-A **virtual thread**, final in JDK 21 <abbr title="JEP 444: Virtual Threads (JDK 21)">[8]</abbr>, is scheduled by the JVM onto a small pool of OS threads, its **carriers**. It *unmounts* from its carrier when it blocks, so blocking is nearly free, and you can run **millions**. Here 10,000 virtual threads each sleep 10 ms:
+A **virtual thread**, final as of JDK 21 <abbr title="JEP 444: Virtual Threads (JDK 21)">[8]</abbr>, is scheduled by the JVM onto a small pool of OS threads, called its **carriers**. It *unmounts* from its carrier whenever it blocks, so blocking is nearly free, and you can run **millions** of them. Here, 10,000 virtual threads each sleep for 10 ms:
 
 ```java run
 import java.util.concurrent.*;
@@ -594,13 +594,13 @@ public class Main {
 completed: 10000
 ```
 
-**Analysis.** Ten thousand threads, each blocking for 10 ms, all finished, and the whole program took a fraction of a second.
+**Analysis.** Ten thousand threads, each blocking for 10 ms, all finished — and the whole program took a fraction of a second.
 
-- Virtual threads make the blocking `Thread.sleep` cheap. Each unmounts from its carrier while sleeping, so a handful of OS threads serve all 10,000.
-- `newVirtualThreadPerTaskExecutor()` gives each task its own virtual thread, and the `try`-with-resources `close()` waits for them all.
-- With platform threads, the same work needs 10,000 OS threads, or a pool that runs them in batches.
+- Virtual threads make the blocking `Thread.sleep` cheap. Each one unmounts from its carrier while sleeping, so a handful of OS threads can serve all 10,000.
+- `newVirtualThreadPerTaskExecutor()` gives each task its own virtual thread, and the `try`-with-resources `close()` waits for all of them.
+- With platform threads, the same work would need 10,000 OS threads, or a pool that runs them in batches.
 
-The batches cost real time. The same 10,000 sleeps, timed inside the program, on virtual threads and on a pool of 100 platform threads:
+Those batches cost real time. Here are the same 10,000 sleeps, timed inside the program, on virtual threads and then on a pool of 100 platform threads:
 
 ```java run
 import java.util.concurrent.*;
@@ -631,9 +631,9 @@ virtual:        64 ms
 100 platform:   1390 ms
 ```
 
-100 platform threads run the sleeps in batches of 100: 100 batches × 10 ms is at least 1 second. The virtual threads all slept at once.
+100 platform threads run the sleeps in batches of 100, and 100 batches × 10 ms comes to at least 1 second. The virtual threads, on the other hand, all slept at once.
 
-A virtual thread is still a `Thread`. `Thread.ofVirtual()` builds one, and `isVirtual()` tells them apart. One difference bites: "Virtual threads are daemon threads" <abbr title="Java SE 21 API, java.lang.Thread, &quot;Virtual threads&quot;">[9]</abbr>, so they do not keep the JVM alive. Always `join` them, or close their executor:
+A virtual thread is still a `Thread`. `Thread.ofVirtual()` builds one, and `isVirtual()` tells the two kinds apart. But one difference can bite: "Virtual threads are daemon threads" <abbr title="Java SE 21 API, java.lang.Thread, &quot;Virtual threads&quot;">[9]</abbr>, so they don't keep the JVM alive. Always `join` them, or close their executor:
 
 ```java run
 public class Main {
@@ -656,9 +656,9 @@ platform: isVirtual=false isDaemon=false
 inside: isVirtual=true
 ```
 
-The unmounting has one important exception on Java 21: **pinning**. A virtual thread is pinned to its carrier "when it executes code inside a `synchronized` block or method" <abbr title="JEP 444: Virtual Threads, &quot;Pinning&quot;">[8]</abbr>. If it blocks while pinned, it holds its carrier OS thread for the whole wait, and quietly costs you the scalability you came for.
+On Java 21, the unmounting has one important exception: **pinning**. A virtual thread is pinned to its carrier "when it executes code inside a `synchronized` block or method" <abbr title="JEP 444: Virtual Threads, &quot;Pinning&quot;">[8]</abbr>. If it blocks while pinned, it holds onto its carrier OS thread for the whole wait — quietly costing you the very scalability you came for.
 
-The JVM tells you where, if you pass the flag `-Djdk.tracePinnedThreads=full`. The sandbox cannot pass JVM flags, so this block does not run here:
+The JVM will tell you where pinning happens if you pass the flag `-Djdk.tracePinnedThreads=full`. The sandbox can't pass JVM flags, so this block doesn't run here:
 
 ```java
 // requires: the JVM flag -Djdk.tracePinnedThreads=full for the trace — without it, only "done" prints
@@ -693,22 +693,22 @@ done
 
 The `reason:MONITOR` line is the JVM reporting the pin. `<== monitors:1` points at the frame holding one monitor: line 8, the `Thread.sleep` inside `synchronized`. Without the flag, the program prints only `done`.
 
-The fixes: keep blocking calls out of `synchronized` sections, or guard them with a `ReentrantLock` from the [coordination lesson](/synapse/programming-languages/java/advanced/concurrency-coordination), under which virtual threads *can* unmount. This is a cost of Java 21. JDK 24 reimplemented monitors so that `synchronized` no longer pins in most cases <abbr title="JEP 491: Synchronize Virtual Threads without Pinning (JDK 24)">[10]</abbr>. Until you run there, treat a monitor plus blocking as a pin.
+There are two fixes: keep blocking calls out of `synchronized` sections, or guard them with a `ReentrantLock` from the [coordination lesson](/synapse/programming-languages/java/advanced/concurrency-coordination), under which virtual threads *can* unmount. This is a cost specific to Java 21. JDK 24 reimplemented monitors so that `synchronized` no longer pins in most cases <abbr title="JEP 491: Synchronize Virtual Threads without Pinning (JDK 24)">[10]</abbr>. Until you're running there, treat a monitor plus blocking as a pin.
 
 **Intuition.**
-*Mechanism.* A virtual thread runs on a carrier OS thread only while executing. The moment it blocks (I/O, `sleep`, a lock), the JVM *unmounts* it and frees the carrier for another virtual thread. Blocking parks a cheap object, not an expensive OS thread, so memory, not the OS, limits the thread count. A native frame, or on Java 21 a held monitor, prevents the unmount.
+*Mechanism.* A virtual thread occupies a carrier OS thread only while it's executing. The moment it blocks (on I/O, `sleep`, or a lock), the JVM *unmounts* it and frees the carrier for another virtual thread. Blocking parks a cheap object rather than an expensive OS thread, so the thread count is limited by memory, not by the OS. A native frame — or, on Java 21, a held monitor — prevents the unmount.
 
-*Concrete bite.* Virtual threads speed up **I/O-bound** and blocking workloads, where each thread spends most of its time waiting. They do not speed up **CPU-bound** ones: a million threads doing pure computation still share the same few cores. The pinning trace above is the second bite. A library that blocks inside `synchronized` can silently turn your million-thread design back into a handful of pinned carriers.
+*Concrete bite.* Virtual threads speed up **I/O-bound** and blocking workloads, where each thread spends most of its time waiting. They don't speed up **CPU-bound** ones: a million threads doing pure computation still share the same few cores. The pinning trace above is the second bite. A library that blocks inside `synchronized` can silently turn your million-thread design back into a handful of pinned carriers.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use virtual threads (one per task, through `newVirtualThreadPerTaskExecutor`) for high-concurrency *blocking* workloads: servers handling thousands of requests, fan-out I/O. Write simple blocking code instead of callback chains.
+💡 **Earned rule.** Use virtual threads (one per task, through `newVirtualThreadPerTaskExecutor`) for high-concurrency *blocking* workloads: servers handling thousands of requests, or fan-out I/O. Write simple blocking code instead of callback chains.
 
-The cost: they do not help CPU-bound work, and on Java 21 blocking inside a monitor pins the carrier (check with `-Djdk.tracePinnedThreads`). The benefit is large: thread-per-request blocking code that scales to millions of concurrent tasks on a handful of cores.
+The cost: they don't help CPU-bound work, and on Java 21, blocking inside a monitor pins the carrier (check with `-Djdk.tracePinnedThreads`). The payoff is large: thread-per-request blocking code that scales to millions of concurrent tasks on a handful of cores.
 
 </div>
 
-One outlook, because you will meet it in code review: **structured concurrency**. `StructuredTaskScope` is a *preview* API in Java 21 <abbr title="JEP 453: Structured Concurrency (Preview) (JDK 21)">[11]</abbr>. It needs `--enable-preview`, so this block has no working Run button here. A scope owns its forked subtasks the way a `try` block owns a resource:
+One more thing to look out for, because you'll meet it in code review: **structured concurrency**. `StructuredTaskScope` is a *preview* API in Java 21 <abbr title="JEP 453: Structured Concurrency (Preview) (JDK 21)">[11]</abbr>. It needs `--enable-preview`, so this block has no working Run button here. A scope owns its forked subtasks the way a `try` block owns a resource:
 
 ```java
 // requires: --enable-preview (a preview API in Java 21), and fetchUser/fetchScore from your code
@@ -720,7 +720,7 @@ try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
 }
 ```
 
-If either subtask fails, the scope cancels the other, and the error surfaces at `join()`. Concurrent work starts together, ends together, and cannot leak a runaway thread. The shape is worth recognizing before the API is final.
+If either subtask fails, the scope cancels the other one, and the error surfaces at `join()`. Concurrent work starts together, ends together, and can't leak a runaway thread. The shape is worth recognizing, even before the API is final.
 
 ---
 
@@ -819,8 +819,8 @@ aaa
 ```
 
 - The two tasks return `aaa` and `4`.
-- `incrementAndGet()` is one atomic read-modify-write, so no update is lost: exactly `500000`.
-- 100,000 virtual threads each sleeping 100 ms finished in 728–735 ms in three runs on JDK 21, not 100,000 × 100 ms. Each unmounts while it sleeps, so all the sleeps overlap on a few carriers. The rest of the time is creating and scheduling 100,000 threads. 100,000 platform threads would each need an OS thread with its own large stack.
+- `incrementAndGet()` is one atomic read-modify-write, so no update is lost: the result is exactly `500000`.
+- In three runs on JDK 21, 100,000 virtual threads each sleeping 100 ms finished in 728–735 ms — not 100,000 × 100 ms. Each thread unmounts while it sleeps, so all the sleeps overlap on a few carriers. The remaining time goes into creating and scheduling 100,000 threads. 100,000 platform threads, by contrast, would each need an OS thread with its own large stack.
 
 </details>
 
@@ -847,8 +847,8 @@ aaa
 🧪 **Predict, then check.**
 
 1. Predict the two lines printed by submitting `() -> "a".repeat(3)` and `() -> 2 + 2` to a pool and printing each `Future.get()`.
-2. Predict whether `AtomicInteger` incremented 100,000 times by 5 threads prints exactly `500000`, and why.
-3. Explain why 100,000 virtual threads each doing `Thread.sleep(100)` finish in under a second, not 100,000 × 100 ms, while 100,000 platform threads could not, in terms of mounting and unmounting.
+2. Predict whether an `AtomicInteger` incremented 100,000 times by each of 5 threads prints exactly `500000`, and explain why.
+3. In terms of mounting and unmounting, explain why 100,000 virtual threads each doing `Thread.sleep(100)` finish in under a second — not 100,000 × 100 ms — while 100,000 platform threads couldn't.
 
 </div>
 

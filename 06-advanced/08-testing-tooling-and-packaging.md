@@ -6,27 +6,27 @@ prereqs: []
 
 # Testing, Tooling & Packaging — Shipping Reliable Java
 
-This is the last lesson, and it's about everything *around* the code that makes it trustworthy and shippable:
+This is the last lesson, and it's about everything *around* the code — the things that make it trustworthy and shippable:
 
-- **Tests** turn "I think it works" into "the machine verifies it works, on every build". Java's built-in `assert` is disabled by default, which is why projects test with a framework such as **JUnit**, whose `@Test` methods always run.
+- **Tests** turn "I think it works" into "the machine verifies it works, on every build." Java's built-in `assert` is disabled by default, which is why projects test with a framework such as **JUnit**, whose `@Test` methods always run.
 - **Build tools** (Maven and Gradle) take over the manual `javac`/`jar` steps from [Packages, Modules & the Build](/synapse/programming-languages/java/robust-oop/packages-modules-and-the-build). They resolve dependencies from coordinates, compile, run the tests, and package the result.
-- An **executable JAR** is how you hand someone a program they can run with one command.
-- A good **debugging** strategy ties it together when something still goes wrong.
+- An **executable JAR** is how you hand someone a program they can run with a single command.
+- And when something still goes wrong, a good **debugging** strategy ties it all together.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **The core idea.**
 
-- **Tests** turn "I think it works" into "the machine verifies it, every build."
+- **Tests** turn "I think it works" into "the machine verifies it, on every build."
 - Java's `assert` is disabled by default — which is why projects test with a framework such as **JUnit**.
 - **Build tools** (Maven/Gradle) resolve dependencies, compile, test, and package.
 - An **executable JAR** is how you ship a program someone runs with one command.
 
 </div>
 
-Most examples here use multi-file projects and the `javac`/`mvn`/`gradle`/`jar` tools, so they're shown as real terminal sessions. Every command and its output was run on JDK 21 and captured; the ▶ Run blocks were compiled and run the same way.
+Most examples here use multi-file projects and the `javac`/`mvn`/`gradle`/`jar` tools, so they're shown as real terminal sessions. Every command and its output was run on JDK 21 and captured, and the ▶ Run blocks were compiled and run the same way.
 
-**You'll be able to:** predict what a false `assert` does with and without `-ea`, and explain why an assertion must have no side effects; write a JUnit test with `assertEquals` and `assertThrows`, and read a failing test's report; explain what a build tool does with one declared dependency, and write it for Maven and for Gradle; build an executable JAR, and fix `no main manifest attribute` and a `NoClassDefFoundError` for a missing library; read a stack trace from the first frame in your own code, and predict which log messages a level lets through.
+**You'll be able to:** predict what a false `assert` does with and without `-ea`, and explain why an assertion must have no side effects; write a JUnit test with `assertEquals` and `assertThrows`, and read a failing test's report; explain what a build tool does with a single declared dependency, and write it for both Maven and Gradle; build an executable JAR, and fix `no main manifest attribute` and a `NoClassDefFoundError` for a missing library; read a stack trace starting from the first frame in your own code, and predict which log messages a level lets through.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -56,7 +56,7 @@ Most examples here use multi-file projects and the `javac`/`mvn`/`gradle`/`jar` 
 
 ## 1. Testing with assertions
 
-The core idea of a test is an **assertion**: a claim that must hold, checked automatically. Java has a built-in `assert` statement. But it's **disabled unless you pass `-ea`** (enable assertions) <abbr title="The java command, JDK 21 documentation (-enableassertions)">[2]</abbr>, which makes it unsuitable as your testing tool.
+At the heart of any test is an **assertion**: a claim that must hold, checked automatically. Java has a built-in `assert` statement, but it's **disabled unless you pass `-ea`** (enable assertions) <abbr title="The java command, JDK 21 documentation (-enableassertions)">[2]</abbr>, which makes it unsuitable as your testing tool.
 
 ```java run
 public class Main {
@@ -83,17 +83,17 @@ Exception in thread "main" java.lang.AssertionError: add(2,2) should be 5
 
 **Analysis.**
 
-- With `-ea`, a true assertion passes silently, and a false one throws `AssertionError` with its message. That's a check.
+- With `-ea`, a true assertion passes silently, and a false one throws `AssertionError` with its message. That's a real check.
 - **Without** `-ea` (the default), the assertion is *skipped entirely*. The program printed `passed`, even though `add(2, 2) == 5` is false.
 
-An assertion the JVM ignores by default is worthless as a test. That is the motivation for a testing framework whose checks *always* run.
+An assertion that the JVM ignores by default is worthless as a test. That's the motivation for a testing framework whose checks *always* run.
 
 **Intuition.**
-*Mechanism.* `assert cond : msg` throws `AssertionError` if `cond` is false, but only when assertions are enabled. When they are disabled, the JLS says the statement "has no effect whatsoever" <abbr title="The Java Language Specification, Java SE 21, §14.10">[1]</abbr>. Assertions were designed for internal sanity checks during development, not as a test mechanism.
+*Mechanism.* `assert cond : msg` throws `AssertionError` if `cond` is false — but only when assertions are enabled. When they're disabled, the JLS says the statement "has no effect whatsoever" <abbr title="The Java Language Specification, Java SE 21, §14.10">[1]</abbr>. Assertions were designed for internal sanity checks during development, not as a testing mechanism.
 
 *Concrete bite.* The first run is the trap: `java Main` printed `passed` for code that's wrong.
 
-*Non-example: an assertion with a side effect.* "No effect whatsoever" includes the condition: it is not even evaluated. Put work inside an `assert`, and that work vanishes with the assertion:
+*Non-example: an assertion with a side effect.* "No effect whatsoever" includes the condition itself: it isn't even evaluated. So if you put work inside an `assert`, that work vanishes along with the assertion:
 
 ```java run
 public class Main {
@@ -121,14 +121,14 @@ $ java -ea Main
 checks = 1
 ```
 
-The same program behaves differently depending on a launch flag. Keep every `assert` condition free of side effects.
+The same program behaves differently depending on a launch flag. So keep every `assert` condition free of side effects.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `assert` only for optional internal invariant checks, with side-effect-free conditions, and know it's off by default. Use a real test framework for actual tests.
+💡 **Earned rule.** Use `assert` only for optional internal invariant checks with side-effect-free conditions, and remember that it's off by default. For actual tests, use a real test framework.
 
 - The cost of `assert` is exactly that default-off behavior.
-- The benefit of a framework, next, is checks that always run, with rich assertions and reporting.
+- The payoff of a framework, coming up next, is checks that always run, with rich assertions and reporting.
 
 </div>
 
@@ -138,15 +138,15 @@ The same program behaves differently depending on a launch flag. Keep every `ass
 
 **JUnit** is a testing framework for Java:
 
-- You write test methods marked `@Test`. An **annotation** such as `@Test` is a marker that a tool reads. You met `@Override`, which the compiler reads, in [Inheritance & Polymorphism](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism).
-- Each test asserts expected behavior with `assertEquals`, `assertThrows`, and friends.
-- The framework discovers and runs them all, every time.
+- You write test methods marked `@Test`. An **annotation** such as `@Test` is a marker that a tool reads. You've already met `@Override`, which the compiler reads, in [Inheritance & Polymorphism](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism).
+- Each test asserts the expected behavior with `assertEquals`, `assertThrows`, and friends.
+- The framework discovers and runs all of them, every time.
 
-Here's a class and its test, written against JUnit 5's Jupiter API. JUnit 6 (6.1.3 at the time of writing) keeps that API and requires Java 17 <abbr title="JUnit User Guide, current (6.1.3)">[5]</abbr>; this same test class passes unchanged against 6.1.3.
+Here's a class and its test, written against JUnit 5's Jupiter API. JUnit 6 (6.1.3 at the time of writing) keeps that API and requires Java 17 <abbr title="JUnit User Guide, current (6.1.3)">[5]</abbr>, and this same test class passes unchanged against 6.1.3.
 
 <div style="border-left:4px solid #da5233;background:rgba(218,82,51,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-⚠️ **Not runnable here.** This block is two files in a Maven layout, and it needs the JUnit library. The sandbox's Run button cannot build it; the terminal sessions below show real runs.
+⚠️ **Not runnable here.** This block is two files in a Maven layout, and it needs the JUnit library. The sandbox's Run button can't build it, so the terminal sessions below show real runs instead.
 
 </div>
 
@@ -175,7 +175,7 @@ class CalculatorTest {
 }
 ```
 
-Run the tests with the build tool (the end of the output):
+Run the tests with the build tool (this is the end of the output):
 
 ```
 $ mvn test
@@ -192,15 +192,15 @@ $ mvn test
 
 **Analysis.** JUnit found both `@Test` methods and ran them:
 
-- `addsTwoNumbers` checked that `add(2, 3)` equals `5`, with `assertEquals(expected, actual)`.
+- `addsTwoNumbers` checked that `add(2, 3)` equals `5`, using `assertEquals(expected, actual)`.
 - `divideByZeroThrows` checked that dividing by zero throws. `assertThrows(ExceptionType, lambda)` runs the [lambda](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas), and passes only if it throws the named [exception](/synapse/programming-languages/java/robust-oop/exceptions).
 
 Both passed: `Tests run: 2, Failures: 0`. Unlike `assert`, these checks *always* run.
 
 **Intuition.**
-*Mechanism.* JUnit finds every method marked `@Test`. Test classes and methods need not be `public`, but they must not be `private` <abbr title="JUnit 5.10.2 User Guide, §2.3 Test Classes and Methods">[4]</abbr>. It creates a new instance of the test class before each test method, so one test's fields cannot leak into the next <abbr title="JUnit 5.10.2 User Guide, §2.11 Test Instance Lifecycle">[4]</abbr>. A failed assertion throws, and JUnit records that test as failed.
+*Mechanism.* JUnit finds every method marked `@Test`. Test classes and methods don't need to be `public`, but they must not be `private` <abbr title="JUnit 5.10.2 User Guide, §2.3 Test Classes and Methods">[4]</abbr>. JUnit creates a fresh instance of the test class before each test method, so one test's fields can't leak into the next <abbr title="JUnit 5.10.2 User Guide, §2.11 Test Instance Lifecycle">[4]</abbr>. A failed assertion throws, and JUnit records that test as failed.
 
-*Concrete bite: a failing test.* Change the expected value to `4`, a wrong expectation, and run again. The report names the test, the line, and both values. Maven then fails the build (output trimmed at `…`):
+*Concrete bite: a failing test.* Change the expected value to `4` — a wrong expectation — and run again. The report names the test, the line, and both values, and Maven then fails the build (output trimmed at `…`):
 
 ```
 $ mvn test
@@ -217,14 +217,14 @@ org.opentest4j.AssertionFailedError: expected: <4> but was: <5>
 [INFO] BUILD FAILURE
 ```
 
-`expected: <4> but was: <5>` is why the argument order matters: the expected value comes first. The power is regression protection. Once `divideByZeroThrows` exists, anyone who later breaks that behavior gets a red build. The test is a permanent, executable specification.
+`expected: <4> but was: <5>` shows why argument order matters: the expected value comes first. The real power here is regression protection. Once `divideByZeroThrows` exists, anyone who later breaks that behavior gets a red build. The test becomes a permanent, executable specification.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Write JUnit tests for the behavior you care about: the happy path, edge cases, and the exceptions. Run them in your build, so failures block shipping.
+💡 **Earned rule.** Write JUnit tests for the behavior you care about: the happy path, the edge cases, and the exceptions. Run them as part of your build, so that failures block shipping.
 
-- The cost: writing and maintaining tests, which are code that can rot.
-- The benefit: a machine-checked safety net that catches regressions at once and lets you refactor without fear.
+- The cost: writing and maintaining tests, which are code too, and can rot.
+- The payoff: a machine-checked safety net that catches regressions immediately, and lets you refactor without fear.
 
 </div>
 
@@ -232,9 +232,9 @@ org.opentest4j.AssertionFailedError: expected: <4> but was: <5>
 
 ## 3. Build tools and dependencies
 
-Past a couple of files, manual `javac` doesn't scale. You need dependencies (libraries), a test phase, and packaging. **Maven** and **Gradle** automate all of it from a project descriptor.
+Once you're past a couple of files, manual `javac` doesn't scale. You need dependencies (libraries), a test phase, and packaging. **Maven** and **Gradle** automate all of it, working from a project descriptor.
 
-Maven's `pom.xml` declares the project and its dependencies by **coordinates** (`groupId:artifactId:version`). The tool fetches them, and *their* dependencies, from a repository:
+Maven's `pom.xml` declares the project and its dependencies by **coordinates** (`groupId:artifactId:version`). The tool fetches those dependencies — and *their* dependencies — from a repository:
 
 ```xml
 <project xmlns="http://maven.apache.org/POM/4.0.0">
@@ -256,7 +256,7 @@ Maven's `pom.xml` declares the project and its dependencies by **coordinates** (
 </project>
 ```
 
-`mvn package` runs the lifecycle's phases in order, each one after the last: compile, test, then package <abbr title="Apache Maven, Introduction to the Build Lifecycle">[6]</abbr>. A real run, filtered to its plugin lines and results, shows that order:
+`mvn package` runs the lifecycle's phases in order, one after another: compile, test, then package <abbr title="Apache Maven, Introduction to the Build Lifecycle">[6]</abbr>. A real run, filtered down to its plugin lines and results, shows that order:
 
 ```
 $ mvn package
@@ -268,7 +268,7 @@ $ mvn package
 [INFO] BUILD SUCCESS
 ```
 
-**Analysis.** The `<dependency>` block is all it takes to use JUnit. Ask Maven for the dependency tree, and one declaration turns out to be eight libraries: the one declared, and seven more:
+**Analysis.** The `<dependency>` block is all it takes to use JUnit. Ask Maven for the dependency tree, though, and that one declaration turns out to be eight libraries: the one you declared, plus seven more:
 
 ```
 $ mvn dependency:tree
@@ -283,7 +283,7 @@ $ mvn dependency:tree
 [INFO]       \- org.junit.platform:junit-platform-engine:jar:1.10.2:test
 ```
 
-`<scope>test</scope>` makes a dependency "only available for the test compilation and execution phases" <abbr title="Apache Maven, Introduction to the Dependency Mechanism">[7]</abbr>. So the JAR that `mvn package` built holds `Calculator.class` and no JUnit class:
+`<scope>test</scope>` makes a dependency "only available for the test compilation and execution phases" <abbr title="Apache Maven, Introduction to the Dependency Mechanism">[7]</abbr>. So the JAR that `mvn package` built holds `Calculator.class`, and not a single JUnit class:
 
 ```
 $ jar --list --file target/calc-1.0.jar
@@ -318,19 +318,19 @@ tasks.test {
 }
 ```
 
-With this file, `gradle test` ran both tests and passed. Leave out `useJUnitPlatform()`, and Gradle 9.7.1 fails with "the test task did not discover any tests to execute". Leave out the launcher line, and it says `Failed to load JUnit Platform`.
+With this file, `gradle test` ran both tests, and they passed. Leave out `useJUnitPlatform()`, and Gradle 9.7.1 fails with "the test task did not discover any tests to execute". Leave out the launcher line, and it says `Failed to load JUnit Platform`.
 
 **Intuition.**
-*Mechanism.* A build tool models the project as a descriptor (`pom.xml` or `build.gradle.kts`) plus a fixed sequence of steps. It resolves the dependency graph from repositories such as Maven Central, caches the artifacts locally, compiles, runs the tests, and packages. It does this the same way on every machine.
+*Mechanism.* A build tool models the project as a descriptor (`pom.xml` or `build.gradle.kts`) plus a fixed sequence of steps. It resolves the dependency graph from repositories such as Maven Central, caches the artifacts locally, compiles, runs the tests, and packages — the same way on every machine.
 
-*Concrete bite.* The transitive resolution is the real value. Declaring one dependency pulled in seven more. When two paths bring different versions of one library, Maven picks the "nearest definition": the version closest to your project in the tree <abbr title="Apache Maven, Introduction to the Dependency Mechanism">[7]</abbr>. Doing this by hand — tracking which JAR needs which other JAR — is the "JAR hell" build tools were invented to end.
+*Concrete bite.* Transitive resolution is the real value here: declaring one dependency pulled in seven more. When two paths bring in different versions of the same library, Maven picks the "nearest definition", meaning the version closest to your project in the tree <abbr title="Apache Maven, Introduction to the Dependency Mechanism">[7]</abbr>. Doing all this by hand — tracking which JAR needs which other JAR — is the "JAR hell" that build tools were invented to end.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Use a build tool (Maven or Gradle) for any real project. Declare dependencies by coordinates, give test libraries the test scope, and let the tool resolve, compile, test, and package.
 
-- The cost: learning the tool's model and conventions, and occasional dependency-conflict debugging.
-- The benefit: reproducible builds with managed transitive dependencies, the baseline for collaborating and shipping.
+- The cost: learning the tool's model and conventions, plus the occasional round of dependency-conflict debugging.
+- The payoff: reproducible builds with managed transitive dependencies — the baseline for collaborating and shipping.
 
 </div>
 
@@ -338,7 +338,7 @@ With this file, `gradle test` ran both tests and passed. Leave out `useJUnitPlat
 
 ## 4. Shipping an executable JAR
 
-A **JAR** (Java ARchive) is a ZIP file of classes plus a manifest, `META-INF/MANIFEST.MF` <abbr title="JAR File Specification, JDK 21">[9]</abbr>. To hand someone a runnable program, package it as an **executable JAR**: its manifest names the `Main-Class`, so `java -jar` launches it directly.
+A **JAR** (Java ARchive) is a ZIP file of classes, plus a manifest at `META-INF/MANIFEST.MF` <abbr title="JAR File Specification, JDK 21">[9]</abbr>. To hand someone a runnable program, package it as an **executable JAR**: its manifest names the `Main-Class`, so `java -jar` can launch it directly.
 
 ```
 $ javac Greeting.java
@@ -352,7 +352,7 @@ Hello from an executable JAR!
 Hello from an executable JAR!
 ```
 
-**Analysis.** `jar --create` bundled the compiled class into `app.jar`, and `--main-class` recorded `Greeting` as the entry point. The manifest shows it:
+**Analysis.** `jar --create` bundled the compiled class into `app.jar`, and `--main-class` recorded `Greeting` as the entry point. You can see it in the manifest:
 
 ```
 $ unzip -p app.jar META-INF/MANIFEST.MF
@@ -363,9 +363,9 @@ Main-Class: Greeting
 
 `java -jar app.jar` read that `Main-Class` line and ran `main`: one file, one command.
 
-This is a plain, **non-modular** JAR: it has no `module-info.class`. A JAR that has one is a **modular JAR**. [Packages, Modules & the Build](/synapse/programming-languages/java/robust-oop/packages-modules-and-the-build) builds both kinds. The same lesson shows how a plain JAR on the module path becomes an automatic module, and how `jlink` makes a runtime image.
+This is a plain, **non-modular** JAR, because it has no `module-info.class`. A JAR that does have one is a **modular JAR**. [Packages, Modules & the Build](/synapse/programming-languages/java/robust-oop/packages-modules-and-the-build) builds both kinds, and also shows how a plain JAR on the module path becomes an automatic module, and how `jlink` makes a runtime image.
 
-*Non-example: a JAR with no `Main-Class`.* Build the JAR without `--main-class`, and `java -jar` has no class to start. So does the JAR `mvn package` built in §3:
+*Non-example: a JAR with no `Main-Class`.* Build the JAR without `--main-class`, and `java -jar` has no class to start. The same goes for the JAR that `mvn package` built in §3:
 
 ```
 $ jar --create --file plain.jar Greeting.class
@@ -378,9 +378,9 @@ Hello from an executable JAR!
 Naming the class on the command line, with the JAR on the classpath, still works.
 
 **Intuition.**
-*Mechanism.* With `-jar`, "the specified JAR file is the source of all user classes, and other class path settings are ignored" <abbr title="The java command, JDK 21 documentation (-jar)">[2]</abbr>. A JAR contains *your* classes only. A library your code uses must come from somewhere else.
+*Mechanism.* With `-jar`, "the specified JAR file is the source of all user classes, and other class path settings are ignored" <abbr title="The java command, JDK 21 documentation (-jar)">[2]</abbr>. A JAR contains only *your* classes, so any library your code uses has to come from somewhere else.
 
-*Concrete bite.* Here `com.example.App` calls `Shout.loud` from a library, `acme.jar`. The app compiled against the library, but the executable JAR holds only `App` (output trimmed at `…`):
+*Concrete bite.* Here, `com.example.App` calls `Shout.loud` from a library, `acme.jar`. The app was compiled against the library, but the executable JAR holds only `App` (output trimmed at `…`):
 
 ```
 $ java -jar app.jar
@@ -397,14 +397,14 @@ Caused by: java.lang.ClassNotFoundException: com.acme.Shout
 …
 ```
 
-- The program *started*: `starting` printed. It failed at the first line that used `Shout`.
+- The program *did* start — `starting` printed. It failed at the first line that used `Shout`.
 - `-cp acme.jar` changed nothing, because `-jar` ignores it.
 
-Three fixes, each run.
+Here are three fixes, each one tested.
 
-**Fix 1: name the classpath yourself.** `java -cp app.jar:acme.jar com.example.App` printed `starting`, then `HELLO!`. (Windows separates the entries with `;` <abbr title="The java command, JDK 21 documentation (-cp)">[2]</abbr>.)
+**Fix 1: name the classpath yourself.** `java -cp app.jar:acme.jar com.example.App` printed `starting`, then `HELLO!`. (On Windows, separate the entries with `;` instead <abbr title="The java command, JDK 21 documentation (-cp)">[2]</abbr>.)
 
-**Fix 2: a `Class-Path` manifest line.** It lists the library by a URL relative to the JAR's own location <abbr title="JAR File Specification, JDK 21 (Class-Path Attribute)">[9]</abbr>. Here `cp.txt` held the line `Class-Path: acme.jar`, and `--manifest` merged it in <abbr title="The jar command, JDK 21 documentation">[3]</abbr>:
+**Fix 2: a `Class-Path` manifest line.** This line lists the library by a URL relative to the JAR's own location <abbr title="JAR File Specification, JDK 21 (Class-Path Attribute)">[9]</abbr>. Here, `cp.txt` held the line `Class-Path: acme.jar`, and `--manifest` merged it in <abbr title="The jar command, JDK 21 documentation">[3]</abbr>:
 
 ```
 $ jar --create --file app2.jar --main-class com.example.App --manifest cp.txt -C app-classes .
@@ -413,9 +413,9 @@ starting
 HELLO!
 ```
 
-Copy `app2.jar` to another directory without `acme.jar`, and the `NoClassDefFoundError` is back.
+But copy `app2.jar` to another directory without `acme.jar`, and the `NoClassDefFoundError` comes right back.
 
-**Fix 3: a fat JAR**, also called an uber JAR. It carries the library's classes inside:
+**Fix 3: a fat JAR**, also called an uber JAR, which carries the library's classes inside it:
 
 ```
 $ jar --create --file fat.jar --main-class com.example.App -C app-classes . -C lib-classes .
@@ -429,16 +429,16 @@ com/acme/
 com/acme/Shout.class
 ```
 
-Copied alone to another directory, `java -jar fat.jar` printed `starting`, then `HELLO!`.
+Copied on its own to another directory, `java -jar fat.jar` printed `starting`, then `HELLO!`.
 
-In practice a build tool produces the fat JAR, with a plugin such as Maven's Shade plugin, which packages "the artifact in an uber-jar, including its dependencies" <abbr title="Apache Maven Shade Plugin">[13]</abbr>.
+In practice, a build tool produces the fat JAR for you, through a plugin such as Maven's Shade plugin, which packages "the artifact in an uber-jar, including its dependencies" <abbr title="Apache Maven Shade Plugin">[13]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Ship an executable JAR built by your build tool: a fat JAR for an app with dependencies, run with `java -jar`.
+💡 **Earned rule.** Ship an executable JAR built by your build tool — a fat JAR, for an app with dependencies — and run it with `java -jar`.
 
 - The cost: configuring the packaging plugin, and a larger artifact.
-- The benefit: one self-contained file that anyone with a JVM can run. That is the compile-once, run-anywhere promise of [What Java Is & Running Code](/synapse/programming-languages/java/first-steps/what-java-is-and-running-code), delivered as one command.
+- The payoff: one self-contained file that anyone with a JVM can run. That's the compile-once, run-anywhere promise of [What Java Is & Running Code](/synapse/programming-languages/java/first-steps/what-java-is-and-running-code), delivered as a single command.
 
 </div>
 
@@ -446,14 +446,14 @@ In practice a build tool produces the fat JAR, with a plugin such as Maven's Sha
 
 ## 5. Debugging strategy
 
-When a test goes red or production misbehaves, debug methodically, not by guesswork. The toolkit:
+When a test goes red or production misbehaves, debug methodically, not by guesswork. Here's the toolkit:
 
 - **Read the stack trace.** It names the exception and the exact line.
 - **Reproduce** the failure reliably. A failing test is the ideal reproduction.
-- **Inspect state** with a debugger (the JDK ships `jdb` <abbr title="The jdb command, JDK 21 documentation">[10]</abbr>; every IDE has one), or with targeted logging.
-- **Bisect**: narrow the problem by halving (which commit, which input, which method) until the cause is isolated.
+- **Inspect state** with a debugger (the JDK ships `jdb` <abbr title="The jdb command, JDK 21 documentation">[10]</abbr>, and every IDE has one), or with targeted logging.
+- **Bisect**: narrow the problem down by halving it (which commit, which input, which method) until you've isolated the cause.
 
-A stack trace is a map, read from the top:
+A stack trace is a map, and you read it from the top:
 
 ```java run
 import java.util.Map;
@@ -488,13 +488,13 @@ Exception in thread "main" java.lang.NumberFormatException: Cannot parse null st
 
 **Analysis.**
 
-- The first line says *what* (`NumberFormatException`) and *why* (`Cannot parse null string`).
-- The frames say *where*, innermost call first. Skip the `java.base` frames: the bug is rarely in the JDK. (Their line numbers differ between JDK builds.)
-- The first frame in your own code is `Main.parsePort(Main.java:5)`. But the `null` came from further down: `loadPort` asked for a `"port"` key that the map does not have.
+- The first line says *what* happened (`NumberFormatException`) and *why* (`Cannot parse null string`).
+- The frames say *where*, innermost call first. Skip the `java.base` frames, since the bug is rarely in the JDK. (Their line numbers also differ between JDK builds.)
+- The first frame in your own code is `Main.parsePort(Main.java:5)`. But the `null` actually came from further down: `loadPort` asked for a `"port"` key that the map doesn't have.
 
-The single most effective debugging move is to turn the bug into a **failing test**. It reproduces the problem on demand, and it tells you the moment you've fixed it. Then it stays as a regression guard.
+The single most effective debugging move is to turn the bug into a **failing test**. It reproduces the problem on demand, tells you the moment you've fixed it, and then stays behind as a regression guard.
 
-**Logging.** A log message records state as the program runs, with a **level** that says how much it matters. The JDK's own API is `java.util.logging` <abbr title="Java SE 21 API, java.util.logging">[11]</abbr>. Its default configuration lets through `INFO` and above; `FINE` and lower are dropped <abbr title="JDK 21, conf/logging.properties (.level= INFO)">[12]</abbr>. This program sends each record to standard output, so you can see which ones pass:
+**Logging.** A log message records state as the program runs, along with a **level** that says how much it matters. The JDK's own logging API is `java.util.logging` <abbr title="Java SE 21 API, java.util.logging">[11]</abbr>. Its default configuration lets through `INFO` and above, and drops `FINE` and lower <abbr title="JDK 21, conf/logging.properties (.level= INFO)">[12]</abbr>. This program sends each record to standard output, so you can see which ones get through:
 
 ```java run
 import java.util.logging.Handler;
@@ -533,19 +533,19 @@ WARNING orders: order 42 is missing a postcode
 FINE orders: order 43 has 1 line
 ```
 
-The `orders` logger had no level of its own (`null`), so it used its parent's, `INFO`. The first `fine` message was dropped. After `setLevel(Level.FINE)`, the second one passed.
+The `orders` logger had no level of its own (`null`), so it used its parent's level, `INFO`. That's why the first `fine` message was dropped. After `setLevel(Level.FINE)`, the second one got through.
 
 **Intuition.**
-*Mechanism.* A debugger pauses the JVM at a breakpoint, and lets you inspect variables and step through execution. Logging records state over time. A failing test pins the exact behavior. Each turns "it's broken somewhere" into concrete, observable facts.
+*Mechanism.* A debugger pauses the JVM at a breakpoint, and lets you inspect variables and step through execution. Logging records state over time. A failing test pins down the exact behavior. Each one turns "it's broken somewhere" into concrete, observable facts.
 
-*Concrete bite.* The anti-pattern is changing code at random, hoping the symptom disappears. That often hides the bug instead of fixing it, or breaks something else. Reproduce first, understand the cause, *then* fix; a fix you can't explain isn't a fix.
+*Concrete bite.* The anti-pattern is changing code at random, hoping the symptom disappears. That often hides the bug instead of fixing it, or breaks something else. Reproduce first, understand the cause, *then* fix — a fix you can't explain isn't really a fix.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Debug by reproducing (ideally as a failing test), reading the stack trace to the cause, and inspecting state with a debugger or logging — not by guessing.
+💡 **Earned rule.** Debug by reproducing the problem (ideally as a failing test), following the stack trace to the cause, and inspecting state with a debugger or logging — not by guessing.
 
-- The cost: the discipline to understand before editing.
-- The benefit: fixes that address the cause, with a regression test that keeps the bug dead.
+- The cost: the discipline to understand before you edit.
+- The payoff: fixes that address the real cause, plus a regression test that keeps the bug dead.
 
 </div>
 
@@ -622,9 +622,9 @@ One check per objective. Answer before you open anything.
 </dependency>
 ```
 
-With no `<scope>`, the scope is `compile`, the default <abbr title="Apache Maven, Introduction to the Dependency Mechanism">[7]</abbr>. `mvn package` downloads `widgets` and its own dependencies, compiles your code against them, runs the tests, and builds a JAR of *your* classes only.
+With no `<scope>`, the scope is `compile`, which is the default <abbr title="Apache Maven, Introduction to the Dependency Mechanism">[7]</abbr>. `mvn package` downloads `widgets` and its own dependencies, compiles your code against them, runs the tests, and builds a JAR containing only *your* classes.
 
-That JAR has no `Main-Class` unless you configure one, so `java -jar` says `no main manifest attribute`. Configure it, and `java -jar` then fails with `NoClassDefFoundError` at the first use of a `widgets` class. The library is not inside the JAR, and `-jar` ignores `-cp`. A fat JAR bundles it in.
+That JAR has no `Main-Class` unless you configure one, so `java -jar` says `no main manifest attribute`. Configure it, and `java -jar` then fails with `NoClassDefFoundError` at the first use of a `widgets` class, because the library isn't inside the JAR, and `-jar` ignores `-cp`. A fat JAR bundles the library in.
 
 </details>
 
@@ -652,11 +652,11 @@ That JAR has no `Main-Class` unless you configure one, so `java -jar` says `no m
 
 🧪 **Predict, then check.**
 
-1. Predict what `java Main` (no `-ea`) prints for a program whose only statement is a *false* `assert`, versus `java -ea Main`.
+1. Predict what `java Main` (no `-ea`) prints for a program whose only statement is a *false* `assert`, compared with `java -ea Main`.
 2. Predict whether a JUnit test `assertEquals(4, calc.add(2, 3))` passes, and what the failure message would show.
-3. Write a `pom.xml` `<dependency>` for a library `com.acme:widgets:2.1.0`. Explain what `mvn package` does with it, and why a fat JAR is needed to run the result with `java -jar`.
+3. Write a `pom.xml` `<dependency>` for a library `com.acme:widgets:2.1.0`. Explain what `mvn package` does with it, and why you need a fat JAR to run the result with `java -jar`.
 
-§1, §2's failing test and the ✅ `<details>` answer each one.
+§1, §2's failing test and the ✅ `<details>` answer each one in turn.
 
 </div>
 

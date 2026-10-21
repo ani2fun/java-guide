@@ -6,9 +6,9 @@ prereqs: []
 
 # Localization — `Locale`, formats and resource bundles
 
-The number twelve hundred and thirty-four and a half is written `1,234.5` in the United States. It is `1.234,5` in Germany and `1 234,5` in France. The date 5 March 2024 is `3/5/24` in the United States and `05/03/2024` in France. A program that prints either one the same way everywhere is wrong somewhere.
+The number twelve hundred and thirty-four and a half is written `1,234.5` in the United States. In Germany it's `1.234,5`, and in France it's `1 234,5`. The date 5 March 2024 is `3/5/24` in the United States, but `05/03/2024` in France. A program that prints either one the same way everywhere is wrong somewhere.
 
-**Localization** is making a program's output fit the reader's language and region. Java's tools for it all take one argument, a **`Locale`**:
+**Localization** means making a program's output fit the reader's language and region. Java's tools for it all take one key argument, a **`Locale`**:
 
 - `NumberFormat` writes numbers, amounts of money and percentages.
 - `DateTimeFormatter` writes dates and times, which you met in [Dates & Times](/synapse/programming-languages/java/core-libraries/dates-and-times).
@@ -21,13 +21,13 @@ The number twelve hundred and thirty-four and a half is written `1,234.5` in the
 
 - Text for **people** is formatted with *their* locale, passed in explicitly.
 - Text for **programs** (files, logs, network messages) uses `Locale.ROOT`, so it reads the same on every machine.
-- Any method that takes no locale uses the machine's **default** locale, which you did not choose.
+- Any method that takes no locale uses the machine's **default** locale — which you didn't choose.
 
 </div>
 
 This lesson uses [nested classes](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas), [abstract methods](/synapse/programming-languages/java/robust-oop/abstract-classes-and-interfaces) and [checked exceptions](/synapse/programming-languages/java/robust-oop/exceptions).
 
-**You'll be able to:** build a `Locale` from a language tag and predict how a number, an amount of money and a date print in it; pick between a reader's locale and `Locale.ROOT` for a piece of output; trace which bundle `ResourceBundle.getBundle` returns, including its fallback to the default locale; write a `MessageFormat` pattern with arguments and name the apostrophe trap; explain why parsing `"1,234"` in a French locale gives `1.234`.
+**You'll be able to:** build a `Locale` from a language tag, and predict how a number, an amount of money and a date print in it; choose between a reader's locale and `Locale.ROOT` for a piece of output; trace which bundle `ResourceBundle.getBundle` returns, including its fallback to the default locale; write a `MessageFormat` pattern with arguments, and name the apostrophe trap; explain why parsing `"1,234"` in a French locale gives `1.234`.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -58,12 +58,12 @@ This lesson uses [nested classes](/synapse/programming-languages/java/robust-oop
 
 ## 1. Locales
 
-A **`Locale`** names a language, and usually a region <abbr title="Java SE 21 API, java.util.Locale">[1]</abbr>. It holds no rules itself. It is a key that locale-sensitive methods use to pick their rules. Two parts matter most:
+A **`Locale`** names a language, and usually a region too <abbr title="Java SE 21 API, java.util.Locale">[1]</abbr>. It holds no rules of its own; it's a key that locale-sensitive methods use to look up their rules. Two parts matter most:
 
 - the **language**, a lowercase code such as `fr` (French) or `de` (German);
 - the **country**, an uppercase code such as `FR` (France) or `CA` (Canada).
 
-French in France and French in Canada share a language and differ in details, so they are different locales. You write a locale as a **language tag**, the parts joined by a hyphen: `fr-FR`, `fr-CA`, `en-US`.
+French in France and French in Canada share a language but differ in the details, so they're different locales. You write a locale as a **language tag**, with the parts joined by a hyphen: `fr-FR`, `fr-CA`, `en-US`.
 
 There are three ways to get one:
 
@@ -101,11 +101,11 @@ japonais (Japon)
 
 **Analysis.**
 
-- `toString()` joins the parts with an underscore, `fr_FR`, and `toLanguageTag()` gives the hyphen form.
+- `toString()` joins the parts with an underscore (`fr_FR`), while `toLanguageTag()` gives the hyphen form.
 - `getDisplayName` names a locale *in* another locale: France's own name for itself is `français (France)`.
-- The last line is **`Locale.ROOT`**, the locale with no language and no country. Its tag is `und`, for "undetermined". It is the neutral locale for output that is not meant for any one audience <abbr title="Java SE 21 API, java.util.Locale.ROOT">[1]</abbr>.
+- The last line is **`Locale.ROOT`**, the locale with no language and no country. Its tag is `und`, for "undetermined". It's the neutral locale for output that isn't meant for any one audience <abbr title="Java SE 21 API, java.util.Locale.ROOT">[1]</abbr>.
 
-Every JVM also has a **default locale**, set at startup from the operating system <abbr title="Java SE 21 API, java.util.Locale, Default Locale">[1]</abbr>. It differs from machine to machine:
+Every JVM also has a **default locale**, set at startup from the operating system <abbr title="Java SE 21 API, java.util.Locale, Default Locale">[1]</abbr>, so it differs from machine to machine:
 
 ```java run
 import java.util.Locale;
@@ -123,9 +123,9 @@ default locale: en_US
 ```
 
 **Intuition.**
-*Mechanism.* `forLanguageTag` reads a **BCP 47** language tag, the web standard, which separates parts with hyphens. It skips the first part it cannot read, and every part after it <abbr title="Java SE 21 API, java.util.Locale.forLanguageTag">[1]</abbr>. A bad tag never makes it throw.
+*Mechanism.* `forLanguageTag` reads a **BCP 47** language tag — the web standard — which separates its parts with hyphens. It skips the first part it can't read, along with every part after it <abbr title="Java SE 21 API, java.util.Locale.forLanguageTag">[1]</abbr>. A bad tag never makes it throw.
 
-*Non-example: an underscore in a tag.* `fr_FR` is how a locale *prints*, not how a tag is written. As a tag, the whole string is one unreadable part:
+*Non-example: an underscore in a tag.* `fr_FR` is how a locale *prints*, not how a tag is written. As a tag, that whole string is one unreadable part:
 
 ```java run
 import java.util.Locale;
@@ -147,13 +147,13 @@ wrong: [] und
 right: [fr_FR] fr-FR
 ```
 
-The wrong tag gave the empty locale, silently. Every format built from it would use neutral rules, and nothing would say why the French text never appeared.
+The wrong tag silently gave the empty locale. Every format built from it would use neutral rules, and nothing would tell you why the French text never appeared.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Build a locale with `Locale.of(language, country)`, a constant, or `forLanguageTag` with a hyphenated tag. After `forLanguageTag`, check that `getLanguage()` is not empty if the tag came from outside the program.
+💡 **Earned rule.** Build a locale with `Locale.of(language, country)`, a constant, or `forLanguageTag` with a hyphenated tag. If the tag came from outside the program, check after `forLanguageTag` that `getLanguage()` isn't empty.
 
-The cost is one check. The benefit is that a malformed tag fails where you can see it, not three calls later as English text for a French reader.
+The cost is one extra check. The payoff is that a malformed tag fails where you can see it — not three calls later, as English text for a French reader.
 
 </div>
 
@@ -161,7 +161,7 @@ The cost is one check. The benefit is that a malformed tag fails where you can s
 
 ## 2. Numbers, money and percentages
 
-**`NumberFormat`** (in `java.text`) formats numbers by a locale's rules. You never build the rules yourself; you ask for a formatter <abbr title="Java SE 21 API, java.text.NumberFormat">[2]</abbr>:
+**`NumberFormat`** (in `java.text`) formats numbers according to a locale's rules. You never build the rules yourself; you just ask for a formatter <abbr title="Java SE 21 API, java.text.NumberFormat">[2]</abbr>:
 
 - `getInstance(locale)` — a plain number;
 - `getCurrencyInstance(locale)` — an amount of money, with the currency symbol;
@@ -196,15 +196,15 @@ fr_FR: 1 234 567,891 | 1 234,50 € | 75 %
 **Analysis.** One number, four spellings:
 
 - Germany swaps the roles of `.` and `,`;
-- Swiss German groups with an apostrophe-like `’`;
-- France groups with a space and puts `€` after the amount.
+- Swiss German groups digits with an apostrophe-like `’`;
+- France groups digits with a space, and puts `€` after the amount.
 
-The rules come from the **CLDR**, the Unicode Consortium's shared locale data, which the JDK has used by default since Java 9 <abbr title="JEP 252: Use CLDR Locale Data by Default">[9]</abbr>.
+These rules come from the **CLDR**, the Unicode Consortium's shared locale data, which the JDK has used by default since Java 9 <abbr title="JEP 252: Use CLDR Locale Data by Default">[9]</abbr>.
 
 **Intuition.**
-*Mechanism.* The "spaces" in the French line are not the space character. CLDR uses a **no-break space** there, so a line break cannot split `1 234` in two. France groups digits with U+202F, the *narrow* no-break space.
+*Mechanism.* The "spaces" in the French line aren't the ordinary space character. CLDR uses a **no-break space** there, so that a line break can't split `1 234` in two. France groups digits with U+202F, the *narrow* no-break space.
 
-*Concrete bite: a string that looks equal and is not.* Compare the French output to the same text typed on a keyboard:
+*Concrete bite: a string that looks equal, but isn't.* Compare the French output with the same text typed on a keyboard:
 
 ```java run
 import java.text.NumberFormat;
@@ -233,9 +233,9 @@ false
 U+202F U+00A0 U+20AC 
 ```
 
-The two strings look the same on screen, and `equals` says `false`. The printed one holds U+202F between the digit groups and U+00A0, the ordinary no-break space, before `€`. A test that compares formatted output to a typed string fails for this reason alone.
+The two strings look identical on screen, yet `equals` says `false`. The printed one holds U+202F between the digit groups, and U+00A0 — the ordinary no-break space — before `€`. A test that compares formatted output against a typed string fails for this reason alone.
 
-**Parsing is locale-sensitive too.** `parse` reads text back into a number, by the same locale's rules. It reads from the start of the text and may stop before the end <abbr title="Java SE 21 API, java.text.NumberFormat.parse">[2]</abbr>. If the start is not a number, it throws the checked `ParseException`:
+**Parsing is locale-sensitive too.** `parse` reads text back into a number, following the same locale's rules. It reads from the start of the text, and may stop before reaching the end <abbr title="Java SE 21 API, java.text.NumberFormat.parse">[2]</abbr>. If the text doesn't start with a number, it throws the checked `ParseException`:
 
 ```java run
 import java.text.NumberFormat;
@@ -263,9 +263,9 @@ public class Main {
 Exception in thread "main" java.text.ParseException: Unparseable number: "abc"
 ```
 
-In France the comma is the decimal separator, so `"1,234"` is one point two three four, not a thousand. `"12abc"` gave `12` with no complaint, because parsing stopped at `a`. Only text with no number at its start throws.
+In France, the comma is the decimal separator, so `"1,234"` means one point two three four, not a thousand. `"12abc"` gave `12` without complaint, because parsing simply stopped at `a`. Only text with no number at its start throws.
 
-**Money is two things: an amount and a currency.** A currency formatter takes its currency from the locale's *country*, not from your data. `Currency` (in `java.util`) names a currency by its ISO 4217 code, such as `EUR`, and `Currency.getInstance(locale)` gives the currency of a locale's country <abbr title="Java SE 21 API, java.util.Currency">[3]</abbr>:
+**Money is two things: an amount and a currency.** A currency formatter takes its currency from the locale's *country*, not from your data. `Currency` (in `java.util`) names a currency by its ISO 4217 code, such as `EUR`, and `Currency.getInstance(locale)` gives you the currency of a locale's country <abbr title="Java SE 21 API, java.util.Currency">[3]</abbr>:
 
 ```java run
 import java.text.NumberFormat;
@@ -303,16 +303,16 @@ JPY has 0 decimal places
 1M 2K
 ```
 
-- A price in euros printed as `$1,234.50`: the amount was right and the currency was a lie. `setCurrency` keeps the US layout and the euro sign.
+- A price in euros printed as `$1,234.50`: the amount was right, but the currency was a lie. `setCurrency` keeps the US layout, with the euro sign.
 - The yen has no minor unit, so a yen amount has no decimal places.
-- The formatters round with **half-even** rounding <abbr title="Java SE 21 API, java.text.NumberFormat, Implementation Requirements">[2]</abbr>. A value exactly halfway goes to the even neighbour: `2.5` to `2`, `3.5` to `4`.
-- `getCompactNumberInstance` (Java 12) writes short forms such as `1M` for display.
+- The formatters use **half-even** rounding <abbr title="Java SE 21 API, java.text.NumberFormat, Implementation Requirements">[2]</abbr>, so a value exactly halfway goes to its even neighbour: `2.5` to `2`, and `3.5` to `4`.
+- `getCompactNumberInstance` (Java 12) writes short forms such as `1M`, for display.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Format numbers for people with `NumberFormat` and the reader's locale. Store money as an amount *and* a currency code, and set the currency on the formatter. Parse numbers from people with the locale they typed in, and never compare formatted text to a string typed on a keyboard.
+💡 **Earned rule.** Format numbers for people with `NumberFormat` and the reader's locale. Store money as an amount *and* a currency code, and set the currency on the formatter. Parse numbers from people using the locale they typed in, and never compare formatted text against a string typed on a keyboard.
 
-The cost is carrying a locale and a currency through the program. The benefit is that no reader sees `1,234` and reads a thousand when you meant one and a quarter.
+The cost is carrying a locale and a currency through the program. The payoff is that no reader ever sees `1,234` and reads a thousand when you meant one and a quarter.
 
 </div>
 
@@ -320,7 +320,7 @@ The cost is carrying a locale and a currency through the program. The benefit is
 
 ## 3. Dates and times in a locale
 
-In [Dates & Times](/synapse/programming-languages/java/core-libraries/dates-and-times) you wrote patterns such as `dd/MM/yyyy`. A pattern fixes the order of the fields, and the order is itself local: the United States writes the month first. A **localized formatter** takes the order from the locale too. You pick only a **`FormatStyle`**: `FULL`, `LONG`, `MEDIUM` or `SHORT` <abbr title="Java SE 21 API, java.time.format.DateTimeFormatter.ofLocalizedDate">[4]</abbr>.
+In [Dates & Times](/synapse/programming-languages/java/core-libraries/dates-and-times), you wrote patterns such as `dd/MM/yyyy`. A pattern fixes the order of the fields — but the order is itself local: the United States writes the month first. A **localized formatter** takes the order from the locale as well, so all you pick is a **`FormatStyle`**: `FULL`, `LONG`, `MEDIUM` or `SHORT` <abbr title="Java SE 21 API, java.time.format.DateTimeFormatter.ofLocalizedDate">[4]</abbr>.
 
 ```java run
 import java.time.LocalDate;
@@ -350,12 +350,12 @@ MEDIUM: Mar 5, 2024 | 05.03.2024 | 5 mars 2024
 SHORT: 3/5/24 | 05.03.24 | 05/03/2024
 ```
 
-**Analysis.** The same date in `SHORT` style is `3/5/24` in the United States and `05/03/2024` in France. Read with the wrong convention, that is 3 May. The day and month names are translated too: `Dienstag, 5. März` in German, `mardi 5 mars` in French.
+**Analysis.** The same date in `SHORT` style is `3/5/24` in the United States, and `05/03/2024` in France. Read with the wrong convention, that's 3 May. The day and month names get translated too: `Dienstag, 5. März` in German, `mardi 5 mars` in French.
 
 **Intuition.**
-*Mechanism.* A localized style is a pattern that the locale's data chooses. The `FULL` and `LONG` date-time styles "typically require a time-zone" <abbr title="Java SE 21 API, java.time.format.DateTimeFormatter.ofLocalizedDateTime">[4]</abbr>. A `LocalDateTime` has no zone to print.
+*Mechanism.* A localized style is a pattern that the locale's data chooses for you. The `FULL` and `LONG` date-time styles "typically require a time-zone" <abbr title="Java SE 21 API, java.time.format.DateTimeFormatter.ofLocalizedDateTime">[4]</abbr>, and a `LocalDateTime` has no zone to print.
 
-*Concrete bite.* `MEDIUM` works with a `LocalDateTime`, and `FULL` stops the program (`LONG` fails the same way):
+*Concrete bite.* `MEDIUM` works fine with a `LocalDateTime`, but `FULL` stops the program (and `LONG` fails the same way):
 
 ```java run
 import java.time.LocalDateTime;
@@ -381,9 +381,9 @@ Mar 5, 2024, 3:30:00 PM
 Exception in thread "main" java.time.DateTimeException: Unable to extract ZoneId from temporal 2024-03-05T15:30
 ```
 
-Use a `ZonedDateTime` for `FULL` or `LONG` date-times, or stay with `MEDIUM` and `SHORT`.
+Use a `ZonedDateTime` for `FULL` or `LONG` date-times, or stick with `MEDIUM` and `SHORT`.
 
-*Non-example: typing the output back in.* Since JDK 20, US English times put a **narrow no-break space** (U+202F) before `AM` and `PM`. That came with the move to CLDR version 42 <abbr title="JDK-8284840: Update CLDR to Version 42.0 (JDK 20)">[10]</abbr>. A formatter parses its own output, and rejects the same time typed with an ordinary space:
+*Non-example: typing the output back in.* Since JDK 20, US English times put a **narrow no-break space** (U+202F) before `AM` and `PM`, a change that came with the move to CLDR version 42 <abbr title="JDK-8284840: Update CLDR to Version 42.0 (JDK 20)">[10]</abbr>. A formatter can parse its own output, but it rejects the same time typed with an ordinary space:
 
 ```java run
 import java.time.LocalTime;
@@ -413,13 +413,13 @@ the character before PM is U+202F
 Exception in thread "main" java.time.format.DateTimeParseException: Text '3:30 PM' could not be parsed at index 4
 ```
 
-Index 4 is the space. On JDK 17 the same program prints an ordinary space (U+0020) and parses `"3:30 PM"`. On JDK 21 it fails with no change to the code, because the locale data changed underneath it.
+Index 4 is the space. On JDK 17, the same program prints an ordinary space (U+0020) and parses `"3:30 PM"` without trouble. On JDK 21, it fails with no change to the code at all, because the locale data changed underneath it.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Show dates to people with `ofLocalizedDate`/`ofLocalizedDateTime` and their locale. Never parse localized output: it is for reading, and its exact characters change between JDK versions. Exchange dates between programs in ISO-8601.
+💡 **Earned rule.** Show dates to people with `ofLocalizedDate`/`ofLocalizedDateTime` and their locale. Never parse localized output: it's meant for reading, and its exact characters change between JDK versions. Exchange dates between programs in ISO-8601.
 
-The cost is two formats per date, one for people and one for programs. The benefit is that a JDK upgrade cannot break the data your program reads.
+The cost is two formats per date, one for people and one for programs. The payoff is that a JDK upgrade can't break the data your program reads.
 
 </div>
 
@@ -427,7 +427,7 @@ The cost is two formats per date, one for people and one for programs. The benef
 
 ## 4. Resource bundles: translated text
 
-Numbers and dates have rules. Words do not: someone has to translate "Hello". A **`ResourceBundle`** holds one language's text as key–value pairs. The program asks for a key, and the bundle for the reader's locale answers <abbr title="Java SE 21 API, java.util.ResourceBundle">[5]</abbr>.
+Numbers and dates follow rules. Words don't: someone has to translate "Hello". A **`ResourceBundle`** holds one language's text as key–value pairs. The program asks for a key, and the bundle for the reader's locale supplies the answer <abbr title="Java SE 21 API, java.util.ResourceBundle">[5]</abbr>.
 
 Bundles form a family that shares a **base name**, with the locale in each member's name:
 
@@ -435,7 +435,7 @@ Bundles form a family that shares a **base name**, with the locale in each membe
 - `Messages_fr` — French;
 - `Messages_fr_CA` — Canadian French, holding only what differs from `Messages_fr`.
 
-A bundle is usually a `.properties` file, shown below. Each Run button compiles one file, so the runnable examples use a **`ListResourceBundle`** instead. It is a bundle written as a class, which returns its pairs from the abstract method `getContents()` <abbr title="Java SE 21 API, java.util.ListResourceBundle">[6]</abbr>. Here the bundles are nested classes of `Main`, so their names start with `Main$`:
+A bundle is usually a `.properties` file, as shown below. But each Run button compiles a single file, so the runnable examples use a **`ListResourceBundle`** instead. That's a bundle written as a class, which returns its pairs from the abstract method `getContents()` <abbr title="Java SE 21 API, java.util.ListResourceBundle">[6]</abbr>. Here, the bundles are nested classes of `Main`, so their names start with `Main$`:
 
 ```java run
 import java.util.List;
@@ -482,14 +482,14 @@ de-DE: Hello, Goodbye   (bundle )
 
 **Analysis.** Each lookup walks from the most specific bundle to the most general:
 
-- `fr-CA` found `Messages_fr_CA`, which has `greeting`. It has no `farewell`, so the lookup went on to its **parent**, `Messages_fr`, and found `Au revoir`.
+- `fr-CA` found `Messages_fr_CA`, which has `greeting`. It has no `farewell`, so the lookup moved on to its **parent**, `Messages_fr`, and found `Au revoir` there.
 - `fr-FR` found no `Messages_fr_FR`, so it started at `Messages_fr`.
 - `de-DE` found no German bundle at all, and fell back to the base bundle.
 
 **Intuition.**
-*Mechanism.* `getBundle` builds a list of candidate names from the requested locale: `Messages_de_DE`, then `Messages_de`. If none exists, it does not go to the base bundle yet. It builds a second list from the **default locale** and searches again. Only then does it take the base bundle <abbr title="Java SE 21 API, ResourceBundle.getBundle, the lookup algorithm">[5]</abbr>.
+*Mechanism.* `getBundle` builds a list of candidate names from the requested locale: `Messages_de_DE`, then `Messages_de`. If none of them exists, it doesn't go to the base bundle just yet. Instead, it builds a second list from the **default locale**, and searches again. Only after that does it take the base bundle <abbr title="Java SE 21 API, ResourceBundle.getBundle, the lookup algorithm">[5]</abbr>.
 
-*Concrete bite: the server's locale leaks into the reply.* A German user asks a server whose default locale is French:
+*Concrete bite: the server's locale leaks into the reply.* Here, a German user asks a server whose default locale is French:
 
 ```java run
 import java.util.ListResourceBundle;
@@ -529,9 +529,9 @@ asked for de_DE, got: Bonjour
 without the fallback: Hello
 ```
 
-The German user got French, because the *server* was French. The same code on a server in New York answers in English. `getNoFallbackControl` turns the default-locale step off, so a missing language always gets the base bundle.
+The German user got French, because the *server* was French. The same code on a server in New York would answer in English. `getNoFallbackControl` switches off the default-locale step, so a missing language always gets the base bundle.
 
-A key that no bundle in the chain holds throws the unchecked `MissingResourceException` <abbr title="Java SE 21 API, ResourceBundle.getString">[5]</abbr>:
+Ask for a key that no bundle in the chain holds, and you get the unchecked `MissingResourceException` <abbr title="Java SE 21 API, ResourceBundle.getString">[5]</abbr>:
 
 ```java run
 import java.util.ListResourceBundle;
@@ -559,9 +559,9 @@ Hello
 Exception in thread "main" java.util.MissingResourceException: Can't find resource for bundle Main$Messages, key greting
 ```
 
-A misspelled key compiles, and fails only when that line runs. The base bundle is where every key must exist.
+A misspelled key compiles fine, and fails only when that line runs. The base bundle is where every key must exist.
 
-**Bundles as `.properties` files.** In a real project each bundle is a text file of `key=value` lines, found on the classpath by the same names. Since Java 9 <abbr title="JEP 226: UTF-8 Property Resource Bundles (JDK 9)">[13]</abbr>, these files are read as UTF-8, with a fallback to ISO-8859-1 <abbr title="Java SE 21 API, java.util.PropertyResourceBundle">[7]</abbr>. So `ç` can be typed as it is. A terminal session with two files:
+**Bundles as `.properties` files.** In a real project, each bundle is a text file of `key=value` lines, found on the classpath by the same names. Since Java 9 <abbr title="JEP 226: UTF-8 Property Resource Bundles (JDK 9)">[13]</abbr>, these files are read as UTF-8, with a fallback to ISO-8859-1 <abbr title="Java SE 21 API, java.util.PropertyResourceBundle">[7]</abbr>, so you can type `ç` as-is. Here's a terminal session with two files:
 
 ```
 $ cat Messages.properties
@@ -590,9 +590,9 @@ Goodbye
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Put every key in the base bundle, and only the differences in each language's bundle. Always pass the reader's locale to `getBundle`. On a server, where the default locale belongs to the machine, use a no-fallback `Control`.
+💡 **Earned rule.** Put every key in the base bundle, and only the differences in each language's bundle. Always pass the reader's locale to `getBundle`. And on a server, where the default locale belongs to the machine, use a no-fallback `Control`.
 
-The cost is a longer `getBundle` call. The benefit is that what a user reads depends on the user, not on where the program was deployed.
+The cost is a longer `getBundle` call. The payoff is that what a user reads depends on the user, not on where the program happens to be deployed.
 
 </div>
 
@@ -600,10 +600,10 @@ The cost is a longer `getBundle` call. The benefit is that what a user reads dep
 
 ## 5. Sentences with values: `MessageFormat`
 
-A translated sentence often has values inside it, and word order differs between languages. "Ada has 12 new messages" in French puts the number first. Gluing strings with `+` fixes the English order into the code. **`MessageFormat`** (in `java.text`) puts the order into the translated text instead <abbr title="Java SE 21 API, java.text.MessageFormat">[8]</abbr>:
+A translated sentence often has values inside it, and word order differs between languages: in French, "Ada has 12 new messages" puts the number first. Gluing strings together with `+` bakes the English word order into the code. **`MessageFormat`** (in `java.text`) puts the order into the translated text instead <abbr title="Java SE 21 API, java.text.MessageFormat">[8]</abbr>:
 
-- `{0}`, `{1}`, … are **placeholders**: argument 0, argument 1, in any order in the pattern;
-- `{1,number,percent}` formats an argument with a type and a style: `number`, `date`, `time` or `choice`.
+- `{0}`, `{1}`, … are **placeholders** — argument 0, argument 1 — in any order in the pattern;
+- `{1,number,percent}` formats an argument with a type and a style; the types are `number`, `date`, `time` and `choice`.
 
 ```java run
 import java.text.MessageFormat;
@@ -635,10 +635,10 @@ Ada hat 1.234 neue Nachrichten
 50% done, $9.99 paid, year 2024
 ```
 
-**Analysis.** The arguments are the same in every language, and each pattern puts them where its grammar wants them. A number with no type is formatted by the pattern's locale, so `1234` became `1,234` in English and `1.234` in German. The style `#` means "digits only", with no grouping.
+**Analysis.** The arguments are the same in every language, and each pattern places them wherever its grammar wants them. A number with no type is formatted by the pattern's locale, so `1234` became `1,234` in English and `1.234` in German. The style `#` means "digits only", with no grouping.
 
 **Intuition.**
-*Mechanism.* In a pattern, the single quote `'` starts and ends a **quoted** section, whose text is copied as is. To print one apostrophe, write two: `''` <abbr title="Java SE 21 API, java.text.MessageFormat, Patterns and Their Interpretation">[8]</abbr>.
+*Mechanism.* In a pattern, the single quote `'` starts and ends a **quoted** section, whose text is copied as-is. To print a single apostrophe, you write two: `''` <abbr title="Java SE 21 API, java.text.MessageFormat, Patterns and Their Interpretation">[8]</abbr>.
 
 *Concrete bite: the apostrophe trap.* English is full of apostrophes, and each one opens a quote:
 
@@ -667,10 +667,10 @@ It's Ada's turn
 Copyright 2,024
 ```
 
-- In `It's {0}'s turn`, the first `'` quoted the text up to the second `'`. So `{0}` was copied as text, and both apostrophes vanished.
-- A year passed as a number is grouped like any number: `Copyright 2,024`. Use `{0,number,#}`, or pass the year as a String.
+- In `It's {0}'s turn`, the first `'` quoted all the text up to the second `'`. So `{0}` was copied as plain text, and both apostrophes vanished.
+- A year passed as a number gets grouped like any other number: `Copyright 2,024`. Use `{0,number,#}`, or pass the year as a String.
 
-**Plurals.** "1 files" is wrong, and the `choice` type picks the text by the number. Each option is `limit#text`, where `#` means "from this value" and `<` means "above this value" <abbr title="Java SE 21 API, java.text.MessageFormat, choice">[8]</abbr>:
+**Plurals.** "1 files" is wrong, and the `choice` type solves this by picking the text based on the number. Each option is `limit#text`, where `#` means "from this value" and `<` means "above this value" <abbr title="Java SE 21 API, java.text.MessageFormat, choice">[8]</abbr>:
 
 ```java run
 import java.text.MessageFormat;
@@ -695,13 +695,13 @@ public class Main {
 1500 -> 1,500 files
 ```
 
-English has two plural forms. Other languages have more, and each translation carries its own `choice` pattern.
+English has two plural forms. Other languages have more, so each translation carries its own `choice` pattern.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Keep a whole sentence, with numbered placeholders, as one bundle value. Never build it from pieces with `+`. Write every apostrophe as `''`, give years the `#` style, and build the `MessageFormat` with the reader's locale.
+💡 **Earned rule.** Keep a whole sentence, with numbered placeholders, as a single bundle value — never build it from pieces with `+`. Write every apostrophe as `''`, give years the `#` style, and build the `MessageFormat` with the reader's locale.
 
-The cost is escaping apostrophes by hand. The benefit is that a translator can reorder the sentence without touching the code.
+The cost is escaping apostrophes by hand. The payoff is that a translator can reorder the sentence without touching the code.
 
 </div>
 
@@ -709,7 +709,7 @@ The cost is escaping apostrophes by hand. The benefit is that a translator can r
 
 ## 6. The default locale in ordinary code
 
-Many everyday methods are locale-sensitive and take no locale: `String.format`, `toUpperCase`, `toLowerCase`, and `MessageFormat.format`. Each one uses the **default** locale <abbr title="Java SE 21 API, String.format and Locale.Category.FORMAT">[11]</abbr>. That is right for text a person reads on this machine. It is wrong for text a program reads, because the output changes with the machine.
+Many everyday methods are locale-sensitive, yet take no locale: `String.format`, `toUpperCase`, `toLowerCase`, and `MessageFormat.format`. Each of them uses the **default** locale <abbr title="Java SE 21 API, String.format and Locale.Category.FORMAT">[11]</abbr>. That's right for text a person reads on this machine. But it's wrong for text a program reads, because the output changes from machine to machine.
 
 ```java run
 import java.util.Locale;
@@ -739,14 +739,14 @@ false
 
 **Analysis.**
 
-- On a German machine, `%.2f` wrote a decimal comma. The comma-separated line `1234,50,EUR` now has three fields, and the program that reads it gets `1234`, `50` and `EUR`. `Locale.ROOT` wrote `1234.50` on every machine.
-- Turkish has a dotted and a dotless `i`. `toUpperCase` in Turkish turns `i` into `İ`, and `toLowerCase` turns `I` into `ı` <abbr title="Java SE 21 API, String.toLowerCase(): the Turkish &quot;TITLE&quot; example">[12]</abbr>. So a key compared after `toLowerCase()` stops matching on a Turkish machine.
+- On a German machine, `%.2f` wrote a decimal comma. The comma-separated line `1234,50,EUR` now has three fields, so the program that reads it gets `1234`, `50` and `EUR`. `Locale.ROOT`, on the other hand, wrote `1234.50` on every machine.
+- Turkish has both a dotted and a dotless `i`. In Turkish, `toUpperCase` turns `i` into `İ`, and `toLowerCase` turns `I` into `ı` <abbr title="Java SE 21 API, String.toLowerCase(): the Turkish &quot;TITLE&quot; example">[12]</abbr>. So a key compared after `toLowerCase()` stops matching on a Turkish machine.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Decide who reads each piece of output. For a person, pass their locale. For a program — a file format, a log line, a key, a protocol — pass `Locale.ROOT` to `String.format`, `toUpperCase` and `toLowerCase`. Leave the default locale to code whose output nobody else reads.
 
-The cost is an extra argument on everyday calls. The benefit is a program that behaves the same in Ankara, Berlin and New York.
+The cost is an extra argument on everyday calls. The payoff is a program that behaves the same in Ankara, Berlin and New York.
 
 </div>
 
@@ -816,9 +816,9 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>Why does <code>NumberFormat.getInstance(Locale.FRANCE).parse("1,234")</code> return <code>1.234</code>, and how do you get one thousand two hundred and thirty-four?</summary>
 
-In French the comma is the **decimal** separator, so `1,234` reads as one point two three four <abbr title="Java SE 21 API, java.text.NumberFormat">[2]</abbr>. The US grouping comma means nothing to a French parser.
+In French, the comma is the **decimal** separator, so `1,234` reads as one point two three four <abbr title="Java SE 21 API, java.text.NumberFormat">[2]</abbr>. The US grouping comma means nothing to a French parser.
 
-The text itself is ambiguous; only its locale says what it means. Parse it with the locale it was written in: `NumberFormat.getInstance(Locale.US).parse("1,234")` returns `1234`.
+The text itself is ambiguous; only its locale says what it means. So parse it with the locale it was written in: `NumberFormat.getInstance(Locale.US).parse("1,234")` returns `1234`.
 
 </details>
 
@@ -844,9 +844,9 @@ The text itself is ambiguous; only its locale says what it means. Parse it with 
 
 <div style="border-left:4px solid #6d28d9;background:rgba(109,40,217,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-🧪 **Predict, then check.** Take the §4 program with three bundles. Change `Locale.setDefault(Locale.US)` to `Locale.setDefault(Locale.CANADA_FRENCH)`. Before you run it, predict the `de-DE` line: which greeting, which farewell, and which bundle?
+🧪 **Predict, then check.** Take the §4 program with three bundles, and change `Locale.setDefault(Locale.US)` to `Locale.setDefault(Locale.CANADA_FRENCH)`. Before you run it, predict the `de-DE` line: which greeting, which farewell, and which bundle?
 
-If you predicted `Allo, Au revoir (bundle fr_CA)`, you have the lesson's hardest idea. **A missing language falls back to the machine's language before the base bundle, so the reply depends on where the program runs.**
+If you predicted `Allo, Au revoir (bundle fr_CA)`, you've got the lesson's hardest idea. **A missing language falls back to the machine's language before the base bundle, so the reply depends on where the program runs.**
 
 </div>
 

@@ -6,30 +6,30 @@ prereqs: []
 
 # Inheritance & Polymorphism — One Reference, Many Behaviors
 
-[Classes](/synapse/programming-languages/java/classes-and-objects/classes-and-objects) let you model one type of thing. **Inheritance** lets one class build on another:
+[Classes](/synapse/programming-languages/java/classes-and-objects/classes-and-objects) let you model one type of thing. **Inheritance** lets one class build on top of another:
 
 - A **subclass** `extends` a **superclass**. It inherits the superclass's fields and methods, and adds its own.
-- It can **override** an inherited method: redeclare it, so its own version replaces the parent's.
-- The real prize is **polymorphism**. Call an overridden method through a *superclass* reference, and Java runs the version of the object's *actual* runtime type.
+- It can **override** an inherited method — that is, redeclare it, so its own version replaces the parent's.
+- The real prize is **polymorphism**. When you call an overridden method through a *superclass* reference, Java runs the version that belongs to the object's *actual* runtime type.
 
-A loop over an `Animal[]` holding a `Dog` and a `Cat` makes each speak in its own voice. That mechanism is **dynamic dispatch**. It lets code written against a general type drive specialized behavior it has never seen.
+Picture a loop over an `Animal[]` that holds a `Dog` and a `Cat`: each one speaks in its own voice. The mechanism behind this is called **dynamic dispatch**. It lets code written against a general type drive specialized behavior it has never even seen.
 
-This lesson also draws the lines dispatch stops at: fields and `static` methods, casts back to the specific type, `final`, and the methods *every* object inherits from `Object`.
+This lesson also shows you where dispatch stops: at fields and `static` methods, at casts back to the specific type, at `final`, and at the methods that *every* object inherits from `Object`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **The core idea.**
 
 - A subclass `extends` a superclass, **inheriting** and **overriding** its members.
-- The prize is **polymorphism**: an overridden call through a superclass reference runs the object's runtime type's version.
-- That mechanism is **dynamic dispatch** — general code drives specialized behavior.
-- Its limits: fields don't dispatch, `final` shuts it off, every object inherits `Object`.
+- The prize is **polymorphism**: an overridden call through a superclass reference runs the version for the object's runtime type.
+- The mechanism is **dynamic dispatch** — general code drives specialized behavior.
+- It has limits: fields don't dispatch, `final` shuts it off, and every object inherits from `Object`.
 
 </div>
 
-This is the deep pass of [classes & objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects). Every output below was produced by compiling and running the code on Java 21.
+This lesson takes a deeper pass at [classes & objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects). Every output below was produced by compiling and running the code on Java 21.
 
-**You'll be able to:** trace the order in which a subclass's constructors run, and fix a missing `super(...)` call; predict which version runs when an overridden method, a hidden field or a `static` method is reached through a superclass reference; predict whether a reference cast compiles, succeeds or throws `ClassCastException`, and guard it with `instanceof`; name the compiler error for a misspelled override, a narrowed access level and an override of a `final` method; pick inheritance or composition with the "is-a" test.
+**You'll be able to:** trace the order in which a subclass's constructors run, and fix a missing `super(...)` call; predict which version runs when you reach an overridden method, a hidden field or a `static` method through a superclass reference; predict whether a reference cast compiles, succeeds or throws `ClassCastException`, and guard it with `instanceof`; name the compiler error for a misspelled override, a narrowed access level, and an override of a `final` method; choose between inheritance and composition using the "is-a" test.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -59,7 +59,7 @@ This is the deep pass of [classes & objects](/synapse/programming-languages/java
 
 ## 1. `extends`: inheriting and adding
 
-A subclass declares `extends Superclass` and automatically has the superclass's fields and methods. Its constructor calls the superclass constructor with `super(...)`, then it can add members of its own.
+A subclass declares `extends Superclass`, and it automatically gets the superclass's fields and methods. Its constructor calls the superclass constructor with `super(...)`. On top of that, the subclass can add members of its own.
 
 ```java run
 class Animal {
@@ -102,17 +102,17 @@ classDiagram
 
 **Analysis.**
 
-- `Dog` inherited `name` and `describe()` from `Animal`: `d.describe()` worked without `Dog` defining it.
+- `Dog` inherited `name` and `describe()` from `Animal`, so `d.describe()` worked even though `Dog` never defines it.
 - `Dog` added its own `fetch()`.
 - `Dog`'s constructor called `super(name)` to run `Animal`'s constructor, which sets `name`.
 - The arrow in the diagram (`<|--`) reads "Dog *is an* Animal."
 
-In Java 21, `super(...)` must be the constructor's first statement <abbr title="The Java Language Specification, Java SE 21, §8.8.7">[3]</abbr>. The superclass part of the object is set up before the subclass part. (JDK 25 relaxes this: statements that do not refer to the object under construction may come before `super(...)` <abbr title="JEP 513: Flexible Constructor Bodies (JDK 25)">[15]</abbr>.)
+In Java 21, `super(...)` must be the first statement in the constructor <abbr title="The Java Language Specification, Java SE 21, §8.8.7">[3]</abbr>. That way, the superclass part of the object is set up before the subclass part. (JDK 25 relaxes this rule: statements that don't refer to the object under construction may come before `super(...)` <abbr title="JEP 513: Flexible Constructor Bodies (JDK 25)">[15]</abbr>.)
 
 **Intuition.**
-*Mechanism.* `new Dog("Rex")` makes **one** object. It has room for the fields declared in `Animal` as well as those declared in `Dog` <abbr title="The Java Language Specification, Java SE 21, §12.5">[17]</abbr>. Construction runs top-down: the `Animal` constructor initializes the inherited fields first, then the `Dog` constructor finishes.
+*Mechanism.* `new Dog("Rex")` creates **one** object, with room for both the fields declared in `Animal` and those declared in `Dog` <abbr title="The Java Language Specification, Java SE 21, §12.5">[17]</abbr>. Construction runs top-down: the `Animal` constructor initializes the inherited fields first, and then the `Dog` constructor finishes the job.
 
-What if you write no `super(...)` at all? Then javac inserts `super();`, a call to the superclass's no-argument constructor, as the first statement <abbr title="The Java Language Specification, Java SE 21, §8.8.7">[3]</abbr>. The order is visible when each constructor prints:
+What if you don't write `super(...)` at all? Then javac inserts `super();` — a call to the superclass's no-argument constructor — as the first statement <abbr title="The Java Language Specification, Java SE 21, §8.8.7">[3]</abbr>. You can see the order when each constructor prints something:
 
 ```java run
 class Animal {
@@ -136,9 +136,9 @@ public class Main {
 2. Dog's constructor
 ```
 
-`Dog()` never mentions `Animal`, yet `Animal`'s constructor ran first: the inserted `super();` called it.
+`Dog()` never mentions `Animal`, yet `Animal`'s constructor ran first, because the inserted `super();` called it.
 
-*Concrete bite.* The inserted call needs a no-argument constructor in the superclass. `Animal` below has only `Animal(String name)`, so the implicit `super();` has nothing to call:
+*Concrete bite.* That inserted call only works if the superclass has a no-argument constructor. `Animal` below has only `Animal(String name)`, so the implicit `super();` has nothing to call:
 
 ```java run
 class Animal {
@@ -167,9 +167,9 @@ Main.java:7: error: constructor Animal in class Animal cannot be applied to give
   reason: actual and formal argument lists differ in length
 ```
 
-The caret points at `Dog`'s body, where the invisible `super();` sits. The fix is the first fence's `super(name);`. Constructors are not inherited either: `Dog` gets no `Dog(String)` unless it declares one <abbr title="The Java Language Specification, Java SE 21, §8.2">[2]</abbr>.
+The caret points at `Dog`'s body, which is where the invisible `super();` sits. The fix is the `super(name);` from the first example. Note that constructors aren't inherited either: `Dog` gets no `Dog(String)` unless it declares one itself <abbr title="The Java Language Specification, Java SE 21, §8.2">[2]</abbr>.
 
-*Non-example: a `private` field is not inherited.* Members declared `private` are not inherited by subclasses <abbr title="The Java Language Specification, Java SE 21, §8.2">[2]</abbr>. The field still exists inside a `Dog` object, but `Dog`'s code cannot name it:
+*Non-example: a `private` field is not inherited.* Members declared `private` are not inherited by subclasses <abbr title="The Java Language Specification, Java SE 21, §8.2">[2]</abbr>. The field still exists inside a `Dog` object, but `Dog`'s code can't refer to it by name:
 
 ```java run
 class Animal {
@@ -195,9 +195,9 @@ Main.java:6: error: secret has private access in Animal
 1 error
 ```
 
-Give the superclass a method that returns the value, or mark the field `protected` for subclasses ([access levels](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers)).
+To fix it, give the superclass a method that returns the value, or mark the field `protected` so subclasses can see it ([access levels](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers)).
 
-*Non-example: inheriting only to reuse code.* The "is-a" relationship is the test for whether to inherit. A `Dog` genuinely *is an* `Animal`. The JDK's own `java.util.Stack` fails the test: it `extends Vector`, a growable list <abbr title="java.util.Stack, Java SE 21 API">[14]</abbr>. So every list method comes with it, including insert-at-any-position, which breaks "last in, first out":
+*Non-example: inheriting only to reuse code.* The test for whether to inherit is the "is-a" relationship. A `Dog` genuinely *is an* `Animal`. But the JDK's own `java.util.Stack` fails this test: it `extends Vector`, which is a growable list <abbr title="java.util.Stack, Java SE 21 API">[14]</abbr>. As a result, every list method comes along for the ride — including insert-at-any-position, which breaks "last in, first out":
 
 ```java run
 import java.util.Stack;
@@ -222,15 +222,15 @@ second
 sneaked in
 ```
 
-`add(0, …)` put an element *under* the stack, and `get(0)` read the bottom. A stack should allow neither. Its own API page recommends the `Deque` interface in preference <abbr title="java.util.Stack, Java SE 21 API">[14]</abbr>. A stack *has* a list; it is not one. Holding the list in a `private` field is **composition**: only the operations you choose to write are exposed.
+`add(0, …)` slipped an element *under* the stack, and `get(0)` read the bottom. A real stack should allow neither. In fact, `Stack`'s own API page recommends using the `Deque` interface instead <abbr title="java.util.Stack, Java SE 21 API">[14]</abbr>. A stack *has* a list; it isn't one. Holding the list in a `private` field is called **composition**, and it exposes only the operations you choose to write.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Use `extends` only for a true "is-a" specialization, and call `super(...)` to initialize the inherited state.
 
-- The cost of inheritance is tight coupling: the subclass depends on the superclass's internals and inherits its whole API.
-- The benefit is genuine specialization, and the polymorphism that follows.
-- So prefer it for "is-a", and favor composition ("has-a") otherwise.
+- The cost of inheritance is tight coupling: the subclass depends on the superclass's internals and inherits its entire API.
+- The payoff is genuine specialization, plus the polymorphism that comes with it.
+- So use inheritance for "is-a", and favor composition ("has-a") everywhere else.
 
 </div>
 
@@ -238,7 +238,7 @@ sneaked in
 
 ## 2. Overriding and `super`
 
-A subclass **overrides** an inherited method by redeclaring it with the same signature — its version replaces the superclass's for objects of that subclass. `super.method()` still reaches the superclass's version when you need both.
+A subclass **overrides** an inherited method by redeclaring it with the same signature. For objects of that subclass, its version replaces the superclass's. When you need both, `super.method()` still reaches the superclass's version.
 
 ```java run
 class Animal {
@@ -269,14 +269,14 @@ Woof
 **Analysis.**
 
 - `Dog.speak()` overrode `Animal.speak()`, so `d.speak()` is `"Woof"`.
-- Inside `both()`, `super.speak()` called `Animal`'s version (`"..."`), and a plain `speak()` called `Dog`'s (`"Woof"`). Together they give `"... / Woof"`.
+- Inside `both()`, `super.speak()` called `Animal`'s version (`"..."`), while a plain `speak()` called `Dog`'s (`"Woof"`). Together, they give `"... / Woof"`.
 
-`super` is the escape hatch to the parent's behavior. It is often used to *extend* that behavior: "do what the parent does, plus this."
+`super` is your escape hatch back to the parent's behavior. You'll often use it to *extend* that behavior: "do what the parent does, plus this."
 
 **Intuition.**
-*Mechanism.* An override must have the same **signature** as the inherited method: the same name and the same parameter types <abbr title="The Java Language Specification, Java SE 21, §8.4.2">[4]</abbr>. The `@Override` annotation asks the compiler to verify that. If the method overrides nothing, it is an error <abbr title="The Java Language Specification, Java SE 21, §9.6.4.4">[5]</abbr>, which catches typos and signature mismatches.
+*Mechanism.* An override must have the same **signature** as the inherited method: the same name and the same parameter types <abbr title="The Java Language Specification, Java SE 21, §8.4.2">[4]</abbr>. The `@Override` annotation asks the compiler to verify that for you. If the method doesn't actually override anything, that's an error <abbr title="The Java Language Specification, Java SE 21, §9.6.4.4">[5]</abbr> — which catches typos and signature mismatches.
 
-*Concrete bite.* Misspell the method (or get the parameters wrong) and you've written a *new* method, not an override — `@Override` turns that silent mistake into a compile error:
+*Concrete bite.* Misspell the method name (or get the parameters wrong), and you've written a *new* method, not an override. `@Override` turns that silent mistake into a compile error:
 
 ```java run
 class Animal { String speak() { return "..."; } }
@@ -298,9 +298,9 @@ Main.java:4: error: method does not override or implement a method from a supert
     ^
 ```
 
-`speakk` (typo) overrides nothing, so `@Override` flags it. Without the annotation this would compile as a brand-new, never-called method, and `speak()` would silently keep the parent's behavior.
+`speakk` (note the typo) overrides nothing, so `@Override` flags it. Without the annotation, this would compile as a brand-new method that nobody ever calls, and `speak()` would quietly keep the parent's behavior.
 
-*Non-example: an override that narrows access.* An override must give at least as much access as the method it replaces <abbr title="The Java Language Specification, Java SE 21, §8.4.8.3">[6]</abbr>. `Object.toString()` is `public`. Leave `public` off, and the name and parameters match, but the override is rejected:
+*Non-example: an override that narrows access.* An override must give at least as much access as the method it replaces <abbr title="The Java Language Specification, Java SE 21, §8.4.8.3">[6]</abbr>. `Object.toString()` is `public`. If you leave `public` off, the name and parameters still match, but the override is rejected:
 
 ```java run
 class Animal {
@@ -324,11 +324,11 @@ Main.java:3: error: toString() in Animal cannot override toString() in Object
 1 error
 ```
 
-Declare it `public String toString()`, as §5 does. The return type has one freedom: an override may return a *subtype* of the original's return type <abbr title="The Java Language Specification, Java SE 21, §8.4.8.3">[6]</abbr>.
+The fix is to declare it `public String toString()`, as §5 does. The return type, by the way, has one degree of freedom: an override may return a *subtype* of the original's return type <abbr title="The Java Language Specification, Java SE 21, §8.4.8.3">[6]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Always annotate overrides with `@Override`, and use `super.method()` when you need to build on the parent's behavior. The cost is one annotation. The benefit: a misspelled or mis-signed "override" would otherwise silently do nothing, and now it is a compile error you fix immediately.
+💡 **Earned rule.** Always annotate overrides with `@Override`, and use `super.method()` when you need to build on the parent's behavior. The cost is a single annotation. The payoff: a misspelled or mis-signed "override" that would otherwise silently do nothing becomes a compile error you can fix right away.
 
 </div>
 
@@ -336,9 +336,9 @@ Declare it `public String toString()`, as §5 does. The return type has one free
 
 ## 3. Dynamic dispatch: polymorphism
 
-Here is the payoff. A variable's *declared* type can be a superclass while the object it points to is a subclass.
+Now for the payoff. A variable's *declared* type can be a superclass, while the object it points to is a subclass.
 
-- Assigning a `Dog` to an `Animal` variable is an **upcast**. It needs no cast syntax, because every `Dog` is an `Animal`.
+- Assigning a `Dog` to an `Animal` variable is called an **upcast**. It needs no cast syntax, because every `Dog` is an `Animal`.
 - When you call an overridden method, Java runs the version for the object's **actual runtime type** — not the declared type. This is **dynamic dispatch**.
 
 ```java run viz=array:animals
@@ -373,15 +373,15 @@ Felix: Meow
 Thing: ...
 ```
 
-**Analysis.** Every element is declared `Animal`, yet each `a.speak()` ran the *object's* version: `Dog`'s `Woof`, `Cat`'s `Meow`, `Animal`'s `...`. The loop is written against `Animal` and knows nothing about `Dog` or `Cat`, but it drives their specialized behavior. This is polymorphism: one interface (`speak()` on `Animal`), many implementations, selected at run time by the actual type.
+**Analysis.** Every element is declared as an `Animal`, yet each `a.speak()` ran the *object's* own version: `Dog`'s `Woof`, `Cat`'s `Meow`, `Animal`'s `...`. The loop is written against `Animal` and knows nothing about `Dog` or `Cat`, yet it drives their specialized behavior. That's polymorphism: one interface (`speak()` on `Animal`), many implementations, with the actual type choosing between them at run time.
 
 **Intuition.**
-*Mechanism.* Two types are in play at every call, and each decides one thing:
+*Mechanism.* Two types are in play at every call, and each one decides one thing:
 
 - The **declared** type decides, at compile time, which methods you may call at all.
 - For an instance method, the **object's class** decides, at run time, which override runs <abbr title="The Java Language Specification, Java SE 21, §15.12.4.4">[7]</abbr>.
 
-That is why the loop's `Animal` reference can invoke `Dog.speak()`. The first rule has a bite of its own. `Dog`'s extra method is out of reach through an `Animal` variable, even when the object is a `Dog`:
+That's why the loop's `Animal` reference can invoke `Dog.speak()`. But the first rule has a bite of its own: `Dog`'s extra method is out of reach through an `Animal` variable, even when the object really is a `Dog`:
 
 ```java run
 class Animal {
@@ -412,9 +412,9 @@ Main.java:14: error: cannot find symbol
 1 error
 ```
 
-The compiler looked for `fetch()` in `Animal`, the declared type, and found none. §4 shows how to reach it.
+The compiler looked for `fetch()` in `Animal`, the declared type, and didn't find it. §4 shows you how to reach it.
 
-*Concrete bite.* The dynamic rule applies to **methods**, not **fields** — a field access is resolved by the *declared* type at compile time:
+*Concrete bite.* The dynamic rule applies to **methods**, not **fields**. A field access is resolved by the *declared* type, at compile time:
 
 ```java run
 class Animal { String kind = "animal"; String speak() { return "generic"; } }
@@ -435,11 +435,11 @@ Woof
 animal
 ```
 
-`a.speak()` dispatched dynamically to `Dog` (`"Woof"`), but `a.kind` read `Animal`'s field (`"animal"`). Only the declared type is used to pick the field, never the object's class <abbr title="The Java Language Specification, Java SE 21, §15.11.1">[8]</abbr>.
+`a.speak()` dispatched dynamically to `Dog` (`"Woof"`), but `a.kind` read `Animal`'s field (`"animal"`). Java uses only the declared type to pick the field, never the object's class <abbr title="The Java Language Specification, Java SE 21, §15.11.1">[8]</abbr>.
 
-`Dog`'s `kind` **hides** `Animal`'s: both fields exist in the object. Hiding a field like this is a code smell precisely because of this confusion. Override *methods*; don't hide fields.
+`Dog`'s `kind` **hides** `Animal`'s, and both fields exist side by side in the object. Hiding a field like this is a code smell precisely because it causes this kind of confusion. Override *methods*; don't hide fields.
 
-*Non-example: a `static` method does not dispatch.* A `static` method belongs to the class, not to an object. A subclass's `static` method with the same signature **hides** the parent's instead of overriding it <abbr title="The Java Language Specification, Java SE 21, §8.4.8.2">[9]</abbr>. Like a field, it is picked by the declared type:
+*Non-example: a `static` method does not dispatch.* A `static` method belongs to the class, not to an object. So a subclass's `static` method with the same signature **hides** the parent's, rather than overriding it <abbr title="The Java Language Specification, Java SE 21, §8.4.8.2">[9]</abbr>. Just like a field, it's picked by the declared type:
 
 ```java run
 class Animal {
@@ -467,14 +467,14 @@ Woof
 animal
 ```
 
-`a.kind()` compiled, but it ran `Animal.kind()`. Call a `static` method through its class name (`Dog.kind()`), and the code says what it does.
+`a.kind()` compiled, but it ran `Animal.kind()`. Call a `static` method through its class name instead (`Dog.kind()`), and the code says exactly what it does.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Program against the general (super)type, and let overridden *methods* dispatch to the right behavior. That is how polymorphic code stays open to new subclasses without changing.
+💡 **Earned rule.** Program against the general (super)type, and let overridden *methods* dispatch to the right behavior. That's how polymorphic code stays open to new subclasses without having to change.
 
 - The cost is an asymmetry: fields and `static` methods bind to the declared type, so never rely on "overriding" them.
-- The benefit is code that works for subclasses written long after it, as long as they override the methods it calls.
+- The payoff is code that works with subclasses written long after it was — as long as they override the methods it calls.
 
 </div>
 
@@ -482,11 +482,11 @@ animal
 
 ## 4. Reference casting: `instanceof` and `ClassCastException`
 
-You met casts on numbers in [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic), and `instanceof` with a cast in [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode). On references, a cast changes only the **declared** type. It never changes the object.
+You met casts on numbers in [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic), and `instanceof` paired with a cast in [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode). On references, a cast changes only the **declared** type. It never changes the object itself.
 
-- An **upcast** (`Dog` to `Animal`) is always safe, so it is automatic.
-- A **downcast** (`Animal` to `Dog`) needs the cast syntax, `(Dog) a`. It is a promise that the object is a `Dog`, and the JVM checks that promise at run time <abbr title="The Java Language Specification, Java SE 21, §5.1.6">[10]</abbr>.
-- `a instanceof Dog` asks the same question without the risk. It is `true` when the object could be cast to `Dog`, and `false` for `null` <abbr title="The Java Language Specification, Java SE 21, §15.20.2">[12]</abbr>.
+- An **upcast** (`Dog` to `Animal`) is always safe, so it happens automatically.
+- A **downcast** (`Animal` to `Dog`) needs the cast syntax, `(Dog) a`. It's a promise that the object is a `Dog`, and the JVM checks that promise at run time <abbr title="The Java Language Specification, Java SE 21, §5.1.6">[10]</abbr>.
+- `a instanceof Dog` asks the same question without the risk. It's `true` when the object could be cast to `Dog`, and `false` for `null` <abbr title="The Java Language Specification, Java SE 21, §15.20.2">[12]</abbr>.
 
 ```mermaid
 flowchart LR
@@ -497,7 +497,7 @@ flowchart LR
   Q2 -->|no| E2["ClassCastException"]
 ```
 
-Guard the downcast with `instanceof`, and `fetch()` is back in reach:
+Guard the downcast with `instanceof`, and `fetch()` is back within reach:
 
 ```java run
 class Animal {
@@ -534,12 +534,12 @@ Woof, then fetches the ball
 Meow, and no fetch
 ```
 
-**Analysis.** The `Dog` passed the `instanceof` test, so the cast was safe, and `d.fetch()` compiled because `d` is declared `Dog`. The `Cat` failed the test, so the code never tried the cast. `a.speak()` dispatched as always; the cast was needed only for `fetch()`.
+**Analysis.** The `Dog` passed the `instanceof` test, so the cast was safe, and `d.fetch()` compiled because `d` is declared as a `Dog`. The `Cat` failed the test, so the code never attempted the cast. Meanwhile, `a.speak()` dispatched as usual; the cast was needed only for `fetch()`.
 
 **Intuition.**
-*Mechanism.* A downcast is checked twice. The compiler rejects a cast between types that no object could belong to both of. The JVM then checks the object's class at the moment of the cast. If the object is not a `Dog` (or a subclass of `Dog`), the cast throws a `ClassCastException` <abbr title="The Java Language Specification, Java SE 21, §15.16">[11]</abbr>.
+*Mechanism.* A downcast gets checked twice. First, the compiler rejects any cast between two types that no object could belong to at once. Then the JVM checks the object's class at the moment of the cast. If the object isn't a `Dog` (or a subclass of `Dog`), the cast throws a `ClassCastException` <abbr title="The Java Language Specification, Java SE 21, §15.16">[11]</abbr>.
 
-*Concrete bite.* This cast compiles, because an `Animal` *could* be a `Dog`. This one is a `Cat`:
+*Concrete bite.* This cast compiles, because an `Animal` *could* be a `Dog`. But this particular one is a `Cat`:
 
 ```java run
 class Animal { }
@@ -562,9 +562,9 @@ about to cast
 Exception in thread "main" java.lang.ClassCastException: class Cat cannot be cast to class Dog (Cat and Dog are in unnamed module of loader 'app')
 ```
 
-The message names both classes: the object's (`Cat`) and the cast's target (`Dog`). The failure happens at run time, on line 9, far from the line that put a `Cat` in `a`.
+The message names both classes: the object's actual class (`Cat`) and the cast's target (`Dog`). The failure happens at run time, on line 9 — far from the line that put a `Cat` into `a`.
 
-*Non-example: a cast between unrelated types.* A `Dog` can never be a `String`. Both are classes, and neither extends the other, so the compiler refuses the cast outright:
+*Non-example: a cast between unrelated types.* A `Dog` can never be a `String`. Both are classes, and neither one extends the other, so the compiler refuses the cast outright:
 
 ```java run
 class Animal { }
@@ -586,13 +586,13 @@ Main.java:7: error: incompatible types: Dog cannot be converted to String
 1 error
 ```
 
-A cast cannot turn an object into a different class of object. To get text from a `Dog`, call a method that builds it, such as `toString()`.
+A cast can't turn an object into a different class of object. If you want text from a `Dog`, call a method that builds it, such as `toString()`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Before a downcast, test with `instanceof`, or know the object's class for certain. Better still, avoid the downcast: move the behavior into an overridden method, and let dispatch pick it.
+💡 **Earned rule.** Before a downcast, test with `instanceof` — or know the object's class for certain. Better still, avoid the downcast entirely: move the behavior into an overridden method, and let dispatch pick it.
 
-- The cost of a downcast is a run-time check that can fail far from the bug that caused it.
+- The cost of a downcast is a run-time check that can fail far away from the bug that caused it.
 - `instanceof` turns that failure into an ordinary `if`.
 - [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching) fuses the test and the cast into one step: `a instanceof Dog d`.
 
@@ -602,7 +602,7 @@ A cast cannot turn an object into a different class of object. To get text from 
 
 ## 5. `final` and the `Object` methods
 
-`final` on a method forbids overriding it — a subclass cannot change that behavior. And every class other than `Object` has a superclass: `Object` itself, when you write no `extends` <abbr title="The Java Language Specification, Java SE 21, §8.1.4">[1]</abbr>. So every object already has methods like `toString`, `equals`, and `hashCode`, which you override to give them meaning.
+Putting `final` on a method forbids overriding it, so no subclass can change that behavior. Meanwhile, every class other than `Object` has a superclass — and if you don't write `extends`, that superclass is `Object` itself <abbr title="The Java Language Specification, Java SE 21, §8.1.4">[1]</abbr>. So every object already comes with methods like `toString`, `equals`, and `hashCode`, which you override to give them meaning.
 
 ```java run
 class Animal {
@@ -631,15 +631,15 @@ unknown
 **Analysis.**
 
 - `System.out.println(a)` called the overridden `toString()`, giving `Animal(Rex)`.
-- `Object`'s default would print the class name, `@`, and the hash code in hexadecimal <abbr title="java.lang.Object, Java SE 21 API">[13]</abbr>: something like `Animal@1b6d3586`.
-- `species()` is `final`: usable, but locked against overriding.
+- `Object`'s default would have printed the class name, an `@`, and the hash code in hexadecimal <abbr title="java.lang.Object, Java SE 21 API">[13]</abbr> — something like `Animal@1b6d3586`.
+- `species()` is `final`: you can use it, but it's locked against overriding.
 
-Overriding `toString`/`equals`/`hashCode` is how your types get readable printing and correct [value equality](/synapse/programming-languages/java/core-libraries/equals-and-hashcode). They're inherited from `Object` whether you ask or not.
+Overriding `toString`/`equals`/`hashCode` is how your types get readable printing and correct [value equality](/synapse/programming-languages/java/core-libraries/equals-and-hashcode). You inherit these methods from `Object` whether you ask for them or not.
 
 **Intuition.**
-*Mechanism.* `Object` is the root of every class hierarchy, so its methods are always available to override. A `final` method cannot be overridden or hidden: the compiler rejects any attempt <abbr title="The Java Language Specification, Java SE 21, §8.4.3.3">[16]</abbr>. So the behavior is fixed for the whole hierarchy.
+*Mechanism.* `Object` is the root of every class hierarchy, so its methods are always there to override. A `final` method, on the other hand, can't be overridden or hidden: the compiler rejects any attempt <abbr title="The Java Language Specification, Java SE 21, §8.4.3.3">[16]</abbr>. Its behavior is fixed for the whole hierarchy.
 
-*Concrete bite.* Try to override a `final` method and it won't compile:
+*Concrete bite.* Try to override a `final` method, and it won't compile:
 
 ```java run
 class Animal { final String species() { return "unknown"; } }
@@ -657,9 +657,9 @@ class Dog extends Animal { @Override String species() { return "dog"; } }
                                             ^
 ```
 
-`Animal.species()` is `final`, so `Dog` cannot override it — the seal holds. javac's next line gives the reason: `overridden method is final`.
+`Animal.species()` is `final`, so `Dog` can't override it — the lock holds. javac's next line spells out the reason: `overridden method is final`.
 
-*Non-example: extending a `final` class.* `final` on a *class* forbids subclasses altogether <abbr title="The Java Language Specification, Java SE 21, §8.1.4">[1]</abbr>. `String` is a `final` class:
+*Non-example: extending a `final` class.* Putting `final` on a *class* forbids subclasses altogether <abbr title="The Java Language Specification, Java SE 21, §8.1.4">[1]</abbr>. `String` is one such `final` class:
 
 ```java run
 class Shout extends String { }
@@ -677,14 +677,14 @@ class Shout extends String { }
 1 error
 ```
 
-To add behavior to text, write a class that *has* a `String` field (composition), or a `static` helper method.
+To add behavior to text, write a class that *has* a `String` field (composition), or write a `static` helper method.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Override `Object`'s `toString`, and `equals`/`hashCode` for value types, to give your objects meaning. Mark a method `final` when subclasses must not change its behavior: a security or invariant guarantee.
+💡 **Earned rule.** Override `Object`'s `toString` — plus `equals`/`hashCode` for value types — to give your objects meaning. Mark a method `final` when subclasses must not change its behavior, such as for a security or invariant guarantee.
 
 - The cost of `final` is lost flexibility: no subclass can specialize that method.
-- The benefit is a behavior you can rely on across the whole hierarchy.
+- The payoff is behavior you can rely on across the whole hierarchy.
 
 </div>
 
@@ -791,9 +791,9 @@ Tweet
 Woof / animal
 ```
 
-- Each `speak()` ran the object's own override: dynamic dispatch.
-- `a.speak()` is `Woof`, but `a.kind` is `animal`: the field is picked by the declared type, `Animal`.
-- Overriding a `final` method does not compile: `species() in Dog cannot override species() in Animal`, then `overridden method is final`. Methods are chosen by the object's class at run time; fields by the declared type at compile time.
+- Each `speak()` ran the object's own override: that's dynamic dispatch.
+- `a.speak()` is `Woof`, but `a.kind` is `animal`, because the field is picked by the declared type, `Animal`.
+- Overriding a `final` method doesn't compile: you get `species() in Dog cannot override species() in Animal`, followed by `overridden method is final`. Methods are chosen by the object's class at run time; fields are chosen by the declared type at compile time.
 
 </details>
 
@@ -825,7 +825,7 @@ Woof / animal
 
 🧪 **Predict, then check.**
 
-1. Add a `Bird extends Animal` overriding `speak()` to return `"Tweet"`. Put a `Dog`, `Cat`, and `Bird` in an `Animal[]`, and predict the three lines printed by calling `speak()` on each.
+1. Add a `Bird extends Animal` that overrides `speak()` to return `"Tweet"`. Put a `Dog`, a `Cat`, and a `Bird` in an `Animal[]`, then predict the three lines printed when you call `speak()` on each.
 2. Predict what `a.speak()` and `a.kind` print for `Animal a = new Dog();`, given the §3 hidden field.
 3. Predict the compiler's reaction to a subclass overriding a `final` method, and explain why fields and methods resolve differently.
 

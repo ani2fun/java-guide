@@ -6,9 +6,9 @@ prereqs: []
 
 # Booleans & Logic — Yes/No as a Real Type
 
-Decisions in a program come down to yes-or-no questions, and Java gives those questions their own type: `boolean`, with exactly two values, `true` and `false`.
+Every decision in a program comes down to a yes-or-no question, and Java gives those questions their own type: `boolean`, with exactly two values, `true` and `false`.
 
-- **Nothing else counts as a yes or no.** `1` is not "true", `0` is not "false", and the compiler rejects code that confuses them. This trips up newcomers from C or Python, where numbers do double as conditions.
+- **Nothing else counts as a yes or no.** `1` isn't "true", `0` isn't "false", and the compiler rejects code that mixes them up. This trips up newcomers from C or Python, where numbers double as conditions.
 - You build conditions from **comparisons** (`<`, `==`, …) and combine them with the **logical operators** `&&`, `||` and `!`.
 - `&&` and `||` **short-circuit**: they stop the moment the answer is known.
 
@@ -54,9 +54,9 @@ This builds on the [primitive types](/synapse/programming-languages/java/first-s
 
 ## 1. The `boolean` type: no truthiness
 
-A `boolean` holds exactly one of two values, written `true` and `false` <abbr title="The Java Language Specification, Java SE 21, §4.2.5">[1]</abbr>. Write them in lowercase and without quotes.
+A `boolean` holds exactly one of two values, written `true` and `false` <abbr title="The Java Language Specification, Java SE 21, §4.2.5">[1]</abbr>. You write them in lowercase, without quotes.
 
-They are **boolean literals**: values written directly into the code, like `42` or `'A'`. They are not text, and not keywords <abbr title="The Java Language Specification, Java SE 21, §3.9">[2]</abbr>. That is the whole type.
+They're **boolean literals**: values written straight into the code, like `42` or `'A'`. They aren't text, and they aren't keywords either <abbr title="The Java Language Specification, Java SE 21, §3.9">[2]</abbr>. And that's the whole type.
 
 ```java run
 public class Main {
@@ -75,12 +75,12 @@ true
 false
 ```
 
-**Analysis.** Two `boolean` variables, two values, printed as `true` and `false`. There is no third option and no numeric stand-in: a `boolean` is *only* ever `true` or `false`.
+**Analysis.** Two `boolean` variables, two values, printed as `true` and `false`. There's no third option and no numeric stand-in. A `boolean` is *only* ever `true` or `false`.
 
 **Intuition.**
-*Mechanism.* `boolean` is a distinct type, unrelated to the integers. C and Python treat zero as false and any other number as true. Java has no conversion from a number to a `boolean` at all.
+*Mechanism.* `boolean` is a separate type with no link to the integers. C and Python treat zero as false and any other number as true. Java has no conversion from a number to a `boolean` at all.
 
-*Concrete bite.* So assigning a number to a `boolean` does not mean "0 is false, 1 is true". It does not compile:
+*Concrete bite.* So assigning a number to a `boolean` doesn't mean "0 is false, 1 is true". It doesn't compile:
 
 ```java run
 public class Main {
@@ -99,9 +99,9 @@ Main.java:3: error: incompatible types: int cannot be converted to boolean
 1 error
 ```
 
-`1` is an `int`, `b` is a `boolean`, and Java has no rule turning one into the other. The same strictness will reject `if (count)` when you meet `if` in the [next chapter](/synapse/programming-languages/java/control-flow/conditionals): a condition must be a `boolean`, never a number.
+`1` is an `int`, `b` is a `boolean`, and Java has no rule that turns one into the other. The same strictness will reject `if (count)` when you meet `if` in the [next chapter](/synapse/programming-languages/java/control-flow/conditionals). A condition must be a `boolean`, never a number.
 
-Comparing a `boolean` with a number fails the same way, with its own message:
+Comparing a `boolean` with a number fails the same way, with a message of its own:
 
 ```java run
 public class Main {
@@ -124,7 +124,7 @@ Main.java:4: error: incomparable types: boolean and int
 
 💡 **Earned rule.** Conditions in Java are genuine `boolean`s. To ask "is this non-zero?", write the comparison: `count != 0` <abbr title="The Java Language Specification, Java SE 21, §4.2.5">[1]</abbr>.
 
-The cost is a few more characters than the bare `count`. The benefit: a whole family of C bugs, where a stray integer is read as a truth value, cannot occur. The compiler forbids the confusion.
+It costs you a few more characters than the bare `count`. The payoff: a whole family of C bugs, where a stray integer gets read as a truth value, simply can't happen. The compiler forbids the mix-up.
 
 </div>
 
@@ -132,7 +132,7 @@ The cost is a few more characters than the bare `count`. The benefit: a whole fa
 
 ## 2. Comparisons produce booleans
 
-You rarely write `true`/`false` literals; you *compute* booleans by comparing values. There are six comparison operators, and each takes two values and produces a `boolean`:
+You'll rarely write `true`/`false` literals. Instead, you *compute* booleans by comparing values. Java has six comparison operators, and each one takes two values and produces a `boolean`:
 
 - `<`, `>`, `<=` and `>=` compare sizes;
 - `==` asks "equal?", and `!=` asks "not equal?".
@@ -158,11 +158,11 @@ false
 true
 ```
 
-**Analysis.** `3 < 5` is `true`, `3 == 3` is `true`, `3 != 3` is `false`. The last pair is the useful shape: `age >= 18` compares and stores the resulting `boolean` in `adult`, which a later decision can use.
+**Analysis.** `3 < 5` is `true`, `3 == 3` is `true`, `3 != 3` is `false`. The last pair shows the useful shape: `age >= 18` compares, then stores the resulting `boolean` in `adult`, ready for a later decision.
 
-On primitives like these, `==` compares values. On *objects* it compares identity, as [Strings, the Basics](/synapse/programming-languages/java/first-steps/strings-the-basics) showed.
+On primitives like these, `==` compares values. On *objects*, it compares identity, as [Strings, the Basics](/synapse/programming-languages/java/first-steps/strings-the-basics) showed.
 
-A comparison between two different numeric types promotes them first, the way [arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) does <abbr title="The Java Language Specification, Java SE 21, §15.20.1 and §15.21.1">[3]</abbr>. A `char` compares as its number:
+When you compare two different numeric types, Java promotes them first, just the way [arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) does <abbr title="The Java Language Specification, Java SE 21, §15.20.1 and §15.21.1">[3]</abbr>. A `char` compares as its number:
 
 ```java run
 public class Main {
@@ -184,12 +184,12 @@ true
 `5` became `5.0` before the test, so the two are equal. `'a'` is the number `97`, and `'b'` is `98`.
 
 **Intuition.**
-*Mechanism.* A comparison is an expression whose result type is `boolean`. `==` (two equals signs) is the *question* "are these equal?"; `=` (one equals sign) is the *action* "assign".
+*Mechanism.* A comparison is an expression whose result type is `boolean`. `==` (two equals signs) is the *question* "are these equal?", while `=` (one equals sign) is the *action* "assign".
 
 - A comparison produces a `boolean`.
 - An assignment produces the value it assigned <abbr title="The Java Language Specification, Java SE 21, §15.26">[4]</abbr>.
 
-*Concrete bite.* C accepts `if (x = 5)` (at most with a warning) and treats the `5` as true, a classic silent bug. Java catches the slip at compile time, because this assignment's result is an `int`, not a `boolean`:
+*Concrete bite.* C accepts `if (x = 5)`, at most with a warning, and treats the `5` as true. It's a classic silent bug. Java catches the slip at compile time, because this assignment's result is an `int`, not a `boolean`:
 
 ```java run
 public class Main {
@@ -209,9 +209,9 @@ Main.java:4: error: incompatible types: int cannot be converted to boolean
 1 error
 ```
 
-`(x = 5)` assigns `5` to `x` and evaluates to the `int` `5`; storing that in a `boolean` fails to compile. The very typo that compiles and misbehaves in C is a compile error here.
+`(x = 5)` assigns `5` to `x` and evaluates to the `int` `5`, and storing that in a `boolean` fails to compile. The very typo that compiles and misbehaves in C is a compile error here.
 
-*Non-example: the slip the compiler cannot see.* The protection comes from the types. When the variable is itself a `boolean`, the assignment produces a `boolean`, and the typo compiles:
+*Non-example: the slip the compiler can't see.* The protection comes from the types. When the variable is itself a `boolean`, the assignment produces a `boolean`, so the typo compiles:
 
 ```java run
 public class Main {
@@ -230,13 +230,13 @@ true
 true
 ```
 
-The line meant to ask "is `done` true?". It *set* `done` to `true` instead, and the answer came out `true` for that reason.
+The line meant to ask "is `done` true?". Instead it *set* `done` to `true`, and that's the only reason the answer came out `true`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Use `==` to compare and `=` to assign. With numbers, the compiler stops the slip wherever a `boolean` is required.
 
-With a `boolean` variable it cannot, so never compare one with `true` or `false`. Use the variable itself: `done`, or `!done` for "not done". Then there is no `==` to mistype.
+With a `boolean` variable it can't, so never compare one with `true` or `false`. Use the variable itself: `done`, or `!done` for "not done". Then there's no `==` to mistype.
 
 </div>
 
@@ -268,9 +268,9 @@ true
 false
 ```
 
-**Analysis.** `a && b` is `false` because `b` is false (and needs both). `a || b` is `true` because `a` is true (or needs only one). `!a` flips `true` to `false`.
+**Analysis.** `a && b` is `false` because `b` is false, and "and" needs both. `a || b` is `true` because `a` is true, and "or" needs only one. `!a` flips `true` to `false`.
 
-These three build every compound condition you will write. Here are all four cases:
+These three build every compound condition you'll ever write. Here are all four cases:
 
 | `a` | `b` | `a && b` | `a \|\| b` |
 |---|---|---|---|
@@ -279,7 +279,7 @@ These three build every compound condition you will write. Here are all four cas
 | `false` | `true` | `false` | `true` |
 | `false` | `false` | `false` | `false` |
 
-*Non-example: a chained comparison.* In maths, "x is between 1 and 10" is written 1 < x < 10. Java rejects that:
+*Non-example: a chained comparison.* In maths, you write "x is between 1 and 10" as 1 < x < 10. Java rejects that:
 
 ```java run
 public class Main {
@@ -300,7 +300,7 @@ Main.java:4: error: bad operand types for binary operator '<'
 1 error
 ```
 
-Java reads `1 < x < 10` as `(1 < x) < 10` <abbr title="The Java Language Specification, Java SE 21, §15.20">[5]</abbr>. The first `<` gives a `boolean`, and the second `<` then compares that `boolean` with `10`. The message names the two types it was handed: `boolean` and `int`. A range is two comparisons joined by `&&`:
+Java reads `1 < x < 10` as `(1 < x) < 10` <abbr title="The Java Language Specification, Java SE 21, §15.20">[5]</abbr>. The first `<` gives a `boolean`, and the second `<` then compares that `boolean` with `10`. The message names the two types it got: `boolean` and `int`. A range takes two comparisons joined by `&&`:
 
 ```java run
 public class Main {
@@ -322,7 +322,7 @@ false
 **Intuition.**
 *Mechanism.* Each operator combines `boolean`s into a `boolean`. `!` binds tightest, then `&&`, then `||`. So `!` applies only to the term it touches, not to a whole expression.
 
-*Concrete bite.* That precedence of `!` is where intuition fails. "Not (a and b)" is **not** the same as "not-a and not-b":
+*Concrete bite.* The precedence of `!` is where intuition lets you down. "Not (a and b)" is **not** the same as "not-a and not-b":
 
 ```java run
 public class Main {
@@ -344,7 +344,7 @@ false
 - `!(a && b)` equals `!a || !b`;
 - `!(a || b)` equals `!a && !b`.
 
-A working-age check shows the second law in use. "Not a child and not retired" can be written either way:
+A working-age check shows the second law in action. You can write "not a child and not retired" either way:
 
 ```java run
 public class Main {
@@ -373,7 +373,7 @@ The two forms agree for both ages. The `||` became `&&`, and each comparison fli
 
 💡 **Earned rule.** Build conditions from `&&`, `||` and `!`. Write a range as two comparisons joined by `&&`. When you negate a compound test, De Morgan applies: `!(a && b)` means `!a || !b`.
 
-The cost of forgetting De Morgan is a condition that looks negated but tests the wrong thing. When in doubt, wrap the whole expression in `!( … )` instead of distributing the `!` by hand.
+Forget De Morgan, and you get a condition that looks negated but tests the wrong thing. When in doubt, wrap the whole expression in `!( … )` instead of distributing the `!` by hand.
 
 </div>
 
@@ -381,12 +381,12 @@ The cost of forgetting De Morgan is a condition that looks negated but tests the
 
 ## 4. Short-circuit evaluation
 
-`&&` and `||` are **short-circuiting**: they evaluate the left side first and stop as soon as the answer is decided <abbr title="The Java Language Specification, Java SE 21, §15.23">[6]</abbr> <abbr title="The Java Language Specification, Java SE 21, §15.24">[7]</abbr>.
+`&&` and `||` are **short-circuiting**: they evaluate the left side first and stop as soon as they know the answer <abbr title="The Java Language Specification, Java SE 21, §15.23">[6]</abbr> <abbr title="The Java Language Specification, Java SE 21, §15.24">[7]</abbr>.
 
 - `false && anything` is `false` without ever looking at the right side.
 - `true || anything` is `true` the same way.
 
-This is not only speed. It is a guard.
+This isn't just about speed. It's a guard.
 
 ```java run
 public class Main {
@@ -406,7 +406,7 @@ false
 **Analysis.** `x` is `0`, so `x != 0` is `false`, and `&&` stops there. The right side, `10 / x`, is **never evaluated**, so the divide-by-zero never happens. The whole expression is `false`, and the program runs cleanly. The first test guarded the second.
 
 **Intuition.**
-*Mechanism.* `&&` computes its left operand, and only if that is `true` does it compute the right. `||` is the mirror: it computes the right only if the left is `false`. The single-character cousins `&` and `|` do **not** short-circuit: they always evaluate both sides <abbr title="The Java Language Specification, Java SE 21, §15.23">[6]</abbr>.
+*Mechanism.* `&&` computes its left operand, and only when that's `true` does it compute the right. `||` is the mirror image: it computes the right only when the left is `false`. The single-character cousins `&` and `|` do **not** short-circuit: they always evaluate both sides <abbr title="The Java Language Specification, Java SE 21, §15.23">[6]</abbr>.
 
 *Concrete bite.* Swap `&&` for `&` and the guard is gone. Both sides run, and `10 / 0` throws:
 
@@ -425,9 +425,9 @@ public class Main {
 Exception in thread "main" java.lang.ArithmeticException: / by zero
 ```
 
-`&` evaluated `10 / x` even though `x != 0` was already `false`, and dividing by zero threw `ArithmeticException`. Same logic, one missing character, a crash instead of a clean `false`.
+`&` evaluated `10 / x` even though `x != 0` was already `false`, and dividing by zero threw `ArithmeticException`. Same logic, one missing character, and you get a crash instead of a clean `false`.
 
-A skipped right side skips *everything* in it, updates included. Here `++n` sits on the right of each operator:
+When the right side is skipped, *everything* in it is skipped, updates included. Here `++n` sits on the right of each operator:
 
 ```java run
 public class Main {
@@ -447,9 +447,9 @@ false 0
 false 1
 ```
 
-With `&&`, `n > 5` was `false`, so `++n` never ran and `n` stayed `0`. With `&`, both sides ran, and `n` became `1`. The results agree, but the program's state does not.
+With `&&`, `n > 5` was `false`, so `++n` never ran and `n` stayed `0`. With `&`, both sides ran, and `n` became `1`. The results agree, but the program's state doesn't.
 
-The third non-short-circuit operator is `^`, "exclusive or": `true` when the two sides differ <abbr title="The Java Language Specification, Java SE 21, §15.22.2">[8]</abbr>. On booleans it gives the same answer as `!=`:
+The third non-short-circuit operator is `^`, "exclusive or", which is `true` when the two sides differ <abbr title="The Java Language Specification, Java SE 21, §15.22.2">[8]</abbr>. On booleans it gives the same answer as `!=`:
 
 ```java run
 public class Main {
@@ -472,7 +472,7 @@ true
 
 💡 **Earned rule.** Use `&&` and `||` (not `&`/`|`) for conditions, and put the cheap, protective test first: `x != 0 && 10 / x > 0`. Keep updates such as `++n` out of conditions, so whether they run never depends on the left side.
 
-The cost is that order now matters. Short-circuiting protects the right side only if the guard is on the left. A misordered condition loses the protection and can still crash.
+The catch is that order now matters. Short-circuiting protects the right side only when the guard is on the left. Get the order wrong, and the condition loses its protection and can still crash.
 
 (The same guard protects text: `s != null && s.length() > 0`. `null` arrives properly in [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model).)
 
@@ -482,7 +482,7 @@ The cost is that order now matters. Short-circuiting protects the right side onl
 
 ## 5. Precedence and a floating-point caveat
 
-When `&&` and `||` mix, `&&` binds tighter than `||`: `a || b && c` means `a || (b && c)`. And one comparison deserves an early warning: `==` on floating-point numbers is treacherous, because decimals are stored approximately.
+When `&&` and `||` mix, `&&` binds tighter than `||`, so `a || b && c` means `a || (b && c)`. One comparison also deserves an early warning: `==` on floating-point numbers is treacherous, because Java stores decimals only approximately.
 
 ```java run
 public class Main {
@@ -499,7 +499,7 @@ true
 false
 ```
 
-**Analysis.** `true || false && false` groups as `true || (false && false)` = `true || false` = `true`, because `&&` binds tighter. Forcing the other grouping with parentheses, `(true || false) && false` = `true && false` = `false`. The parentheses changed the answer.
+**Analysis.** `true || false && false` groups as `true || (false && false)` = `true || false` = `true`, because `&&` binds tighter. Force the other grouping with parentheses, and you get `(true || false) && false` = `true && false` = `false`. The parentheses changed the answer.
 
 The full order, tightest first, for the operators you know so far <abbr title="The Java Language Specification, Java SE 21, Chapter 15">[9]</abbr>:
 
@@ -518,7 +518,7 @@ The full order, tightest first, for the operators you know so far <abbr title="T
 **Intuition.**
 *Mechanism.* Precedence is fixed grammar. The comparisons bind tighter than `&&` and `||`, so `a < b && c < d` already means `(a < b) && (c < d)`. `!` sits on the top level, and `+` binds tighter than any comparison.
 
-*Concrete bite.* Two everyday lines fall into those last two rules. Both look fine, and neither compiles:
+*Concrete bite.* Two everyday lines run straight into those last two rules. Both look fine, and neither compiles:
 
 ```java run
 public class Main {
@@ -559,9 +559,9 @@ Main.java:5: error: bad operand types for binary operator '>='
 1 error
 ```
 
-`+` ran first and built the text `"adult: 20"`. Then `>=` tried to compare that `String` with `18`. Line 4, with parentheses, is the fix, and it would print `adult: true`.
+`+` ran first and built the text `"adult: 20"`. Then `>=` tried to compare that `String` with `18`. Line 4, with its parentheses, is the fix, and it would print `adult: true`.
 
-*A floating-point caveat.* [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) showed that `0.1 + 0.2` is not exactly `0.3`. A `==` test turns that tiny error into a wrong answer:
+*A floating-point caveat.* [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) showed that `0.1 + 0.2` isn't exactly `0.3`. A `==` test turns that tiny error into a wrong answer:
 
 ```java run
 public class Main {
@@ -578,7 +578,7 @@ false
 0.30000000000000004
 ```
 
-`0.1 + 0.2` is `0.30000000000000004`, not `0.3`, so `== 0.3` is `false`. Nothing is broken: `double` stores approximations, and `==` compares them exactly. The fix is to ask "are these *close*?":
+`0.1 + 0.2` is `0.30000000000000004`, not `0.3`, so `== 0.3` is `false`. Nothing is broken. `double` stores approximations, and `==` compares them exactly. The fix is to ask "are these *close*?" instead:
 
 ```java run
 public class Main {
@@ -596,9 +596,9 @@ false
 true
 ```
 
-`Math.abs(sum - 0.3)` is the size of the difference. It is far below `1e-9` (0.000000001), so the two count as equal. Pick the tolerance to suit the size of your values. Near `1e9`, neighbouring `double`s are about `1.2e-7` apart, so `1e-9` would be too strict there <abbr title="Java SE 21 API, java.lang.Math.ulp">[13]</abbr>.
+`Math.abs(sum - 0.3)` is the size of the difference. It's far below `1e-9` (0.000000001), so the two count as equal. Pick a tolerance that suits the size of your values. Near `1e9`, neighbouring `double`s sit about `1.2e-7` apart, so `1e-9` would be too strict there <abbr title="Java SE 21 API, java.lang.Math.ulp">[13]</abbr>.
 
-One `double` is not even equal to itself: **NaN**, the "not a number" that `0.0 / 0` produces. The rule is fixed: `==` with NaN is always `false` <abbr title="The Java Language Specification, Java SE 21, §15.21.1">[11]</abbr>.
+One `double` isn't even equal to itself: **NaN**, the "not a number" that `0.0 / 0` produces. The rule is fixed, and `==` with NaN is always `false` <abbr title="The Java Language Specification, Java SE 21, §15.21.1">[11]</abbr>.
 
 ```java run
 public class Main {
@@ -622,7 +622,7 @@ To test for NaN, call `Double.isNaN` <abbr title="Java SE 21 API, java.lang.Doub
 
 💡 **Earned rule.** Parenthesise whenever `&&` and `||` mix, whenever `!` negates a comparison, and whenever a comparison sits inside a `+` chain. Never compare `double`s with `==`. Test that the difference is within a small tolerance (`Math.abs(a - b) < 1e-9`) instead.
 
-The cost of trusting `==` on floating-point is a comparison that is *false* for values you consider equal, with no error to flag it. It is the same "silent wrong answer" hazard as [integer overflow](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic), in a different disguise.
+Trust `==` on floating-point, and you get a comparison that's *false* for values you consider equal, with no error to flag it. It's the same "silent wrong answer" hazard as [integer overflow](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic), in a different disguise.
 
 </div>
 
@@ -686,7 +686,7 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>Why is <code>0.1 + 0.2 == 0.3</code> false? Write a test that answers true for those two values.</summary>
 
-A `double` stores the nearest binary fraction, not the exact decimal. `0.1 + 0.2` lands on `0.30000000000000004`, and `==` compares exactly. Ask whether the difference is tiny instead:
+A `double` stores the nearest binary fraction, not the exact decimal. `0.1 + 0.2` lands on `0.30000000000000004`, and `==` compares exactly. Ask whether the difference is tiny, instead:
 
 `Math.abs((0.1 + 0.2) - 0.3) < 1e-9` is `true`.
 
@@ -730,7 +730,7 @@ With `int n = 0;`, `n != 0 && 100 / n > 0` prints `false`: the left side is `fal
 - `System.out.println(5 > 3 || 2 > 4);`
 - `System.out.println(!(5 > 3));`
 
-Then a harder one: with `int n = 0;`, what does `System.out.println(n != 0 && 100 / n > 0);` print? What would change if you wrote `&` instead of `&&`? Explain the second in terms of short-circuiting before you run it.
+Then a harder one: with `int n = 0;`, what does `System.out.println(n != 0 && 100 / n > 0);` print? What would change if you wrote `&` instead of `&&`? Explain that second answer in terms of short-circuiting before you run it.
 
 </div>
 

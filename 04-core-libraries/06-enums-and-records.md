@@ -6,28 +6,28 @@ prereqs: []
 
 # Enums & Records — Modeling Data Precisely
 
-Three modern features let you model data so precisely that whole categories of bug become impossible to write:
+Three modern features let you model data so precisely that whole categories of bugs become impossible to write:
 
-- An **enum** is a fixed set of named constants: a type whose every value you list up front, so an invalid one can't exist.
-- A **record** (Java 16) is a data carrier. You declare its *components*, and Java generates the constructor, the accessors, and a correct [`equals`/`hashCode`](/synapse/programming-languages/java/core-libraries/equals-and-hashcode)/`toString` <abbr title="JEP 395: Records">[1]</abbr>.
-- A **sealed** type (Java 17) names exactly which classes may implement it, so the set of subtypes is closed and known <abbr title="JEP 409: Sealed Classes">[2]</abbr>.
+- An **enum** is a fixed set of named constants. You list every value of the type up front, so an invalid one simply can't exist.
+- A **record** (Java 16) is a data carrier. You declare its *components*, and Java generates the constructor, the accessors, and a correct [`equals`/`hashCode`](/synapse/programming-languages/java/core-libraries/equals-and-hashcode)/`toString` for you <abbr title="JEP 395: Records">[1]</abbr>.
+- A **sealed** type (Java 17) names exactly which classes may implement it, so its set of subtypes is closed and known <abbr title="JEP 409: Sealed Classes">[2]</abbr>.
 
-Together they replace piles of hand-written boilerplate, and the bugs that hide in it.
+Together, they replace piles of hand-written boilerplate — along with the bugs that like to hide in it.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **The core idea.**
 
 - An **enum** is a fixed set of named constants — an invalid value can't exist.
-- A **record** generates constructor, accessors, `equals`/`hashCode`/`toString` from its components.
+- A **record** generates its constructor, accessors and `equals`/`hashCode`/`toString` from its components.
 - A **sealed** type names exactly which subtypes may exist — a closed, known set.
-- Together they replace hand-written boilerplate and the bugs hiding in it.
+- Together, they replace hand-written boilerplate and the bugs hiding in it.
 
 </div>
 
 Every output below was produced by compiling and running the code on Java 21.
 
-**You'll be able to:** declare an enum, and predict `ordinal()`, `values()`, `valueOf` and an exhaustive `switch` over it; give enum constants fields, a constructor and methods; declare a record, predict its `toString`, accessors and `equals`, and validate it in a compact constructor; explain why a record holding a `List` is not fully immutable, and fix it; predict which classes may implement a sealed interface.
+**You'll be able to:** declare an enum, and predict what `ordinal()`, `values()`, `valueOf` and an exhaustive `switch` over it do; give enum constants fields, a constructor and methods; declare a record, predict its `toString`, accessors and `equals`, and validate it in a compact constructor; explain why a record holding a `List` isn't fully immutable, and fix it; predict which classes may implement a sealed interface.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -56,7 +56,7 @@ Every output below was produced by compiling and running the code on Java 21.
 
 ## 1. Enums: a fixed set of constants
 
-An `enum` declares a type whose only values are the named constants you list. Each constant is the one and only object of its kind. The type is safe (you can't pass a stray string), and a natural fit for a [`switch`](/synapse/programming-languages/java/control-flow/conditionals).
+An `enum` declares a type whose only values are the named constants you list. Each constant is the one and only object of its kind. That makes the type safe (nobody can pass in a stray string), and it makes it a natural fit for a [`switch`](/synapse/programming-languages/java/control-flow/conditionals).
 
 ```java run
 enum Day { MON, TUE, WED, THU, FRI, SAT, SUN }
@@ -86,19 +86,19 @@ weekday
 
 **Analysis.**
 
-- `Day.WED` prints its name.
-- `ordinal()` is its position, counted from zero: `2` <abbr title="Java SE 21 API, java.lang.Enum">[3]</abbr>.
+- `Day.WED` prints its own name.
+- `ordinal()` is its position, counting from zero, so it's `2` <abbr title="Java SE 21 API, java.lang.Enum">[3]</abbr>.
 - The `switch` classified it as a `weekday`.
 - `Day.values()` returns all seven constants.
 
-A `Day` variable can hold *only* one of these seven, or `null`. There is no eighth day, and no way to assign a misspelled one, because the compiler checks every `Day` value against the declared set.
+A `Day` variable can hold *only* one of these seven, or `null`. There's no eighth day, and no way to assign a misspelled one, because the compiler checks every `Day` value against the declared set.
 
 **Intuition.**
-*Mechanism.* Each constant becomes an implicitly declared `public static final` field, holding an instance of the enum type <abbr title="The Java Language Specification, Java SE 21, §8.9.3">[4]</abbr>. The instances are created once, when the enum class is initialized. A variable of the enum type can reference only those instances, so the set of valid values is closed at compile time.
+*Mechanism.* Each constant becomes an implicitly declared `public static final` field that holds an instance of the enum type <abbr title="The Java Language Specification, Java SE 21, §8.9.3">[4]</abbr>. Those instances are created exactly once, when the enum class is initialized. A variable of the enum type can reference only those instances, so the set of valid values is closed at compile time.
 
-Because each constant is the only instance of its kind, `==` is safe for enums; the JLS permits it "in place of the `equals` method" <abbr title="The Java Language Specification, Java SE 21, §8.9.1">[5]</abbr>.
+Since each constant is the only instance of its kind, `==` is safe for enums. In fact, the JLS explicitly permits it "in place of the `equals` method" <abbr title="The Java Language Specification, Java SE 21, §8.9.1">[5]</abbr>.
 
-*Concrete bite.* That closed set lets a `switch` *expression* over an enum be checked for exhaustiveness — cover some constants but not all, with no `default`, and it won't compile:
+*Concrete bite.* Because the set is closed, the compiler can check a `switch` *expression* over an enum for exhaustiveness. Cover some constants but not all, with no `default`, and it won't compile:
 
 ```java run
 enum Day { MON, TUE, WED, THU, FRI, SAT, SUN }
@@ -122,9 +122,9 @@ Main.java:6: error: the switch expression does not cover all possible input valu
                    ^
 ```
 
-The `switch` handles only two of seven days and produces a value, so the compiler demands the rest (or a `default`). With an enum, "I forgot a case" becomes a build error.
+This `switch` handles only two of the seven days, yet it must produce a value, so the compiler demands the rest (or a `default`). With an enum, "I forgot a case" becomes a build error instead of a bug.
 
-Text from outside the program becomes an enum constant through `valueOf`. It matches the name exactly, case included:
+To turn text from outside the program into an enum constant, use `valueOf`. It matches the name exactly, including case:
 
 ```java run
 enum Day { MON, TUE, WED, THU, FRI, SAT, SUN }
@@ -145,11 +145,11 @@ true
 Exception in thread "main" java.lang.IllegalArgumentException: No enum constant Day.wed
 ```
 
-`valueOf("WED")` returned the existing constant, so `==` is `true`. `"wed"` matches no name exactly. Convert typed input first, for example with `toUpperCase()`, and be ready for the exception.
+`valueOf("WED")` returned the existing constant, so `==` is `true`. But `"wed"` doesn't exactly match any name, so it throws. Normalize typed input first — for example, with `toUpperCase()` — and be ready to handle the exception anyway.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use an enum for any value that comes from a fixed, known set — states, directions, days, modes — instead of `int` codes or `String`s. The cost is declaring the type. The benefit is type safety (no invalid value), readable names, and a `switch` that flags a forgotten case at compile time.
+💡 **Earned rule.** Use an enum for any value that comes from a fixed, known set — states, directions, days, modes — instead of `int` codes or `String`s. The cost is declaring the type. The payoff is type safety (no invalid values), readable names, and a `switch` that flags a forgotten case at compile time.
 
 </div>
 
@@ -157,7 +157,7 @@ Exception in thread "main" java.lang.IllegalArgumentException: No enum constant 
 
 ## 2. Rich enums: fields and methods
 
-Enum constants are real objects, so they can carry **data** and **behavior**. Give the enum a constructor and fields, pass each constant its values in parentheses, and add methods that use them.
+Enum constants are real objects, which means they can carry both **data** and **behavior**. Give the enum a constructor and some fields, pass each constant its values in parentheses, and then add methods that use those values.
 
 ```java run
 enum Planet {
@@ -184,14 +184,14 @@ MARS: 37.1
 MOON: 16.2
 ```
 
-**Analysis.** Each constant passed a `gravity` to the enum's constructor (`EARTH(9.81)`). The constructor stored it in a field, and `weightOf` used it. So `Planet` isn't only three names: it is three objects, each bundling a value and a method, iterated with `values()`.
+**Analysis.** Each constant passed a `gravity` value to the enum's constructor (`EARTH(9.81)`). The constructor stored it in a field, and `weightOf` used it. So `Planet` isn't just three names: it's three objects, each bundling a value with a method, and `values()` lets you loop over them.
 
-The field is `final` by choice: nothing should change a planet's gravity. The JLS does not require it, and an enum with a non-`final` field compiles and lets any code change it. Keep enum fields `final`, since every part of the program shares the one instance.
+The field is `final` by choice, because nothing should change a planet's gravity. The JLS doesn't require it, though. An enum with a non-`final` field compiles fine, and then any code can change it. Keep enum fields `final`, since every part of the program shares the one instance.
 
 **Intuition.**
-*Mechanism.* `EARTH(9.81)` calls the enum's constructor when the constant is created, once, as the enum class is initialized <abbr title="The Java Language Specification, Java SE 21, §8.9.3">[4]</abbr>. The fields and methods make each constant a small, self-describing object: an enum is a class whose instances are fixed and named.
+*Mechanism.* `EARTH(9.81)` calls the enum's constructor when the constant is created — once, as the enum class is initialized <abbr title="The Java Language Specification, Java SE 21, §8.9.3">[4]</abbr>. The fields and methods turn each constant into a small, self-describing object. In other words, an enum is a class whose instances are fixed and named.
 
-The constructor is private even with no modifier <abbr title="The Java Language Specification, Java SE 21, §8.9.2">[6]</abbr>, so no other code can make a new constant:
+The constructor is private even when you write no modifier <abbr title="The Java Language Specification, Java SE 21, §8.9.2">[6]</abbr>, so no other code can create a new constant:
 
 ```java run
 enum Planet {
@@ -215,11 +215,11 @@ Main.java:10: error: enum classes may not be instantiated
                    ^
 ```
 
-*Concrete bite.* This replaces the fragile "parallel arrays" or `switch`-on-code style. Without it you would write a `double gravityFor(int planetCode)` with a `switch` to keep in sync. With it, the data lives *on* the constant, so adding a planet adds one line and nothing can fall out of step.
+*Concrete bite.* This pattern replaces the fragile "parallel arrays" or `switch`-on-a-code style. Without it, you'd write something like a `double gravityFor(int planetCode)` with a `switch` that you have to keep in sync by hand. With it, the data lives *on* the constant. Adding a planet means adding one line, and nothing can fall out of step.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Put per-constant data and behavior *in* the enum (fields, a constructor, methods) rather than in external `switch`es keyed on the constant. The cost is a richer enum declaration. The benefit is that each constant is self-contained: add or change one, and there is a single place to edit.
+💡 **Earned rule.** Put per-constant data and behavior *in* the enum (fields, a constructor, methods), rather than in external `switch`es keyed on the constant. The cost is a richer enum declaration. The payoff is that each constant is self-contained: to add or change one, there's a single place to edit.
 
 </div>
 
@@ -227,7 +227,7 @@ Main.java:10: error: enum classes may not be instantiated
 
 ## 3. Records: immutable data carriers
 
-A **record** is a class whose entire job is to hold data. You declare its **components**, and Java generates <abbr title="The Java Language Specification, Java SE 21, §8.10.3">[7]</abbr>:
+A **record** is a class whose whole job is to hold data. You declare its **components**, and Java generates the rest <abbr title="The Java Language Specification, Java SE 21, §8.10.3">[7]</abbr>:
 
 - a `private final` field per component;
 - a **canonical constructor** that takes every component, in order;
@@ -257,17 +257,17 @@ true
 true
 ```
 
-**Analysis.** One line, `record Point(int x, int y) {}`, gave us:
+**Analysis.** That single line, `record Point(int x, int y) {}`, gave us all of this:
 
 - a constructor: `new Point(1, 2)`;
 - accessors: `a.x()` and `a.y()`, with parentheses;
 - a readable `toString`: `Point[x=1, y=2]`;
 - a **correct** `equals`/`hashCode` pair: `a.equals(b)` is `true`, and their hash codes match.
 
-Recall from [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) how much hand-written code that contract took. A record generates it from the components, the same way every time. (The `toString` format is not a contract: the API says it "is subject to change" <abbr title="Java SE 21 API, java.lang.Record">[8]</abbr>, so never parse it.)
+Remember from [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) how much hand-written code that contract took? A record generates it from the components, the same way every time. (One caveat: the `toString` format is not a contract. The API says it "is subject to change" <abbr title="Java SE 21 API, java.lang.Record">[8]</abbr>, so never parse it.)
 
 **Intuition.**
-*Mechanism.* A record class is implicitly `final`, and its superclass is always `java.lang.Record`, so it cannot `extend` another class <abbr title="The Java Language Specification, Java SE 21, §8.10">[9]</abbr>. The compiler derives the members from the component list. You can still add methods, and check the values in a **compact constructor**: a constructor with no parameter list, which runs before the fields are assigned <abbr title="The Java Language Specification, Java SE 21, §8.10.4.2">[10]</abbr>:
+*Mechanism.* A record class is implicitly `final`, and its superclass is always `java.lang.Record`, so it can't `extend` another class <abbr title="The Java Language Specification, Java SE 21, §8.10">[9]</abbr>. The compiler derives the members from the component list. You can still add your own methods, and you can check the values in a **compact constructor** — a constructor with no parameter list that runs before the fields are assigned <abbr title="The Java Language Specification, Java SE 21, §8.10.4.2">[10]</abbr>:
 
 ```java run
 record Range(int low, int high) {
@@ -297,9 +297,9 @@ Range[low=2, high=5] has length 3
 Exception in thread "main" java.lang.IllegalArgumentException: low 5 > high 2
 ```
 
-The compact constructor rejected `(5, 2)`, so no invalid `Range` can exist. `length()` is an ordinary method added to the record.
+The compact constructor rejected `(5, 2)`, so an invalid `Range` can never exist. Meanwhile, `length()` is just an ordinary method added to the record.
 
-*Concrete bite.* The immutability is real — record components are `final`, with no setters, so you can't change one after construction:
+*Concrete bite.* The immutability is real. Record components are `final` and come with no setters, so you can't change one after construction:
 
 ```java run
 record Point(int x, int y) {}
@@ -321,9 +321,9 @@ Main.java:6: error: x has private access in Point
 1 error
 ```
 
-`p.x = 5` is rejected: the component field is `private` and `final`, readable only through the accessor `p.x()`. To "change" a point, you build a new one.
+`p.x = 5` is rejected, because the component field is `private` and `final`. The only way to read it is through the accessor `p.x()`. To "change" a point, you build a new one.
 
-*Non-example: a mutable component.* `final` protects the field, not the object it refers to, as with the `final` array in [Encapsulation & Access Modifiers](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers). A record holding a `List` shares that list:
+*Non-example: a mutable component.* `final` protects the field, not the object the field refers to — just like the `final` array in [Encapsulation & Access Modifiers](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers). So a record that holds a `List` shares that list with whoever else has it:
 
 ```java run
 import java.util.ArrayList;
@@ -347,7 +347,7 @@ public class Main {
 Team[name=core, members=[Ada, Linus, Grace]]
 ```
 
-The "immutable" `Team` changed twice: once through the caller's `people`, once through its own accessor. The fix is a defensive copy in the compact constructor. `List.copyOf` makes an unmodifiable copy:
+The "immutable" `Team` changed twice: once through the caller's `people` list, and once through its own accessor. The fix is a defensive copy in the compact constructor, where `List.copyOf` makes an unmodifiable copy:
 
 ```java run
 import java.util.ArrayList;
@@ -376,13 +376,13 @@ Team[name=core, members=[Ada]]
 Exception in thread "main" java.lang.UnsupportedOperationException
 ```
 
-The caller's later `add` no longer reached the record, and the accessor's list refused changes.
+Now the caller's later `add` no longer reaches the record, and the list from the accessor refuses changes.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use a record for any group of values that should not change: coordinates, a name and email pair, a `Map` key. Validate in a compact constructor, and copy mutable components there.
+💡 **Earned rule.** Use a record for any group of values that shouldn't change: coordinates, a name-and-email pair, a `Map` key. Validate in a compact constructor, and copy any mutable components there too.
 
-The cost is that a record's fields can't change and it can't extend a class. The benefit is a correct, concise value type where a hand-written class would be dozens of lines of boilerplate.
+The cost is that a record's fields can't change, and a record can't extend a class. The payoff is a correct, concise value type, where a hand-written class would take dozens of lines of boilerplate.
 
 </div>
 
@@ -390,7 +390,7 @@ The cost is that a record's fields can't change and it can't extend a class. The
 
 ## 4. Sealed types: a first look
 
-A **sealed** interface or class names exactly which types may implement or extend it, with a `permits` clause. The subtype set is then *closed*: the compiler knows every possible implementation. That is the foundation for the exhaustive pattern matching of [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching).
+A **sealed** interface or class uses a `permits` clause to name exactly which types may implement or extend it. Its set of subtypes is then *closed*: the compiler knows every possible implementation. That's the foundation for the exhaustive pattern matching you'll meet in [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching).
 
 ```java run
 sealed interface Shape permits Circle, Square {}
@@ -419,18 +419,18 @@ classDiagram
   Shape <|.. Square
 ```
 
-**Analysis.** `Shape` permits exactly `Circle` and `Square`, both records here: records and sealed types pair naturally. The diagram shows the closed family: a `Shape` is a `Circle` or a `Square`, and nothing else can claim to be one. A plain interface can't make that promise, because any class anywhere may implement it.
+**Analysis.** `Shape` permits exactly `Circle` and `Square`, which are both records here — records and sealed types pair naturally. The diagram shows the closed family: a `Shape` is either a `Circle` or a `Square`, and nothing else can claim to be one. A plain interface can't make that promise, because any class anywhere may implement it.
 
 **Intuition.**
-*Mechanism.* `sealed … permits A, B` writes the allowed subtypes into the type itself. The compiler lets only those types extend or implement it. Each of them must in turn say whether the family stays closed below it <abbr title="The Java Language Specification, Java SE 21, §8.1.1.2">[11]</abbr>:
+*Mechanism.* `sealed … permits A, B` writes the allowed subtypes into the type itself, and the compiler lets only those types extend or implement it. Each of them, in turn, must say whether the family stays closed below it <abbr title="The Java Language Specification, Java SE 21, §8.1.1.2">[11]</abbr>:
 
 - `final`: no subclasses (a record is implicitly `final`);
 - `sealed`: its own `permits` list;
 - `non-sealed`: open again to any subclass.
 
-A plain class that forgets to choose is rejected: `class Square implements Shape {}` gives `error: sealed, non-sealed or final modifiers expected`.
+A plain class that forgets to choose gets rejected: `class Square implements Shape {}` gives `error: sealed, non-sealed or final modifiers expected`.
 
-*Concrete bite.* A type not in the `permits` clause cannot join the family:
+*Concrete bite.* A type that isn't in the `permits` clause can't join the family:
 
 ```java run
 sealed interface Shape permits Circle {}
@@ -447,13 +447,13 @@ public class Main {
 Main.java:3: error: class is not allowed to extend sealed class: Shape (as it is not listed in its 'permits' clause)
 ```
 
-`Triangle` tried to implement `Shape` but isn't permitted, so it was rejected. The family stays exactly `{Circle}`: the seal holds.
+`Triangle` tried to implement `Shape` without being permitted, so the compiler rejected it. The family stays exactly `{Circle}` — the seal holds.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Seal an interface or class when its subtypes are meant to be *closed and known*: shapes, syntax-tree nodes, result variants. Pair it with records for the cases.
+💡 **Earned rule.** Seal an interface or class when its subtypes are meant to be *closed and known*: shapes, syntax-tree nodes, result variants. Use records for the individual cases.
 
-The cost is listing the permitted types, and updating the list to add one. The benefit is a closed family the compiler can reason about. It enables an exhaustive `switch` over the subtypes with no `default`, in [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching).
+The cost is listing the permitted types, and updating that list whenever you add one. The payoff is a closed family the compiler can reason about. That's what enables an exhaustive `switch` over the subtypes with no `default`, as you'll see in [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching).
 
 </div>
 
@@ -548,8 +548,8 @@ true
 ```
 
 - `isWeekend()` compares with `==`, which is safe for enum constants.
-- Two `Money` values with equal components are `equals`: the record generated the method.
-- `record Rectangle(double w, double h) implements Shape {}` does not compile against `sealed interface Shape permits Circle, Square {}`: `class is not allowed to extend sealed class`. The one change is to add `Rectangle` to the `permits` clause.
+- Two `Money` values with equal components are `equals`, because the record generated that method.
+- `record Rectangle(double w, double h) implements Shape {}` doesn't compile against `sealed interface Shape permits Circle, Square {}`: you get `class is not allowed to extend sealed class`. The one change that fixes it is adding `Rectangle` to the `permits` clause.
 
 </details>
 

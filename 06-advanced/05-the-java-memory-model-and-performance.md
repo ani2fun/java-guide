@@ -6,12 +6,12 @@ prereqs: []
 
 # The Java Memory Model & Performance — Visibility and Speed
 
-Two advanced realities shape correct, fast Java.
+Two advanced realities shape Java code that is both correct and fast.
 
-- **The Java Memory Model** (JMM). Compilers and processors reorder and cache memory operations for speed, so a write by one thread is *not* automatically visible to another. **`volatile`** guarantees visibility, but *not* atomicity. **Happens-before** is the precise set of rules that decide when writes are seen. It is the foundation under [`synchronized`](/synapse/programming-languages/java/advanced/concurrency-the-basics) and [atomics](/synapse/programming-languages/java/advanced/concurrency-high-level-and-virtual-threads).
-- **Performance.** The JVM does not run your bytecode the same way forever. It **interprets** it at first, then **JIT-compiles** hot methods to optimized native code. A **garbage collector** reclaims unused objects in short pauses. You can watch both happen with diagnostic flags.
+- **The Java Memory Model** (JMM). For speed, compilers and processors reorder and cache memory operations, so a write by one thread is *not* automatically visible to another. **`volatile`** guarantees visibility, but *not* atomicity. **Happens-before** is the precise set of rules that decides when writes are seen. It's the foundation underneath both [`synchronized`](/synapse/programming-languages/java/advanced/concurrency-the-basics) and [atomics](/synapse/programming-languages/java/advanced/concurrency-high-level-and-virtual-threads).
+- **Performance.** The JVM doesn't run your bytecode the same way forever. At first it **interprets** it, and then it **JIT-compiles** hot methods into optimized native code. Meanwhile, a **garbage collector** reclaims unused objects in short pauses. You can watch both happen with diagnostic flags.
 
-Understanding visibility keeps concurrent code *correct*; understanding the JIT and GC keeps it *fast*.
+Understanding visibility keeps your concurrent code *correct*; understanding the JIT and the GC keeps it *fast*.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -24,9 +24,9 @@ Understanding visibility keeps concurrent code *correct*; understanding the JIT 
 
 </div>
 
-This is the deep pass of [happens-before](/synapse/programming-languages/java/advanced/concurrency-the-basics). Every output below was produced by running the code. The JIT and GC logs are real captured runs with JVM flags the sandbox cannot pass, **labeled illustrative** because their exact lines and timings vary per run and machine.
+This lesson takes a deeper pass at [happens-before](/synapse/programming-languages/java/advanced/concurrency-the-basics). Every output below was produced by running the code. The JIT and GC logs are real captured runs that use JVM flags the sandbox can't pass. They're **labeled illustrative**, because their exact lines and timings vary from run to run and machine to machine.
 
-**You'll be able to:** predict whether a thread sees a flag change with and without `volatile`, and explain why a `volatile` counter still loses updates; trace the happens-before edge that makes a plain write visible through a `volatile` flag; pick a safe way to publish an object (`final` fields, `volatile`, a lock, the holder idiom), and explain why double-checked locking needs `volatile`; read a `-XX:+PrintCompilation` line and explain why a benchmark must warm up; read a `-Xlog:gc` line, and explain why a reachable object leaks.
+**You'll be able to:** predict whether a thread sees a flag change with and without `volatile`, and explain why a `volatile` counter still loses updates; trace the happens-before edge that makes a plain write visible through a `volatile` flag; choose a safe way to publish an object (`final` fields, `volatile`, a lock, the holder idiom), and explain why double-checked locking needs `volatile`; read a `-XX:+PrintCompilation` line, and explain why a benchmark must warm up; read a `-Xlog:gc` line, and explain why a reachable object leaks.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -56,7 +56,7 @@ This is the deep pass of [happens-before](/synapse/programming-languages/java/ad
 
 ## 1. `volatile`: visibility, not atomicity
 
-A field may be declared `volatile`, "in which case the Java Memory Model ensures that all threads see a consistent value for the variable" <abbr title="The Java Language Specification, Java SE 21, §8.3.1.4">[1]</abbr>. A write to it is *visible* to every later read by other threads. That fixes the "a thread never sees the flag change" bug. Here a worker spins until `main` flips a `volatile` flag, and it stops.
+A field may be declared `volatile`, "in which case the Java Memory Model ensures that all threads see a consistent value for the variable" <abbr title="The Java Language Specification, Java SE 21, §8.3.1.4">[1]</abbr>. A write to it is *visible* to every later read by other threads, which fixes the "a thread never sees the flag change" bug. Here, a worker spins until `main` flips a `volatile` flag — and then it stops.
 
 ```java run
 public class Main {
@@ -82,9 +82,9 @@ worker saw running=false and stopped
 done
 ```
 
-**Analysis.** The worker loops on `running`. After 100 ms `main` sets `running = false`, the worker *sees* it, exits its loop, and the program ends. The `volatile` write happens-before every later read of the field, so the worker's next read returns `false`.
+**Analysis.** The worker loops on `running`. After 100 ms, `main` sets `running = false`; the worker *sees* the change, exits its loop, and the program ends. The `volatile` write happens-before every later read of the field, so the worker's next read returns `false`.
 
-Without `volatile`, the worker may read `true` forever, and the program hangs. That is not hypothetical: delete the one keyword and it *does*. If you press Run, it prints nothing and never finishes, so the sandbox stops it at its time limit.
+Without `volatile`, the worker may read `true` forever, and the program hangs. That's not hypothetical: delete that one keyword, and it *does* hang. If you press Run, it prints nothing and never finishes, so the sandbox stops it at its time limit.
 
 ```java
 // expects-hang: without volatile, the worker may never see running = false
@@ -111,14 +111,14 @@ public class Main {
  running = false; we killed the process. Neither println was ever reached.)
 ```
 
-The JLS describes this exact bug, for a loop on a non-`volatile` field. The compiler "is free to read the field this.done" a single time, "and reuse the cached value in each execution of the loop" <abbr title="The Java Language Specification, Java SE 21, §17.3">[2]</abbr>.
+The JLS describes this exact bug, for a loop on a non-`volatile` field. The compiler "is free to read the field this.done" just once, "and reuse the cached value in each execution of the loop" <abbr title="The Java Language Specification, Java SE 21, §17.3">[2]</abbr>.
 
-The worker's loop becomes `if (running) while (true) count++;`. That is a legal transformation of code that never said another thread would touch the field. The write from `main` happens; the worker never looks again.
+In effect, the worker's loop becomes `if (running) while (true) count++;`. That's a perfectly legal transformation of code that never said another thread would touch the field. The write from `main` does happen — the worker just never looks again.
 
 **Intuition.**
-*Mechanism.* A `volatile` write happens-before every later read of that field <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[3]</abbr>. So a reader after the write is guaranteed to see it, and everything written before it. The JIT may not keep the field in a register, or reorder other memory operations across it, in any way that would break that guarantee.
+*Mechanism.* A `volatile` write happens-before every later read of that field <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[3]</abbr>. So a reader that comes after the write is guaranteed to see it, along with everything written before it. The JIT may not keep the field in a register, or reorder other memory operations across it, in any way that would break that guarantee.
 
-*Concrete bite.* `volatile` gives visibility but **not** atomicity. A `volatile` counter's `++` still races:
+*Concrete bite.* `volatile` gives you visibility, but **not** atomicity. A `volatile` counter's `++` still races:
 
 ```java run
 public class Main {
@@ -140,13 +140,13 @@ public class Main {
 157875
 ```
 
-Even though `counter` is `volatile`, `counter++` is still read-modify-write. `volatile` makes each *access* visible; it does not make the *three* steps atomic. So updates are still lost, as without `volatile`. Visibility is not atomicity: for an atomic counter you need `AtomicInteger` or a lock.
+Even though `counter` is `volatile`, `counter++` is still a read-modify-write. `volatile` makes each *access* visible, but it doesn't make the *three* steps atomic. So updates still get lost, just as they did without `volatile`. Visibility isn't atomicity: for an atomic counter, you need `AtomicInteger` or a lock.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `volatile` for a single flag or reference that one thread writes and others read: a stop signal, a published configuration. Use atomics or locks when you need *atomic* updates.
+💡 **Earned rule.** Use `volatile` for a single flag or reference that one thread writes and others read — a stop signal, say, or a published configuration. Use atomics or locks when you need *atomic* updates.
 
-The cost of confusing the two is the bug above, a `volatile` counter that still races. The benefit, used correctly, is cheap visibility without a lock, for the common publish-a-value pattern.
+The cost of confusing the two is the bug above: a `volatile` counter that still races. Used correctly, the payoff is cheap visibility without a lock, for the common publish-a-value pattern.
 
 </div>
 
@@ -154,7 +154,7 @@ The cost of confusing the two is the bug above, a `volatile` counter that still 
 
 ## 2. happens-before, in depth
 
-**Happens-before** is the JMM's guarantee: if action A happens-before action B, then A's writes are visible to B. Without such an edge, there is *no* guarantee: B may see an older value. A few rules establish these edges <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[3]</abbr>:
+**Happens-before** is the JMM's guarantee: if action A happens-before action B, then A's writes are visible to B. Without such an edge, there's *no* guarantee at all, and B may see an older value. A handful of rules establish these edges <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[3]</abbr>:
 
 ```mermaid
 ---
@@ -181,20 +181,20 @@ flowchart LR
 **Analysis.** The four common sources of happens-before edges:
 
 - **Program order:** "If x and y are actions of the same thread and x comes before y in program order, then hb(x, y)."
-- **Monitor lock:** an unlock happens-before every later lock of the same monitor. That is why [`synchronized`](/synapse/programming-languages/java/advanced/concurrency-the-basics) publishes writes.
+- **Monitor lock:** an unlock happens-before every later lock of the same monitor. That's why [`synchronized`](/synapse/programming-languages/java/advanced/concurrency-the-basics) publishes writes.
 - **`volatile`:** a write happens-before every later read of that field (§1).
 - **Start and join:** `Thread.start()` happens-before the started thread's actions, and a thread's actions happen-before another thread returns from `join()` on it.
 
-Each is a bridge across which writes are guaranteed visible.
+Think of each one as a bridge, across which writes are guaranteed to be visible.
 
 **Intuition.**
-*Mechanism.* Happens-before is *transitive*: "If hb(x, y) and hb(y, z), then hb(x, z)" <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[3]</abbr>. So a writer can set several plain fields and then write one `volatile` flag. A reader that sees the flag also sees those fields:
+*Mechanism.* Happens-before is *transitive*: "If hb(x, y) and hb(y, z), then hb(x, z)" <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[3]</abbr>. So a writer can set several plain fields and then write a single `volatile` flag — and a reader that sees the flag also sees those fields:
 
 1. Program order: `data = 42` happens-before `ready = true` in the writer.
 2. `volatile`: the write `ready = true` happens-before the reader's read that sees `true`.
 3. Program order: that read happens-before the reader's read of `data`.
 
-Chain the three, and `data = 42` happens-before the reader's read of `data`:
+Chain those three together, and `data = 42` happens-before the reader's read of `data`:
 
 ```java run
 public class Main {
@@ -221,15 +221,15 @@ public class Main {
 reader sees data=42 label=answer
 ```
 
-This output is guaranteed, not lucky. The flag's edge carries the earlier writes with it. That is the "safe publication" idiom §3 develops.
+This output is guaranteed, not lucky: the flag's edge carries the earlier writes along with it. That's the "safe publication" idiom that §3 develops.
 
-*Concrete bite.* The relation is the *only* guarantee. Two threads with no edge between them can see each other's writes in any order, or not at all. "It seemed to work" means nothing; correctness needs an actual happens-before edge. That is why every access to shared state needs `synchronized`, `volatile`, or a `java.util.concurrent` tool.
+*Concrete bite.* This relation is the *only* guarantee you get. Two threads with no edge between them can see each other's writes in any order, or not at all. "It seemed to work" means nothing; correctness needs an actual happens-before edge. That's why every access to shared state needs `synchronized`, `volatile`, or a `java.util.concurrent` tool.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Reason about concurrent correctness in happens-before edges, not in timing. For every shared read, name the write it must see, and the edge that guarantees it.
+💡 **Earned rule.** Reason about concurrent correctness in terms of happens-before edges, not timing. For every shared read, name the write it must see, and the edge that guarantees it.
 
-The cost is a more formal mental model. The benefit is the only sound way to know concurrent code is correct. It also explains *why* the synchronization tools work, instead of treating them as magic.
+The cost is a more formal mental model. The payoff is the only sound way to know that concurrent code is correct. It also explains *why* the synchronization tools work, instead of treating them as magic.
 
 </div>
 
@@ -237,7 +237,7 @@ The cost is a more formal mental model. The benefit is the only sound way to kno
 
 ## 3. Safe publication: reordering, `final`, and double-checked locking
 
-§2's rules have a surprising consequence: **a constructor is not a fence.** Consider one thread building an object and handing it to another through a plain field:
+§2's rules have a surprising consequence: **a constructor is not a fence.** Picture one thread building an object and handing it to another thread through a plain field:
 
 ```text
 // Thread A                          // Thread B
@@ -246,23 +246,23 @@ config = new Config("prod", 42);     if (config != null) {
                                      }
 ```
 
-Inside `new Config(...)` there are several writes: the fields, then the reference `config` itself.
+Inside `new Config(...)`, there are several writes: first the fields, then the reference `config` itself.
 
-- Within Thread A, program order makes that sequence look fixed. But program order is an edge *inside one thread only*.
-- Thread B reads `config` through a plain field, so there is **no happens-before edge at all** between A's writes and B's reads.
+- Within Thread A, program order makes that sequence look fixed. But program order is an edge *inside a single thread only*.
+- Thread B reads `config` through a plain field, so there's **no happens-before edge at all** between A's writes and B's reads.
 - So the JMM permits B to see the reference *before* the field writes. B can observe a non-null `config` whose `name` is still `null`: a half-built object.
 
-This one is told, not shown. The reorder is allowed, but it depends on the JIT and the processor catching the window, so no demo captures it reliably. That is precisely what makes it dangerous. The fixes below run.
+This one is described rather than demonstrated. The reordering is allowed, but it depends on the JIT and the processor hitting the window, so no demo captures it reliably — and that's precisely what makes it dangerous. The fixes below, however, do run.
 
-Publishing an object so that its fields travel with the reference is called **safe publication**. There are three tools, plus one the class loader gives you:
+Publishing an object so that its fields travel along with the reference is called **safe publication**. There are three tools for it, plus a fourth that the class loader gives you:
 
-1. **`final` fields.** The JLS guarantees them. A thread that sees the reference only after the object "has been completely initialized is guaranteed to see the correctly initialized values for that object's final fields" <abbr title="The Java Language Specification, Java SE 21, §17.5">[4]</abbr>. The object counts as initialized "when its constructor finishes". So the constructor must not let `this` escape to another thread before it ends.
-2. **A `volatile` reference.** The `volatile` write of the reference happens-before the `volatile` read. By §2's transitivity, it carries every earlier write, the fields included.
-3. **A lock.** Publish and consume under the same monitor; the unlock→lock edge carries the writes.
+1. **`final` fields.** The JLS guarantees them. A thread that sees the reference only after the object "has been completely initialized is guaranteed to see the correctly initialized values for that object's final fields" <abbr title="The Java Language Specification, Java SE 21, §17.5">[4]</abbr>. The object counts as initialized "when its constructor finishes", so the constructor must not let `this` escape to another thread before it ends.
+2. **A `volatile` reference.** The `volatile` write of the reference happens-before the `volatile` read. By §2's transitivity, it carries every earlier write along with it, the fields included.
+3. **A lock.** Publish and consume under the same monitor, and the unlock→lock edge carries the writes.
 
-This is the deepest reason [records](/synapse/programming-languages/java/core-libraries/enums-and-records) are safe to hand between threads. A record's component fields are "private, final, and non-static" <abbr title="The Java Language Specification, Java SE 21, §8.10.3">[5]</abbr>. The guarantee also covers objects reached through those `final` fields, as they were when the constructor finished <abbr title="The Java Language Specification, Java SE 21, §17.5">[4]</abbr>. It does not cover changes made *after* construction: a record holding a mutable `ArrayList` is only shallowly immutable.
+This is the deepest reason [records](/synapse/programming-languages/java/core-libraries/enums-and-records) are safe to hand between threads. A record's component fields are "private, final, and non-static" <abbr title="The Java Language Specification, Java SE 21, §8.10.3">[5]</abbr>. The guarantee also covers objects reached through those `final` fields, as they were when the constructor finished <abbr title="The Java Language Specification, Java SE 21, §17.5">[4]</abbr>. It doesn't cover changes made *after* construction, though: a record holding a mutable `ArrayList` is only shallowly immutable.
 
-The classic place these tools collide is the **lazily initialized singleton**. The infamous *double-checked locking* pattern (check, lock, check again, construct) is broken when written with a plain field: the unlocked first check can observe the half-built object. With `volatile`, the pattern is correct, and here it is running:
+The classic place where these tools collide is the **lazily initialized singleton**. The infamous *double-checked locking* pattern (check, lock, check again, construct) is broken when written with a plain field, because the unlocked first check can observe the half-built object. With `volatile`, the pattern is correct — and here it is, running:
 
 ```java run
 public class Main {
@@ -311,7 +311,7 @@ Thread-3 got loaded
 Thread-1 got loaded
 ```
 
-**Analysis.** Four threads raced into `getInstance()`, and exactly one constructed the `Config`. The lock plus the *second* check guarantee that. The `volatile` write published it, so the other threads' *unlocked* fast-path reads still saw a fully built object. Remove `volatile`, and the fast path becomes the unsafe publication above: rare, timing-dependent, catastrophic.
+**Analysis.** Four threads raced into `getInstance()`, and exactly one of them constructed the `Config` — the lock plus the *second* check guarantee that. The `volatile` write published it, so the other threads' *unlocked* fast-path reads still saw a fully built object. Remove `volatile`, and the fast path becomes the unsafe publication described above: rare, timing-dependent, and catastrophic.
 
 **The holder idiom** gets the same laziness and safety from the class loader, with no `volatile` and no lock. A class is initialized "immediately before" its first use, such as the first read of one of its `static` fields <abbr title="The Java Language Specification, Java SE 21, §12.4.1">[6]</abbr>. The JVM synchronizes that initialization, so exactly one thread runs it <abbr title="The Java Language Specification, Java SE 21, §12.4.2">[7]</abbr>:
 
@@ -350,18 +350,18 @@ Config constructed
 all four got loaded
 ```
 
-`Holder` was not initialized when `Main` started, so nothing was constructed. The first `getInstance()` triggered it, once, however many threads raced there.
+`Holder` wasn't initialized when `Main` started, so nothing was constructed yet. The first `getInstance()` triggered the initialization — exactly once, no matter how many threads raced there.
 
 **Intuition.**
-*Mechanism.* The JIT and processor may make the reference write visible before the field writes, unless something forbids it. `final` fields add a guarantee at constructor exit; `volatile` adds a write→read edge; a monitor adds unlock→lock; class initialization adds its own lock. All are §2's rules aimed at one moment: the instant an object becomes reachable by another thread.
+*Mechanism.* Unless something forbids it, the JIT and the processor may make the reference write visible before the field writes. `final` fields add a guarantee at constructor exit; `volatile` adds a write→read edge; a monitor adds unlock→lock; and class initialization adds its own lock. All of them are §2's rules, aimed at one moment: the instant an object becomes reachable by another thread.
 
-*Concrete bite.* The bug's signature is its rarity. Unsafe publication can run clean for months on one JVM and processor, then produce impossible-looking `NullPointerException`s on another, with a different memory model or different JIT decisions. Testing on your machine cannot catch it; only reasoning about edges can.
+*Concrete bite.* The signature of this bug is its rarity. Unsafe publication can run clean for months on one JVM and processor, then produce impossible-looking `NullPointerException`s on another, with a different memory model or different JIT decisions. Testing on your machine can't catch it; only reasoning about edges can.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Publish objects through `final` fields, a `volatile` reference, a lock, class initialization, or a concurrent collection. Never publish through a plain field that another thread reads without a lock. Prefer immutable (`final`-field) objects, and the holder idiom over hand-rolled double-checked locking.
+💡 **Earned rule.** Publish objects through `final` fields, a `volatile` reference, a lock, class initialization, or a concurrent collection. Never publish through a plain field that another thread reads without a lock. Prefer immutable (`final`-field) objects, and prefer the holder idiom over hand-rolled double-checked locking.
 
-The cost is one more thing to check whenever a reference leaves a constructor or crosses threads. The benefit: no thread, anywhere, can observe your object half-built.
+The cost is one more thing to check whenever a reference leaves a constructor or crosses between threads. The payoff: no thread, anywhere, can ever observe your object half-built.
 
 </div>
 
@@ -369,7 +369,7 @@ The cost is one more thing to check whenever a reference leaves a constructor or
 
 ## 4. JIT compilation
 
-The JVM runs bytecode by **interpreting** it at first. Methods that run often ("hot") are then **JIT-compiled**: compiled into optimized native code while the program runs. By default the JVM uses a "Tiered compiler, using both C1 and C2" <abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 21, &quot;Ergonomics&quot;">[8]</abbr>: C1 compiles quickly, and C2 optimizes fully. This program makes `fib` hot:
+At first, the JVM runs bytecode by **interpreting** it. Methods that run often ("hot" methods) then get **JIT-compiled**: compiled into optimized native code while the program is running. By default, the JVM uses a "Tiered compiler, using both C1 and C2" <abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 21, &quot;Ergonomics&quot;">[8]</abbr>: C1 compiles quickly, and C2 optimizes fully. This program makes `fib` hot:
 
 ```java run
 public class Main {
@@ -388,7 +388,7 @@ public class Main {
 fib(30) = 832040
 ```
 
-The flag `-XX:+PrintCompilation` prints "a message to the console every time a method is compiled" <abbr title="The java command, JDK 21 documentation, -XX:+PrintCompilation">[9]</abbr>. The sandbox cannot pass JVM flags, so this is a terminal run, filtered to the lines about `Main`:
+The flag `-XX:+PrintCompilation` prints "a message to the console every time a method is compiled" <abbr title="The java command, JDK 21 documentation, -XX:+PrintCompilation">[9]</abbr>. The sandbox can't pass JVM flags, so this is a terminal run, filtered down to the lines about `Main`:
 
 ```
 $ java -XX:+PrintCompilation Main | grep -E "Main::|fib\(30\)"
@@ -409,20 +409,20 @@ fib(30) = 832040
 
 - In HotSpot's source, tier 3 is "C1, invocation & backedge counters + mdo" (C1 with full profiling), and tier 4 is C2 <abbr title="OpenJDK 21 source, src/hotspot/share/compiler/compilerDefinitions.hpp, enum CompLevel">[10]</abbr>.
 - `fib` was compiled at tier 3 first. Once it proved *very* hot, it was recompiled at tier 4.
-- The tier-3 version was then "made not entrant": retired in favour of the faster one.
+- The tier-3 version was then "made not entrant" — retired in favour of the faster one.
 
-This is why Java *warms up*. The same code runs faster after the JIT has compiled and optimized its hot paths.
+This is why Java *warms up*: the same code runs faster once the JIT has compiled and optimized its hot paths.
 
 **Intuition.**
-*Mechanism.* While interpreting, the JVM counts calls and records branch behaviour. It then compiles hot methods, with inlining, loop optimizations and speculative optimizations based on that profile. If an assumption later fails, it *deoptimizes*: back to the interpreter, then a recompile.
+*Mechanism.* While interpreting, the JVM counts calls and records how branches behave. It then compiles hot methods, applying inlining, loop optimizations and speculative optimizations based on that profile. If one of its assumptions later turns out to be wrong, it *deoptimizes*: it falls back to the interpreter, and later recompiles.
 
-*Concrete bite.* This makes naive timing lie. The first calls to a method run interpreted and slow; later calls run optimized and fast. Timing a method once measures interpretation, not steady-state performance. So you warm up (run it many times) before measuring, and a real benchmark uses a harness such as JMH <abbr title="OpenJDK Code Tools: JMH, the Java Microbenchmark Harness">[11]</abbr>.
+*Concrete bite.* This makes naive timing lie. The first calls to a method run interpreted and slow; later calls run optimized and fast. So timing a method once measures interpretation, not steady-state performance. That's why you warm up (run the code many times) before measuring, and why a real benchmark uses a harness such as JMH <abbr title="OpenJDK Code Tools: JMH, the Java Microbenchmark Harness">[11]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Trust the JIT to optimize hot code, and warm up before measuring performance. Do not hand-optimize cold paths the JIT will never compile, or micro-optimize from un-warmed timings.
+💡 **Earned rule.** Trust the JIT to optimize hot code, and warm up before measuring performance. Don't hand-optimize cold paths the JIT will never compile, and don't micro-optimize based on un-warmed timings.
 
-The cost is that performance is dynamic, and hard to predict from source alone. The benefit is that idiomatic, readable code usually runs fast once hot: the JIT rewards clarity over premature cleverness.
+The cost is that performance is dynamic, and hard to predict from the source alone. The payoff is that idiomatic, readable code usually runs fast once it's hot: the JIT rewards clarity over premature cleverness.
 
 </div>
 
@@ -430,9 +430,9 @@ The cost is that performance is dynamic, and hard to predict from source alone. 
 
 ## 5. Garbage collection and tuning
 
-Java manages memory automatically. A **garbage collector** reclaims objects that are no longer **reachable**, so you never `free` memory. "A reachable object is any object that can be accessed in any potential continuing computation from any live thread" <abbr title="The Java Language Specification, Java SE 21, §12.6.1">[13]</abbr>. The [object-model lesson](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) shows when an object becomes unreachable.
+Java manages memory automatically. A **garbage collector** reclaims objects that are no longer **reachable**, so you never `free` memory yourself. "A reachable object is any object that can be accessed in any potential continuing computation from any live thread" <abbr title="The Java Language Specification, Java SE 21, §12.6.1">[13]</abbr>. The [object-model lesson](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) shows when an object becomes unreachable.
 
-Modern collectors are **generational**. They rely on "the weak generational hypothesis, which states that most objects survive for only a short period of time" <abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 21, &quot;Garbage Collector Implementation&quot;">[12]</abbr>. So the GC scans a small "young" region often and cheaply. This program allocates 2000 MB of short-lived 1 MB arrays:
+Modern collectors are **generational**. They rely on "the weak generational hypothesis, which states that most objects survive for only a short period of time" <abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 21, &quot;Garbage Collector Implementation&quot;">[12]</abbr>. So the GC scans a small "young" region often, and cheaply. This program allocates 2000 MB worth of short-lived 1 MB arrays:
 
 ```java run
 public class Main {
@@ -452,7 +452,7 @@ public class Main {
 allocated 2000 MB of garbage
 ```
 
-Watch the collector with `-Xlog:gc`, again a terminal run:
+You can watch the collector at work with `-Xlog:gc` — again, as a terminal run:
 
 ```
 $ java -Xlog:gc Main
@@ -469,15 +469,15 @@ allocated 2000 MB of garbage
 [0.036s][info][gc] GC(1) Pause Young (Normal) (G1 Evacuation Pause) 300M->1M(516M) 0.530ms
 ```
 
-**Analysis.** The program allocated 2000 MB, but each array was garbage at once, so the GC reclaimed them in many tiny pauses. Read one line:
+**Analysis.** The program allocated 2000 MB, but each array became garbage immediately, so the GC reclaimed them in many tiny pauses. Here's how to read one line:
 
 - **G1** ran a **Young** collection.
-- It shrank the heap's used space from `300M` to `1M`: almost all of it was garbage.
+- It shrank the heap's used space from `300M` to `1M`, because almost all of it was garbage.
 - The heap was `516M` in total, and the pause took **0.530 ms**.
 
-The heap never grew toward 2 GB, because the collector kept recycling the same space.
+The heap never grew anywhere near 2 GB, because the collector kept recycling the same space.
 
-G1 is the default only "on server-class machines, Serial Collector otherwise". A machine is server-class when the JVM "detects two or more processors and physical memory larger than or equal to 1792 MB" <abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 21, &quot;Ergonomics&quot;">[8]</abbr>. Tell the same JVM it has one processor, and it picks Serial:
+G1 is the default only "on server-class machines, Serial Collector otherwise". A machine counts as server-class when the JVM "detects two or more processors and physical memory larger than or equal to 1792 MB" <abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 21, &quot;Ergonomics&quot;">[8]</abbr>. Tell the same JVM it has only one processor, and it picks Serial:
 
 ```
 $ java -Xlog:gc -XX:ActiveProcessorCount=1 Main
@@ -486,9 +486,9 @@ $ java -Xlog:gc -XX:ActiveProcessorCount=1 Main
 ```
 
 **Intuition.**
-*Mechanism.* The heap is split into generations. New objects go in the young generation, which fills and is collected quickly; survivors are promoted to the old generation. Most objects die young, so young collections touch little live data and are fast. `-Xmx` and `-Xms` size the heap; flags such as `-XX:+UseZGC` select another collector, tuned for low pause times.
+*Mechanism.* The heap is split into generations. New objects go into the young generation, which fills up and gets collected quickly; objects that survive are promoted to the old generation. Since most objects die young, young collections touch little live data, and they're fast. `-Xmx` and `-Xms` size the heap, and flags such as `-XX:+UseZGC` select a different collector, tuned for low pause times.
 
-*Concrete bite.* Automatic GC does not mean "no memory bugs". A **memory leak** in Java is unintended *reachability*. Objects you forgot to remove from a `static` collection or cache stay reachable, so the GC cannot reclaim them, and the heap grows until `OutOfMemoryError`. This program needs a small heap, `-Xmx64m`, to fail quickly, so it is a terminal run:
+*Concrete bite.* Automatic GC doesn't mean "no memory bugs." A **memory leak** in Java is unintended *reachability*. Objects you forgot to remove from a `static` collection or cache stay reachable, so the GC can't reclaim them, and the heap grows until you hit `OutOfMemoryError`. This program needs a small heap, `-Xmx64m`, to fail quickly, so it's a terminal run:
 
 ```java run
 // requires: the JVM flag -Xmx64m, so the leak fills a small heap in a moment
@@ -515,13 +515,13 @@ public class Main {
 OutOfMemoryError: Java heap space, after caching about 58 MB
 ```
 
-Compare it with the §5 garbage program: that one allocated 2000 MB and never ran out, because nothing kept its arrays. This one kept every array in `cache`, and ran out after about 58 MB of a 64 MB heap. The GC frees the *unreachable*; a live reference defeats it.
+Compare it with the §5 garbage program: that one allocated 2000 MB and never ran out, because nothing held onto its arrays. This one kept every array in `cache`, and ran out after about 58 MB of a 64 MB heap. The GC frees what's *unreachable*, and a live reference defeats it.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Let the GC manage memory, and tune only when profiling shows a problem. Size the heap (`-Xmx`), and pick a collector for your latency and throughput goals. Use the JDK's profiling tools (JDK Flight Recorder, `jcmd`) to find real allocation and pause hot spots.
+💡 **Earned rule.** Let the GC manage memory, and tune only when profiling shows a real problem. Size the heap (`-Xmx`), and choose a collector to match your latency and throughput goals. Use the JDK's profiling tools (JDK Flight Recorder, `jcmd`) to find the real allocation and pause hot spots.
 
-The cost of premature GC tuning is wasted effort on a system that is usually fine by default. The benefit of knowing the model: when a leak or a pause problem *does* appear, you can read the logs and fix the cause.
+The cost of premature GC tuning is wasted effort on a system that's usually fine by default. The payoff of knowing the model: when a leak or a pause problem *does* show up, you can read the logs and fix the cause.
 
 </div>
 
@@ -587,9 +587,9 @@ One check per objective. Answer before you open anything.
 <summary>The 🧪 box below: a <code>volatile</code> counter; plain fields and a <code>volatile</code> <code>ready</code>; records; 10 calls vs 10 million.</summary>
 
 1. No. `volatile` makes each read and write visible, but `counter++` is still three steps. The §1 runs printed `157875`, `137145` and `135861`, not `400000`.
-2. Program order puts each plain write before `ready = true` in the writer. The `volatile` write happens-before the read that sees `true`. Program order puts that read before the reader's field reads. Transitivity chains the three, as the §2 fence shows.
-3. A `record` uses **`final` fields**: its component fields are `private final`. Once the constructor finishes, any thread that sees the reference sees the component values, with no synchronization. Mutable objects inside it are covered only as they were at construction.
-4. In a run on JDK 21, a method called 10 times never appeared: it never got hot, so it stayed interpreted. A method called 10 million times appeared at tier 3, then tier 4. A benchmark that does not warm up measures the interpreter and C1, not the C2 code that runs in production.
+2. Program order puts each plain write before `ready = true` in the writer. The `volatile` write happens-before the read that sees `true`. And program order puts that read before the reader's field reads. Transitivity chains all three together, as the §2 example shows.
+3. A `record` uses **`final` fields**: its component fields are `private final`. Once the constructor finishes, any thread that sees the reference also sees the component values, with no synchronization needed. Mutable objects inside it are covered only as they were at construction time.
+4. In a run on JDK 21, a method called 10 times never appeared at all: it never got hot, so it stayed interpreted. A method called 10 million times appeared at tier 3, then at tier 4. A benchmark that doesn't warm up measures the interpreter and C1 — not the C2 code that actually runs in production.
 
 </details>
 
@@ -617,10 +617,10 @@ One check per objective. Answer before you open anything.
 
 🧪 **Predict, then check.**
 
-1. Predict whether making a shared `int counter` `volatile` is enough for four threads to increment it to exactly the right total, and why.
-2. Explain in terms of happens-before why writing several plain fields and then setting a `volatile` `ready = true` lets a reader that sees `ready == true` also see those fields.
+1. Predict whether making a shared `int counter` `volatile` is enough for four threads to increment it to exactly the right total, and explain why.
+2. Explain, in terms of happens-before, why writing several plain fields and then setting a `volatile` `ready = true` lets a reader that sees `ready == true` also see those fields.
 3. Predict which of §3's publication tools a `record` uses, and why that makes records safe to hand between threads with no synchronization at all.
-4. Predict what `-XX:+PrintCompilation` shows about a method called 10 times versus 10 million times, and why a benchmark must warm up.
+4. Predict what `-XX:+PrintCompilation` shows for a method called 10 times versus 10 million times, and why a benchmark must warm up.
 
 </div>
 

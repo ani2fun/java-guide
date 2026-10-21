@@ -6,11 +6,11 @@ prereqs: []
 
 # Sealed Classes & Pattern Matching — A Closed Set of Cases
 
-[Enums & Records](/synapse/programming-languages/java/core-libraries/enums-and-records) introduced `sealed` (a closed set of subtypes) and `record` (a data carrier). This lesson makes them pay off:
+[Enums & Records](/synapse/programming-languages/java/core-libraries/enums-and-records) introduced `sealed` (a closed set of subtypes) and `record` (a data carrier). This lesson is where they finally pay off:
 
-- **Pattern matching** tests a value's type *and* binds it to a variable in one move. `o instanceof Circle c` replaces the test-then-cast you wrote for [`equals`](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) and in [Inheritance & Polymorphism](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism).
-- **Switch pattern matching** (JDK 21) extends the [`switch`](/synapse/programming-languages/java/control-flow/conditionals) to dispatch on type. **Record patterns** deconstruct a record's components inline.
-- The keystone: over a **sealed** hierarchy the compiler knows every possible subtype. A `switch` covering them all needs **no `default`**. Add a subtype the `switch` doesn't handle, and it's a compile error, not a silent fall-through.
+- **Pattern matching** tests a value's type *and* binds it to a variable, all in one move. `o instanceof Circle c` replaces the test-then-cast you wrote for [`equals`](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) and in [Inheritance & Polymorphism](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism).
+- **Switch pattern matching** (JDK 21) extends the [`switch`](/synapse/programming-languages/java/control-flow/conditionals) so it can dispatch on type. **Record patterns** let you deconstruct a record's components inline.
+- Here's the keystone: over a **sealed** hierarchy, the compiler knows every possible subtype. So a `switch` that covers them all needs **no `default`**. Add a subtype the `switch` doesn't handle, and you get a compile error, not a silent fall-through.
 
 That combination — `sealed` + `record` + pattern `switch` — is Java's answer to data-oriented programming.
 
@@ -20,14 +20,14 @@ That combination — `sealed` + `record` + pattern `switch` — is Java's answer
 
 - **Pattern matching** tests a type and binds it in one move — `o instanceof Circle c`.
 - **Switch pattern matching** dispatches on type; **record patterns** deconstruct components inline.
-- Over a **sealed** hierarchy the `switch` is **exhaustive with no `default`** — a forgotten case is a compile error.
-- Together `sealed` + `record` + pattern `switch` is Java's data-oriented design.
+- Over a **sealed** hierarchy, the `switch` is **exhaustive with no `default`** — a forgotten case is a compile error.
+- Together, `sealed` + `record` + pattern `switch` make up Java's data-oriented design.
 
 </div>
 
 Every output below was produced by compiling and running the code on Java 21.
 
-**You'll be able to:** rewrite a test-then-cast as `instanceof` with a binding, and predict where the binding is in scope; write a pattern `switch` with a `when` guard and a `case null`, and predict which case runs; predict whether a `switch` over a sealed type compiles without `default`, and name the error when a case is missing or dominated; deconstruct a nested record with record patterns.
+**You'll be able to:** rewrite a test-then-cast as an `instanceof` with a binding, and predict where the binding is in scope; write a pattern `switch` with a `when` guard and a `case null`, and predict which case runs; predict whether a `switch` over a sealed type compiles without a `default`, and name the error when a case is missing or dominated; deconstruct a nested record with record patterns.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -56,7 +56,7 @@ Every output below was produced by compiling and running the code on Java 21.
 
 ## 1. Pattern matching for `instanceof`
 
-A **type pattern** — `o instanceof Type var` — tests whether `o` is a `Type` and, if so, binds it to `var` already cast. It has been standard since Java 16 <abbr title="JEP 394: Pattern Matching for instanceof (JDK 16)">[1]</abbr>. The binding is in scope wherever the test is known to be true, so the test-and-cast becomes one step.
+A **type pattern** — `o instanceof Type var` — tests whether `o` is a `Type`, and if it is, binds it to `var`, already cast. It's been standard since Java 16 <abbr title="JEP 394: Pattern Matching for instanceof (JDK 16)">[1]</abbr>. The binding is in scope wherever the test is known to be true, so test-and-cast becomes a single step.
 
 ```java run
 public class Main {
@@ -83,12 +83,12 @@ int doubled = 42
 unknown
 ```
 
-**Analysis.** `o instanceof String s` did three things at once: checked the type, cast it, and bound `s`. So the branch could call `s.length()` with no explicit `(String) o`. Likewise `i` was a ready-to-use `Integer`. Compare the old style from [`equals`](/synapse/programming-languages/java/core-libraries/equals-and-hashcode): `if (!(o instanceof Point)) return false; Point p = (Point) o;` The pattern collapses the redundant cast away.
+**Analysis.** `o instanceof String s` did three things at once: it checked the type, cast the value, and bound `s`. That's why the branch could call `s.length()` without an explicit `(String) o`. Likewise, `i` was a ready-to-use `Integer`. Compare that with the old style from [`equals`](/synapse/programming-languages/java/core-libraries/equals-and-hashcode): `if (!(o instanceof Point)) return false; Point p = (Point) o;` The pattern collapses the redundant cast away.
 
 **Intuition.**
-*Mechanism.* The compiler introduces the binding variable only where the pattern is provably true <abbr title="The Java Language Specification, Java SE 21, §6.3.1">[5]</abbr>. The cast is implicit and guaranteed safe, so a `ClassCastException` from a mismatched manual cast can't happen.
+*Mechanism.* The compiler introduces the binding variable only where the pattern is provably true <abbr title="The Java Language Specification, Java SE 21, §6.3.1">[5]</abbr>. The cast is implicit and guaranteed safe, so you can't get a `ClassCastException` from a mismatched manual cast.
 
-"Provably true" includes the code *after* a negated test that returns. The early-exit style works:
+"Provably true" also covers the code *after* a negated test that returns. So the early-exit style works too:
 
 ```java run
 public class Main {
@@ -111,11 +111,11 @@ public class Main {
 -1
 ```
 
-The `if` returns whenever `o` is not a `String`. So on the line after it, `o` must be a `String`, and `s` is in scope there <abbr title="The Java Language Specification, Java SE 21, §6.3.2.2">[10]</abbr>.
+The `if` returns whenever `o` isn't a `String`. So on the line after it, `o` must be a `String`, and `s` is in scope there <abbr title="The Java Language Specification, Java SE 21, §6.3.2.2">[10]</abbr>.
 
-*Concrete bite.* The redundancy it removes is real: the classic `instanceof` + cast names the type twice and risks them drifting apart. The pattern names it once and binds the result, so there's no second cast to get wrong.
+*Concrete bite.* The redundancy this removes is real. The classic `instanceof` + cast names the type twice, and the two can drift apart. The pattern names the type once and binds the result, so there's no second cast to get wrong.
 
-*Non-example: a binding where the test may have failed.* With `||`, the right side runs only when the left side is `false`, which is exactly when `s` was never bound:
+*Non-example: a binding where the test may have failed.* With `||`, the right side runs only when the left side is `false` — which is exactly when `s` was never bound:
 
 ```java run
 public class Main {
@@ -138,14 +138,14 @@ Main.java:4: error: cannot find symbol
 1 error
 ```
 
-With `&&` the same code compiles: the right side runs only when the test succeeded. `o instanceof String s && s.isEmpty()` is the usual form.
+With `&&`, the same code compiles, because the right side runs only when the test succeeded. `o instanceof String s && s.isEmpty()` is the usual form.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `o instanceof Type var` instead of a separate test and cast wherever you check a type and then use it.
+💡 **Earned rule.** Wherever you check a type and then use it, write `o instanceof Type var` instead of a separate test and cast.
 
-- The cost is close to none: it's strictly less code.
-- The benefit: no redundant cast, no chance of a mismatched one, and a binding scoped exactly to where it's valid. It's also the building block for the switch patterns next.
+- The cost is close to nothing: it's strictly less code.
+- The payoff: no redundant cast, no chance of a mismatched one, and a binding scoped exactly to where it's valid. It's also the building block for the switch patterns coming up next.
 
 </div>
 
@@ -153,7 +153,7 @@ With `&&` the same code compiles: the right side runs only when the test succeed
 
 ## 2. Switch pattern matching
 
-A `switch` can match on **type patterns** (JDK 21) <abbr title="JEP 441: Pattern Matching for switch (JDK 21)">[3]</abbr>: each `case Type var ->` handles values of that type, binding the variable. This turns a chain of `instanceof`/`else if` into a clean multi-way dispatch.
+Since JDK 21, a `switch` can match on **type patterns** <abbr title="JEP 441: Pattern Matching for switch (JDK 21)">[3]</abbr>: each `case Type var ->` handles values of that type and binds the variable. This turns a chain of `instanceof`/`else if` into a clean multi-way dispatch.
 
 ```java run
 public class Main {
@@ -179,12 +179,12 @@ int: 42
 other
 ```
 
-**Analysis.** The `switch` matched each value against type patterns: a `String` took the first case (binding `s`), an `Integer` the second, and the `Double` fell to `default`. This is the [arrow `switch` expression](/synapse/programming-languages/java/control-flow/conditionals) generalized from constants to *types*. Each case both tests the type and binds a usable variable, producing a value.
+**Analysis.** The `switch` matched each value against the type patterns: a `String` took the first case (binding `s`), an `Integer` took the second, and the `Double` fell through to `default`. This is the [arrow `switch` expression](/synapse/programming-languages/java/control-flow/conditionals), generalized from constants to *types*. Each case both tests the type and binds a usable variable, and the whole thing produces a value.
 
 **Intuition.**
-*Mechanism.* The `switch` evaluates the selector once and tries each `case` pattern top to bottom, running the first that matches and binding its variable. A pattern `switch` must be **exhaustive**: some case must match every possible value <abbr title="The Java Language Specification, Java SE 21, §14.11.1.1">[7]</abbr>. That holds for a `switch` *statement* with patterns too, not only for an expression. With `Object` as the selector type there are unboundedly many types, so it needs a `default`.
+*Mechanism.* The `switch` evaluates the selector once, then tries each `case` pattern from top to bottom, running the first one that matches and binding its variable. A pattern `switch` must be **exhaustive**: some case has to match every possible value <abbr title="The Java Language Specification, Java SE 21, §14.11.1.1">[7]</abbr>. That's true for a `switch` *statement* with patterns too, not just for an expression. With `Object` as the selector type, there are unboundedly many possible types, so you need a `default`.
 
-Two more tools refine the cases <abbr title="The Java Language Specification, Java SE 21, §14.11.1">[6]</abbr>:
+Two more tools let you refine the cases <abbr title="The Java Language Specification, Java SE 21, §14.11.1">[6]</abbr>:
 
 - A **guard**, `when condition`, adds a test after the type matches.
 - `case null` handles a `null` selector, which otherwise matches no case.
@@ -225,11 +225,11 @@ nothing
 other: 2.5
 ```
 
-**Analysis.** `"hi"` matched `String s` three times, but the first two guards were `false`, so it reached the unguarded `case String s`. `null` went to `case null`. `2.5` is a `Double`, which no case names, so it fell to `default`.
+**Analysis.** `"hi"` matched `String s` three times, but the first two guards were `false`, so it reached the unguarded `case String s`. `null` went to `case null`. And `2.5` is a `Double`, which no case names, so it fell through to `default`.
 
 *Concrete bite.* This replaces the verbose `if (o instanceof A a) … else if (o instanceof B b) …` ladder with a flat, value-producing form. The `default` is required *only* because the selector type (`Object`) is open. Close the type set with `sealed`, and the next section removes even that.
 
-*Non-example: a `null` selector without `case null`.* `default` does not match `null`. With no `case null`, a `null` selector throws `NullPointerException` <abbr title="The Java Language Specification, Java SE 21, §14.11.3">[8]</abbr>:
+*Non-example: a `null` selector without `case null`.* `default` doesn't match `null`. Without a `case null`, a `null` selector throws a `NullPointerException` <abbr title="The Java Language Specification, Java SE 21, §14.11.3">[8]</abbr>:
 
 ```java run
 public class Main {
@@ -253,9 +253,9 @@ string: hi
 Exception in thread "main" java.lang.NullPointerException
 ```
 
-Add `case null ->`, or check for `null` before the `switch`.
+To fix it, add `case null ->`, or check for `null` before the `switch`.
 
-*Non-example: a general case before a specific one.* Cases are tried in order. A `case CharSequence cs` first would take every `String`, so a later `case String s` could never run. javac calls that case **dominated**, and rejects it <abbr title="The Java Language Specification, Java SE 21, §14.11.1">[6]</abbr>:
+*Non-example: a general case before a specific one.* Cases are tried in order. Put `case CharSequence cs` first, and it takes every `String`, so a later `case String s` could never run. javac calls that later case **dominated**, and rejects it <abbr title="The Java Language Specification, Java SE 21, §14.11.1">[6]</abbr>:
 
 ```java run
 public class Main {
@@ -280,14 +280,14 @@ Main.java:5: error: this case label is dominated by a preceding case label
 1 error
 ```
 
-Put `case String s` first. A *guarded* case does not dominate, which is why `classify` could list `case String s when …` before `case String s`.
+The fix is to put `case String s` first. Note that a *guarded* case doesn't dominate, which is why `classify` could list `case String s when …` before `case String s`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use a pattern `switch` to dispatch on a value's type when you'd otherwise write an `instanceof` chain. It's flatter, binds each case, and yields a value.
+💡 **Earned rule.** Whenever you'd otherwise write an `instanceof` chain to dispatch on a value's type, use a pattern `switch`. It's flatter, it binds each case, and it yields a value.
 
-- The cost: a `default` for open types, `case null` when `null` can arrive, and ordering care (specific before general).
-- The benefit: readable type-based dispatch, which becomes exhaustive and `default`-free over a sealed hierarchy.
+- The cost: a `default` for open types, a `case null` when `null` can arrive, and care with ordering (specific before general).
+- The payoff: readable type-based dispatch, which becomes exhaustive and `default`-free over a sealed hierarchy.
 
 </div>
 
@@ -295,7 +295,7 @@ Put `case String s` first. A *guarded* case does not dominate, which is why `cla
 
 ## 3. Exhaustiveness over a sealed hierarchy
 
-When the selector is a [`sealed`](/synapse/programming-languages/java/core-libraries/enums-and-records) type, the compiler knows *every* permitted subtype. A `switch` that covers them all is **exhaustive with no `default`** — and if it misses one, that's a compile error.
+When the selector is a [`sealed`](/synapse/programming-languages/java/core-libraries/enums-and-records) type, the compiler knows *every* permitted subtype. So a `switch` that covers them all is **exhaustive with no `default`** — and if it misses one, you get a compile error.
 
 ```java run
 sealed interface Shape permits Circle, Square {}
@@ -331,12 +331,12 @@ classDiagram
   Shape <|.. Square
 ```
 
-**Analysis.** `Shape` permits exactly `Circle` and `Square`, so the `switch` handling both is *complete*. No `default` was needed, and the compiler accepted it. Each case bound the matched shape and computed its area. This is the design's payoff: the type system guarantees the `switch` covers every case.
+**Analysis.** `Shape` permits exactly `Circle` and `Square`, so a `switch` that handles both is *complete*. No `default` was needed, and the compiler accepted it. Each case bound the matched shape and computed its area. This is the payoff of the whole design: the type system guarantees that the `switch` covers every case.
 
 **Intuition.**
-*Mechanism.* Because `sealed` closes the subtype set <abbr title="JEP 409: Sealed Classes (JDK 17)">[4]</abbr>, the compiler can verify a `switch` handles all of them <abbr title="The Java Language Specification, Java SE 21, §14.11.1.1">[7]</abbr>. Exhaustiveness is checked at compile time: completeness is *proven*, not assumed.
+*Mechanism.* Because `sealed` closes the subtype set <abbr title="JEP 409: Sealed Classes (JDK 17)">[4]</abbr>, the compiler can verify that a `switch` handles every one of them <abbr title="The Java Language Specification, Java SE 21, §14.11.1.1">[7]</abbr>. Exhaustiveness is checked at compile time, so completeness is *proven*, not assumed.
 
-*Concrete bite.* Omit a permitted case and it won't compile:
+*Concrete bite.* Leave out a permitted case, and it won't compile:
 
 ```java run
 sealed interface Shape permits Circle, Square {}
@@ -359,14 +359,14 @@ Main.java:7: error: the switch expression does not cover all possible input valu
         return switch (s) {
 ```
 
-`Square` is missing, so the `switch` isn't exhaustive over `Shape`: a compile error. And here's the real win. Add a *third* permitted shape later, and *every* such `switch` stops compiling until you handle it. The compiler becomes a checklist of "places to update when the data model grows."
+`Square` is missing, so the `switch` isn't exhaustive over `Shape`, and that's a compile error. Now here's the real win. Add a *third* permitted shape later, and *every* such `switch` stops compiling until you handle it. The compiler becomes your checklist of "places to update when the data model grows."
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Model a closed set of cases as a `sealed` hierarchy, and dispatch with a `default`-free `switch`, letting exhaustiveness be checked.
+💡 **Earned rule.** Model a closed set of cases as a `sealed` hierarchy, and dispatch with a `default`-free `switch`, so exhaustiveness gets checked.
 
-- The cost: keeping the `permits` list and the switches in step, which the compiler enforces.
-- The benefit: adding a case can't silently slip through. A `default` would quietly swallow the new type at run time.
+- The cost: keeping the `permits` list and the switches in step — though the compiler enforces that for you.
+- The payoff: a new case can't silently slip through. A `default`, by contrast, would quietly swallow the new type at run time.
 
 </div>
 
@@ -374,7 +374,7 @@ Main.java:7: error: the switch expression does not cover all possible input valu
 
 ## 4. Record patterns
 
-When the cases are [records](/synapse/programming-languages/java/core-libraries/enums-and-records), a **record pattern** deconstructs them <abbr title="JEP 440: Record Patterns (JDK 21)">[2]</abbr>. `case Circle(double r) ->` matches a `Circle` *and* binds its component `r` directly, skipping the accessor call.
+When the cases are [records](/synapse/programming-languages/java/core-libraries/enums-and-records), a **record pattern** can deconstruct them <abbr title="JEP 440: Record Patterns (JDK 21)">[2]</abbr>. `case Circle(double r) ->` matches a `Circle` *and* binds its component `r` directly, so you skip the accessor call.
 
 ```java run
 sealed interface Shape permits Circle, Rect {}
@@ -401,10 +401,10 @@ public class Main {
 12.00
 ```
 
-**Analysis.** `case Circle(double r)` matched a `Circle` and bound its `radius` component to `r` in one step, with no `c.radius()` call. `Rect(double w, double h)` bound both components at once. The pattern mirrors the record's *shape*: you read its data by destructuring it, the inverse of constructing it.
+**Analysis.** `case Circle(double r)` matched a `Circle` and bound its `radius` component to `r` in one step, with no `c.radius()` call. `Rect(double w, double h)` bound both components at once. The pattern mirrors the record's *shape*: you read its data by destructuring it, which is the inverse of constructing it.
 
 **Intuition.**
-*Mechanism.* A record pattern matches the record type, then gets each component by invoking its accessor method <abbr title="The Java Language Specification, Java SE 21, §14.30.2">[9]</abbr>. Record patterns nest, and `var` lets the compiler infer a component's type. So one case can match and destructure nested data, and a guard can test the parts:
+*Mechanism.* A record pattern matches the record type, then gets each component by invoking its accessor method <abbr title="The Java Language Specification, Java SE 21, §14.30.2">[9]</abbr>. Record patterns can nest, and `var` lets the compiler infer a component's type. So a single case can match and destructure nested data, and a guard can test the parts:
 
 ```java run
 record Point(int x, int y) {}
@@ -435,7 +435,7 @@ line from (0, 0) to (3, 4)
 not a line
 ```
 
-**Analysis.** The first `Line` has `x1 == x2`, so the guarded case took it. The second failed the guard and fell to the unguarded `Line` case. Four coordinates were bound in one `case`, with no accessor calls and no casts.
+**Analysis.** The first `Line` has `x1 == x2`, so the guarded case took it. The second one failed the guard and fell through to the unguarded `Line` case. Four coordinates were bound in a single `case`, with no accessor calls and no casts.
 
 *Concrete bite.* This is the heart of data-oriented programming:
 
@@ -443,14 +443,14 @@ not a line
 - `record`s define each shape's fields.
 - A pattern `switch` consumes them by destructuring, exhaustively.
 
-The behavior lives *outside* the data (in the `switch`), the opposite of the polymorphism in [inheritance](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism). It is a better fit when the operations vary more than the data.
+Here, the behavior lives *outside* the data (in the `switch`) — the opposite of the polymorphism you saw in [inheritance](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism). It's a better fit when the operations vary more than the data does.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Combine `sealed` + `record` + record-pattern `switch` to model and process closed sets of structured data: results, expressions, events, shapes.
 
-- The cost: choosing this style over class polymorphism. Use polymorphism when *behavior* travels with each type and subtypes are open. Use sealed types and patterns when the type set is *closed* and operations are added from outside.
-- The benefit: concise, exhaustive, destructuring code the compiler keeps complete.
+- The cost: you have to choose this style over class polymorphism. Use polymorphism when *behavior* travels with each type and the subtypes are open. Use sealed types and patterns when the type set is *closed* and operations get added from outside.
+- The payoff: concise, exhaustive, destructuring code that the compiler keeps complete.
 
 </div>
 
@@ -548,8 +548,8 @@ unknown
 ```
 
 - The `switch` version of `describe` prints the same three lines as the §1 `if` chain.
-- A `Json` switch handling only `JNum` and `JStr` does not compile: `the switch expression does not cover all possible input values`. `JNull` is permitted, and unhandled.
-- `area(new Rect(2, 5))` is `10.00`. No `default` is needed: `Shape` permits only `Circle` and `Rect`, and both have a case.
+- A `Json` switch that handles only `JNum` and `JStr` doesn't compile: you get `the switch expression does not cover all possible input values`. `JNull` is permitted, but unhandled.
+- `area(new Rect(2, 5))` is `10.00`. No `default` is needed, because `Shape` permits only `Circle` and `Rect`, and both have a case.
 
 </details>
 

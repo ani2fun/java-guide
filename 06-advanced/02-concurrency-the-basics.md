@@ -6,13 +6,13 @@ prereqs: []
 
 # Concurrency: the Basics — Threads and Shared State
 
-A **thread** is an independent path of execution. With several, your program does things *at the same time*: on a machine with several cores, truly in parallel. That is power and peril.
+A **thread** is an independent path of execution. With several of them, your program can do things *at the same time* — and on a machine with several cores, truly in parallel. That's both power and peril.
 
 - The moment two threads touch the same mutable data without coordination, you get a **race condition**. Operations interleave, updates clobber each other, and one thread may not even *see* another's writes.
 - These bugs are silent and nondeterministic. They often pass every test, then fail in production.
 - The fix is coordination. **`synchronized`** lets only one thread at a time run a critical section (**mutual exclusion**). Through the **Java Memory Model's** happens-before rule, it also makes one thread's writes visible to the next.
 
-This lesson is the foundation. [Coordination between threads](/synapse/programming-languages/java/advanced/concurrency-coordination) (waiting, several locks, the synchronizers) comes next, then the [higher-level tools](/synapse/programming-languages/java/advanced/concurrency-high-level-and-virtual-threads) and [the memory model in depth](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance).
+This lesson lays the foundation. Next comes [coordination between threads](/synapse/programming-languages/java/advanced/concurrency-coordination) (waiting, multiple locks, the synchronizers), followed by the [higher-level tools](/synapse/programming-languages/java/advanced/concurrency-high-level-and-virtual-threads) and [the memory model in depth](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance).
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -24,9 +24,9 @@ This lesson is the foundation. [Coordination between threads](/synapse/programmi
 
 </div>
 
-This connects [shared references](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model), [lambdas as `Runnable`s](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas), and the [parallel-stream race](/synapse/programming-languages/java/advanced/functional-java-and-streams) from the last lesson. Thread scheduling is nondeterministic, so some outputs below vary per run. They are **labeled illustrative**, and each shows one real captured run.
+This lesson ties together [shared references](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model), [lambdas as `Runnable`s](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas), and the [parallel-stream race](/synapse/programming-languages/java/advanced/functional-java-and-streams) from the last lesson. Thread scheduling is nondeterministic, so some outputs below vary from run to run. Those are **labeled illustrative**, and each one shows a single real captured run.
 
-**You'll be able to:** start a thread and wait for it, and predict what `run()` does instead of `start()`; name a thread's state from what it is doing, and trace its lifecycle; explain why an unsynchronized `counter++` from several threads loses updates; fix the race with `synchronized` on one shared lock, and predict what happens with a lock per thread; name the happens-before edges that make one thread's write visible to another.
+**You'll be able to:** start a thread and wait for it, and predict what `run()` does instead of `start()`; name a thread's state from what it's doing, and trace its lifecycle; explain why an unsynchronized `counter++` from several threads loses updates; fix the race with `synchronized` on one shared lock, and predict what happens with a lock per thread; name the happens-before edges that make one thread's write visible to another.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -56,16 +56,16 @@ This connects [shared references](/synapse/programming-languages/java/classes-an
 
 ## 1. Threads and `Runnable`
 
-Before the API, the thing itself. Your program runs inside a **process**: the operating system (OS) gives it a private memory space and at least one **thread**.
+Before the API, let's look at the thing itself. Your program runs inside a **process**: the operating system (OS) gives it a private memory space and at least one **thread**.
 
-- A thread is the unit the OS *schedules*. It is a call stack plus a saved position in the code.
-- The OS can pause and resume a thread at any moment, without asking. That is **preemptive** scheduling.
+- A thread is the unit that the OS *schedules*. It's a call stack plus a saved position in the code.
+- The OS can pause and resume a thread at any moment, without asking. That's called **preemptive** scheduling.
 - The stack's default size depends on the platform. The `java` docs list 1024 KB for Linux/x64 and 2048 KB for macOS/Aarch64 <abbr title="The java command, JDK 21 documentation, -Xss">[1]</abbr>.
 - A Java `Thread` created with `new Thread(…)` is a **platform thread**, "typically mapped 1:1 to kernel threads scheduled by the operating system" <abbr title="Java SE 21 API, java.lang.Thread, &quot;Platform threads&quot;">[2]</abbr>.
 
-So two Java threads on two cores run at the same instant. Everything in this lesson follows from one fact. The JVM's heap "is shared among all Java Virtual Machine threads", while each thread has "a private Java Virtual Machine stack" <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.2 and §2.5.3">[3]</abbr>. Separate stacks, shared objects.
+So two Java threads on two cores really do run at the same instant. Everything in this lesson follows from one fact: the JVM's heap "is shared among all Java Virtual Machine threads", while each thread has "a private Java Virtual Machine stack" <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.2 and §2.5.3">[3]</abbr>. Separate stacks, shared objects.
 
-You can watch the layering: one process id, several thread ids.
+You can see the layering for yourself: one process id, several thread ids.
 
 ```java run
 public class Main {
@@ -86,13 +86,13 @@ main   -> pid=82858 threadId=1
 worker -> pid=82858 threadId=20
 ```
 
-**Analysis.** Same `pid`, different `threadId`s. Both threads live inside one process, so they see the same heap: the same objects, the same `static` fields.
+**Analysis.** Same `pid`, different `threadId`s. Both threads live inside one process, so they see the same heap: the same objects, and the same `static` fields.
 
-The worker is not a copy of your program. It is a second path of execution *through the same memory*. That shared heap makes passing data between threads free, and *changing* shared data dangerous.
+The worker isn't a copy of your program. It's a second path of execution *through the same memory*. That shared heap makes passing data between threads free — and makes *changing* shared data dangerous.
 
-Now the API. A `Thread` runs a `Runnable`, a functional interface, so a lambda fits. `start()` launches it alongside the caller; `join()` waits for it to finish.
+Now for the API. A `Thread` runs a `Runnable`, which is a functional interface, so a lambda fits nicely. `start()` launches it alongside the caller, and `join()` waits for it to finish.
 
-`main` declares `throws InterruptedException` because `join()` can throw that checked exception. It is thrown if another thread *interrupts* the waiting thread, a polite request to stop <abbr title="Java SE 21 API, java.lang.Thread.join() and interrupt()">[2]</abbr>. §2 shows one.
+`main` declares `throws InterruptedException` because `join()` can throw that checked exception. It's thrown if another thread *interrupts* the waiting thread — a polite request to stop <abbr title="Java SE 21 API, java.lang.Thread.join() and interrupt()">[2]</abbr>. You'll see one in §2.
 
 ```java run
 public class Main {
@@ -112,12 +112,12 @@ worker thread: worker-1
 main thread: main
 ```
 
-**Analysis.** `t.start()` ran `task` on a new thread named `worker-1`. `t.join()` made `main` wait until it finished, so the two lines printed in a fixed order. Without `join`, `main` could print first, or the lines could come in either order.
+**Analysis.** `t.start()` ran `task` on a new thread named `worker-1`. `t.join()` made `main` wait until that thread finished, so the two lines printed in a fixed order. Without `join`, `main` could print first — the lines could come out in either order.
 
 **Intuition.**
-*Mechanism.* `start()` asks the JVM to schedule a new thread that runs the `Runnable`'s `run()`. The scheduler decides when each thread runs, and interleaves them however it likes. So *order between threads is not guaranteed* unless you coordinate, for example with `join`.
+*Mechanism.* `start()` asks the JVM to schedule a new thread that runs the `Runnable`'s `run()`. The scheduler decides when each thread runs, and interleaves them however it likes. So *the order between threads isn't guaranteed* unless you coordinate them — for example, with `join`.
 
-*Concrete bite.* `start()` and `run()` are different methods. `t.run()` is an ordinary method call on the *current* thread: no new thread, no concurrency.
+*Concrete bite.* `start()` and `run()` are different methods. `t.run()` is just an ordinary method call on the *current* thread: no new thread, no concurrency.
 
 ```java run
 public class Main {
@@ -136,9 +136,9 @@ running on: main
 after run(), state = NEW
 ```
 
-The task ran on `main`, and the `Thread` object is still `NEW`: it never started. The code "works", sequentially, and hides the mistake until concurrency was the point.
+The task ran on `main`, and the `Thread` object is still `NEW`, because it never started. The code "works" — sequentially — which hides the mistake until the moment concurrency was the whole point.
 
-*Non-example: starting a thread twice.* "A thread can be started at most once" <abbr title="Java SE 21 API, java.lang.Thread.start()">[2]</abbr>. A finished thread cannot be restarted:
+*Non-example: starting a thread twice.* "A thread can be started at most once" <abbr title="Java SE 21 API, java.lang.Thread.start()">[2]</abbr>. Once a thread finishes, you can't restart it:
 
 ```java run
 public class Main {
@@ -161,9 +161,9 @@ To run the task again, create a new `Thread`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Create threads with a `Runnable` and `start()` them once; use `join()` to wait for them.
+💡 **Earned rule.** Create threads with a `Runnable`, `start()` each one exactly once, and use `join()` to wait for them.
 
-The cost is that you now own coordination: without it, order and visibility between threads are undefined. The benefit is genuine parallelism. In practice you will rarely manage raw `Thread`s: the [executors](/synapse/programming-languages/java/advanced/concurrency-high-level-and-virtual-threads) do it better. The model here underlies all of them.
+The cost is that coordination is now your job: without it, order and visibility between threads are undefined. The payoff is genuine parallelism. In practice, you'll rarely manage raw `Thread`s, because the [executors](/synapse/programming-languages/java/advanced/concurrency-high-level-and-virtual-threads) do it better — but the model here underlies all of them.
 
 </div>
 
@@ -171,7 +171,7 @@ The cost is that you now own coordination: without it, order and visibility betw
 
 ## 2. The six thread states
 
-A thread is always in exactly one of six states, the constants of the enum `Thread.State` <abbr title="Java SE 21 API, java.lang.Thread.State">[4]</abbr>:
+At any moment, a thread is in exactly one of six states — the constants of the enum `Thread.State` <abbr title="Java SE 21 API, java.lang.Thread.State">[4]</abbr>:
 
 | State | The thread is… |
 |---|---|
@@ -206,9 +206,9 @@ stateDiagram-v2
   TERMINATED --> [*]
 ```
 
-`Thread.sleep(ms)` pauses the current thread for that many milliseconds. `wait()` and its notification are the subject of the [next lesson](/synapse/programming-languages/java/advanced/concurrency-coordination). A woken `wait()` goes to `BLOCKED`, not `RUNNABLE`, because it must re-acquire the lock first <abbr title="Java SE 21 API, java.lang.Thread.State.BLOCKED">[4]</abbr>.
+`Thread.sleep(ms)` pauses the current thread for that many milliseconds. `wait()` and its notification are the subject of the [next lesson](/synapse/programming-languages/java/advanced/concurrency-coordination). Note that a woken `wait()` goes to `BLOCKED`, not `RUNNABLE`, because it must re-acquire the lock first <abbr title="Java SE 21 API, java.lang.Thread.State.BLOCKED">[4]</abbr>.
 
-`t.getState()` reports a thread's state. The program below puts one thread in each state and prints it. Each `while` loop waits until the other thread has reached the state; `Thread.onSpinWait()` is a hint that the loop is only waiting.
+`t.getState()` reports a thread's state. The program below puts one thread into each state and prints it. Each `while` loop waits until the other thread has reached the target state, and `Thread.onSpinWait()` is a hint that the loop is only waiting.
 
 ```java run
 public class Main {
@@ -261,19 +261,19 @@ sleeper interrupted
 after it ends:    TERMINATED
 ```
 
-**Analysis.** Each line is one state:
+**Analysis.** Each line shows one state:
 
 - `sleeper` was `NEW` until `start()`, then `TIMED_WAITING` inside a 60-second `sleep`.
-- `main` asked about itself while running, so it saw `RUNNABLE`.
+- `main` asked about itself while it was running, so it saw `RUNNABLE`.
 - `blocked` tried to enter `synchronized (lock)` while `main` held that lock, so it was `BLOCKED`.
-- `joiner` sat in `sleeper.join()`, which has no time limit: `WAITING`.
+- `joiner` sat in `sleeper.join()`, which has no time limit, so it was `WAITING`.
 - `sleeper.interrupt()` cut the sleep short: `sleep` threw `InterruptedException`, the catch printed its line, and `run()` returned. After that, `sleeper` was `TERMINATED`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** When a program hangs, ask each thread's state. `BLOCKED` means it waits for a lock someone holds; `WAITING` means it waits for another thread to act.
+💡 **Earned rule.** When a program hangs, check each thread's state. `BLOCKED` means it's waiting for a lock that someone else holds; `WAITING` means it's waiting for another thread to act.
 
-The cost: a state is a snapshot, and it may change the moment you read it. That is why the program above waits in a loop for each state instead of reading it once. The benefit is a precise vocabulary for "stuck", which the next lesson's deadlocks need.
+The cost: a state is only a snapshot, and it may change the moment you read it. That's why the program above waits in a loop for each state, instead of reading it once. The payoff is a precise vocabulary for "stuck" — which you'll need for the next lesson's deadlocks.
 
 </div>
 
@@ -281,7 +281,7 @@ The cost: a state is a snapshot, and it may change the moment you read it. That 
 
 ## 3. Race conditions
 
-When several threads update the same shared variable without coordination, their operations interleave and updates are lost. Here four threads each increment a shared `counter` 100,000 times. The correct total is 400,000.
+When several threads update the same shared variable without coordination, their operations interleave, and updates get lost. Here, four threads each increment a shared `counter` 100,000 times. The correct total should be 400,000.
 
 ```java run
 public class Main {
@@ -305,7 +305,7 @@ public class Main {
 121926
 ```
 
-Here is one lost update, frame by frame. The run above produced collisions like it hundreds of thousands of times:
+Here's a single lost update, frame by frame. The run above produced collisions like this one hundreds of thousands of times:
 
 ```mermaid
 ---
@@ -333,22 +333,22 @@ sequenceDiagram
   Note over A,B: two increments, one effect — counter ends at 6, not 7
 ```
 
-**Analysis.** The result is far below 400,000, and it differs each run. The culprit is that `counter++` is *not atomic*. It is three steps: read `counter`, add one, write it back.
+**Analysis.** The result is far below 400,000, and it's different on each run. The culprit is that `counter++` is *not atomic*. It's really three steps: read `counter`, add one, and write it back.
 
-- The diagram traces one collision. Both threads read `5` before either writes, both compute `6`, and B's write lands on top of A's.
-- The scheduler can pause a thread *between any two of those steps*, which is what preemptive scheduling from §1 means.
-- Across 400,000 increments, most were lost. Nothing threw; the program "succeeded" and printed a wrong number.
+- The diagram traces one collision. Both threads read `5` before either one writes, both compute `6`, and B's write lands right on top of A's.
+- The scheduler can pause a thread *between any two of those steps* — that's exactly what preemptive scheduling (§1) means.
+- Out of 400,000 increments, most were lost. Yet nothing threw: the program "succeeded" and printed a wrong number.
 
 **Intuition.**
-*Mechanism.* `counter++` is a read-modify-write. With no coordination, the steps of different threads interleave in any order. One thread's write is overwritten by another that read the old value: a **lost update**. The same lack of coordination allows a **stale read**, where a thread does not see another's recent write at all (§5).
+*Mechanism.* `counter++` is a read-modify-write. With no coordination, the steps of different threads interleave in any order. One thread's write gets overwritten by another thread that read the old value: a **lost update**. The same lack of coordination also allows a **stale read**, where a thread doesn't see another thread's recent write at all (§5).
 
-*Concrete bite.* The varying, sub-400,000 outputs are the race made visible. It is the [parallel-stream data race](/synapse/programming-languages/java/advanced/functional-java-and-streams) from the last lesson, now in raw threads. It is also why "it passed in testing" means little for concurrent code. A race may appear one run in a thousand, then constantly under production load.
+*Concrete bite.* Those varying, sub-400,000 outputs are the race made visible. It's the [parallel-stream data race](/synapse/programming-languages/java/advanced/functional-java-and-streams) from the last lesson, now in raw threads. It's also why "it passed in testing" means little for concurrent code. A race might show up once in a thousand runs, then constantly under production load.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Treat *any* unsynchronized access to shared mutable state from several threads as a bug, even if it seems to work.
+💡 **Earned rule.** Treat *any* unsynchronized access to shared mutable state from several threads as a bug — even if it seems to work.
 
-The cost is pessimism about shared state. The benefit is avoiding the hardest category of bug, nondeterministic corruption that evades tests, by coordinating access. The next section does that.
+The cost is a healthy pessimism about shared state. The payoff is that, by coordinating access, you avoid the hardest category of bug: nondeterministic corruption that slips past your tests. The next section shows how.
 
 </div>
 
@@ -356,7 +356,7 @@ The cost is pessimism about shared state. The benefit is avoiding the hardest ca
 
 ## 4. `synchronized`
 
-`synchronized` makes a method or block a **critical section**: only one thread can hold its lock and execute it at a time. Wrapping the increment in a `synchronized` method serializes the updates, and the race disappears.
+`synchronized` turns a method or block into a **critical section**: only one thread at a time can hold its lock and execute it. Wrap the increment in a `synchronized` method, and the updates are serialized — the race disappears.
 
 ```java run
 public class Main {
@@ -382,16 +382,16 @@ public class Main {
 400000
 ```
 
-**Analysis.** Now the total is **always** exactly 400,000, run after run. `synchronized` lets only one thread execute `increment()` at a time, so each read-modify-write completes before the next begins. No two threads interleave inside it, and no update is lost. One keyword turned random wrong answers into a correct, deterministic result.
+**Analysis.** Now the total is **always** exactly 400,000, run after run. `synchronized` lets only one thread execute `increment()` at a time, so each read-modify-write completes before the next one begins. No two threads interleave inside it, so no update is lost. A single keyword turned random wrong answers into a correct, deterministic result.
 
 **Intuition.**
 *Mechanism.* "Each object in Java is associated with a monitor, which a thread can lock or unlock. Only one thread at a time may hold a lock on a monitor" <abbr title="The Java Language Specification, Java SE 21, §17.1">[5]</abbr>. A monitor is also called an object's intrinsic **lock**.
 
-- A `synchronized` method locks a monitor on entry and unlocks it on exit. A `static` method uses the monitor of its class's `Class` object; an instance method uses `this` <abbr title="The Java Language Specification, Java SE 21, §8.4.3.6">[6]</abbr>.
-- A `synchronized (obj) { … }` **block** locks the monitor of the object you name <abbr title="The Java Language Specification, Java SE 21, §14.19">[7]</abbr>.
-- A second thread that tries to lock a held monitor is `BLOCKED` (§2) until the monitor is free.
+- A `synchronized` method locks a monitor on entry and unlocks it on exit. A `static` method uses the monitor of its class's `Class` object, while an instance method uses `this` <abbr title="The Java Language Specification, Java SE 21, §8.4.3.6">[6]</abbr>.
+- A `synchronized (obj) { … }` **block** locks the monitor of whichever object you name <abbr title="The Java Language Specification, Java SE 21, §14.19">[7]</abbr>.
+- A second thread that tries to lock a monitor that's already held is `BLOCKED` (§2) until the monitor is free.
 
-The block form, with one shared lock object, is as correct as the method:
+The block form, using one shared lock object, is just as correct as the method:
 
 ```java run
 public class Main {
@@ -419,7 +419,7 @@ public class Main {
 400000
 ```
 
-*Concrete bite: a lock per thread.* `synchronized` only excludes threads that lock the *same* monitor. Give each thread its own lock object, and each thread only ever excludes itself:
+*Concrete bite: a lock per thread.* `synchronized` excludes only threads that lock the *same* monitor. Give each thread its own lock object, and each thread only ever excludes itself:
 
 ```java run
 // ⚠️ ANTI-PATTERN — each thread locks its own object, so nothing is excluded.  Do not copy it.
@@ -450,13 +450,13 @@ public class Main {
 violation: four locks guard one counter, so updates are still lost
 ```
 
-The code *looks* synchronized, and still loses updates. Locking is a discipline that every access must follow, on one consistent lock. One unguarded write, or one wrong lock, reopens the race.
+The code *looks* synchronized, yet it still loses updates. Locking is a discipline that every single access must follow, on one consistent lock. One unguarded write, or one wrong lock, reopens the race.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Guard every read and write of shared mutable state with synchronization on a *consistent* lock: a `synchronized` method or block, or the [higher-level tools](/synapse/programming-languages/java/advanced/concurrency-high-level-and-virtual-threads).
+💡 **Earned rule.** Guard every read and write of shared mutable state with synchronization on a *consistent* lock: a `synchronized` method or block, or one of the [higher-level tools](/synapse/programming-languages/java/advanced/concurrency-high-level-and-virtual-threads).
 
-The cost is contention and less parallelism, because threads queue at the lock. Holding several locks carelessly also risks deadlock, the subject of the next lesson. The benefit is correctness: atomic critical sections instead of silent corruption.
+The cost is contention and less parallelism, because threads queue up at the lock. Holding several locks carelessly also risks deadlock, the subject of the next lesson. The payoff is correctness: atomic critical sections instead of silent corruption.
 
 </div>
 
@@ -464,7 +464,7 @@ The cost is contention and less parallelism, because threads queue at the lock. 
 
 ## 5. The Java Memory Model and happens-before
 
-`synchronized` did two jobs: mutual exclusion *and* **visibility**. The **Java Memory Model** (JMM) defines when one thread's writes are guaranteed visible to another, through the **happens-before** relation <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[8]</abbr>. Without such a relationship, a thread may read an older value. With one, it is guaranteed to see the other's writes.
+`synchronized` actually did two jobs: mutual exclusion *and* **visibility**. The **Java Memory Model** (JMM) defines when one thread's writes are guaranteed to be visible to another, through the **happens-before** relation <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[8]</abbr>. Without such a relationship, a thread may read an older value. With one, it's guaranteed to see the other thread's writes.
 
 ```mermaid
 ---
@@ -487,16 +487,16 @@ sequenceDiagram
   B->>B: reads counter, sees 1
 ```
 
-**Analysis.** The diagram is the rule that makes §4 correct beyond mutual exclusion.
+**Analysis.** The diagram shows the rule that makes §4 correct, beyond mutual exclusion:
 
 - Thread A *unlocks* a monitor, and Thread B later *locks the same monitor*.
 - "An unlock on a monitor happens-before every subsequent lock on that monitor" <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[8]</abbr>.
 - So every write A made before unlocking is visible to B after locking.
 
-That is why each `increment()` sees the running total: the lock both serializes the updates *and* publishes them. Without a happens-before edge, as in the §3 race, the JMM allows B to read an older value of `counter`.
+That's why each `increment()` sees the running total: the lock both serializes the updates *and* publishes them. Without a happens-before edge, as in the §3 race, the JMM allows B to read an older value of `counter`.
 
 **Intuition.**
-*Mechanism.* The JMM lets compilers and processors reorder and cache memory operations for speed, so a write by one thread is not automatically visible to another. Happens-before edges are the guarantees. The four this book uses most are in JLS §17.4.5 <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[8]</abbr>:
+*Mechanism.* For the sake of speed, the JMM lets compilers and processors reorder and cache memory operations, so a write by one thread isn't automatically visible to another. Happens-before edges are the guarantees you get. The four this book uses most are in JLS §17.4.5 <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[8]</abbr>:
 
 1. An unlock of a monitor happens-before every later lock of that monitor.
 2. A write to a `volatile` field happens-before every later read of that field.
@@ -505,20 +505,20 @@ That is why each `increment()` sees the running total: the lock both serializes 
 
 No edge, no guarantee.
 
-*Concrete bite.* This is why every program in this lesson reads `counter` only after `join()`. Edge 4 makes all four threads' writes visible to `main`.
+*Concrete bite.* This is why every program in this lesson reads `counter` only after `join()`: edge 4 makes all four threads' writes visible to `main`.
 
-It is also why a shared flag without `volatile` or a lock can loop forever:
+It's also why a shared flag without `volatile` or a lock can loop forever:
 
 - One thread sets `stop = true`, but the reader, with no edge, may keep reading `false`.
-- The bug is not atomicity (a `boolean` write is atomic); it is *visibility*.
+- The bug isn't about atomicity (a `boolean` write is atomic); it's about *visibility*.
 
 [The memory-model lesson](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance) runs that bug and fixes it with `volatile`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Establish a happens-before relationship for *every* piece of state shared between threads: `synchronized`, `volatile`, `start`/`join`, or the `java.util.concurrent` tools. It prevents lost updates, and it also guarantees visibility.
+💡 **Earned rule.** Establish a happens-before relationship for *every* piece of state that threads share: `synchronized`, `volatile`, `start`/`join`, or the `java.util.concurrent` tools. That prevents lost updates, and it also guarantees visibility.
 
-The cost is that you must think in happens-before edges rather than "the variable has a value". The benefit is that your reads see the writes you depend on, instead of an older value.
+The cost is that you have to think in happens-before edges, rather than "the variable has a value." The payoff is that your reads see the writes you depend on, instead of an older value.
 
 </div>
 
@@ -579,9 +579,9 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>The 🧪 box below: two threads, a million increments each; <code>start()</code> vs <code>run()</code>; and why a <code>running</code> flag should be <code>volatile</code>.</summary>
 
-1. Two threads each doing an unsynchronized `counter += 1` a million times *can* print `2000000`, if no two read-modify-writes happen to interleave. It is unlikely, because with a million chances the collision from §3 happens often. The §3 runs lost most of 400,000 updates.
-2. `t.start()` prints the new thread's name; `t.run()` prints `main`, as the §1 fence showed.
-3. A `boolean` write is atomic, but atomicity is not the problem. Without a happens-before edge, the polling thread may never see the write. A `volatile` write happens-before every later read of that field (edge 2 in §5), so the reader sees `false` promptly.
+1. Two threads each doing an unsynchronized `counter += 1` a million times *can* print `2000000`, if no two read-modify-writes happen to interleave. But it's unlikely, because with a million chances, the collision from §3 happens often. The §3 runs lost most of their 400,000 updates.
+2. `t.start()` prints the new thread's name, while `t.run()` prints `main`, as the §1 example showed.
+3. A `boolean` write is atomic, but atomicity isn't the problem. Without a happens-before edge, the polling thread may never see the write. A `volatile` write happens-before every later read of that field (edge 2 in §5), so the reader sees `false` promptly.
 
 </details>
 
@@ -604,9 +604,9 @@ One check per objective. Answer before you open anything.
 
 🧪 **Predict, then check.**
 
-1. Predict whether two threads each doing `counter += 1` a million times, unsynchronized, can ever print exactly `2000000`, and why it usually won't.
+1. Predict whether two threads, each doing `counter += 1` a million times without synchronization, can ever print exactly `2000000` — and why it usually won't.
 2. Predict the difference between `t.start()` and `t.run()` for a task that prints the current thread's name.
-3. Explain in terms of happens-before why a `boolean running` flag set by one thread and polled by another should be `volatile`, even though a boolean write is atomic.
+3. Explain, in terms of happens-before, why a `boolean running` flag that one thread sets and another polls should be `volatile`, even though a boolean write is atomic.
 
 </div>
 

@@ -6,9 +6,17 @@ prereqs: []
 
 # Advanced & Idiomatic: Overview
 
-This is Chapter 6, the summit. With the full language and the standard library behind you, these nine lessons cover what separates competent Java from idiomatic, production-grade Java: declarative data processing with streams, the hard truths of concurrency — races, coordination, and the Java Memory Model — how the JVM actually runs and reclaims your code, modern file I/O, the way the modern type-system features compose into one coherent style, the testing, tooling, and packaging that ship it, and the localization that lets it speak its readers' languages.
+Welcome to Chapter 6, the summit. You now have the full language and the standard library behind you. These nine lessons cover what separates competent Java from idiomatic, production-grade Java:
 
-Nine lessons, in order:
+- declarative data processing with streams;
+- the hard truths of concurrency — races, coordination, and the Java Memory Model;
+- how the JVM actually runs your code and reclaims its memory;
+- modern file I/O;
+- how the modern type-system features compose into one coherent style;
+- the testing, tooling and packaging that ship your code;
+- and the localization that lets it speak its readers' languages.
+
+There are nine lessons, in this order:
 
 1. [**Functional Java & the Streams API**](/synapse/programming-languages/java/advanced/functional-java-and-streams) — lazy pipelines, collectors, `Optional`, and the parallel-stream hazard.
 2. [**Concurrency: the Basics**](/synapse/programming-languages/java/advanced/concurrency-the-basics) — what a thread is, race conditions, `synchronized`, and happens-before.
@@ -20,7 +28,7 @@ Nine lessons, in order:
 8. [**Testing, Tooling & Packaging**](/synapse/programming-languages/java/advanced/testing-tooling-and-packaging) — JUnit 5, build tools, dependencies, and executable JARs.
 9. [**Localization**](/synapse/programming-languages/java/advanced/localization) — `Locale`, `NumberFormat`, localized dates, resource bundles, and `MessageFormat`.
 
-Every code block with a ▶ Run button is live; the concurrency, performance, and tooling lessons include real captured runs (a data race, JIT and GC logs, a `mvn test` summary) where behavior is nondeterministic or project-level. The habit that matters most in this chapter is **knowing the cost**: streams, parallelism, immutability, and abstractions all have trade-offs, and senior judgment is choosing them deliberately.
+Every code block with a ▶ Run button is live. Where behavior is nondeterministic or project-level, the concurrency, performance and tooling lessons include real captured runs instead (a data race, JIT and GC logs, a `mvn test` summary). The habit that matters most in this chapter is **knowing the cost**. Streams, parallelism, immutability and abstractions all come with trade-offs, and senior judgment means choosing among them deliberately.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 

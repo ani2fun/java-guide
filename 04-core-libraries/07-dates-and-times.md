@@ -6,9 +6,9 @@ prereqs: []
 
 # Dates & Times — the `java.time` API
 
-A date looks like a simple value, and it is not. Months have 28 to 31 days, and some years have a 29th of February. The time on the clock depends on where you stand. Twice a year, in many places, an hour of the clock is skipped or repeated.
+A date looks like a simple value. It isn't. Months have anywhere from 28 to 31 days, and some years have a 29th of February. The time on the clock depends on where you're standing. And twice a year, in many places, an hour of the clock is either skipped or repeated.
 
-Java's answer is the **`java.time`** package, added in Java 8 <abbr title="JEP 150: Date & Time API">[1]</abbr>. It has one type for each question you can ask about time:
+Java's answer to all this is the **`java.time`** package, added in Java 8 <abbr title="JEP 150: Date & Time API">[1]</abbr>. It gives you one type for each question you might ask about time:
 
 - **What does the calendar or the clock say?** `LocalDate`, `LocalTime` and `LocalDateTime`. These hold no time zone.
 - **Which moment on Earth?** `Instant`, and `ZonedDateTime` for a moment seen from one place.
@@ -18,15 +18,15 @@ Java's answer is the **`java.time`** package, added in Java 8 <abbr title="JEP 1
 
 💡 **The core idea.**
 
-- Pick the type by the question: a calendar date, a moment, or an amount of time.
+- Pick the type by the question you're asking: a calendar date, a moment, or an amount of time.
 - Every `java.time` object is **immutable**: `plusDays` returns a *new* object and leaves the old one alone.
-- A calendar day is not always 24 hours. `java.time` keeps "one day later" and "24 hours later" apart, and so must you.
+- A calendar day isn't always 24 hours long. `java.time` keeps "one day later" and "24 hours later" apart — and so must you.
 
 </div>
 
-This lesson uses [sorting a `List`](/synapse/programming-languages/java/core-libraries/the-collections-framework), [`equals`](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) and [enums](/synapse/programming-languages/java/core-libraries/enums-and-records). A few examples stop with a thrown exception, because the failure is the point. You learn to catch exceptions in [the next chapter](/synapse/programming-languages/java/robust-oop/exceptions).
+This lesson builds on [sorting a `List`](/synapse/programming-languages/java/core-libraries/the-collections-framework), [`equals`](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) and [enums](/synapse/programming-languages/java/core-libraries/enums-and-records). A few examples deliberately stop with a thrown exception, because the failure is the whole point. You'll learn to catch exceptions in [the next chapter](/synapse/programming-languages/java/robust-oop/exceptions).
 
-**You'll be able to:** predict the date that month arithmetic lands on, including at the end of a month; pick `Period` or `Duration` for an amount of time, and `LocalDateTime` or `ZonedDateTime` for a moment; predict what a daylight saving gap or overlap does to a `ZonedDateTime`; write a `DateTimeFormatter` pattern and name the letter traps in `mm`, `hh` and `YYYY`; explain why a `plusDays` call whose result is not assigned changes nothing.
+**You'll be able to:** predict which date month arithmetic lands on, including at the end of a month; choose `Period` or `Duration` for an amount of time, and `LocalDateTime` or `ZonedDateTime` for a moment; predict what a daylight saving gap or overlap does to a `ZonedDateTime`; write a `DateTimeFormatter` pattern, and name the letter traps in `mm`, `hh` and `YYYY`; explain why a `plusDays` call changes nothing when its result isn't assigned.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -57,13 +57,13 @@ This lesson uses [sorting a `List`](/synapse/programming-languages/java/core-lib
 
 ## 1. Local dates and times
 
-"Local" means *as read off a calendar or a clock, with no place attached*. A birthday is a local date: 15 March is 15 March wherever you are. Three types cover the local view:
+"Local" means *as read off a calendar or a clock, with no place attached*. A birthday is a good example of a local date: 15 March is 15 March wherever you happen to be. Three types cover this local view:
 
 - **`LocalDate`** — a date: year, month, day. No time and no zone <abbr title="Java SE 21 API, java.time.LocalDate">[2]</abbr>.
 - **`LocalTime`** — a time of day: hour, minute, second, nanosecond. No date.
 - **`LocalDateTime`** — both together. Still no zone.
 
-You make one with a **static factory method** named `of`, in the same style as `List.of`. None of these types has a public constructor.
+None of these types has a public constructor. Instead, you create one with a **static factory method** named `of`, in the same style as `List.of`.
 
 ```java run
 import java.time.LocalDate;
@@ -94,9 +94,9 @@ public class Main {
 MARCH FRIDAY
 ```
 
-**Analysis.** Each type prints in the **ISO-8601** format: year-month-day, then `T`, then the time. Months count from 1, so March is `3`. `getMonth()` and `getDayOfWeek()` return the enum constants `Month.MARCH` and `DayOfWeek.FRIDAY`. They are ordinary [enums](/synapse/programming-languages/java/core-libraries/enums-and-records), so `==` and `switch` work on them.
+**Analysis.** Each type prints in the **ISO-8601** format: year-month-day, then a `T`, then the time. Months count from 1, so March is `3`. `getMonth()` and `getDayOfWeek()` return the enum constants `Month.MARCH` and `DayOfWeek.FRIDAY`. These are ordinary [enums](/synapse/programming-languages/java/core-libraries/enums-and-records), so `==` and `switch` work on them just as you'd expect.
 
-`LocalDate.now()` reads today's date from the machine's clock, in its default time zone. Its output changes every day, so no other example here uses it:
+`LocalDate.now()` reads today's date from the machine's clock, in the machine's default time zone. Because its output changes every day, no other example in this lesson uses it:
 
 ```java run
 import java.time.LocalDate;
@@ -114,9 +114,9 @@ Today is 2026-09-30
 ```
 
 **Intuition.**
-*Mechanism.* `LocalDate.of` checks its arguments against the calendar before it builds anything. The month must be 1 to 12, and the day must exist in that month of that year <abbr title="Java SE 21 API, java.time.LocalDate.of">[2]</abbr>.
+*Mechanism.* Before it builds anything, `LocalDate.of` checks its arguments against the calendar. The month must be 1 to 12, and the day must actually exist in that month of that year <abbr title="Java SE 21 API, java.time.LocalDate.of">[2]</abbr>.
 
-*Concrete bite.* 2023 was not a leap year, so it had no 29 February. This program compiles, then stops at run time:
+*Concrete bite.* 2023 wasn't a leap year, so it had no 29 February. This program compiles fine, then stops at run time:
 
 ```java run
 import java.time.LocalDate;
@@ -136,7 +136,7 @@ before
 Exception in thread "main" java.time.DateTimeException: Invalid date 'February 29' as '2023' is not a leap year
 ```
 
-*Non-example: throwing the result away.* Every `java.time` object is **immutable**: once built, it never changes <abbr title="Java SE 21 API, java.time.LocalDate: &quot;This class is immutable and thread-safe&quot;">[2]</abbr>. So `plusDays` cannot move a date. It returns a *new* date, and the old one stays where it was. This is the trap you met with [`greeting.toUpperCase();`](/synapse/programming-languages/java/first-steps/strings-the-basics) on a String:
+*Non-example: throwing the result away.* Every `java.time` object is **immutable**: once built, it never changes <abbr title="Java SE 21 API, java.time.LocalDate: &quot;This class is immutable and thread-safe&quot;">[2]</abbr>. So `plusDays` can't move a date. Instead, it returns a *new* date, and the old one stays exactly where it was. It's the same trap you met with [`greeting.toUpperCase();`](/synapse/programming-languages/java/first-steps/strings-the-basics) on a String:
 
 ```java run
 import java.time.LocalDate;
@@ -160,13 +160,13 @@ due 2024-03-15
 due 2024-03-22
 ```
 
-The first `plusDays(7)` built `2024-03-22`, and nothing kept it. The compiler gives no warning. Only the second call, whose result is assigned back to `due`, changed what the variable refers to.
+The first `plusDays(7)` built `2024-03-22`, but nothing kept it — and the compiler doesn't warn you. Only the second call, whose result is assigned back to `due`, changed what the variable refers to.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use the `Local` types for what a calendar or a clock shows: a birthday, a shop's opening time, the date and time printed on a ticket. Always keep the value that a `plus` or `minus` method returns.
+💡 **Earned rule.** Use the `Local` types for what a calendar or a clock shows: a birthday, a shop's opening time, the date and time printed on a ticket. And always keep the value that a `plus` or `minus` method returns.
 
-The cost of immutability is that assignment, every time. The benefit is that a date you pass to a method, or store in a list, can never change under you.
+The cost of immutability is that assignment, every single time. The payoff is that a date you pass to a method, or store in a list, can never change underneath you.
 
 </div>
 
@@ -174,7 +174,7 @@ The cost of immutability is that assignment, every time. The benefit is that a d
 
 ## 2. Date arithmetic: month ends, comparing, counting
 
-`plusDays`, `plusWeeks`, `plusMonths` and `plusYears` add to a date; the `minus` methods subtract. Days and weeks are exact. Months and years are not, because months differ in length.
+`plusDays`, `plusWeeks`, `plusMonths` and `plusYears` add to a date, and the matching `minus` methods subtract. Days and weeks are exact. Months and years aren't, because months come in different lengths.
 
 ```java run
 import java.time.LocalDate;
@@ -203,12 +203,12 @@ public class Main {
 2025-02-28
 ```
 
-**Analysis.** 31 January plus one month would be 31 February, which does not exist. So `plusMonths` picks the **last valid day** of February: the 29th, as 2024 is a leap year. Two months at once give 31 March. One month, then another, gives 29 March, because the first step already lost the 31st.
+**Analysis.** 31 January plus one month would be 31 February, which doesn't exist. So `plusMonths` picks the **last valid day** of February instead: the 29th, since 2024 is a leap year. Adding two months at once gives 31 March. But adding one month, then another, gives 29 March, because the first step already lost the 31st.
 
 **Intuition.**
-*Mechanism.* `plusMonths` works in three steps. It adds to the month, checks whether the day exists in the new month, and if not, moves the day back to the month's last day <abbr title="Java SE 21 API, java.time.LocalDate.plusMonths">[2]</abbr>. A missing day never makes it throw, and never spills over into the following month. `plusYears` does the same for 29 February.
+*Mechanism.* `plusMonths` works in three steps. It adds to the month, checks whether the day exists in the new month, and if it doesn't, moves the day back to that month's last day <abbr title="Java SE 21 API, java.time.LocalDate.plusMonths">[2]</abbr>. A missing day never makes it throw, and never spills over into the following month. `plusYears` does the same thing for 29 February.
 
-*Concrete bite: a billing date that drifts.* A customer signs up on 31 January and is billed monthly. Stepping the date forward one month at a time loses the 31st for good. Counting each bill from the sign-up date keeps it:
+*Concrete bite: a billing date that drifts.* Say a customer signs up on 31 January and is billed monthly. If you step the date forward one month at a time, you lose the 31st for good. If you count each bill from the sign-up date, you keep it:
 
 ```java run
 import java.time.LocalDate;
@@ -241,9 +241,9 @@ from start: 2024-03-31
 from start: 2024-04-30
 ```
 
-The stepped dates stuck on the 29th after February. The dates counted from the start return to the month's end whenever the month has one.
+After February, the stepped dates got stuck on the 29th. The dates counted from the start, on the other hand, return to the 31st whenever the month has one.
 
-**Comparing and counting.** Dates compare with `isBefore`, `isAfter` and `equals`. To count whole units between two dates, use a **`ChronoUnit`**: an enum of units such as `DAYS`, `WEEKS` and `MONTHS`, each with a `between` method. `LocalDate` also has a **natural ordering**, earliest first, so a list of dates sorts with no `Comparator`:
+**Comparing and counting.** You compare dates with `isBefore`, `isAfter` and `equals`. To count whole units between two dates, use a **`ChronoUnit`**: an enum of units such as `DAYS`, `WEEKS` and `MONTHS`, each with its own `between` method. `LocalDate` also has a **natural ordering**, earliest first, so you can sort a list of dates without a `Comparator`:
 
 ```java run
 import java.time.LocalDate;
@@ -283,13 +283,13 @@ true 31
 [2023-05-09, 2024-01-20, 2024-12-01]
 ```
 
-`between` counts **complete** units <abbr title="Java SE 21 API, java.time.LocalDate.until">[2]</abbr>, so 74 days is 10 whole weeks, not 10.6. Swap the arguments and the count turns negative. The start date is counted and the end date is not: 1 January to 2 January is 1 day.
+`between` counts only **complete** units <abbr title="Java SE 21 API, java.time.LocalDate.until">[2]</abbr>, so 74 days is 10 whole weeks, not 10.6. Swap the arguments, and the count turns negative. Note that the start date is counted but the end date isn't: 1 January to 2 January is 1 day.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** For a repeating date (a bill, a subscription, a monthly report), count each one from a fixed start with `start.plusMonths(n)`. Never step the previous result forward.
+💡 **Earned rule.** For a repeating date (a bill, a subscription, a monthly report), count each occurrence from a fixed start with `start.plusMonths(n)`. Never step the previous result forward.
 
-The cost is keeping the start date around. The benefit is that a 31st stays a 31st in every month that has one.
+The cost is keeping the start date around. The payoff is that a 31st stays a 31st in every month that has one.
 
 </div>
 
@@ -297,12 +297,12 @@ The cost is keeping the start date around. The benefit is that a 31st stays a 31
 
 ## 3. Amounts of time: `Period` and `Duration`
 
-A date says *when*. An **amount of time** says *how long*. `java.time` has two kinds, and they do not mix:
+A date tells you *when*. An **amount of time** tells you *how long*. `java.time` has two kinds of amount, and they don't mix:
 
 - **`Period`** is date-based: years, months and days, such as "2 months and 14 days" <abbr title="Java SE 21 API, java.time.Period">[3]</abbr>. It prints as `P2M14D`.
 - **`Duration`** is time-based: an exact number of seconds and nanoseconds, such as "8 hours 45 minutes" <abbr title="Java SE 21 API, java.time.Duration">[4]</abbr>. It prints as `PT8H45M`.
 
-Both print in ISO-8601 form. `P` starts the amount, and `T` separates the date part from the time part.
+Both print in ISO-8601 form: `P` starts the amount, and `T` separates the date part from the time part.
 
 ```java run
 import java.time.LocalDate;
@@ -337,9 +337,9 @@ age: 33
 P1Y2M3D P14D
 ```
 
-**Analysis.** `Period.between` removes whole months first, then counts the days left over <abbr title="Java SE 21 API, java.time.Period.between">[3]</abbr>. So `getDays()` returns `14`, the leftover days, not the `74` days between the dates. For a total, use `ChronoUnit.DAYS.between`. For someone's age in years, `Period.between(born, today).getYears()` is the right tool.
+**Analysis.** `Period.between` takes out whole months first, then counts the days left over <abbr title="Java SE 21 API, java.time.Period.between">[3]</abbr>. That's why `getDays()` returns `14` — the leftover days — and not the `74` days between the two dates. When you want a total, use `ChronoUnit.DAYS.between`. When you want someone's age in years, `Period.between(born, today).getYears()` is exactly the right tool.
 
-A `Duration` counts clock time:
+A `Duration`, by contrast, counts clock time:
 
 ```java run
 import java.time.Duration;
@@ -371,12 +371,12 @@ PT48H
 PT-8H
 ```
 
-**Analysis.** A `Duration` never rolls over into days: 25 hours prints as `PT25H`, and `ofDays(2)` becomes `PT48H`, exactly 48 hours. `toMinutes()` gives the total; `toHoursPart()` and `toMinutesPart()` give the pieces for display. A `LocalTime` has no date, so 17:00 to 9:00 is 8 hours *backwards*, not an overnight shift.
+**Analysis.** A `Duration` never rolls over into days: 25 hours prints as `PT25H`, and `ofDays(2)` becomes `PT48H`, exactly 48 hours. `toMinutes()` gives you the total, while `toHoursPart()` and `toMinutesPart()` give you the pieces for display. And since a `LocalTime` has no date, 17:00 to 9:00 is 8 hours *backwards*, not an overnight shift.
 
 **Intuition.**
-*Mechanism.* `Duration.between` measures in seconds, so both ends must have a time of day <abbr title="Java SE 21 API, java.time.Duration.between">[4]</abbr>. A `LocalDate` has no seconds to measure.
+*Mechanism.* `Duration.between` measures in seconds, so both ends need a time of day <abbr title="Java SE 21 API, java.time.Duration.between">[4]</abbr>. A `LocalDate` simply has no seconds to measure.
 
-*Concrete bite.* Ask for the `Duration` between two dates, and the program compiles, then fails at run time:
+*Concrete bite.* Ask for the `Duration` between two dates, and the program compiles fine, then fails at run time:
 
 ```java run
 import java.time.Duration;
@@ -396,13 +396,13 @@ public class Main {
 Exception in thread "main" java.time.temporal.UnsupportedTemporalTypeException: Unsupported unit: Seconds
 ```
 
-The message names the unit that is missing: a date has no seconds. Adding a `Duration` to a `LocalDate` fails the same way, and adding a `Period` to a `LocalTime` fails with `Unsupported unit: Days`.
+The message names the missing unit: a date has no seconds. Adding a `Duration` to a `LocalDate` fails the same way, and adding a `Period` to a `LocalTime` fails with `Unsupported unit: Days`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `Period` for amounts a calendar measures (a notice period, an age, "3 months free"). Use `Duration` for amounts a stopwatch measures (a timeout, a shift, a video's length). For a total count of one unit, use `ChronoUnit.X.between`, not a `Period` getter.
+💡 **Earned rule.** Use `Period` for amounts a calendar measures (a notice period, an age, "3 months free"). Use `Duration` for amounts a stopwatch measures (a timeout, a shift, a video's length). For a total count of a single unit, use `ChronoUnit.X.between`, not a `Period` getter.
 
-The cost is choosing before you compute. The benefit is that a mismatch fails loudly with `Unsupported unit`, instead of returning a plausible wrong number.
+The cost is having to choose before you compute. The payoff is that a mismatch fails loudly with `Unsupported unit`, instead of quietly returning a plausible but wrong number.
 
 </div>
 
@@ -410,10 +410,10 @@ The cost is choosing before you compute. The benefit is that a mismatch fails lo
 
 ## 4. Moments: `Instant`, `ZoneId` and `ZonedDateTime`
 
-A `LocalDateTime` of 09:00 on 3 June 2024 is not a moment. It happens once in Tokyo and 13 hours later in New York. To name a single moment you need a place, or a universal clock:
+A `LocalDateTime` of 09:00 on 3 June 2024 isn't a moment. It happens once in Tokyo, and then again 13 hours later in New York. To name a single moment, you need a place — or a universal clock:
 
-- **`Instant`** — a point on the universal time-line, counted in seconds from the **epoch**, `1970-01-01T00:00:00Z` <abbr title="Java SE 21 API, java.time.Instant">[5]</abbr>. The `Z` means UTC, the world's reference time.
-- **`ZoneId`** — a place's time-zone rules, named like `Europe/Paris` or `America/New_York`. The names come from the IANA Time Zone Database <abbr title="Java SE 21 API, java.time.ZoneId">[6]</abbr>.
+- **`Instant`** — a point on the universal time-line, counted in seconds from the **epoch**, `1970-01-01T00:00:00Z` <abbr title="Java SE 21 API, java.time.Instant">[5]</abbr>. The `Z` stands for UTC, the world's reference time.
+- **`ZoneId`** — a place's time-zone rules, with names like `Europe/Paris` or `America/New_York`. These names come from the IANA Time Zone Database <abbr title="Java SE 21 API, java.time.ZoneId">[6]</abbr>.
 - **`ZonedDateTime`** — a local date-time, plus the zone that pins it to one instant. It also stores the **offset**: how far that place's clock is from UTC at that moment, such as `-04:00`.
 
 ```java run
@@ -443,9 +443,9 @@ public class Main {
 2024-06-03T13:00:00Z
 ```
 
-**Analysis.** A 09:00 call in New York is at 22:00 in Tokyo: `withZoneSameInstant` keeps the moment and changes the clock reading. `withZoneSameLocal` does the opposite. It keeps 09:00 and moves the moment, which is a different call altogether. `toInstant()` drops the place and gives the moment in UTC, 13:00.
+**Analysis.** A 09:00 call in New York happens at 22:00 in Tokyo: `withZoneSameInstant` keeps the moment and changes the clock reading. `withZoneSameLocal` does the opposite. It keeps the 09:00 and moves the moment — which makes it a different call altogether. Finally, `toInstant()` drops the place and gives you the moment in UTC, 13:00.
 
-An `Instant` is the form to store and to send between systems. Convert it to a zone only to show it to a person:
+An `Instant` is the form you should store and send between systems. Convert it to a zone only when you show it to a person:
 
 ```java run
 import java.time.Instant;
@@ -475,12 +475,12 @@ public class Main {
 2024-06-03T18:30+05:30[Asia/Kolkata]
 ```
 
-One instant, three clock readings. Offsets are not always whole hours: India is 5 hours 30 minutes ahead of UTC.
+One instant, three clock readings. Notice that offsets aren't always whole hours: India is 5 hours 30 minutes ahead of UTC.
 
 **Intuition.**
-*Mechanism.* A `ZonedDateTime` holds three things: the local date-time, the offset and the zone. Its `equals` compares all three <abbr title="Java SE 21 API, java.time.chrono.ChronoZonedDateTime.equals and isEqual">[8]</abbr>. Its `isEqual` compares only the instant.
+*Mechanism.* A `ZonedDateTime` holds three things: the local date-time, the offset and the zone. Its `equals` compares all three <abbr title="Java SE 21 API, java.time.chrono.ChronoZonedDateTime.equals and isEqual">[8]</abbr>, while its `isEqual` compares only the instant.
 
-*Non-example: `equals` to ask "same moment?"* Two objects for the same call, one per city, are the same moment and not `equals`:
+*Non-example: `equals` to ask "same moment?"* Take two objects for the same call, one per city. They describe the same moment, yet they aren't `equals`:
 
 ```java run
 import java.time.LocalDateTime;
@@ -505,9 +505,9 @@ equals:  false
 isEqual: true
 ```
 
-That is the [equals contract](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) at work: `equals` answers "same value?", and a New York reading and a Tokyo reading are different values. For "same moment?", use `isEqual`, or compare the two `toInstant()` results.
+That's the [equals contract](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) at work. `equals` answers "same value?", and a New York reading and a Tokyo reading are different values. To ask "same moment?", use `isEqual`, or compare the two `toInstant()` results.
 
-*Concrete bite: a zone name must be exact.* `ZoneId.of` looks the name up, and a near miss fails at run time <abbr title="Java SE 21 API, java.time.ZoneId.of">[6]</abbr>:
+*Concrete bite: a zone name must be exact.* `ZoneId.of` looks the name up, and even a near miss fails at run time <abbr title="Java SE 21 API, java.time.ZoneId.of">[6]</abbr>:
 
 ```java run
 import java.time.ZoneId;
@@ -524,14 +524,14 @@ public class Main {
 Exception in thread "main" java.time.zone.ZoneRulesException: Unknown time-zone ID: America/NewYork
 ```
 
-The ID has an underscore: `America/New_York`. Avoid three-letter abbreviations such as `PST` too. They are ambiguous, and `ZoneId.of` accepts them only through a separate compatibility map <abbr title="Java SE 21 API, java.time.ZoneId.SHORT_IDS">[6]</abbr>.
+The correct ID has an underscore: `America/New_York`. Steer clear of three-letter abbreviations such as `PST`, too. They're ambiguous, and `ZoneId.of` accepts them only through a separate compatibility map <abbr title="Java SE 21 API, java.time.ZoneId.SHORT_IDS">[6]</abbr>.
 
-**The older classes.** Code written before Java 8 uses `java.util.Date` and `java.util.Calendar`. JEP 150 calls them "poor, mutable" <abbr title="JEP 150: Date & Time API, Motivation">[1]</abbr>:
+**The older classes.** Code written before Java 8 uses `java.util.Date` and `java.util.Calendar`. JEP 150 doesn't mince words, calling them "poor, mutable" <abbr title="JEP 150: Date & Time API, Motivation">[1]</abbr>:
 
-- a `Date` holds a moment, counted in milliseconds from the epoch, not a date, and its `setTime` changes it in place;
+- despite its name, a `Date` holds a moment (counted in milliseconds from the epoch), not a date, and its `setTime` changes it in place;
 - `Calendar` counts months from 0 <abbr title="Java SE 21 API, java.util.Calendar.MONTH">[11]</abbr>.
 
-When you meet them, convert at the boundary:
+When you run into them, convert at the boundary:
 
 ```java run
 import java.time.Instant;
@@ -562,9 +562,9 @@ Calendar.DECEMBER = 11
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Store and compare moments as `Instant`. Attach a `ZoneId` only to show a moment to a person, or to do calendar arithmetic in their place. A `LocalDateTime` is a moment only once you say *where*.
+💡 **Earned rule.** Store and compare moments as `Instant`. Attach a `ZoneId` only to show a moment to a person, or to do calendar arithmetic in their place. A `LocalDateTime` becomes a moment only once you say *where*.
 
-The cost is a conversion at each edge of the program. The benefit is that two servers in different countries agree on what happened when.
+The cost is a conversion at each edge of the program. The payoff is that two servers in different countries agree on what happened when.
 
 </div>
 
@@ -572,12 +572,12 @@ The cost is a conversion at each edge of the program. The benefit is that two se
 
 ## 5. Daylight saving time: gaps and overlaps
 
-In many zones the offset changes twice a year. In New York in 2024, clocks jumped from 02:00 to 03:00 on 10 March, and fell back from 02:00 to 01:00 on 3 November. That creates two kinds of local time that do not map to one instant:
+In many zones, the offset changes twice a year. In New York in 2024, the clocks jumped from 02:00 to 03:00 on 10 March, and fell back from 02:00 to 01:00 on 3 November. That creates two kinds of local time that don't map to exactly one instant:
 
 - a **gap**: a local time that never happened, such as 02:30 on 10 March;
 - an **overlap**: a local time that happened twice, such as 01:30 on 3 November.
 
-`ZonedDateTime` resolves both without throwing <abbr title="Java SE 21 API, java.time.ZonedDateTime, class description">[7]</abbr>:
+`ZonedDateTime` resolves both cases without throwing <abbr title="Java SE 21 API, java.time.ZonedDateTime, class description">[7]</abbr>:
 
 ```java run
 import java.time.LocalDateTime;
@@ -607,15 +607,15 @@ overlap: 2024-11-03T01:30-04:00[America/New_York]
 later:   2024-11-03T01:30-05:00[America/New_York]
 ```
 
-**Analysis.** In the gap, 02:30 moved **forward by the length of the gap**, to 03:30. In the overlap, 01:30 took the **earlier** offset, `-04:00` (summer time). `withLaterOffsetAtOverlap()` picks the second 01:30, `-05:00`, one hour later in real time.
+**Analysis.** In the gap, 02:30 moved **forward by the length of the gap**, landing on 03:30. In the overlap, 01:30 took the **earlier** offset, `-04:00` (summer time). If you want the second 01:30, `withLaterOffsetAtOverlap()` picks it: `-05:00`, one hour later in real time.
 
 **Intuition.**
 *Mechanism.* `ZonedDateTime` has two kinds of addition <abbr title="Java SE 21 API, java.time.ZonedDateTime.plusDays and plusHours">[7]</abbr>:
 
-- `plusDays`, `plusMonths` and `plusYears` work on the **local** time-line. They change the calendar, keep the clock reading, then look up the offset again.
+- `plusDays`, `plusMonths` and `plusYears` work on the **local** time-line. They change the calendar, keep the clock reading, and then look up the offset again.
 - `plusHours`, `plusMinutes` and `plusSeconds` work on the **instant** time-line. They add exact elapsed time.
 
-*Concrete bite.* An alarm set for 09:00 on 9 March. "Tomorrow" and "24 hours later" are different answers, because 10 March is 23 hours long:
+*Concrete bite.* Picture an alarm set for 09:00 on 9 March. "Tomorrow" and "24 hours later" give different answers, because 10 March is only 23 hours long:
 
 ```java run
 import java.time.Duration;
@@ -644,13 +644,13 @@ plusHours(24): 2024-03-10T10:00-04:00[America/New_York]
 elapsed:       PT23H
 ```
 
-The same split holds for the amount types. Adding `Period.ofDays(1)` gives 09:00, like `plusDays`. Adding `Duration.ofDays(1)` gives 10:00, because a `Duration` day is always exactly 24 hours <abbr title="Java SE 21 API, java.time.Period, class description">[3]</abbr>.
+The amount types split the same way. Adding `Period.ofDays(1)` gives 09:00, just like `plusDays`. Adding `Duration.ofDays(1)` gives 10:00, because a `Duration` day is always exactly 24 hours <abbr title="Java SE 21 API, java.time.Period, class description">[3]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** "Same time tomorrow" is `plusDays(1)` or a `Period`. "Exactly 24 hours from now" is `plusHours(24)` or a `Duration`. Say which one you mean, because they differ on two days a year.
+💡 **Earned rule.** "Same time tomorrow" means `plusDays(1)` or a `Period`. "Exactly 24 hours from now" means `plusHours(24)` or a `Duration`. Be explicit about which one you mean, because they differ on two days a year.
 
-The cost is choosing on every addition. The benefit is a reminder that fires at 09:00, and a timeout that lasts 24 hours, on the days the clocks change too.
+The cost is making that choice on every addition. The payoff is a reminder that fires at 09:00, and a timeout that lasts 24 hours — even on the days the clocks change.
 
 </div>
 
@@ -658,7 +658,7 @@ The cost is choosing on every addition. The benefit is a reminder that fires at 
 
 ## 6. Formatting and parsing
 
-`toString()` always gives ISO-8601, and `LocalDate.parse` reads ISO-8601 back. For any other layout, a **`DateTimeFormatter`** turns a date into text (formatting) and text into a date (parsing). You build one from a **pattern**: letters that stand for fields <abbr title="Java SE 21 API, java.time.format.DateTimeFormatter, Patterns for Formatting and Parsing">[9]</abbr>.
+`toString()` always gives you ISO-8601, and `LocalDate.parse` reads ISO-8601 back. For any other layout, you need a **`DateTimeFormatter`**, which turns a date into text (formatting) and text into a date (parsing). You build one from a **pattern**: a string of letters that each stand for a field <abbr title="Java SE 21 API, java.time.format.DateTimeFormatter, Patterns for Formatting and Parsing">[9]</abbr>.
 
 | Letter | Field | Example |
 |---|---|---|
@@ -671,7 +671,7 @@ The cost is choosing on every addition. The benefit is a reminder that fires at 
 | `mm` | **minute** | `07` |
 | `a` | AM or PM | `PM` |
 
-Case matters: `MM` is the month and `mm` is the minute.
+Watch the case: `MM` is the month, but `mm` is the minute.
 
 ```java run
 import java.time.LocalDate;
@@ -703,12 +703,12 @@ Tuesday, 5 March 2024, 2:07 PM
 2024-03-05 is a TUESDAY
 ```
 
-**Analysis.** The same formatter both formats and parses. The second formatter takes a **`Locale`**, `Locale.US`, which fixes the language of `Tuesday`, `March` and `PM`. Without one, a formatter uses the machine's default locale <abbr title="Java SE 21 API, DateTimeFormatter.ofPattern(String)">[9]</abbr>, and month names change from machine to machine. A formatter is immutable, so one instance can be shared.
+**Analysis.** One formatter handles both formatting and parsing. The second formatter also takes a **`Locale`**, `Locale.US`, which fixes the language of `Tuesday`, `March` and `PM`. Without one, a formatter falls back on the machine's default locale <abbr title="Java SE 21 API, DateTimeFormatter.ofPattern(String)">[9]</abbr>, and month names change from machine to machine. Since a formatter is immutable, you can safely share one instance.
 
 **Intuition.**
-*Mechanism.* The formatter reads each letter as a field, with no check that the combination makes sense. It has no way to know you meant the month when you wrote the minute.
+*Mechanism.* The formatter reads each letter as a field, without checking whether the combination makes sense. It has no way of knowing you meant the month when you wrote the minute.
 
-*Concrete bite: three wrong letters, no error.* Every line below compiles and runs, and two of them print a wrong date with no warning:
+*Concrete bite: three wrong letters, no error.* Every line below compiles and runs, yet two of them print a wrong date without any warning:
 
 ```java run
 import java.time.LocalDate;
@@ -736,11 +736,11 @@ yyyy -> 2024-12-30
 YYYY -> 2025-12-30
 ```
 
-- `mm` printed the minute, `07`, where the month belonged, and `MM` printed the month, `03`, where the minute belonged.
-- `hh` printed `02`: 14:07 on a 12-hour clock, with no `a` to say PM.
-- `YYYY` is the **week-based year** <abbr title="Java SE 21 API, DateTimeFormatter pattern letter Y">[9]</abbr>. The week holding 30 December 2024 counts as week 1 of 2025, so the date printed a year late. The bug shows only in the few days around New Year, which is why it survives testing.
+- `mm` printed the minute, `07`, where the month belonged, while `MM` printed the month, `03`, where the minute belonged.
+- `hh` printed `02`: that's 14:07 on a 12-hour clock, with no `a` to say PM.
+- `YYYY` is the **week-based year** <abbr title="Java SE 21 API, DateTimeFormatter pattern letter Y">[9]</abbr>. The week containing 30 December 2024 counts as week 1 of 2025, so the date printed a year late. The bug shows up only in the few days around New Year, which is exactly why it tends to survive testing.
 
-*Non-example: parsing text that is not ISO.* `LocalDate.parse` with no formatter accepts only ISO-8601:
+*Non-example: parsing text that isn't ISO.* Without a formatter, `LocalDate.parse` accepts only ISO-8601:
 
 ```java run
 import java.time.LocalDate;
@@ -759,9 +759,9 @@ public class Main {
 Exception in thread "main" java.time.format.DateTimeParseException: Text '15/03/2024' could not be parsed at index 0
 ```
 
-"At index 0" is the position where the text stopped matching: the first character. Pass a formatter with the matching pattern, as in the first example of this section.
+"At index 0" is the position where the text stopped matching — here, the very first character. The fix is to pass a formatter with a matching pattern, as in the first example of this section.
 
-**Invalid dates in text.** A formatter's default **resolver style** is `SMART`. For a day-of-month too large for its month, `SMART` moves the day to the month's last valid day <abbr title="Java SE 21 API, java.time.format.ResolverStyle.SMART">[10]</abbr>. `STRICT` rejects it instead:
+**Invalid dates in text.** A formatter's default **resolver style** is `SMART`. When a day-of-month is too large for its month, `SMART` moves the day back to the month's last valid day <abbr title="Java SE 21 API, java.time.format.ResolverStyle.SMART">[10]</abbr>. `STRICT`, by contrast, rejects it:
 
 ```java run
 import java.time.LocalDate;
@@ -785,18 +785,18 @@ smart:  2024-02-29
 Exception in thread "main" java.time.format.DateTimeParseException: Text '31/02/2024' could not be parsed: Invalid date 'FEBRUARY 31'
 ```
 
-A user typed 31 February, and `SMART` quietly turned it into 29 February. For input from people, use `STRICT`. Pair it with `uuuu` rather than `yyyy`. Under `STRICT`, `yyyy` is the year *of an era*, and without an era field in the pattern, every parse fails with `Unable to obtain LocalDate`.
+A user typed 31 February, and `SMART` quietly turned it into 29 February. For input that comes from people, use `STRICT` — and pair it with `uuuu` rather than `yyyy`. Under `STRICT`, `yyyy` means the year *of an era*, so without an era field in the pattern, every parse fails with `Unable to obtain LocalDate`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use ISO-8601 (`toString` and `parse`) for anything a program reads. Use a pattern only for text a person reads or types, and then use:
+💡 **Earned rule.** Use ISO-8601 (`toString` and `parse`) for anything a program reads. Use a pattern only for text that a person reads or types, and when you do, use:
 
 - `MM` for months and `HH` for 24-hour time;
 - `uuuu` or `yyyy`, never `YYYY`;
 - an explicit `Locale`;
 - `STRICT` for input.
 
-The cost is five small decisions per pattern. The benefit is dates that are right on 30 December, and a typo that fails instead of storing a wrong date.
+The cost is five small decisions per pattern. The payoff is dates that are still right on 30 December, and a typo that fails loudly instead of storing a wrong date.
 
 </div>
 
@@ -871,7 +871,7 @@ It prints `2024-03-15`. A `LocalDate` is immutable <abbr title="Java SE 21 API, 
 - `plusDays(1)` built a new date, `2024-03-16`, and returned it;
 - nothing stored the result, so it was discarded, and `d` still refers to the original date.
 
-Write `d = d.plusDays(1);` to keep it.
+To keep the new date, write `d = d.plusDays(1);`.
 
 </details>
 
@@ -895,9 +895,9 @@ Write `d = d.plusDays(1);` to keep it.
 
 <div style="border-left:4px solid #6d28d9;background:rgba(109,40,217,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-🧪 **Predict, then check.** Take the §5 alarm program. Change the start to 09:00 on **2 November** 2024, the day before the clocks fall back. Before you run it, predict the three lines: `plusDays(1)`, `plusHours(24)`, and the elapsed `Duration`.
+🧪 **Predict, then check.** Take the §5 alarm program, and change the start to 09:00 on **2 November** 2024 — the day before the clocks fall back. Before you run it, predict all three lines: `plusDays(1)`, `plusHours(24)`, and the elapsed `Duration`.
 
-If you predicted 09:00, 08:00 and `PT25H`, you have the lesson's hardest idea. **A day on the calendar and 24 hours on a stopwatch are different amounts, and `java.time` makes you say which one you mean.**
+If you predicted 09:00, 08:00 and `PT25H`, you've got the lesson's hardest idea. **A day on the calendar and 24 hours on a stopwatch are different amounts, and `java.time` makes you say which one you mean.**
 
 </div>
 

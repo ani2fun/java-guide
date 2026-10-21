@@ -6,14 +6,14 @@ prereqs: []
 
 # What Java Is & Running Code — Your First Program
 
-Java is a **compiled** language, and that one fact shapes everything you are about to do.
+Java is a **compiled** language, and that one fact shapes everything you're about to do.
 
 - You write **source code**: plain text, like the program below.
 - A tool called the **compiler** reads the *whole* file and checks it for mistakes.
-- If the file passes, the compiler translates it into **bytecode**. Bytecode is a set of instructions for an imaginary computer, the **Java Virtual Machine** (the **JVM**).
+- If the file passes, the compiler translates it into **bytecode** — a set of instructions for an imaginary computer called the **Java Virtual Machine** (the **JVM**).
 - The JVM is a real program on your machine. It reads the bytecode and carries it out.
 
-So running Java is always two steps: **compile, then run**. The payoff is portability. Bytecode targets the *virtual* machine, not your laptop, so the same compiled program runs unchanged on Windows, macOS or Linux <abbr title="The Java Virtual Machine Specification, Java SE 21, §1.2">[4]</abbr>.
+So running Java always takes two steps: **compile, then run**. The payoff is portability. Bytecode targets the *virtual* machine, not your laptop, so the same compiled program runs unchanged on Windows, macOS or Linux <abbr title="The Java Virtual Machine Specification, Java SE 21, §1.2">[4]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -25,11 +25,11 @@ So running Java is always two steps: **compile, then run**. The payoff is portab
 
 </div>
 
-This chapter gets you running real Java. It shows both halves of the loop, including what each half looks like when it says *no* — because Java says no in two very different ways.
+This chapter gets you running real Java. It shows you both halves of the loop — including what each half looks like when it says *no*, because Java says no in two very different ways.
 
-You need nothing installed. Every block with a ▶ Run button compiles and runs in a sandboxed **Java 21** environment. Every `Output:` block below was produced by compiling and running its code.
+You don't need anything installed. Every block with a ▶ Run button compiles and runs in a sandboxed **Java 21** environment, and every `Output:` block below was produced by compiling and running its code.
 
-**You'll be able to:** predict whether a broken program prints anything, from where its mistake is; compile and run a program from a terminal, naming the class and not the file; name the mistake in a `main` declaration from the JVM's launch message; predict the lines a mix of `print` and `println` produces; explain why a commented-out line never runs, and why one block comment cannot hold another.
+**You'll be able to:** predict from where its mistake is whether a broken program prints anything; compile and run a program from a terminal, naming the class rather than the file; identify the mistake in a `main` declaration from the JVM's launch message; predict the lines that a mix of `print` and `println` produces; explain why a commented-out line never runs, and why one block comment can't hold another.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -59,9 +59,9 @@ You need nothing installed. Every block with a ▶ Run button compiles and runs 
 
 ## 1. A first Java program
 
-A **program** is a list of **instructions**, also called **statements**, carried out in order. In Java, every statement must live inside a **method**: a named block of statements. Every method lives inside a **class**: a named container.
+A **program** is a list of **instructions**, also called **statements**, carried out in order. In Java, every statement has to live inside a **method**, which is a named block of statements. And every method lives inside a **class**, which is a named container.
 
-That is more scaffolding than some languages ask for, and §3 explains every word of it. For now, here is the smallest complete Java program. Run it.
+That's more scaffolding than some languages ask for, and §3 explains every word of it. For now, here's the smallest complete Java program. Go ahead and run it.
 
 ```java run
 public class Main {
@@ -76,18 +76,18 @@ public class Main {
 Hello, world!
 ```
 
-**Analysis.** The program is three nested parts:
+**Analysis.** The program has three nested parts:
 
 - The outer `public class Main { ... }` is the **class**: a container named `Main`.
-- Inside it, `public static void main(String[] args) { ... }` is the **method** named `main`. The JVM runs it first.
-- Inside *that* sits one statement, `System.out.println("Hello, world!");`, which prints a line of text.
+- Inside it, `public static void main(String[] args) { ... }` is the **method** named `main`. This is what the JVM runs first.
+- Inside *that* sits a single statement, `System.out.println("Hello, world!");`, which prints a line of text.
 
-The text between the double quotes is shown literally; the quotes themselves are not printed. The `;` ends the statement, the way a period ends a sentence.
+The text between the double quotes is shown exactly as written; the quotes themselves aren't printed. The `;` ends the statement, the way a period ends a sentence.
 
 **Intuition.**
-*Mechanism.* Running this is two phases, not one. First the **compiler** (`javac`) reads the entire file and translates it to bytecode. Only if that succeeds does the **JVM** start executing `main`, one statement at a time, top to bottom. The compiler's job is to check *before* anything runs.
+*Mechanism.* Running this happens in two phases, not one. First, the **compiler** (`javac`) reads the entire file and translates it to bytecode. Only if that succeeds does the **JVM** start executing `main`, one statement at a time, from top to bottom. The compiler's job is to check everything *before* anything runs.
 
-*Concrete bite.* Because compiling is a gate, one missing `;` means the program never runs at all. There is no partial output, only a compiler complaint pointing at the spot. Click Run and see for yourself:
+*Concrete bite.* Because compiling is a gate, a single missing `;` means the program never runs at all. There's no partial output — just a compiler complaint pointing at the spot. Click Run and see for yourself:
 
 ```java run
 public class Main {
@@ -105,9 +105,9 @@ Main.java:3: error: ';' expected
 1 error
 ```
 
-The compiler read the whole file and found that the statement on line 3 had no `;`. It refused to produce bytecode. Nothing ran, so `Hello, world!` appears nowhere.
+The compiler read the whole file and found that the statement on line 3 had no `;`, so it refused to produce bytecode. Nothing ran, which is why `Hello, world!` appears nowhere.
 
-*Non-example: a mistake the compiler cannot see.* Some mistakes pass the compiler and fail only while the program runs. Dividing a whole number by zero is one: the compiler accepts `10 / 0`, and the JVM refuses to compute it.
+*Non-example: a mistake the compiler can't see.* Some mistakes get past the compiler, and fail only while the program runs. Dividing a whole number by zero is one of them: the compiler accepts `10 / 0`, but the JVM refuses to compute it.
 
 ```java run
 public class Main {
@@ -125,16 +125,16 @@ before
 Exception in thread "main" java.lang.ArithmeticException: / by zero
 ```
 
-This time `before` *did* print. The program compiled, so the JVM started running it, line by line. It stopped at the line it could not carry out, and `after` never printed.
+This time, `before` *did* print. The program compiled, so the JVM started running it, line by line. It stopped at the line it couldn't carry out, and `after` never printed.
 
-- That is a **run-time** failure: the JVM refused while carrying the program out.
+- That's a **run-time** failure: the JVM refused while carrying the program out.
 - The missing `;` was a **compile-time** failure: `javac` refused while checking the file.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Java checks first and runs second. So a program that doesn't compile produces **no** output, not even the lines before the mistake. A run-time failure is different: every line before it has already run.
+💡 **Earned rule.** Java checks first and runs second. So a program that doesn't compile produces **no** output — not even the lines before the mistake. A run-time failure is different: every line before it has already run.
 
-The cost is up-front strictness: you must satisfy the compiler before you see anything happen. The benefit compounds with every chapter. A whole category of mistakes is caught *before* your program touches real data — the compiler is a proof-checker you run for free.
+The cost is up-front strictness: you have to satisfy the compiler before you see anything happen. But the payoff compounds with every chapter. A whole category of mistakes gets caught *before* your program touches real data — the compiler is a proof-checker you get to run for free.
 
 </div>
 
@@ -142,7 +142,7 @@ The cost is up-front strictness: you must satisfy the compiler before you see an
 
 ## 2. Compile, then run: `javac`, bytecode, and the JVM
 
-You met the two phases as error messages; now meet them as commands. When you install Java, you install the **JDK** (Java Development Kit), a toolbox. Two of its tools matter here: `javac`, the **compiler**, and `java`, the **launcher** that starts the JVM.
+You've met the two phases as error messages; now meet them as commands. When you install Java, you install the **JDK** (Java Development Kit), which is a toolbox. Two of its tools matter here: `javac`, the **compiler**, and `java`, the **launcher** that starts the JVM.
 
 ```mermaid
 ---
@@ -164,14 +164,14 @@ flowchart LR
   BC -->|"run (anywhere)"| JVM --> OUT
 ```
 
-You type these commands in a **terminal**: a window where you type a command, press Enter, and read its text reply. macOS calls it Terminal; Windows has PowerShell. On a terminal the loop is explicit, two commands:
+You type these commands in a **terminal**: a window where you type a command, press Enter, and read its text reply. macOS calls it Terminal, and Windows has PowerShell. In a terminal, the loop is explicit — two commands:
 
 ```
 javac Main.java   # compile: reads Main.java, writes Main.class (bytecode)
 java Main          # run: starts the JVM, which executes Main.class
 ```
 
-`javac` turns your `Main.java` into a new file, `Main.class`, holding bytecode. `java Main` hands that bytecode to the JVM, which runs it. Note `java Main`, not `java Main.class`: you name the **class**, not the file <abbr title="The java command, JDK 21 documentation">[5]</abbr>. Name the file, and the JVM looks for a class called `Main.class`, which does not exist:
+`javac` turns your `Main.java` into a new file, `Main.class`, which holds bytecode. `java Main` then hands that bytecode to the JVM, which runs it. Note that it's `java Main`, not `java Main.class`: you name the **class**, not the file <abbr title="The java command, JDK 21 documentation">[5]</abbr>. Name the file instead, and the JVM goes looking for a class called `Main.class`, which doesn't exist:
 
 ```
 $ java Main.class
@@ -179,7 +179,7 @@ Error: Could not find or load main class Main.class
 Caused by: java.lang.ClassNotFoundException: Main.class
 ```
 
-The Run buttons here do the same two steps for you: they compile your code as `Main.java` with `javac`, then start it with `java`. Since Java 11 there is also a one-step shortcut for a single file. `java Main.java` compiles the file in memory and runs it, and leaves no `.class` file behind <abbr title="JEP 330: Launch Single-File Source-Code Programs (JDK 11)">[6]</abbr>.
+The Run buttons here do the same two steps for you: they compile your code as `Main.java` with `javac`, then start it with `java`. Since Java 11, there's also a one-step shortcut for a single file: `java Main.java` compiles the file in memory and runs it, leaving no `.class` file behind <abbr title="JEP 330: Launch Single-File Source-Code Programs (JDK 11)">[6]</abbr>.
 
 ```java run
 public class Main {
@@ -196,10 +196,10 @@ compiled to bytecode,
 then run by the JVM.
 ```
 
-**Analysis.** Behind the Run button, two things happened in order. `javac` checked both statements and translated them into bytecode. Then the JVM executed them top to bottom: first line, then second. On a terminal you would type `javac Main.java` and then `java Main` to get the same two lines.
+**Analysis.** Behind the Run button, two things happened in order. First, `javac` checked both statements and translated them into bytecode. Then the JVM executed them from top to bottom: first line, then second. In a terminal, you'd type `javac Main.java` and then `java Main` to get the same two lines.
 
 **Intuition.**
-*Mechanism.* `java` does not run your *source*; it runs the *bytecode* the compiler produced. The JVM knows nothing of the Java language, only of the class-file format <abbr title="The Java Virtual Machine Specification, Java SE 21, §1.2">[4]</abbr>. By the time the launcher loads a class, the `.java` text is irrelevant.
+*Mechanism.* `java` doesn't run your *source*; it runs the *bytecode* the compiler produced. The JVM knows nothing about the Java language, only about the class-file format <abbr title="The Java Virtual Machine Specification, Java SE 21, §1.2">[4]</abbr>. By the time the launcher loads a class, the `.java` text no longer matters.
 
 *Concrete bite.* Ask the JVM to run a class that was never compiled, and it has nothing to load:
 
@@ -211,17 +211,17 @@ Error: Could not find or load main class Ghost
 Caused by: java.lang.ClassNotFoundException: Ghost
 ```
 
-There is no `Ghost.class`, so the JVM stops before running a single instruction. This is a *run-time* failure — the JVM complaining — not a *compile-time* one.
+There's no `Ghost.class`, so the JVM stops before running a single instruction. This is a *run-time* failure — the JVM complaining — not a *compile-time* one.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Compiling and running are separate steps with separate failures. `javac` rejects bad *source* (compile time); the JVM rejects missing or broken *bytecode* (run time).
+💡 **Earned rule.** Compiling and running are separate steps, with separate failures. `javac` rejects bad *source* (at compile time), and the JVM rejects missing or broken *bytecode* (at run time).
 
-The cost of two steps is the ceremony of compiling before running. The benefit is **portability**: `Main.class` is plain bytecode, so the same file runs on any machine with a JVM. That is why a program built on a developer's Mac runs unchanged on a Linux server.
+The cost of two steps is the ceremony of compiling before running. The payoff is **portability**: `Main.class` is plain bytecode, so the same file runs on any machine with a JVM. That's why a program built on a developer's Mac runs unchanged on a Linux server.
 
 </div>
 
-**The file name is not free.** `javac` requires a `public` class to sit in a file with the same name plus `.java` <abbr title="The Java Language Specification, Java SE 21, §7.6">[2]</abbr>. So `public class Main` belongs in `Main.java`. Put `public class Hello` in a file named `Main.java` on your own machine, and `javac` refuses:
+**You can't name the file just anything.** `javac` requires a `public` class to sit in a file with the same name, plus `.java` <abbr title="The Java Language Specification, Java SE 21, §7.6">[2]</abbr>. So `public class Main` belongs in `Main.java`. Put `public class Hello` in a file named `Main.java` on your own machine, and `javac` refuses:
 
 ```
 $ javac Main.java
@@ -231,9 +231,9 @@ public class Hello {
 1 error
 ```
 
-Here the file was `Main.java` and the class was `Hello`. Rename one to match the other. (The Run buttons hide this rule: they rename the first class to `Main` before compiling.)
+Here, the file was `Main.java` but the class was `Hello`, so rename one to match the other. (The Run buttons hide this rule from you: they rename the first class to `Main` before compiling.)
 
-For quick experiments there is a third tool, **jshell**. It is a Java REPL (Read–Eval–Print Loop): it evaluates one expression at a time, with no class and no `main`.
+For quick experiments, there's a third tool, **jshell**. It's a Java REPL (Read–Eval–Print Loop): it evaluates one expression at a time, with no class and no `main`.
 
 ```
 jshell> 1 + 1
@@ -242,13 +242,13 @@ jshell> "Java" + "!"
 $2 ==> "Java!"
 ```
 
-Type an expression, press Enter, and jshell shows the result. The names `$1` and `$2` are ones it invents for the results. It is the fastest way to answer "what does this do?" Real programs are compiled classes, though, and that is what the rest of this book writes.
+Type an expression, press Enter, and jshell shows the result. The names `$1` and `$2` are ones it invents for those results. It's the fastest way to answer "what does this do?" Real programs are compiled classes, though, and that's what the rest of this book writes.
 
 ---
 
 ## 3. Reading `public static void main(String[] args)`
 
-That line is the one piece of ceremony every Java program repeats. It is worth understanding rather than copying on faith. Each word tells the JVM *how* to start, and none of it is decoration. Here is a sketch of each part; later chapters return to most of them:
+That line is the one piece of ceremony that every Java program repeats, and it's worth understanding rather than copying on faith. Each word tells the JVM *how* to start, and none of it is decoration. Here's a sketch of each part; later chapters come back to most of them:
 
 - `public` — an **access level**: this method can be called from outside the class. The JVM starts your program from *outside* it, so the entry point must be reachable. *([Access levels](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers) come later.)*
 - `static` — this method belongs to the **class itself**, not to an **object** built from it. The JVM calls `main` *before* your program has created any objects, so `main` cannot require one. *([Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects) come later.)*
@@ -256,7 +256,7 @@ That line is the one piece of ceremony every Java program repeats. It is worth u
 - `main` — the **name** the JVM looks for, spelled exactly `main`. Java is **case-sensitive**, so `Main` (the class) and `main` (the method) are different names. The class is the container; the method is the starting point.
 - `String[] args` — a **parameter**: a slot for **command-line arguments**, the extra words typed after `java Main`. They arrive as a list of text values. You rarely need them at first, but the JVM always passes them. *([Arrays](/synapse/programming-languages/java/control-flow/arrays).)*
 
-Read as a whole, the line describes a public, class-level method named `main`. It returns nothing and takes a list of text arguments. The JVM is built to find exactly that and call it <abbr title="The Java Language Specification, Java SE 21, §12.1.4">[1]</abbr>. Two details are yours to choose: the parameter's name (`args` is only a convention), and `String... args` in place of `String[] args`.
+Read as a whole, the line describes a public, class-level method named `main` that returns nothing and takes a list of text arguments. The JVM is built to find exactly that, and call it <abbr title="The Java Language Specification, Java SE 21, §12.1.4">[1]</abbr>. Two details are yours to choose: the parameter's name (`args` is just a convention), and whether to write `String... args` instead of `String[] args`.
 
 ```java run
 public class Main {
@@ -271,12 +271,12 @@ public class Main {
 The JVM called main.
 ```
 
-**Analysis.** The JVM loaded `Main`, found a method with the shape `public static void main(String[] args)`, and called it. The modifiers, the return type, the name and the parameter type all had to match for the call to happen.
+**Analysis.** The JVM loaded `Main`, found a method shaped `public static void main(String[] args)`, and called it. The modifiers, the return type, the name and the parameter type all had to match for that call to happen.
 
 **Intuition.**
-*Mechanism.* The JVM does not run "the class". It looks for a method named `main` with this declaration and calls *that*. The name and shape are a contract. Miss any part, and there is nothing for the JVM to call.
+*Mechanism.* The JVM doesn't run "the class". It looks for a method named `main` with this exact declaration, and calls *that*. The name and shape form a contract: miss any part of it, and there's nothing for the JVM to call.
 
-*Concrete bite.* Rename `main` to `greet`. The class still **compiles** — it is a perfectly legal class — but at run time the JVM cannot find its entry point:
+*Concrete bite.* Rename `main` to `greet`. The class still **compiles** — it's a perfectly legal class — but at run time, the JVM can't find its entry point:
 
 ```java run
 public class Main {
@@ -293,9 +293,9 @@ Error: Main method not found in class Main, please define the main method as:
 or a JavaFX application class must extend javafx.application.Application
 ```
 
-It compiled, because the method is valid Java. It never ran `greet`, because the JVM only ever calls `main`. The error even reminds you of the shape it wants.
+It compiled, because the method is valid Java. But it never ran `greet`, because the JVM only ever calls `main`. The error even reminds you of the shape it wants.
 
-Each wrong part of the declaration gets its own launch message. All four versions below compile; Java 21's launcher rejects each one:
+Each wrong part of the declaration gets its own launch message. All four versions below compile, and Java 21's launcher rejects every one of them:
 
 | You wrote | The JVM says |
 |---|---|
@@ -306,19 +306,19 @@ Each wrong part of the declaration gets its own launch message. All four version
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** The entry point must be `public static void main(String[] args)`, and the JVM checks every part. The cost: a mistake in the *declaration* gives you no compile error, only a launch error, because the method you wrote is legal. It is not the one the JVM calls. When a program compiles but won't start, read the launch message: it names the part that is wrong.
+💡 **Earned rule.** The entry point must be `public static void main(String[] args)`, and the JVM checks every part of it. The cost: a mistake in the *declaration* gives you no compile error, only a launch error, because the method you wrote is legal — it just isn't the one the JVM calls. When a program compiles but won't start, read the launch message: it names the part that's wrong.
 
 </div>
 
 **A note on newer Java.** JDK 25 lets you write a simpler entry point: `void main()`, with no `public`, no `static`, no `String[] args`, and no surrounding class <abbr title="JEP 512: Compact Source Files and Instance Main Methods (JDK 25; first previewed in JDK 21 as JEP 445)">[7]</abbr>.
 
-This book teaches **JDK 21**. JDK 21 is a long-term-support release <abbr title="OpenJDK, JDK 21 project page">[9]</abbr>, and the version the Run buttons use; JDK 25, released in September 2025, is the newer one <abbr title="OpenJDK, JDK 25 project page">[8]</abbr>. The classic `public static void main(String[] args)` is what nearly all existing code uses, and it runs on every version. When you meet the short form later, you will know what it leaves out.
+This book teaches **JDK 21**. JDK 21 is a long-term-support release <abbr title="OpenJDK, JDK 21 project page">[9]</abbr>, and it's the version the Run buttons use; JDK 25, released in September 2025, is the newer one <abbr title="OpenJDK, JDK 25 project page">[8]</abbr>. The classic `public static void main(String[] args)` is what nearly all existing code uses, and it runs on every version. When you meet the short form later on, you'll know what it leaves out.
 
 ---
 
 ## 4. `System.out.println` — how a program talks back
 
-A program that cannot show anything is useless, and `System.out.println` is the statement that prints. Read it in pieces:
+A program that can't show anything is useless, and `System.out.println` is the statement that prints. Read it piece by piece:
 
 - `System.out` is the program's standard text **output**: the console.
 - `println` is an action you ask of it: "print this, then move to the next line."
@@ -339,12 +339,12 @@ first line
 second line
 ```
 
-**Analysis.** Two `println` calls produced two lines. Each printed its text and then ended the line, so the second call started fresh below the first. We never wrote anything about a line break. The "ln" in `println` *is* that automatic newline.
+**Analysis.** Two `println` calls produced two lines. Each one printed its text and then ended the line, so the second call started fresh below the first. We never wrote anything about a line break: the "ln" in `println` *is* that automatic newline.
 
 **Intuition.**
-*Mechanism.* There are two related actions. `println` prints its argument **and** ends the line. `print` (no "ln") prints its argument and **stops there**, leaving whatever comes next on the same line.
+*Mechanism.* There are two related actions. `println` prints its argument **and** ends the line. `print` (with no "ln") prints its argument and **stops there**, leaving whatever comes next on the same line.
 
-*Concrete bite.* Mix them and the difference is visible — `print` keeps the cursor on the line, `println` breaks it:
+*Concrete bite.* Mix the two, and the difference becomes visible — `print` keeps the cursor on the line, while `println` breaks it:
 
 ```java run
 public class Main {
@@ -367,7 +367,7 @@ The `a`, `b` and `c` all landed on one line (`abc`), because only the `println` 
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `println` when you want each piece on its own line, and `print` when you build a line in parts. Confusing them is cosmetic but common. A row of `print` calls runs your output together (`abc`), and a stray `println` breaks a line you meant to keep whole. When in doubt, `println` is the safe default: most output is line-at-a-time.
+💡 **Earned rule.** Use `println` when you want each piece on its own line, and `print` when you're building a line in parts. Mixing them up is cosmetic, but common. A row of `print` calls runs your output together (`abc`), and a stray `println` breaks a line you meant to keep whole. When in doubt, `println` is the safe default, since most output is line-at-a-time.
 
 </div>
 
@@ -375,7 +375,7 @@ The `a`, `b` and `c` all landed on one line (`abc`), because only the `println` 
 
 ## 5. Comments — notes for humans
 
-Not every line in a file is for the computer. A **comment** is a note for the people reading the code, and the compiler skips it entirely. Java has two forms <abbr title="The Java Language Specification, Java SE 21, §3.7">[3]</abbr>:
+Not every line in a file is meant for the computer. A **comment** is a note for the people reading the code, and the compiler skips it entirely. Java has two forms of comment <abbr title="The Java Language Specification, Java SE 21, §3.7">[3]</abbr>:
 
 - `//` ignores the rest of *that line*.
 - `/* ... */` ignores everything between the markers, across as many lines as you like.
@@ -401,17 +401,17 @@ code runs
 
 - The `//` line did nothing.
 - The inline `// ...` after the working statement was ignored, while the statement itself ran.
-- The `/* ... */` block vanished across both its lines.
-- The last line is a real `println` with `//` in front, so it never ran.
+- The `/* ... */` block vanished, across both of its lines.
+- The last line is a real `println` with `//` in front of it, so it never ran.
 
 Putting `//` before a line to disable it is called **commenting out**.
 
 **Intuition.**
-*Mechanism.* While reading your source, the compiler discards `//` to the end of the line, and everything between `/*` and `*/`. It does this before anything else. Commented text never becomes bytecode, so it cannot run.
+*Mechanism.* While reading your source, the compiler discards everything from `//` to the end of the line, and everything between `/*` and `*/` — before it does anything else. Commented text never becomes bytecode, so it can't run.
 
-*Concrete bite.* The missing line is the proof: the output is only `code runs`. The commented-out `println` was legal code, but it sat behind `//`. The compiler never saw it as a statement, so it produced nothing.
+*Concrete bite.* The missing line is the proof: the output is just `code runs`. The commented-out `println` was legal code, but it sat behind `//`, so the compiler never saw it as a statement, and it produced nothing.
 
-*Non-example: a block comment inside a block comment.* Comments do not nest <abbr title="The Java Language Specification, Java SE 21, §3.7">[3]</abbr>. A `/* ... */` comment ends at the **first** `*/`, wherever that is. Wrap a line that already carries a block comment, and the outer comment ends too early:
+*Non-example: a block comment inside a block comment.* Comments don't nest <abbr title="The Java Language Specification, Java SE 21, §3.7">[3]</abbr>. A `/* ... */` comment ends at the **first** `*/`, wherever that happens to be. Wrap a line that already carries a block comment, and the outer comment ends too early:
 
 ```java run
 public class Main {
@@ -431,13 +431,13 @@ Main.java:6: error: illegal start of expression
         ^
 ```
 
-The comment that opened on line 4 closed at `old note */` on line 5. The lone `*/` on line 6 was left over as code, and `*/` is not Java. To switch off lines that hold block comments, put `//` in front of each line.
+The comment that opened on line 4 closed at `old note */` on line 5. That left the lone `*/` on line 6 over as code — and `*/` isn't Java. To switch off lines that hold block comments, put `//` in front of each line instead.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Comment to explain **why**, not to restate **what** the code plainly does. "Comment out" a line with `//` to disable it while you experiment.
+💡 **Earned rule.** Use comments to explain **why**, not to restate **what** the code plainly does. "Comment out" a line with `//` to disable it while you experiment.
 
-The cost is that comments are never checked against the code. The compiler ignores them, so a comment gone stale states a falsehood with total confidence. Keep them honest, or delete them.
+The cost is that comments are never checked against the code. The compiler ignores them, so a comment that has gone stale states a falsehood with total confidence. Keep your comments honest, or delete them.
 
 </div>
 
@@ -501,9 +501,9 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>What does <code>System.out.println("// not a comment");</code> print, and why? Then: why does wrapping <code>/* old note */</code> in another <code>/* ... */</code> break the build?</summary>
 
-It prints `// not a comment`. Inside the double quotes, `//` is two characters of text; comments do not occur inside string literals <abbr title="The Java Language Specification, Java SE 21, §3.7">[3]</abbr>.
+It prints `// not a comment`. Inside the double quotes, `//` is just two characters of text, because comments don't occur inside string literals <abbr title="The Java Language Specification, Java SE 21, §3.7">[3]</abbr>.
 
-A block comment ends at the first `*/`. The inner `old note */` closes the outer comment, and the outer `*/` is left over as code, which javac rejects.
+A block comment ends at the first `*/`. The inner `old note */` closes the outer comment, so the outer `*/` is left over as code, which javac rejects.
 
 </details>
 
@@ -525,9 +525,9 @@ A block comment ends at the first `*/`. The inner `old note */` closes the outer
 
 <div style="border-left:4px solid #6d28d9;background:rgba(109,40,217,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-🧪 **Predict, then check.** Look again at the §3 program whose method is named `greet` instead of `main`. Before re-running it, answer two questions: does it **compile**? And does it **run**? Then fix it by renaming `greet` to `main`, and predict the output before clicking Run. 
+🧪 **Predict, then check.** Look again at the §3 program whose method is named `greet` instead of `main`. Before re-running it, answer two questions: does it **compile**? And does it **run**? Then fix it by renaming `greet` to `main`, and predict the output before you click Run. 
 
-If you can explain why the broken version compiles but won't start, you have the most important idea in this chapter. **Java checks your program at compile time and again at run time, and the two stages fail in different ways.**
+If you can explain why the broken version compiles but won't start, you've got the most important idea in this chapter. **Java checks your program at compile time and again at run time, and the two stages fail in different ways.**
 
 </div>
 

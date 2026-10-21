@@ -6,9 +6,16 @@ prereqs: []
 
 # Robust OOP & Error Handling: Overview
 
-This is Chapter 5, where the object model becomes complete and Java turns toward modern, functional, and well-structured code. You'll specialize types with [inheritance](/synapse/programming-languages/java/classes-and-objects/classes-and-objects) and watch polymorphism pick the right behavior at run time; define contracts with abstract classes and interfaces; handle failure deliberately with exceptions; turn behavior into values with lambdas; model closed sets of data with sealed types and consume them with pattern matching; and learn how packages, modules, and build tools organize and ship real code.
+Welcome to Chapter 5. This is where the object model comes together, and Java turns toward modern, functional, well-structured code. Here's what's ahead:
 
-Six lessons, in order:
+- You'll specialize types with [inheritance](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism), and watch polymorphism pick the right behavior at run time.
+- You'll define contracts with abstract classes and interfaces.
+- You'll handle failure deliberately with exceptions.
+- You'll turn behavior into values with lambdas.
+- You'll model closed sets of data with sealed types, and consume them with pattern matching.
+- Finally, you'll learn how packages, modules and build tools organize and ship real code.
+
+There are six lessons, in this order:
 
 1. [**Inheritance & Polymorphism**](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism) — `extends`, overriding, `super`, dynamic dispatch, `final`, and the `Object` methods.
 2. [**Abstract Classes & Interfaces**](/synapse/programming-languages/java/robust-oop/abstract-classes-and-interfaces) — abstract methods, interfaces, `default` methods, and one-class/many-interfaces.
@@ -17,7 +24,7 @@ Six lessons, in order:
 5. [**Sealed Classes & Pattern Matching**](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching) — `sealed`, pattern matching for `instanceof`, switch patterns, and record patterns.
 6. [**Packages, Modules & the Build**](/synapse/programming-languages/java/robust-oop/packages-modules-and-the-build) — packages and the classpath, JPMS modules, JARs, and Maven/Gradle.
 
-Every code block with a ▶ Run button is live; the project-level examples in the final lesson are shown as real terminal sessions. The highest-value habit in this chapter is to **ask "what's the right tool for this shape of problem"** — inheritance vs interfaces vs sealed types each fit a different situation, and choosing well is most of good design.
+Every code block with a ▶ Run button is live. The project-level examples in the final lesson are shown as real terminal sessions instead. The most valuable habit you can build in this chapter is to **ask "what's the right tool for this shape of problem"**. Inheritance, interfaces and sealed types each fit a different situation, and choosing well is most of what good design is.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 

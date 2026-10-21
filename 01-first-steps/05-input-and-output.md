@@ -6,12 +6,12 @@ prereqs: []
 
 # Input & Output — Talking With the User
 
-A program becomes useful the moment it can take input from a person and respond. Both halves are **method calls on stream objects**. A **stream** is a flow of characters in one direction: out to the screen, or in from the keyboard.
+A program gets useful the moment it can take input from a person and respond. Both halves come down to **method calls on stream objects**. A **stream** is a flow of characters in one direction: out to the screen, or in from the keyboard.
 
 - `System.out` is an object you send text to, with `println` and `printf`.
 - A `Scanner` wraps `System.in`, the keyboard, and turns the characters someone types into typed *values*.
 
-The chapter turns on one idea that ties First Steps together: reading input is **parsing**, turning text into a value of a type. `Scanner`'s `nextInt()` hands you a real `int`, ready for the arithmetic of [Numbers and arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic). When the typed text is not a number, the parse fails loudly.
+One idea ties this chapter, and First Steps as a whole, together: reading input is **parsing**, which means turning text into a value of a type. `Scanner`'s `nextInt()` hands you a real `int`, ready for the arithmetic of [Numbers and arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic). And when the typed text isn't a number, the parse fails loudly.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -27,10 +27,10 @@ Every output below was produced by compiling and running the code on Java 21.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **A note on the Run button and typed input.** The sandbox behind ▶ Run compiles and runs your code, but it cannot pause to let you type.
+📘 **A note on the Run button and typed input.** The sandbox behind ▶ Run compiles and runs your code, but it can't pause to let you type.
 
-- So each real `Scanner(System.in)` example is shown as **static** code, with the exact output it produces *for a stated entry*. Each was verified by running it with that input supplied.
-- Beside each, a **runnable twin** points the Scanner at a fixed piece of text instead of the keyboard. The methods behave identically, so you can click Run and experiment.
+- So each real `Scanner(System.in)` example appears as **static** code, with the exact output it produces *for a stated entry*. We verified each one by running it with that input supplied.
+- Next to each, a **runnable twin** points the Scanner at a fixed piece of text instead of the keyboard. The methods behave the same way, so you can click Run and experiment.
 
 On your own machine, `Scanner(System.in)` pauses and waits for you to type.
 
@@ -66,7 +66,7 @@ On your own machine, `Scanner(System.in)` pauses and waits for you to type.
 
 ## 1. Building output with `printf`
 
-You already have `println` for plain lines. For *formatted* output, such as a number to two decimals or values slotted into a template, Java has `printf` and its sibling `String.format`. A **format string** holds placeholders, and the values that fill them follow, in order <abbr title="Java SE 21 API, java.util.Formatter">[1]</abbr>:
+You already have `println` for plain lines. For *formatted* output, like a number to two decimals or values slotted into a template, Java gives you `printf` and its sibling `String.format`. A **format string** holds placeholders, and the values that fill them follow in order <abbr title="Java SE 21 API, java.util.Formatter">[1]</abbr>:
 
 - `%s` is any value, as text.
 - `%d` is a whole number, and `%f` a decimal.
@@ -97,7 +97,7 @@ score = 95
 
 - `printf` filled `%s` with `name` (`"Ada"`) and `%d` with `score` (`95`), and `%n` ended the line.
 - `%.2f` rendered `pi` rounded to two decimals: `3.14`.
-- `String.format` does the same formatting, but *returns* the result as a String instead of printing it. Use it when you want to keep the text.
+- `String.format` does the same formatting, but it *returns* the result as a String instead of printing it. Reach for it when you want to keep the text.
 
 `%n` is the platform's own line separator <abbr title="Java SE 21 API, java.util.Formatter">[1]</abbr>, so prefer it to `\n` in a format string.
 
@@ -119,7 +119,7 @@ public class Main {
 Exception in thread "main" java.util.IllegalFormatConversionException: d != java.lang.String
 ```
 
-`%d` demands a whole number, but a String was supplied, so `printf` throws `IllegalFormatConversionException`. Read the message as "`d` does not fit a `String`". The reverse fails too: `printf("%.2f%n", 5)` throws `f != java.lang.Integer`, because `5` is an `int`. Write `5.0`, or divide by `2.0` first.
+`%d` demands a whole number, but it got a String, so `printf` throws `IllegalFormatConversionException`. Read the message as "`d` does not fit a `String`". The reverse fails too: `printf("%.2f%n", 5)` throws `f != java.lang.Integer`, because `5` is an `int`. Write `5.0`, or divide by `2.0` first.
 
 *Non-example: a bare `%` sign.* A `%` always starts a specifier. So `"50% done"` is read as `% d`, a specifier with no value to fill it:
 
@@ -136,11 +136,11 @@ public class Main {
 50Exception in thread "main" java.util.MissingFormatArgumentException: Format specifier '% d'
 ```
 
-`printf` printed `50`, then found `% d` with no argument left. The exception's message starts on the same line, because nothing had ended the line. Write `%%` for a literal percent sign: `printf("%d%% done%n", 50)` prints `50% done`.
+`printf` printed `50`, then hit `% d` with no argument left. The exception's message starts on the same line, because nothing had ended that line yet. Write `%%` for a literal percent sign: `printf("%d%% done%n", 50)` prints `50% done`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Match each specifier to its value's type: `%d` for whole numbers, `%f` for decimals, `%s` for anything. Use `%.Nf` to fix the number of decimals, `%n` for line breaks, and `%%` for a percent sign. The cost of `printf`'s power is that mismatches are *run-time* errors. The compiler does not check format strings against their arguments, so a wrong `%d`/`%s` surfaces only when that line runs.
+💡 **Earned rule.** Match each specifier to its value's type: `%d` for whole numbers, `%f` for decimals, `%s` for anything. Use `%.Nf` to fix the number of decimals, `%n` for line breaks, and `%%` for a percent sign. The price of `printf`'s power is that mismatches are *run-time* errors. The compiler doesn't check format strings against their arguments, so a wrong `%d`/`%s` shows up only when that line runs.
 
 </div>
 
@@ -172,9 +172,9 @@ public class Main {
 What's your name? Hello, Ada!
 ```
 
-**Analysis.** `new Scanner(System.in)` built a Scanner reading the keyboard. `nextLine()` waited for a line and returned it as a String, which we greeted. The prompt and the greeting appear together here because this page does not show your keystrokes. In a terminal you would see `Ada` where you typed it, between the prompt and the greeting.
+**Analysis.** `new Scanner(System.in)` built a Scanner that reads the keyboard. `nextLine()` waited for a line and returned it as a String, which we then greeted. The prompt and the greeting run together here because this page doesn't show your keystrokes. In a terminal, you'd see `Ada` where you typed it, between the prompt and the greeting.
 
-Here is the **runnable twin**. It is identical, except that its Scanner reads a fixed String, so you can click Run:
+Here's the **runnable twin**. It's identical, except its Scanner reads a fixed String, so you can click Run:
 
 ```java run
 import java.util.Scanner;
@@ -218,12 +218,12 @@ public class Main {
 [London]
 ```
 
-`next()` returned `Ada` and left the Scanner at the space. `nextLine()` then returned the *rest of that line*, `" Lovelace"`, space included. Only the second `nextLine()` reached `London`. The brackets make each value's edges visible.
+`next()` returned `Ada` and left the Scanner sitting at the space. `nextLine()` then returned the *rest of that line*, `" Lovelace"`, space included. Only the second `nextLine()` got to `London`. The brackets show exactly where each value starts and ends.
 
 **Intuition.**
-*Mechanism.* A `Scanner` is a reader over a **source**. `new Scanner(System.in)` reads the keyboard; `new Scanner("Ada")` reads a fixed string. `nextLine`, `next` and `nextInt` behave identically over either. The Scanner keeps a position in its source, and each call consumes a little more from that position.
+*Mechanism.* A `Scanner` is a reader over a **source**. `new Scanner(System.in)` reads the keyboard; `new Scanner("Ada")` reads a fixed string. `nextLine`, `next` and `nextInt` behave the same over either one. The Scanner keeps a position in its source, and each call consumes a little more from that position.
 
-*Concrete bite.* Ask for input that is not there, and it throws:
+*Concrete bite.* Ask for input that isn't there, and it throws:
 
 ```java run
 import java.util.Scanner;
@@ -242,11 +242,11 @@ public class Main {
 Exception in thread "main" java.util.NoSuchElementException: No line found
 ```
 
-The source is empty, so `nextLine()` has nothing to return, and it throws `NoSuchElementException`. This is also why a `Scanner(System.in)` program fails when run on this page: there is no keyboard to read. That is why the real examples here are shown statically.
+The source is empty, so `nextLine()` has nothing to return, and it throws `NoSuchElementException`. It's also why a `Scanner(System.in)` program fails when you run it on this page: there's no keyboard to read. And that's why the real examples here are shown as static code.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Create one Scanner over `System.in` for real input; point one at a String only to demo or test. The cost is that a Scanner assumes input exists: read past the end, and it throws. A robust program checks `hasNextLine()` or `hasNextInt()` first. You will write that guard once you have [conditionals](/synapse/programming-languages/java/control-flow/conditionals).
+💡 **Earned rule.** Create one Scanner over `System.in` for real input, and point one at a String only to demo or test. The catch is that a Scanner assumes input exists: read past the end, and it throws. A robust program checks `hasNextLine()` or `hasNextInt()` first. You'll write that guard once you have [conditionals](/synapse/programming-languages/java/control-flow/conditionals).
 
 </div>
 
@@ -254,7 +254,7 @@ The source is empty, so `nextLine()` has nothing to return, and it throws `NoSuc
 
 ## 3. Reading numbers: `nextInt` and `nextDouble`
 
-`nextInt()` reads the next token and parses it as an `int`; `nextDouble()` parses a `double`. The Scanner does the text-to-number conversion for you, so what you get back is a real number, ready for arithmetic.
+`nextInt()` reads the next token and parses it as an `int`, and `nextDouble()` parses a `double`. The Scanner handles the text-to-number conversion for you, so you get back a real number, ready for arithmetic.
 
 ```java
 import java.util.Scanner;
@@ -274,7 +274,7 @@ public class Main {
 Enter your age: Next year you'll be 37
 ```
 
-**Analysis.** `nextInt()` read `36` and returned the **int** `36`, not the text `"36"`, so `age + 1` is real arithmetic: `37`. The parentheses earn their keep. As [Strings, the basics](/synapse/programming-languages/java/first-steps/strings-the-basics) showed, `"… be " + age + 1` would join into `"… be 361"`; `(age + 1)` forces the addition first. The runnable twin reads the number from a fixed source:
+**Analysis.** `nextInt()` read `36` and returned the **int** `36`, not the text `"36"`, so `age + 1` is real arithmetic: `37`. The parentheses earn their keep, too. As [Strings, the basics](/synapse/programming-languages/java/first-steps/strings-the-basics) showed, `"… be " + age + 1` would join into `"… be 361"`. `(age + 1)` forces the addition first. The runnable twin reads the number from a fixed source:
 
 ```java run
 import java.util.Scanner;
@@ -294,9 +294,9 @@ Next year you'll be 37
 ```
 
 **Intuition.**
-*Mechanism.* `nextInt()` reads characters up to the next space or line break, and parses them into an `int`. It stops *before* the line break that ends the line: it consumes the number token, not the line.
+*Mechanism.* `nextInt()` reads characters up to the next space or line break, and parses them into an `int`. It stops *before* the line break that ends the line. In other words, it consumes the number token, not the line.
 
-*Concrete bite.* That leftover line break is the famous Scanner trap. A `nextLine()` after a `nextInt()` reads the *rest of the number's line*, which is empty, not the next line:
+*Concrete bite.* That leftover line break is the famous Scanner trap. A `nextLine()` after a `nextInt()` reads the *rest of the number's line*, which is empty, instead of the next line:
 
 ```java run
 import java.util.Scanner;
@@ -316,9 +316,9 @@ public class Main {
 age=36 name=[]
 ```
 
-`nextInt()` read `36` and stopped before its line break. The following `nextLine()` returned everything left on that same line, which is nothing. So `name` is empty (`[]`), not `"Ada"`. `nextLine()` "returns the rest of the current line" <abbr title="Java SE 21 API, java.util.Scanner">[2]</abbr>, and here the rest was empty.
+`nextInt()` read `36` and stopped before its line break. The `nextLine()` that followed returned everything left on that same line, which is nothing. So `name` is empty (`[]`), not `"Ada"`. `nextLine()` "returns the rest of the current line" <abbr title="Java SE 21 API, java.util.Scanner">[2]</abbr>, and here the rest was empty.
 
-The fix is one extra `sc.nextLine()` after the `nextInt()`, to swallow the leftover line break:
+The fix is one extra `sc.nextLine()` after the `nextInt()`, which swallows the leftover line break:
 
 ```java run
 import java.util.Scanner;
@@ -341,7 +341,7 @@ age=36 name=[Ada]
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** `nextInt` and `nextDouble` read a *token*, and leave the rest of the line, line break included, unread. When you mix them with `nextLine`, consume that leftover line break first. The cost of Scanner's token model is this trap: when a `nextLine()` after a `nextInt()` comes back empty, this is why.
+💡 **Earned rule.** `nextInt` and `nextDouble` read a *token* and leave the rest of the line, line break included, unread. When you mix them with `nextLine`, consume that leftover line break first. This trap is the price of Scanner's token model. Whenever a `nextLine()` after a `nextInt()` comes back empty, this is why.
 
 </div>
 
@@ -349,7 +349,7 @@ age=36 name=[Ada]
 
 ## 4. A first interactive program
 
-Put it together: read two numbers, add them, and report the result. This **read → compute → output** skeleton underlies countless programs.
+Let's put it all together: read two numbers, add them, and report the result. Countless programs are built on this **read → compute → output** skeleton.
 
 ```java
 import java.util.Scanner;
@@ -371,7 +371,7 @@ public class Main {
 First number: Second number: 7 + 5 = 12
 ```
 
-**Analysis.** Two `nextInt()` calls read `7` and `5` as `int`s, then `printf` reported the sum. Reading with `nextInt`, rather than as text, is what makes `a + b` arithmetic (`12`) and not concatenation (`"75"`). The runnable twin supplies both numbers from one fixed source; the single space separates the two tokens:
+**Analysis.** Two `nextInt()` calls read `7` and `5` as `int`s, and then `printf` reported the sum. Reading with `nextInt`, instead of as text, is what makes `a + b` arithmetic (`12`) rather than concatenation (`"75"`). The runnable twin supplies both numbers from one fixed source, with a single space separating the two tokens:
 
 ```java run
 import java.util.Scanner;
@@ -392,9 +392,9 @@ public class Main {
 ```
 
 **Intuition.**
-*Mechanism.* `nextInt()` skips leading spaces and reads one whole-number token, so `"7 5"` yields `7`, then `5`, across two calls. The read → compute → output shape is the spine of interactive programs.
+*Mechanism.* `nextInt()` skips leading spaces and reads one whole-number token, so `"7 5"` yields `7`, then `5`, across two calls. The read → compute → output shape is the backbone of interactive programs.
 
-*Concrete bite.* Drop the number-ness, read as text and add, and `+` flips back to concatenation:
+*Concrete bite.* Lose the number-ness, by reading as text and then adding, and `+` flips back to concatenation:
 
 ```java run
 public class Main {
@@ -410,7 +410,7 @@ public class Main {
 75
 ```
 
-Two strings joined give `"75"`, not `12`. When you already hold the text, convert it with `Integer.parseInt`, or `Double.parseDouble` for a decimal <abbr title="Java SE 21 API, java.lang.Integer">[3]</abbr>. This is the deliberate conversion that [Variables and primitive types](/synapse/programming-languages/java/first-steps/variables-and-primitive-types) promised:
+Joining two strings gives `"75"`, not `12`. When you already hold the text, convert it with `Integer.parseInt`, or `Double.parseDouble` for a decimal <abbr title="Java SE 21 API, java.lang.Integer">[3]</abbr>. That's the deliberate conversion that [Variables and primitive types](/synapse/programming-languages/java/first-steps/variables-and-primitive-types) promised:
 
 ```java run
 public class Main {
@@ -433,7 +433,7 @@ public class Main {
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Structure interactive programs as read → convert → compute → output. Read numbers *as numbers* (`nextInt`/`nextDouble`), or convert held text with `Integer.parseInt`, so `+` stays arithmetic. The cost of keeping numbers as text and converting late is the concatenation bug. Convert at the boundary, where the text comes in.
+💡 **Earned rule.** Structure interactive programs as read → convert → compute → output. Read numbers *as numbers* (`nextInt`/`nextDouble`), or convert held text with `Integer.parseInt`, so `+` stays arithmetic. Keep numbers as text and convert late, and you pay with the concatenation bug. Convert at the boundary, where the text comes in.
 
 </div>
 
@@ -441,7 +441,7 @@ public class Main {
 
 ## 5. When the input is bad
 
-Parsing can fail, and on real input it is not rare:
+Parsing can fail, and with real input that's not rare:
 
 - `nextInt()` accepts only a token that *is* an `int`. A word, a decimal, or a number past `2147483647` makes it throw `InputMismatchException` <abbr title="Java SE 21 API, java.util.Scanner">[2]</abbr>.
 - `Integer.parseInt` throws `NumberFormatException` when the String is not a whole number <abbr title="Java SE 21 API, java.lang.Integer">[3]</abbr>.
@@ -463,9 +463,9 @@ public class Main {
 Exception in thread "main" java.util.InputMismatchException
 ```
 
-`nextInt()` found `seven`, which is not an integer, and threw. The program halted before printing. A user who types `seven` instead of `7` hits this.
+`nextInt()` found `seven`, which isn't an integer, and threw. The program halted before printing anything. Any user who types `seven` instead of `7` runs into this.
 
-A number too big for an `int` fails the same way: `nextInt()` on `3000000000` throws `InputMismatchException: For input string: "3000000000"`. The same failure, when you parse a String yourself:
+A number too big for an `int` fails the same way: `nextInt()` on `3000000000` throws `InputMismatchException: For input string: "3000000000"`. Here's the same failure when you parse a String yourself:
 
 ```java run
 public class Main {
@@ -482,18 +482,18 @@ public class Main {
 Exception in thread "main" java.lang.NumberFormatException: For input string: "3.5"
 ```
 
-`Integer.parseInt("42")` worked and printed `42`. `Integer.parseInt("3.5")` failed, because `"3.5"` is not a *whole* number, with `NumberFormatException`, halting the program. `parseInt` is strict about spaces too: `Integer.parseInt(" 42")` fails with `For input string: " 42"`. Strip the text first.
+`Integer.parseInt("42")` worked and printed `42`. `Integer.parseInt("3.5")` failed with `NumberFormatException`, because `"3.5"` isn't a *whole* number, and that halted the program. `parseInt` is strict about spaces too: `Integer.parseInt(" 42")` fails with `For input string: " 42"`. Strip the text first.
 
 **Intuition.**
-*Mechanism.* Both `nextInt` and `Integer.parseInt` validate as they parse. If the characters do not form an `int`, there is no value to return, so they throw rather than guess.
+*Mechanism.* Both `nextInt` and `Integer.parseInt` validate as they parse. If the characters don't form an `int`, there's no value to return, so they throw instead of guessing.
 
-*Concrete bite.* The outputs above are the demonstration: `42` prints, then the bad parse throws and execution stops. Real user input is unpredictable, so this is not an edge case; it is an ordinary day.
+*Concrete bite.* The outputs above are the demonstration: `42` prints, then the bad parse throws and execution stops. Real user input is unpredictable, so this isn't an edge case. It's an ordinary day.
 
-**Decimals and your computer's language.** A Scanner reads numbers in the format of your computer's language settings <abbr title="Java SE 21 API, java.util.Scanner">[2]</abbr>, and so does `printf`. The outputs on this page come from a computer set to US English, where the decimal mark is a point. On a computer set to German, `nextDouble()` rejects `3.5` with `InputMismatchException` and expects `3,5`, and `printf("%.2f%n", 3.14159)` prints `3,14`.
+**Decimals and your computer's language.** A Scanner reads numbers in the format of your computer's language settings <abbr title="Java SE 21 API, java.util.Scanner">[2]</abbr>, and so does `printf`. The outputs on this page come from a computer set to US English, where the decimal mark is a point. But on a computer set to German, `nextDouble()` rejects `3.5` with `InputMismatchException` and expects `3,5`, and `printf("%.2f%n", 3.14159)` prints `3,14`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Convert at the boundary, and assume conversion *can* fail on real input. The cost of unhandled bad input is a crash, right at the parse, with everything after it skipped. Recovering gracefully, by asking again instead of crashing, needs `try`/`catch`, which [Exceptions](/synapse/programming-languages/java/robust-oop/exceptions) teaches. For now, know that it happens, and where.
+💡 **Earned rule.** Convert at the boundary, and assume conversion *can* fail on real input. Unhandled bad input costs you a crash right at the parse, and everything after it gets skipped. Recovering gracefully, by asking again instead of crashing, takes `try`/`catch`, which [Exceptions](/synapse/programming-languages/java/robust-oop/exceptions) teaches. For now, just know that it happens, and where.
 
 </div>
 
@@ -584,9 +584,9 @@ For the average of `"7 5"`, divide by `2.0` so the division is floating-point: `
 
 <div style="border-left:4px solid #6d28d9;background:rgba(109,40,217,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-🧪 **Predict, then check.** Take the §4 runnable twin and predict its output if the source string were `"10 20"` instead of `"7 5"`. Now predict what happens if the source were `"ten 20"`: which line throws, and with what exception?
+🧪 **Predict, then check.** Take the §4 runnable twin and predict its output if the source string were `"10 20"` instead of `"7 5"`. Now predict what happens if the source were `"ten 20"`. Which line throws, and with what exception?
 
-Finally, change the twin to read two numbers and print their **average** to two decimals with `printf`. Hint: from [Numbers and arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic), `nextInt` gives `int`s, so force floating-point division before the `%.2f`. Reach for `nextDouble` if you prefer to read decimals directly. Build it and confirm.
+Finally, change the twin to read two numbers and print their **average** to two decimals with `printf`. Hint: as you saw in [Numbers and arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic), `nextInt` gives you `int`s, so force floating-point division before the `%.2f`. Or reach for `nextDouble` if you'd rather read decimals directly. Build it and confirm.
 
 </div>
 

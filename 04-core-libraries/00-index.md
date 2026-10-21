@@ -6,9 +6,9 @@ prereqs: []
 
 # Core Libraries & Data Structures: Overview
 
-This is Chapter 4. With [the object model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) behind you, these seven lessons give you the standard library's workhorses — the growable, hashed, and sorted collections you'll reach for every day — and the *contracts* that make your own types behave correctly inside them. The thread running through the chapter: a collection is only as good as the `equals`/`hashCode` of what you put in it, and the modern type tools (generics, records, sealed) let you model data so the compiler catches mistakes for you.
+Welcome to Chapter 4. With [the object model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) behind you, these seven lessons introduce the standard library's workhorses — the growable, hashed, and sorted collections you'll reach for every day — along with the *contracts* that make your own types behave correctly inside them. Two threads run through the chapter. A collection is only as good as the `equals`/`hashCode` of what you put in it. And the modern type tools (generics, records, sealed) let you model data so that the compiler catches mistakes for you.
 
-Seven lessons, in order:
+There are seven lessons, in this order:
 
 1. [**Strings in Depth**](/synapse/programming-languages/java/core-libraries/strings-in-depth) — the cost of immutability, `StringBuilder`, interning, formatting, and text blocks.
 2. [**The Collections Framework**](/synapse/programming-languages/java/core-libraries/the-collections-framework) — `List` and program-to-the-interface, the `Iterator`, and choosing an implementation.
@@ -18,7 +18,7 @@ Seven lessons, in order:
 6. [**Enums & Records**](/synapse/programming-languages/java/core-libraries/enums-and-records) — fixed constant sets, immutable data carriers, and a first look at `sealed`.
 7. [**Dates & Times**](/synapse/programming-languages/java/core-libraries/dates-and-times) — `LocalDate` and friends, `Period` vs `Duration`, time zones, daylight saving, and `DateTimeFormatter`.
 
-Every code block with a ▶ Run button is live. The highest-value habit in this chapter is to **respect the contracts**: when you put your own type into a `HashSet` or use it as a `HashMap` key, ask whether its `equals`/`hashCode` are correct — and prefer a `record`, which gets them right for free.
+Every code block with a ▶ Run button is live. The most valuable habit in this chapter is to **respect the contracts**: whenever you put your own type into a `HashSet` or use it as a `HashMap` key, ask whether its `equals`/`hashCode` are correct — and prefer a `record`, which gets them right for free.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 

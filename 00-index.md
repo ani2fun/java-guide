@@ -6,16 +6,16 @@ prereqs: []
 
 # Java
 
-Most Java tutorials hand you a pile of features and ask you to remember them. This one does the opposite: it finds the **one generative idea** under each topic and shows every rule as a *consequence* of it. You should finish each lesson able to re-derive the rules, not just recite them — and able to predict what a snippet prints, or *whether it even compiles*, before you run it.
+Most Java tutorials hand you a pile of features and ask you to remember them. This one does the opposite. It finds the **one generative idea** underneath each topic, and shows every rule as a *consequence* of that idea. By the end of each lesson, you should be able to re-derive the rules, not just recite them — and to predict what a snippet prints, or *whether it even compiles*, before you run it.
 
-The book is a single text, read top to bottom. It starts assuming **you have never written a line of code in any language** and ends on generics, concurrency, the memory model, and modern idioms. Early lessons introduce every term before using it; later lessons assume the earlier ones are done and move at a fluent reader's pace. What never changes is the standard of explanation: every claim is backed by code that was actually compiled and run, and every rule comes with its cost. One idea recurs from the first page to the last — **Java checks your program twice, at compile time and at run time, and the two stages fail in different ways** — so learning to read both kinds of message is learning the language.
+The book is a single text, meant to be read from top to bottom. It starts by assuming **you've never written a line of code in any language**, and it ends on generics, concurrency, the memory model, and modern idioms. Early lessons introduce every term before using it; later lessons assume you've done the earlier ones, and move at a fluent reader's pace. What never changes is the standard of explanation: every claim is backed by code that was actually compiled and run, and every rule comes with its cost. One idea runs from the first page to the last — **Java checks your program twice, at compile time and at run time, and the two stages fail in different ways** — so learning to read both kinds of message is learning the language.
 
 ## Reading conventions
 
-- **Every code block with a Run button is real.** Synapse compiles and runs it in a sandboxed **Java 21 (OpenJDK)** runner — the same one that produced every `Output:` block in this book. Click ▶ Run, edit the code, run it again. The output you see is the output we verified.
-- **When the lesson is a compile error, the block is labelled `Compiler error:`** and shows the real `javac` diagnostic — because in Java, many of the most important lessons happen *before* the program runs.
-- **Blocks without a Run button are deliberate** — short fragments, or programs shown precisely because they need keyboard input the sandbox can't supply. Their output is still shown and still real.
-- **Every lesson is built on a thesis** stated in its first paragraph, and a fixed rhythm: concept → code → verified output → analysis ("what happened") → an **Intuition** box ("why it must be so").
+- **Every code block with a Run button is real.** Synapse compiles and runs it in a sandboxed **Java 21 (OpenJDK)** runner — the same one that produced every `Output:` block in this book. Click ▶ Run, edit the code, and run it again. The output you see is the output we verified.
+- **When the lesson is a compile error, the block is labelled `Compiler error:`**, and it shows the real `javac` diagnostic — because in Java, many of the most important lessons happen *before* the program runs.
+- **Blocks without a Run button are deliberate.** They're either short fragments, or programs shown precisely because they need keyboard input that the sandbox can't supply. Their output is still shown, and still real.
+- **Every lesson is built on a thesis** stated in its first paragraph, and follows a fixed rhythm: concept → code → verified output → analysis ("what happened") → an **Intuition** box ("why it must be so").
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -33,7 +33,7 @@ This note repeats, word for word, at the top of every chapter overview, so a ret
 
 ## The six chapters
 
-The book climbs six chapters. Earlier chapters are prerequisites for later ones; topics that matter most return later at greater depth (the **spiral** — e.g. `==` vs `.equals` gets a gentle pass with strings in Chapter 1, a rigorous "object model" pass in Chapter 3, and a third pass in the `equals`/`hashCode` contract in Chapter 4, each referencing back rather than re-teaching).
+The book climbs through six chapters. Earlier chapters are prerequisites for later ones, and the topics that matter most come back later at greater depth. This is the **spiral**: for example, `==` vs `.equals` gets a gentle pass with strings in Chapter 1, a rigorous "object model" pass in Chapter 3, and a third pass with the `equals`/`hashCode` contract in Chapter 4 — each one referring back rather than re-teaching.
 
 ```mermaid
 ---
@@ -119,14 +119,16 @@ flowchart TD
 
 ## Three reading paths
 
-**Path A — Your first programming language ever.** Start at lesson 1 and walk straight through. Do not skip; each lesson assumes the one before it. Type every example, then change it and predict the new output — or whether it still compiles — before running. Chapters 1–2 are the whole game at first: values, decisions, loops, methods. Everything after is built on those.
+**Path A — Your first programming language ever.** Start at lesson 1 and walk straight through. Don't skip ahead: each lesson assumes the one before it. Type in every example, then change it and predict the new output — or whether it still compiles — before you run it. At first, Chapters 1–2 are the whole game: values, decisions, loops, methods. Everything after that is built on them.
 
-**Path B — You program in another language, new to Java.** Skim Chapter 1 for the syntax and the surprises (integer division truncates, `int` overflow wraps silently, `==` vs `.equals`), then slow down at **Chapter 3 — Classes & Objects**. The reference model (stack vs heap, values vs references, aliasing) and the equality/`hashCode` contract are where Java differs most from scripting-language mental models, and where transferred assumptions cause the subtlest bugs.
+**Path B — You program in another language, but you're new to Java.** Skim Chapter 1 for the syntax and the surprises (integer division truncates, `int` overflow wraps silently, `==` vs `.equals`), then slow down at **Chapter 3 — Classes & Objects**. The reference model (stack vs heap, values vs references, aliasing) and the equality/`hashCode` contract are where Java differs most from scripting-language mental models — and where assumptions carried over from other languages cause the subtlest bugs.
 
-**Path C — You know Java, filling gaps.** Use the chapter map to find your boundary and read forward. The highest-leverage deep passes are the object model (lesson 15), `equals`/`hashCode` (19), generics and erasure (20), the Streams API (28), and concurrency with the memory model (29–32).
+**Path C — You know Java, and want to fill gaps.** Use the chapter map to find your boundary, and read forward from there. The highest-leverage deep passes are the object model (lesson 15), `equals`/`hashCode` (19), generics and erasure (20), the Streams API (28), and concurrency with the memory model (29–32).
 
 ---
 
 ## A note on the runner
 
-Every runnable block compiles and runs in an isolated **Java 21 (OpenJDK)** sandbox — no setup, no install, nothing to break. The sandbox compiles your code as a class named `Main`, so the examples here use that name; each block runs on its own (state does not carry from one block to the next), so self-contained examples repeat any setup they need. Anonymous runs work; signing in lets you edit-and-run and raises your hourly quota. One limit worth knowing early: the sandbox cannot pause to read keyboard input, so the interactive `Scanner(System.in)` programs in [Input & Output](/synapse/programming-languages/java/first-steps/input-and-output) are shown statically, each paired with a runnable twin that reads from a fixed source. You do **not** need Java installed locally to read this book — though by Chapter 6 you'll want it, and the last lesson, [Testing, Tooling & Packaging](/synapse/programming-languages/java/advanced/testing-tooling-and-packaging), shows how to set it up properly.
+Every runnable block compiles and runs in an isolated **Java 21 (OpenJDK)** sandbox — no setup, no install, nothing to break. The sandbox compiles your code as a class named `Main`, so the examples here use that name. Each block runs on its own (state doesn't carry over from one block to the next), so self-contained examples repeat any setup they need. Anonymous runs work; signing in lets you edit and run, and raises your hourly quota.
+
+One limit is worth knowing early: the sandbox can't pause to read keyboard input. So the interactive `Scanner(System.in)` programs in [Input & Output](/synapse/programming-languages/java/first-steps/input-and-output) are shown statically, each paired with a runnable twin that reads from a fixed source. You do **not** need Java installed locally to read this book — though by Chapter 6 you'll want it, and the last lesson, [Testing, Tooling & Packaging](/synapse/programming-languages/java/advanced/testing-tooling-and-packaging), shows how to set it up properly.
