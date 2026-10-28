@@ -13,7 +13,7 @@ Java is a **compiled** language, and that one fact shapes everything you're abou
 - If the file passes, the compiler translates it into **bytecode** — a set of instructions for an imaginary computer called the **Java Virtual Machine** (the **JVM**).
 - The JVM is a real program on your machine. It reads the bytecode and carries it out.
 
-So running Java always takes two steps: **compile, then run**. The payoff is portability. Bytecode targets the *virtual* machine, not your laptop, so the same compiled program runs unchanged on Windows, macOS or Linux <abbr title="The Java Virtual Machine Specification, Java SE 21, §1.2">[4]</abbr>.
+So running Java always takes two steps: **compile, then run**. The payoff is portability. Bytecode targets the *virtual* machine, not your laptop, so the same compiled program runs unchanged on Windows, macOS or Linux <abbr title="The Java Virtual Machine Specification, Java SE 25, §1.2">[4]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -27,9 +27,9 @@ So running Java always takes two steps: **compile, then run**. The payoff is por
 
 This chapter gets you running real Java. It shows you both halves of the loop — including what each half looks like when it says *no*, because Java says no in two very different ways.
 
-You don't need anything installed. Every block with a ▶ Run button compiles and runs in a sandboxed **Java 21** environment, and every `Output:` block below was produced by compiling and running its code.
+You don't need anything installed. Every block with a ▶ Run button compiles and runs in a sandboxed **Java 25** environment, and every `Output:` block below was produced by compiling and running its code.
 
-**You'll be able to:** predict from where its mistake is whether a broken program prints anything; compile and run a program from a terminal, naming the class rather than the file; identify the mistake in a `main` declaration from the JVM's launch message; predict the lines that a mix of `print` and `println` produces; explain why a commented-out line never runs, and why one block comment can't hold another.
+**You'll be able to:** predict from where its mistake is whether a broken program prints anything; compile and run a program from a terminal, naming the class rather than the file; identify the mistake in a `main` declaration from the JVM's launch message, and say which shortened forms JDK 25 accepts; predict the lines that a mix of `print` and `println` produces; explain why a commented-out line never runs, and why one block comment can't hold another.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -171,7 +171,7 @@ javac Main.java   # compile: reads Main.java, writes Main.class (bytecode)
 java Main          # run: starts the JVM, which executes Main.class
 ```
 
-`javac` turns your `Main.java` into a new file, `Main.class`, which holds bytecode. `java Main` then hands that bytecode to the JVM, which runs it. Note that it's `java Main`, not `java Main.class`: you name the **class**, not the file <abbr title="The java command, JDK 21 documentation">[5]</abbr>. Name the file instead, and the JVM goes looking for a class called `Main.class`, which doesn't exist:
+`javac` turns your `Main.java` into a new file, `Main.class`, which holds bytecode. `java Main` then hands that bytecode to the JVM, which runs it. Note that it's `java Main`, not `java Main.class`: you name the **class**, not the file <abbr title="The java command, JDK 25 documentation">[5]</abbr>. Name the file instead, and the JVM goes looking for a class called `Main.class`, which doesn't exist:
 
 ```
 $ java Main.class
@@ -179,7 +179,7 @@ Error: Could not find or load main class Main.class
 Caused by: java.lang.ClassNotFoundException: Main.class
 ```
 
-The Run buttons here do the same two steps for you: they compile your code as `Main.java` with `javac`, then start it with `java`. Since Java 11, there's also a one-step shortcut for a single file: `java Main.java` compiles the file in memory and runs it, leaving no `.class` file behind <abbr title="JEP 330: Launch Single-File Source-Code Programs (JDK 11)">[6]</abbr>.
+The Run buttons here do the same two steps for you: they compile your code as `Main.java` with `javac`, then start it with `java`. Since Java 11, there's also a one-step shortcut for a single file: `java Main.java` compiles the file in memory and runs it, leaving no `.class` file behind <abbr title="JEP 330: Launch Single-File Source-Code Programs (JDK 11)">[6]</abbr>. Since JDK 22, that shortcut also finds the other source files your program uses, so a small multi-file program runs without a separate `javac` step <abbr title="JEP 458: Launch Multi-File Source-Code Programs (JDK 22)">[9]</abbr>.
 
 ```java run
 public class Main {
@@ -199,7 +199,7 @@ then run by the JVM.
 **Analysis.** Behind the Run button, two things happened in order. First, `javac` checked both statements and translated them into bytecode. Then the JVM executed them from top to bottom: first line, then second. In a terminal, you'd type `javac Main.java` and then `java Main` to get the same two lines.
 
 **Intuition.**
-*Mechanism.* `java` doesn't run your *source*; it runs the *bytecode* the compiler produced. The JVM knows nothing about the Java language, only about the class-file format <abbr title="The Java Virtual Machine Specification, Java SE 21, §1.2">[4]</abbr>. By the time the launcher loads a class, the `.java` text no longer matters.
+*Mechanism.* `java` doesn't run your *source*; it runs the *bytecode* the compiler produced. The JVM knows nothing about the Java language, only about the class-file format <abbr title="The Java Virtual Machine Specification, Java SE 25, §1.2">[4]</abbr>. By the time the launcher loads a class, the `.java` text no longer matters.
 
 *Concrete bite.* Ask the JVM to run a class that was never compiled, and it has nothing to load:
 
@@ -221,7 +221,7 @@ The cost of two steps is the ceremony of compiling before running. The payoff is
 
 </div>
 
-**You can't name the file just anything.** `javac` requires a `public` class to sit in a file with the same name, plus `.java` <abbr title="The Java Language Specification, Java SE 21, §7.6">[2]</abbr>. So `public class Main` belongs in `Main.java`. Put `public class Hello` in a file named `Main.java` on your own machine, and `javac` refuses:
+**You can't name the file just anything.** `javac` requires a `public` class to sit in a file with the same name, plus `.java` <abbr title="The Java Language Specification, Java SE 25, §7.6">[2]</abbr>. So `public class Main` belongs in `Main.java`. Put `public class Hello` in a file named `Main.java` on your own machine, and `javac` refuses:
 
 ```
 $ javac Main.java
@@ -248,15 +248,15 @@ Type an expression, press Enter, and jshell shows the result. The names `$1` and
 
 ## 3. Reading `public static void main(String[] args)`
 
-That line is the one piece of ceremony that every Java program repeats, and it's worth understanding rather than copying on faith. Each word tells the JVM *how* to start, and none of it is decoration. Here's a sketch of each part; later chapters come back to most of them:
+That line is the one piece of ceremony that nearly every Java program repeats, and it's worth understanding rather than copying on faith. Each word tells the JVM *how* to start, and none of it is decoration. Here's a sketch of each part; later chapters come back to most of them:
 
 - `public` — an **access level**: this method can be called from outside the class. The JVM starts your program from *outside* it, so the entry point must be reachable. *([Access levels](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers) come later.)*
-- `static` — this method belongs to the **class itself**, not to an **object** built from it. The JVM calls `main` *before* your program has created any objects, so `main` cannot require one. *([Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects) come later.)*
+- `static` — this method belongs to the **class itself**, not to an **object** built from it. The JVM can call it straight away, before your program has created any objects. *([Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects) come later.)*
 - `void` — the **return type**: `main` hands no value back when it finishes. *([Methods and return types](/synapse/programming-languages/java/control-flow/methods).)*
 - `main` — the **name** the JVM looks for, spelled exactly `main`. Java is **case-sensitive**, so `Main` (the class) and `main` (the method) are different names. The class is the container; the method is the starting point.
 - `String[] args` — a **parameter**: a slot for **command-line arguments**, the extra words typed after `java Main`. They arrive as a list of text values. You rarely need them at first, but the JVM always passes them. *([Arrays](/synapse/programming-languages/java/control-flow/arrays).)*
 
-Read as a whole, the line describes a public, class-level method named `main` that returns nothing and takes a list of text arguments. The JVM is built to find exactly that, and call it <abbr title="The Java Language Specification, Java SE 21, §12.1.4">[1]</abbr>. Two details are yours to choose: the parameter's name (`args` is just a convention), and whether to write `String... args` instead of `String[] args`.
+Read as a whole, the line describes a public, class-level method named `main` that returns nothing and takes a list of text arguments. The JVM is built to find a method named `main` and call it <abbr title="The Java Language Specification, Java SE 25, §12.1.4">[1]</abbr>. This full form is the one every version of Java accepts. Two details are yours to choose: the parameter's name (`args` is just a convention), and whether to write `String... args` instead of `String[] args`.
 
 ```java run
 public class Main {
@@ -274,7 +274,7 @@ The JVM called main.
 **Analysis.** The JVM loaded `Main`, found a method shaped `public static void main(String[] args)`, and called it. The modifiers, the return type, the name and the parameter type all had to match for that call to happen.
 
 **Intuition.**
-*Mechanism.* The JVM doesn't run "the class". It looks for a method named `main` with this exact declaration, and calls *that*. The name and shape form a contract: miss any part of it, and there's nothing for the JVM to call.
+*Mechanism.* The JVM doesn't run "the class". It looks for a method named `main` with an acceptable declaration, and calls *that*. The name and shape form a contract: miss a required part of it, and there's nothing for the JVM to call.
 
 *Concrete bite.* Rename `main` to `greet`. The class still **compiles** — it's a perfectly legal class — but at run time, the JVM can't find its entry point:
 
@@ -295,24 +295,58 @@ or a JavaFX application class must extend javafx.application.Application
 
 It compiled, because the method is valid Java. But it never ran `greet`, because the JVM only ever calls `main`. The error even reminds you of the shape it wants.
 
-Each wrong part of the declaration gets its own launch message. All four versions below compile, and Java 21's launcher rejects every one of them:
+Until JDK 25, the contract was strict: `main` had to be `public`, `static`, return `void` and take a `String[]`. JDK 25 relaxed it <abbr title="JEP 512: Compact Source Files and Instance Main Methods (JDK 25; first previewed in JDK 21 as JEP 445)">[7]</abbr>. Now `main` must still be named `main` and return `void`, but `public` and `static` are optional, and so is the parameter. Only `private` is ruled out <abbr title="The Java Language Specification, Java SE 25, §12.1.4 (&quot;The form of a candidate main method expanded significantly in Java SE 25&quot;)">[1]</abbr>. Here's what the JDK 25 launcher does with each variation. Every one of them compiles:
 
-| You wrote | The JVM says |
+| You wrote | What happens on JDK 25 |
 |---|---|
+| `public static void main(String[] args)` | runs: the classic form, accepted by every version |
+| `static void main(String[] args)` (no `public`) | runs |
+| `void main(String[] args)` (no `static`) | runs: the JVM first creates a `Main` object, then calls `main` on it |
+| `void main()` (no parameter) | runs |
+| `private static void main(String[] args)` | `Main method not found in class Main` |
+| `public static int main(String[] args)` | `Main method not found in class Main` |
+| `public static void main(String args)` | `Main method not found in class Main` |
 | `public static void greet(String[] args)` | `Main method not found in class Main` |
-| `static void main(String[] args)` (no `public`) | `Main method not found in class Main` |
-| `public void main(String[] args)` (no `static`) | `Main method is not static in class Main` |
-| `public static int main(String[] args)` | `Main method must return a value of type void in class Main` |
+
+Here's the shortest form, `void main()`, inside a class:
+
+```java run
+class Main {
+    void main() {
+        System.out.println("No public, no static, no args.");
+    }
+}
+```
+
+**Output:**
+```
+No public, no static, no args.
+```
+
+This `main` isn't `static`, so it belongs to an *object*. The JVM made one by calling `new Main()`, and then called `main` on it. If a class has both a `main(String[] args)` and a `main()`, the JVM picks the one with the parameter.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** The entry point must be `public static void main(String[] args)`, and the JVM checks every part of it. The cost: a mistake in the *declaration* gives you no compile error, only a launch error, because the method you wrote is legal — it just isn't the one the JVM calls. When a program compiles but won't start, read the launch message: it names the part that's wrong.
+💡 **Earned rule.** The entry point is a method named `main` that returns `void`, and isn't `private`. The cost: a mistake in the *declaration* gives you no compile error, only a launch error, because the method you wrote is legal — it just isn't one the JVM calls. When a program compiles but won't start, read the launch message, then check the name, the return type and the parameter.
 
 </div>
 
-**A note on newer Java.** JDK 25 lets you write a simpler entry point: `void main()`, with no `public`, no `static`, no `String[] args`, and no surrounding class <abbr title="JEP 512: Compact Source Files and Instance Main Methods (JDK 25; first previewed in JDK 21 as JEP 445)">[7]</abbr>.
+**Compact source files.** JDK 25 goes one step further: you can leave out the class too. A file that holds only methods and fields is a **compact source file**, and the compiler wraps it in a class for you, named after the file <abbr title="JEP 512: Compact Source Files and Instance Main Methods (JDK 25)">[7]</abbr>. The new `IO` class in `java.lang` gives such programs a short way to print:
 
-This book teaches **JDK 21**. JDK 21 is a long-term-support release <abbr title="OpenJDK, JDK 21 project page">[9]</abbr>, and it's the version the Run buttons use; JDK 25, released in September 2025, is the newer one <abbr title="OpenJDK, JDK 25 project page">[8]</abbr>. The classic `public static void main(String[] args)` is what nearly all existing code uses, and it runs on every version. When you meet the short form later on, you'll know what it leaves out.
+```java run
+void main() {
+    IO.println("Hello from a compact source file");
+}
+```
+
+**Output:**
+```
+Hello from a compact source file
+```
+
+That's a whole program. It's handy for small scripts and first experiments.
+
+This book uses the classic `public static void main(String[] args)` inside `class Main`. That's what nearly all existing code uses, and it runs on every version of Java, including older ones you'll meet at work. The Run buttons use **JDK 25**, a long-term-support release from September 2025 <abbr title="OpenJDK, JDK 25 project page">[8]</abbr>, so both forms run here.
 
 ---
 
@@ -375,7 +409,7 @@ The `a`, `b` and `c` all landed on one line (`abc`), because only the `println` 
 
 ## 5. Comments — notes for humans
 
-Not every line in a file is meant for the computer. A **comment** is a note for the people reading the code, and the compiler skips it entirely. Java has two forms of comment <abbr title="The Java Language Specification, Java SE 21, §3.7">[3]</abbr>:
+Not every line in a file is meant for the computer. A **comment** is a note for the people reading the code, and the compiler skips it entirely. Java has two forms of comment <abbr title="The Java Language Specification, Java SE 25, §3.7">[3]</abbr>:
 
 - `//` ignores the rest of *that line*.
 - `/* ... */` ignores everything between the markers, across as many lines as you like.
@@ -411,7 +445,7 @@ Putting `//` before a line to disable it is called **commenting out**.
 
 *Concrete bite.* The missing line is the proof: the output is just `code runs`. The commented-out `println` was legal code, but it sat behind `//`, so the compiler never saw it as a statement, and it produced nothing.
 
-*Non-example: a block comment inside a block comment.* Comments don't nest <abbr title="The Java Language Specification, Java SE 21, §3.7">[3]</abbr>. A `/* ... */` comment ends at the **first** `*/`, wherever that happens to be. Wrap a line that already carries a block comment, and the outer comment ends too early:
+*Non-example: a block comment inside a block comment.* Comments don't nest <abbr title="The Java Language Specification, Java SE 25, §3.7">[3]</abbr>. A `/* ... */` comment ends at the **first** `*/`, wherever that happens to be. Wrap a line that already carries a block comment, and the outer comment ends too early:
 
 ```java run
 public class Main {
@@ -451,8 +485,8 @@ The cost is that comments are never checked against the code. The compiler ignor
 | A run-time failure stops the program where it happens | Every line before it has already run and printed |
 | `javac` turns source into portable **bytecode** (`.class`); the JVM runs the bytecode | The same compiled class runs on any machine with a JVM — "write once, run anywhere" |
 | `java` takes a **class** name; a `public` class lives in a file of the same name | `java Main`, not `java Main.class`; `public class Main` goes in `Main.java` |
-| Every statement lives in a method, inside a class; statements run top to bottom | The `class`/`main` wrapper is required, not decoration |
-| The JVM calls `public static void main(String[] args)` | A wrong declaration compiles but won't start, and the launch message names the wrong part |
+| Every statement lives in a method, inside a class; statements run top to bottom | The `main` method is required; a compact source file (JDK 25) lets the compiler supply the class |
+| The JVM calls a non-`private` method named `main` that returns `void` | A wrong declaration compiles but won't start; `public static void main(String[] args)` runs on every version |
 | `println` ends the line; `print` does not | A row of `print`s runs together; `println` is the line-at-a-time default |
 | `//` and `/* */` are ignored by the compiler; block comments do not nest | Comments are for humans; "commenting out" disables code; stale comments can lie |
 
@@ -466,9 +500,8 @@ The cost is that comments are never checked against the code. The compiler ignor
 | Some lines printed, then `Exception in thread "main"` | a run-time failure: the program compiled, then stopped at one line | read the exception's name, then the `at Main.main(Main.java:N)` line under it: line N failed |
 | `Could not find or load main class X` | there is no `X.class`: you didn't compile, mistyped the name, or typed `java X.class` | run `javac X.java`, then `java X` — the class name, not the file |
 | `class X is public, should be declared in a file named X.java` | the file name and the `public` class name differ | rename the file or the class so they match |
-| `Main method not found in class Main` | the method isn't named `main`, isn't `public`, or its parameter isn't `String[]` | declare it as `public static void main(String[] args)` |
-| `Main method is not static in class Main` | `static` is missing | add `static` |
-| `Main method must return a value of type void` | the return type isn't `void` | make it `void` |
+| `Main method not found in class Main` | the method isn't named `main`, is `private`, doesn't return `void`, or its parameter isn't `String[]` | declare it as `public static void main(String[] args)` |
+| `no non-private zero argument constructor found in class Main` | `main` isn't `static`, so the JVM must call `new Main()`, but the class has no such constructor | add `static`, or give the class a no-argument constructor |
 | Output runs together on one line | `print` where you meant `println` | use `println`; the "ln" is the line break |
 | A line you expected to run did nothing | it is behind `//` or inside `/* */` | remove the comment markers |
 | `illegal start of expression` at a lone `*/` | a block comment inside a block comment | disable the lines with `//` instead |
@@ -491,7 +524,7 @@ One check per objective. Answer before you open anything.
 ```
 
 ```quiz
-{"prompt": "A program compiles, but the launcher says: Main method is not static in class Main. What is wrong with the main declaration?", "options": ["The method is misspelled", "The keyword static is missing", "The return type is not void"], "answer": "The keyword static is missing"}
+{"prompt": "On JDK 25, which of these main declarations does the launcher reject?", "options": ["void main()", "static void main(String[] args)", "public static int main(String[] args)"], "answer": "public static int main(String[] args)"}
 ```
 
 ```quiz
@@ -501,7 +534,7 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>What does <code>System.out.println("// not a comment");</code> print, and why? Then: why does wrapping <code>/* old note */</code> in another <code>/* ... */</code> break the build?</summary>
 
-It prints `// not a comment`. Inside the double quotes, `//` is just two characters of text, because comments don't occur inside string literals <abbr title="The Java Language Specification, Java SE 21, §3.7">[3]</abbr>.
+It prints `// not a comment`. Inside the double quotes, `//` is just two characters of text, because comments don't occur inside string literals <abbr title="The Java Language Specification, Java SE 25, §3.7">[3]</abbr>.
 
 A block comment ends at the first `*/`. The inner `old note */` closes the outer comment, so the outer `*/` is left over as code, which javac rejects.
 
@@ -511,15 +544,15 @@ A block comment ends at the first `*/`. The inner `old note */` closes the outer
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §12.1.4 "Invoke `Test.main`" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-12.html#jls-12.1.4>
-2. *The Java Language Specification, Java SE 21*, §7.6 "Top Level Class and Interface Declarations" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-7.html#jls-7.6>
-3. *The Java Language Specification, Java SE 21*, §3.7 "Comments" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-3.html#jls-3.7>
-4. *The Java Virtual Machine Specification, Java SE 21*, §1.2 "The Java Virtual Machine" — <https://docs.oracle.com/javase/specs/jvms/se21/html/jvms-1.html#jvms-1.2>
-5. The `java` command, JDK 21 documentation — <https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html>
+1. *The Java Language Specification, Java SE 25*, §12.1.4 "Invoke a `main` Method" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.1.4>
+2. *The Java Language Specification, Java SE 25*, §7.6 "Top Level Class and Interface Declarations" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.6>
+3. *The Java Language Specification, Java SE 25*, §3.7 "Comments" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.7>
+4. *The Java Virtual Machine Specification, Java SE 25*, §1.2 "The Java Virtual Machine" — <https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-1.html#jvms-1.2>
+5. The `java` command, JDK 25 documentation — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html>
 6. JEP 330: Launch Single-File Source-Code Programs (JDK 11) — <https://openjdk.org/jeps/330>
 7. JEP 512: Compact Source Files and Instance Main Methods (JDK 25) — <https://openjdk.org/jeps/512>
 8. OpenJDK, JDK 25 (general availability 16 September 2025; "a long-term support (LTS) release from most vendors") — <https://openjdk.org/projects/jdk/25/>
-9. OpenJDK, JDK 21 (general availability 19 September 2023; "a long-term support (LTS) release from most vendors") — <https://openjdk.org/projects/jdk/21/>
+9. JEP 458: Launch Multi-File Source-Code Programs (JDK 22) — <https://openjdk.org/jeps/458>
 
 ---
 

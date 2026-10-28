@@ -63,9 +63,9 @@ This is the deep pass of [primitives](/synapse/programming-languages/java/first-
 
 ## 1. Two kinds of variable: values and references
 
-A primitive variable *is* its value: the bits sit right in the variable. A reference variable holds a **pointer** to an object stored elsewhere <abbr title="The Java Language Specification, Java SE 21, §4.3.1">[1]</abbr>, and the object itself isn't in the variable.
+A primitive variable *is* its value: the bits sit right in the variable. A reference variable holds a **pointer** to an object stored elsewhere <abbr title="The Java Language Specification, Java SE 25, §4.3.1">[1]</abbr>, and the object itself isn't in the variable.
 
-So where do they live? Each running method has a **frame** on its thread's **stack**, which holds its local variables <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.2">[2]</abbr>. Every object and array is allocated on the **heap**, one area shared by the whole program <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.3">[3]</abbr>. This lesson calls the pointer an **address**. The JVM doesn't pin down how it's stored <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.7">[4]</abbr>, but the picture holds.
+So where do they live? Each running method has a **frame** on its thread's **stack**, which holds its local variables <abbr title="The Java Virtual Machine Specification, Java SE 25, §2.5.2">[2]</abbr>. Every object and array is allocated on the **heap**, one area shared by the whole program <abbr title="The Java Virtual Machine Specification, Java SE 25, §2.5.3">[3]</abbr>. This lesson calls the pointer an **address**. The JVM doesn't pin down how it's stored <abbr title="The Java Virtual Machine Specification, Java SE 25, §2.7">[4]</abbr>, but the picture holds.
 
 Assignment copies whatever the variable holds — and that's the whole story:
 
@@ -132,7 +132,7 @@ References cost you the sharing surprise. The payoff is efficiency: passing a mi
 
 ## 2. `==` compares what the variable holds
 
-`==` looks at the bits in the two variables. For primitives, those bits are values, so `==` compares values. For references, those bits are *addresses*, so `==` asks "same object?". That's **identity**, not contents <abbr title="The Java Language Specification, Java SE 21, §15.21.3">[5]</abbr>.
+`==` looks at the bits in the two variables. For primitives, those bits are values, so `==` compares values. For references, those bits are *addresses*, so `==` asks "same object?". That's **identity**, not contents <abbr title="The Java Language Specification, Java SE 25, §15.21.3">[5]</abbr>.
 
 ```java run
 public class Main {
@@ -190,7 +190,7 @@ false
 true
 ```
 
-An array's `.equals` is the one every object starts with, inherited from the class `Object`. It returns `true` only when both sides are the same object <abbr title="java.lang.Object.equals(Object), Java SE 21 API">[6]</abbr>. Your own classes start out the same way: two `new Box(7)` objects aren't `.equals` until the class defines what "equal" means. [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) shows how. For arrays, compare contents with `Arrays.equals`.
+An array's `.equals` is the one every object starts with, inherited from the class `Object`. It returns `true` only when both sides are the same object <abbr title="java.lang.Object.equals(Object), Java SE 25 API">[6]</abbr>. Your own classes start out the same way: two `new Box(7)` objects aren't `.equals` until the class defines what "equal" means. [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) shows how. For arrays, compare contents with `Arrays.equals`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -206,8 +206,8 @@ Forget, and you get a comparison that's `false` for objects that mean the same t
 
 Every primitive type has a matching **wrapper class**: an object that holds one value. `Integer` wraps an `int`, `Double` a `double`, `Boolean` a `boolean`. Java converts between them automatically:
 
-- **boxing** turns an `int` into an `Integer` (`Integer a = 127;`) <abbr title="The Java Language Specification, Java SE 21, §5.1.7">[7]</abbr>;
-- **unboxing** turns an `Integer` back into an `int` <abbr title="The Java Language Specification, Java SE 21, §5.1.8">[8]</abbr>.
+- **boxing** turns an `int` into an `Integer` (`Integer a = 127;`) <abbr title="The Java Language Specification, Java SE 25, §5.1.7">[7]</abbr>;
+- **unboxing** turns an `Integer` back into an `int` <abbr title="The Java Language Specification, Java SE 25, §5.1.8">[8]</abbr>.
 
 `.equals` is a *method* that an object defines to compare by **meaning**. For `Integer`, it compares the wrapped numbers. The danger is that boxing small numbers reuses cached objects, so `==` *accidentally* agrees with `.equals` — until it doesn't.
 
@@ -242,9 +242,9 @@ true
 The `Integer` `==` flipped from `true` to `false` between `127` and `128`.
 
 **Intuition.**
-*Mechanism.* `Integer` is a reference type, so `==` compares object identity. Boxing a value in −128..127 always gives the same object <abbr title="The Java Language Specification, Java SE 21, §5.1.7">[7]</abbr> <abbr title="java.lang.Integer.valueOf(int), Java SE 21 API">[9]</abbr>. Beyond that range, the JVM *may* reuse objects, but by default it doesn't <abbr title="java.lang.Integer.valueOf(int), Java SE 21 API">[9]</abbr>. So `==` is *coincidentally* true for small values, and false for larger ones on this JVM.
+*Mechanism.* `Integer` is a reference type, so `==` compares object identity. Boxing a value in −128..127 always gives the same object <abbr title="The Java Language Specification, Java SE 25, §5.1.7">[7]</abbr> <abbr title="java.lang.Integer.valueOf(int), Java SE 25 API">[9]</abbr>. Beyond that range, the JVM *may* reuse objects, but by default it doesn't <abbr title="java.lang.Integer.valueOf(int), Java SE 25 API">[9]</abbr>. So `==` is *coincidentally* true for small values, and false for larger ones on this JVM.
 
-Mix an `Integer` with an `int`, and `==` unboxes the `Integer` and compares numbers <abbr title="The Java Language Specification, Java SE 21, §15.21.1">[10]</abbr>: `Integer c = 128; int e = 128; c == e` is `true`.
+Mix an `Integer` with an `int`, and `==` unboxes the `Integer` and compares numbers <abbr title="The Java Language Specification, Java SE 25, §15.21.1">[10]</abbr>: `Integer c = 128; int e = 128; c == e` is `true`.
 
 *Concrete bite.* A test that passes with `127` and fails with `128` is the telltale sign of code that used `==` for object equality. The cache hides the bug in small-number tests and lets it loose in production.
 
@@ -260,7 +260,7 @@ The cost is vigilance. Boxing hides the boundary, so a passing small-value `==` 
 
 ## 4. The String pool
 
-`String` is a reference type too, so `==` on strings means identity. But Java **interns** string *literals*, so identical literals share one pooled object <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[11]</abbr>. That makes `==` *look* right for literals and wrong for everything else.
+`String` is a reference type too, so `==` on strings means identity. But Java **interns** string *literals*, so identical literals share one pooled object <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[11]</abbr>. That makes `==` *look* right for literals and wrong for everything else.
 
 ```java run
 public class Main {
@@ -285,7 +285,7 @@ true
 **Analysis.** `a` and `b` are the same literal `"hello"`, which the pool stores once. So `a == b` is `true`, *by interning, not by content comparison*. `new String("hello")` forces a separate object, so `a == c` is `false`, even though `a.equals(c)` (comparing characters) is `true`. That's the mechanism behind the [Strings](/synapse/programming-languages/java/first-steps/strings-the-basics) teaser: `==` on strings is identity, and the pool makes literals share it.
 
 **Intuition.**
-*Mechanism.* Literals, and more generally the values of compile-time **constant expressions**, are interned into a shared pool, so equal ones are the same object <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[11]</abbr>. A string built at run time is a fresh object: `new String(…)`, user input, or `+` with a variable.
+*Mechanism.* Literals, and more generally the values of compile-time **constant expressions**, are interned into a shared pool, so equal ones are the same object <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[11]</abbr>. A string built at run time is a fresh object: `new String(…)`, user input, or `+` with a variable.
 
 *Concrete bite.* A string computed from a variable misses the pool, even when its characters match a literal:
 
@@ -321,7 +321,7 @@ The pool's cost is that `==` passes in quick literal tests and fails on real str
 
 ## 5. `null` and `NullPointerException`
 
-A reference can point at *no object*: the value `null` <abbr title="The Java Language Specification, Java SE 21, §4.3.1">[1]</abbr>. You can legally hold it and print it. But the moment you try to *use* the object it points to (call a method, read a field), there's no object, and the JVM throws `NullPointerException`.
+A reference can point at *no object*: the value `null` <abbr title="The Java Language Specification, Java SE 25, §4.3.1">[1]</abbr>. You can legally hold it and print it. But the moment you try to *use* the object it points to (call a method, read a field), there's no object, and the JVM throws `NullPointerException`.
 
 ```java run
 public class Main {
@@ -348,7 +348,7 @@ Since Java 14, the message names what was null and what you tried to do <abbr ti
 
 *Concrete bite.* The `null` line works, and the `s.length()` line throws. The boundary is *use*. Fields of a reference type start as `null`, and so do the slots of a new object array and many "not found" results. So any object you didn't definitely set could be `null`, and the first method call on it crashes.
 
-*Non-example: an NPE with no dot in sight.* Unboxing is a hidden method call. Store a `null` `Integer` into an `int`, and the JVM must call `intValue()` on nothing <abbr title="The Java Language Specification, Java SE 21, §5.1.8">[8]</abbr>:
+*Non-example: an NPE with no dot in sight.* Unboxing is a hidden method call. Store a `null` `Integer` into an `int`, and the JVM must call `intValue()` on nothing <abbr title="The Java Language Specification, Java SE 25, §5.1.8">[8]</abbr>:
 
 ```java run
 public class Main {
@@ -369,7 +369,7 @@ Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.l
 
 Line 5, `int n = count;`, has no `.` in it, yet the message names `Integer.intValue()`. When an NPE points at a line with no method call, look for an `Integer`, `Double` or `Boolean` that's being used as a number or a `boolean`.
 
-Comparing with `.equals` has the same sharp edge. `"hi".equals(s)` returns `false` when `s` is `null`, but `s.equals("hi")` throws. `java.util.Objects.equals(a, b)` is safe on either side <abbr title="java.util.Objects.equals(Object, Object), Java SE 21 API">[13]</abbr>.
+Comparing with `.equals` has the same sharp edge. `"hi".equals(s)` returns `false` when `s` is `null`, but `s.equals("hi")` throws. `java.util.Objects.equals(a, b)` is safe on either side <abbr title="java.util.Objects.equals(Object, Object), Java SE 25 API">[13]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -383,9 +383,9 @@ Comparing with `.equals` has the same sharp edge. `"hi".equals(s)` returns `fals
 
 ## 6. When an object becomes unreachable
 
-Java has no statement that deletes an object. Objects are "never explicitly deallocated" <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.3">[3]</abbr>. The **garbage collector** reclaims the heap memory of objects the program can no longer reach.
+Java has no statement that deletes an object. Objects are "never explicitly deallocated" <abbr title="The Java Virtual Machine Specification, Java SE 25, §2.5.3">[3]</abbr>. The **garbage collector** reclaims the heap memory of objects the program can no longer reach.
 
-An object is **reachable** as long as some running code can still get to it through a chain of references <abbr title="The Java Language Specification, Java SE 21, §12.6.1">[14]</abbr>. It becomes unreachable once the last such reference is gone:
+An object is **reachable** as long as some running code can still get to it through a chain of references <abbr title="The Java Language Specification, Java SE 25, §12.6.1">[14]</abbr>. It becomes unreachable once the last such reference is gone:
 
 - the variable is pointed at another object (`a = new Counter();`);
 - the variable is set to `null`;
@@ -433,7 +433,7 @@ stack.keep -> heap.first
 **Analysis.** `a = new Counter()` pointed `a` at a second object, with `count` `0`. The first object survived, because `keep` still refers to it (`count` `1`). Delete the line `Counter keep = a;`, and after the reassignment nothing refers to the first counter. It becomes unreachable, and the program can never read it again.
 
 **Intuition.**
-*Mechanism.* Reachability is about references, not about variables going quiet. As long as one live reference leads to an object, the object stays. When none does, the garbage collector *may* reclaim it. The specification sets no moment for that, and a small program may end before any collection runs <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.3">[3]</abbr>.
+*Mechanism.* Reachability is about references, not about variables going quiet. As long as one live reference leads to an object, the object stays. When none does, the garbage collector *may* reclaim it. The specification sets no moment for that, and a small program may end before any collection runs <abbr title="The Java Virtual Machine Specification, Java SE 25, §2.5.3">[3]</abbr>.
 
 *Concrete bite.* The reverse is the real-world bug. An object stays alive as long as *anything* refers to it, such as a forgotten entry in a long-lived `static` list. That object is never collected, however useless it has become. It's a memory leak, in a language with a garbage collector.
 
@@ -491,7 +491,7 @@ One check per objective. Answer before you open anything.
 ```
 
 ```quiz
-{"prompt": "Integer r = 200, s = 200; — what do r == s and r.equals(s) print, in that order, on JDK 21 with default settings?", "options": ["true true", "false false", "false true"], "answer": "false true"}
+{"prompt": "Integer r = 200, s = 200; — what do r == s and r.equals(s) print, in that order, on JDK 25 with default settings?", "options": ["true true", "false false", "false true"], "answer": "false true"}
 ```
 
 ```quiz
@@ -511,7 +511,7 @@ One check per objective. Answer before you open anything.
 
 - `p == q` with `100`: `true`. Both boxed values come from the cache.
 - `r == s` with `200`: `false`, and `r.equals(s)`: `true`. `200` is outside the cache.
-- `x == y` for `"ab" + "c"` and `"abc"`: `true`. `"ab" + "c"` is a constant expression, so it's interned like a literal <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[11]</abbr>. Built from a variable, as in §4, it would be `false`.
+- `x == y` for `"ab" + "c"` and `"abc"`: `true`. `"ab" + "c"` is a constant expression, so it's interned like a literal <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[11]</abbr>. Built from a variable, as in §4, it would be `false`.
 - `z + "!"` with `z` set to `null`: prints `null!`. String concatenation writes a `null` reference as the text `null`.
 - `z.toUpperCase()`: throws `NullPointerException: Cannot invoke "String.toUpperCase()" because "<local5>" is null`. The `5` counts the locals of a `main` that declares `p`, `q`, `r`, `s` and `z`, in that order.
 
@@ -521,20 +521,20 @@ One check per objective. Answer before you open anything.
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §4.3.1 "Objects" ("The reference values … are pointers to these objects, and a special null reference") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html#jls-4.3.1>
-2. *The Java Virtual Machine Specification, Java SE 21*, §2.5.2 "Java Virtual Machine Stacks" — <https://docs.oracle.com/javase/specs/jvms/se21/html/jvms-2.html#jvms-2.5.2>
-3. *The Java Virtual Machine Specification, Java SE 21*, §2.5.3 "Heap" (reclaimed by a garbage collector; "objects are never explicitly deallocated") — <https://docs.oracle.com/javase/specs/jvms/se21/html/jvms-2.html#jvms-2.5.3>
-4. *The Java Virtual Machine Specification, Java SE 21*, §2.7 "Representation of Objects" — <https://docs.oracle.com/javase/specs/jvms/se21/html/jvms-2.html#jvms-2.7>
-5. *The Java Language Specification, Java SE 21*, §15.21.3 "Reference Equality Operators `==` and `!=`" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.21.3>
-6. `java.lang.Object.equals(Object)`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)>
-7. *The Java Language Specification, Java SE 21*, §5.1.7 "Boxing Conversion" (−128 to 127: "It is always the case that a == b") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-5.html#jls-5.1.7>
-8. *The Java Language Specification, Java SE 21*, §5.1.8 "Unboxing Conversion" ("If r is null, unboxing conversion throws a NullPointerException") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-5.html#jls-5.1.8>
-9. `java.lang.Integer.valueOf(int)`, Java SE 21 API ("will always cache values in the range -128 to 127 … and may cache other values") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html#valueOf(int)>
-10. *The Java Language Specification, Java SE 21*, §15.21.1 "Numerical Equality Operators `==` and `!=`" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.21.1>
-11. *The Java Language Specification, Java SE 21*, §3.10.5 "String Literals" (constant-expression strings are "interned") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-3.html#jls-3.10.5>
+1. *The Java Language Specification, Java SE 25*, §4.3.1 "Objects" ("The reference values … are pointers to these objects, and a special null reference") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.3.1>
+2. *The Java Virtual Machine Specification, Java SE 25*, §2.5.2 "Java Virtual Machine Stacks" — <https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-2.html#jvms-2.5.2>
+3. *The Java Virtual Machine Specification, Java SE 25*, §2.5.3 "Heap" (reclaimed by a garbage collector; "objects are never explicitly deallocated") — <https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-2.html#jvms-2.5.3>
+4. *The Java Virtual Machine Specification, Java SE 25*, §2.7 "Representation of Objects" — <https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-2.html#jvms-2.7>
+5. *The Java Language Specification, Java SE 25*, §15.21.3 "Reference Equality Operators `==` and `!=`" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.21.3>
+6. `java.lang.Object.equals(Object)`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)>
+7. *The Java Language Specification, Java SE 25*, §5.1.7 "Boxing Conversion" (−128 to 127: "It is always the case that a == b") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.7>
+8. *The Java Language Specification, Java SE 25*, §5.1.8 "Unboxing Conversion" ("If r is null, unboxing conversion throws a NullPointerException") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.8>
+9. `java.lang.Integer.valueOf(int)`, Java SE 25 API ("will always cache values in the range -128 to 127 … and may cache other values") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html#valueOf(int)>
+10. *The Java Language Specification, Java SE 25*, §15.21.1 "Numerical Equality Operators `==` and `!=`" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.21.1>
+11. *The Java Language Specification, Java SE 25*, §3.10.5 "String Literals" (constant-expression strings are "interned") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.5>
 12. JEP 358: Helpful NullPointerExceptions (JDK 14; local names need `javac -g`) — <https://openjdk.org/jeps/358>
-13. `java.util.Objects.equals(Object, Object)`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Objects.html#equals(java.lang.Object,java.lang.Object)>
-14. *The Java Language Specification, Java SE 21*, §12.6.1 "Implementing Finalization" ("A reachable object is any object that can be accessed in any potential continuing computation from any live thread") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-12.html#jls-12.6.1>
+13. `java.util.Objects.equals(Object, Object)`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Objects.html#equals(java.lang.Object,java.lang.Object)>
+14. *The Java Language Specification, Java SE 25*, §12.6.1 "Implementing Finalization" ("A reachable object is any object that can be accessed in any potential continuing computation from any live thread") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.6.1>
 
 ---
 

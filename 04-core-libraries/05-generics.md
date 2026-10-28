@@ -20,7 +20,7 @@ Here's the catch, and it's the second half of this lesson: generics are a **comp
 
 </div>
 
-Every output below was produced by compiling and running the code on Java 21.
+Every output below was produced by compiling and running the code on Java 25.
 
 **You'll be able to:** write a generic class and a generic method, and predict when the compiler rejects a misuse; predict the type the compiler infers for a diamond, a `var` and a generic call; add a bound when a method needs `compareTo`, and read the error you get when the bound is missing; choose `? extends T` or `? super T` for a parameter, and predict which calls compile; explain what erasure removes, and predict which forms of `instanceof` and `new T[]` compile.
 
@@ -51,7 +51,7 @@ Every output below was produced by compiling and running the code on Java 21.
 
 ## 1. Generic classes: type parameters
 
-A class can declare a **type parameter**, written `<T>`, and then use `T` as a stand-in type throughout its body <abbr title="The Java Language Specification, Java SE 21, §8.1.2">[1]</abbr>. The caller fills in the real type by supplying a **type argument**, such as `String` in `Box<String>` <abbr title="The Java Language Specification, Java SE 21, §4.5">[2]</abbr>. From then on, the compiler enforces that type everywhere.
+A class can declare a **type parameter**, written `<T>`, and then use `T` as a stand-in type throughout its body <abbr title="The Java Language Specification, Java SE 25, §8.1.2">[1]</abbr>. The caller fills in the real type by supplying a **type argument**, such as `String` in `Box<String>` <abbr title="The Java Language Specification, Java SE 25, §4.5">[2]</abbr>. From then on, the compiler enforces that type everywhere.
 
 ```java run
 class Box<T> {
@@ -112,7 +112,7 @@ Main.java:10: error: incompatible types: String cannot be converted to Integer
 
 `sb.get()` is statically a `String`, so the compiler refuses to assign it to an `Integer`: the type argument carried `String` all the way through to the return type. Notice *when* the error arrives — at compile time, not as a `ClassCastException` at run time.
 
-*Non-example: a raw type.* If you leave out the type argument, you get a **raw type**: `List` instead of `List<String>`. The JLS allows raw types "only as a concession to compatibility of legacy code" — code written before Java 5 added generics <abbr title="The Java Language Specification, Java SE 21, §4.8">[3]</abbr>. With a raw type, the compiler checks nothing:
+*Non-example: a raw type.* If you leave out the type argument, you get a **raw type**: `List` instead of `List<String>`. The JLS allows raw types "only as a concession to compatibility of legacy code" — code written before Java 5 added generics <abbr title="The Java Language Specification, Java SE 25, §4.8">[3]</abbr>. With a raw type, the compiler checks nothing:
 
 ```java run
 import java.util.ArrayList;
@@ -151,7 +151,7 @@ The cost is a more abstract class definition, plus one restriction: `T` must be 
 
 ## 2. Generic methods and bounded types
 
-A *method* can have its own type parameter too. You declare it just before the return type: `<T> T pick(...)` <abbr title="The Java Language Specification, Java SE 21, §8.4.4">[4]</abbr>. Add a **bound**, `<T extends Something>`, and `T` is restricted to subtypes of `Something`. In exchange, you can call `Something`'s methods on `T`.
+A *method* can have its own type parameter too. You declare it just before the return type: `<T> T pick(...)` <abbr title="The Java Language Specification, Java SE 25, §8.4.4">[4]</abbr>. Add a **bound**, `<T extends Something>`, and `T` is restricted to subtypes of `Something`. In exchange, you can call `Something`'s methods on `T`.
 
 ```java run
 public class Main {
@@ -174,7 +174,7 @@ banana
 
 **Analysis.** `max` works for any `T` that is `Comparable<T>`. So a single definition found both the larger `Integer` (`7`) and the alphabetically later `String` (`"banana"`). The bound `T extends Comparable<T>` is what allows the body to call `a.compareTo(b)`. Without it, the compiler knows nothing about `T` beyond `Object`'s methods.
 
-Notice that nobody wrote `<Integer>` at the call site. The compiler **inferred** `T` from the arguments <abbr title="The Java Language Specification, Java SE 21, §18 Type Inference">[5]</abbr>. You can still spell it out if you like: `Main.<Integer>max(3, 7)` prints `7`.
+Notice that nobody wrote `<Integer>` at the call site. The compiler **inferred** `T` from the arguments <abbr title="The Java Language Specification, Java SE 25, §18 Type Inference">[5]</abbr>. You can still spell it out if you like: `Main.<Integer>max(3, 7)` prints `7`.
 
 **Intuition.**
 *Mechanism.* A bound is a compile-time promise about what `T` can do. `T extends Comparable<T>` tells the compiler that every `T` has `compareTo`, so the call type-checks. In return, callers may pass only `Comparable` types.
@@ -262,9 +262,9 @@ The cost of a bound is that it narrows what callers may pass. The payoff is that
 
 ## 3. Wildcards and PECS
 
-`Integer` is a subtype of `Number`, but here's a surprise: `List<Integer>` is **not** a `List<Number>`. In the JLS's words, "subtyping does not extend through parameterized types" <abbr title="The Java Language Specification, Java SE 21, §4.10">[6]</abbr>. Generics are *invariant*, so a method that takes a `List<Number>` rejects a `List<Integer>`.
+`Integer` is a subtype of `Number`, but here's a surprise: `List<Integer>` is **not** a `List<Number>`. In the JLS's words, "subtyping does not extend through parameterized types" <abbr title="The Java Language Specification, Java SE 25, §4.10">[6]</abbr>. Generics are *invariant*, so a method that takes a `List<Number>` rejects a `List<Integer>`.
 
-**Wildcards** bring the flexibility back <abbr title="The Java Language Specification, Java SE 21, §4.5.1">[7]</abbr>. `? extends Number` means "some unknown subtype of `Number`", so it accepts `List<Integer>`, `List<Double>`, and so on.
+**Wildcards** bring the flexibility back <abbr title="The Java Language Specification, Java SE 25, §4.5.1">[7]</abbr>. `? extends Number` means "some unknown subtype of `Number`", so it accepts `List<Integer>`, `List<Double>`, and so on.
 
 ```java run
 import java.util.List;
@@ -400,7 +400,7 @@ The cost is the wildcard syntax and its restriction: you can't add to a `? exten
 
 ## 4. Type erasure
 
-Generics exist only at compile time. The compiler checks the types and then **erases** them <abbr title="The Java Language Specification, Java SE 21, §4.6">[8]</abbr>. By run time, there is only `ArrayList`: `ArrayList<String>` and `ArrayList<Integer>` are the *same* class.
+Generics exist only at compile time. The compiler checks the types and then **erases** them <abbr title="The Java Language Specification, Java SE 25, §4.6">[8]</abbr>. By run time, there is only `ArrayList`: `ArrayList<String>` and `ArrayList<Integer>` are the *same* class.
 
 ```java run
 import java.util.List;
@@ -425,7 +425,7 @@ ArrayList
 **Analysis.** Both lists report the *same* class, `ArrayList`, and `getClass() == getClass()` is `true`. At run time, the `<String>` and `<Integer>` are simply gone: generics were enforced during compilation, then erased. That's why generics need no extra classes — and why some things are impossible.
 
 **Intuition.**
-*Mechanism.* Erasure replaces each type variable with the erasure of its bound, or with `Object` when there is no bound <abbr title="The Java Language Specification, Java SE 21, §4.6">[8]</abbr>. Wherever the code needs the real type, the compiler inserts a cast. You can see both effects with `javap -c`, the JDK's bytecode printer, on the §1 `Box<String>` program:
+*Mechanism.* Erasure replaces each type variable with the erasure of its bound, or with `Object` when there is no bound <abbr title="The Java Language Specification, Java SE 25, §4.6">[8]</abbr>. Wherever the code needs the real type, the compiler inserts a cast. You can see both effects with `javap -c`, the JDK's bytecode printer, on the §1 `Box<String>` program:
 
 ```text
 $ javap -c Main
@@ -435,7 +435,7 @@ $ javap -c Main
 
 In the bytecode, `Box.get` returns `Object`, and a `checkcast` to `String` follows the call. That cast can't fail here, because the compiler already proved the types. A raw type, as in §1, skips that proof — and the inserted cast is exactly what threw.
 
-*Concrete bite.* Because the type argument is gone at run time, the JVM has no way to check it. So `instanceof` accepts `List<String>` only when the compiler can prove the `<String>` part in advance <abbr title="The Java Language Specification, Java SE 21, §15.20.2">[9]</abbr>. Starting from an `Object`, it can't:
+*Concrete bite.* Because the type argument is gone at run time, the JVM has no way to check it. So `instanceof` accepts `List<String>` only when the compiler can prove the `<String>` part in advance <abbr title="The Java Language Specification, Java SE 25, §15.20.2">[9]</abbr>. Starting from an `Object`, it can't:
 
 ```java run
 import java.util.List;
@@ -481,7 +481,7 @@ true
 true
 ```
 
-From an `Object`, test `instanceof List<?>` instead, which means "some list". The same reasoning explains why you can't create an array of a type variable <abbr title="The Java Language Specification, Java SE 21, §15.10.1">[10]</abbr>: there's no run-time `T` to allocate:
+From an `Object`, test `instanceof List<?>` instead, which means "some list". The same reasoning explains why you can't create an array of a type variable <abbr title="The Java Language Specification, Java SE 25, §15.10.1">[10]</abbr>: there's no run-time `T` to allocate:
 
 ```java run
 class Stack<T> {
@@ -562,7 +562,7 @@ One check per objective. Answer before you open anything.
 ```
 
 ```quiz
-{"prompt": "Which of these compiles in Java 21?", "options": ["Object o; o instanceof List<String>", "Collection<String> c; c instanceof List<String>", "new T[10] inside a generic class"], "answer": "Collection<String> c; c instanceof List<String>"}
+{"prompt": "Which of these compiles in Java 25?", "options": ["Object o; o instanceof List<String>", "Collection<String> c; c instanceof List<String>", "new T[10] inside a generic class"], "answer": "Collection<String> c; c instanceof List<String>"}
 ```
 
 <details>
@@ -611,16 +611,16 @@ true
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §8.1.2 "Generic Classes and Type Parameters" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1.2>
-2. *The Java Language Specification, Java SE 21*, §4.5 "Parameterized Types" (type arguments) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html#jls-4.5>
-3. *The Java Language Specification, Java SE 21*, §4.8 "Raw Types" ("only as a concession to compatibility of legacy code") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html#jls-4.8>
-4. *The Java Language Specification, Java SE 21*, §8.4.4 "Generic Methods" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.4>
-5. *The Java Language Specification, Java SE 21*, Chapter 18 "Type Inference" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-18.html>
-6. *The Java Language Specification, Java SE 21*, §4.10 "Subtyping" ("Subtyping does not extend through parameterized types") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html#jls-4.10>
-7. *The Java Language Specification, Java SE 21*, §4.5.1 "Type Arguments of Parameterized Types" (wildcards) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html#jls-4.5.1>
-8. *The Java Language Specification, Java SE 21*, §4.6 "Type Erasure" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html#jls-4.6>
-9. *The Java Language Specification, Java SE 21*, §15.20.2 "The `instanceof` Operator" (the operand "must be checked cast compatible") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.20.2>
-10. *The Java Language Specification, Java SE 21*, §15.10.1 "Array Creation Expressions" (the element type must be reifiable) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.10.1>
+1. *The Java Language Specification, Java SE 25*, §8.1.2 "Generic Classes and Type Parameters" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.2>
+2. *The Java Language Specification, Java SE 25*, §4.5 "Parameterized Types" (type arguments) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.5>
+3. *The Java Language Specification, Java SE 25*, §4.8 "Raw Types" ("only as a concession to compatibility of legacy code") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.8>
+4. *The Java Language Specification, Java SE 25*, §8.4.4 "Generic Methods" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.4>
+5. *The Java Language Specification, Java SE 25*, Chapter 18 "Type Inference" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-18.html>
+6. *The Java Language Specification, Java SE 25*, §4.10 "Subtyping" ("Subtyping does not extend through parameterized types") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.10>
+7. *The Java Language Specification, Java SE 25*, §4.5.1 "Type Arguments of Parameterized Types" (wildcards) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.5.1>
+8. *The Java Language Specification, Java SE 25*, §4.6 "Type Erasure" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.6>
+9. *The Java Language Specification, Java SE 25*, §15.20.2 "The `instanceof` Operator" (the operand "must be checked cast compatible") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.20.2>
+10. *The Java Language Specification, Java SE 25*, §15.10.1 "Array Creation Expressions" (the element type must be reifiable) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.10.1>
 
 ---
 

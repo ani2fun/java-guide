@@ -27,7 +27,7 @@ This lesson also shows you where dispatch stops: at fields and `static` methods,
 
 </div>
 
-This lesson takes a deeper pass at [classes & objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects). Every output below was produced by compiling and running the code on Java 21.
+This lesson takes a deeper pass at [classes & objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects). Every output below was produced by compiling and running the code on Java 25.
 
 **You'll be able to:** trace the order in which a subclass's constructors run, and fix a missing `super(...)` call; predict which version runs when you reach an overridden method, a hidden field or a `static` method through a superclass reference; predict whether a reference cast compiles, succeeds or throws `ClassCastException`, and guard it with `instanceof`; name the compiler error for a misspelled override, a narrowed access level, and an override of a `final` method; choose between inheritance and composition using the "is-a" test.
 
@@ -107,12 +107,12 @@ classDiagram
 - `Dog`'s constructor called `super(name)` to run `Animal`'s constructor, which sets `name`.
 - The arrow in the diagram (`<|--`) reads "Dog *is an* Animal."
 
-In Java 21, `super(...)` must be the first statement in the constructor <abbr title="The Java Language Specification, Java SE 21, §8.8.7">[3]</abbr>. That way, the superclass part of the object is set up before the subclass part. (JDK 25 relaxes this rule: statements that don't refer to the object under construction may come before `super(...)` <abbr title="JEP 513: Flexible Constructor Bodies (JDK 25)">[15]</abbr>.)
+The superclass part of the object is set up before the subclass part. Before JDK 25, the language enforced this by making `super(...)` the first statement in the constructor. Since JDK 25, statements may come before `super(...)`, as long as they don't use the object that's being built <abbr title="The Java Language Specification, Java SE 25, §8.8.7">[3]</abbr> <abbr title="JEP 513: Flexible Constructor Bodies (JDK 25)">[15]</abbr>. Later in this section, you'll see why that matters.
 
 **Intuition.**
-*Mechanism.* `new Dog("Rex")` creates **one** object, with room for both the fields declared in `Animal` and those declared in `Dog` <abbr title="The Java Language Specification, Java SE 21, §12.5">[17]</abbr>. Construction runs top-down: the `Animal` constructor initializes the inherited fields first, and then the `Dog` constructor finishes the job.
+*Mechanism.* `new Dog("Rex")` creates **one** object, with room for both the fields declared in `Animal` and those declared in `Dog` <abbr title="The Java Language Specification, Java SE 25, §12.5">[17]</abbr>. Construction runs top-down: the `Animal` constructor initializes the inherited fields first, and then the `Dog` constructor finishes the job.
 
-What if you don't write `super(...)` at all? Then javac inserts `super();` — a call to the superclass's no-argument constructor — as the first statement <abbr title="The Java Language Specification, Java SE 21, §8.8.7">[3]</abbr>. You can see the order when each constructor prints something:
+What if you don't write `super(...)` at all? Then javac inserts `super();` — a call to the superclass's no-argument constructor — as the first statement <abbr title="The Java Language Specification, Java SE 25, §8.8.7">[3]</abbr>. You can see the order when each constructor prints something:
 
 ```java run
 class Animal {
@@ -167,9 +167,89 @@ Main.java:7: error: constructor Animal in class Animal cannot be applied to give
   reason: actual and formal argument lists differ in length
 ```
 
-The caret points at `Dog`'s body, which is where the invisible `super();` sits. The fix is the `super(name);` from the first example. Note that constructors aren't inherited either: `Dog` gets no `Dog(String)` unless it declares one itself <abbr title="The Java Language Specification, Java SE 21, §8.2">[2]</abbr>.
+The caret points at `Dog`'s body, which is where the invisible `super();` sits. The fix is the `super(name);` from the first example. Note that constructors aren't inherited either: `Dog` gets no `Dog(String)` unless it declares one itself <abbr title="The Java Language Specification, Java SE 25, §8.2">[2]</abbr>.
 
-*Non-example: a `private` field is not inherited.* Members declared `private` are not inherited by subclasses <abbr title="The Java Language Specification, Java SE 21, §8.2">[2]</abbr>. The field still exists inside a `Dog` object, but `Dog`'s code can't refer to it by name:
+*Non-example: a superclass constructor calls an overridden method.* `Animal`'s constructor calls `describe()`, and `Dog` overrides it. The call runs `Dog`'s version, before `Dog`'s constructor has set `name`:
+
+```java run
+class Animal {
+    Animal() {
+        describe();
+    }
+
+    void describe() { System.out.println("an animal"); }
+}
+
+class Dog extends Animal {
+    private final String name;
+
+    Dog(String name) {
+        super();
+        this.name = name;
+    }
+
+    @Override
+    void describe() { System.out.println("a dog named " + name); }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        new Dog("Rex");
+    }
+}
+```
+
+**Output:**
+```
+a dog named null
+```
+
+The field was still `null`, its default value, even though it's `final` and the constructor sets it. Construction runs top-down, so `Animal()` ran, and called `describe()`, before the line `this.name = name;`.
+
+Since JDK 25, a constructor may assign its *own* fields before it calls `super(...)` <abbr title="JEP 513: Flexible Constructor Bodies (JDK 25)">[15]</abbr>. Move the assignment up, and the field is ready by the time the superclass needs it:
+
+```java run
+class Animal {
+    Animal() {
+        describe();
+    }
+
+    void describe() { System.out.println("an animal"); }
+}
+
+class Dog extends Animal {
+    private final String name;
+
+    Dog(String name) {
+        this.name = name;
+        super();
+    }
+
+    @Override
+    void describe() { System.out.println("a dog named " + name); }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        new Dog("Rex");
+    }
+}
+```
+
+**Output:**
+```
+a dog named Rex
+```
+
+The code before `super(...)` can assign fields, check arguments and compute values. It can't *read* a field or call an instance method of the object, because the object isn't ready yet. javac rejects that with `cannot reference … before supertype constructor has been called`.
+
+<div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
+
+💡 **Earned rule.** Don't call an overridable method from a constructor: the subclass version runs before the subclass is set up. If you can't avoid it, assign the fields that method needs *before* `super(...)` (JDK 25+).
+
+</div>
+
+*Non-example: a `private` field is not inherited.* Members declared `private` are not inherited by subclasses <abbr title="The Java Language Specification, Java SE 25, §8.2">[2]</abbr>. The field still exists inside a `Dog` object, but `Dog`'s code can't refer to it by name:
 
 ```java run
 class Animal {
@@ -197,7 +277,7 @@ Main.java:6: error: secret has private access in Animal
 
 To fix it, give the superclass a method that returns the value, or mark the field `protected` so subclasses can see it ([access levels](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers)).
 
-*Non-example: inheriting only to reuse code.* The test for whether to inherit is the "is-a" relationship. A `Dog` genuinely *is an* `Animal`. But the JDK's own `java.util.Stack` fails this test: it `extends Vector`, which is a growable list <abbr title="java.util.Stack, Java SE 21 API">[14]</abbr>. As a result, every list method comes along for the ride — including insert-at-any-position, which breaks "last in, first out":
+*Non-example: inheriting only to reuse code.* The test for whether to inherit is the "is-a" relationship. A `Dog` genuinely *is an* `Animal`. But the JDK's own `java.util.Stack` fails this test: it `extends Vector`, which is a growable list <abbr title="java.util.Stack, Java SE 25 API">[14]</abbr>. As a result, every list method comes along for the ride — including insert-at-any-position, which breaks "last in, first out":
 
 ```java run
 import java.util.Stack;
@@ -222,7 +302,7 @@ second
 sneaked in
 ```
 
-`add(0, …)` slipped an element *under* the stack, and `get(0)` read the bottom. A real stack should allow neither. In fact, `Stack`'s own API page recommends using the `Deque` interface instead <abbr title="java.util.Stack, Java SE 21 API">[14]</abbr>. A stack *has* a list; it isn't one. Holding the list in a `private` field is called **composition**, and it exposes only the operations you choose to write.
+`add(0, …)` slipped an element *under* the stack, and `get(0)` read the bottom. A real stack should allow neither. In fact, `Stack`'s own API page recommends using the `Deque` interface instead <abbr title="java.util.Stack, Java SE 25 API">[14]</abbr>. A stack *has* a list; it isn't one. Holding the list in a `private` field is called **composition**, and it exposes only the operations you choose to write.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -274,7 +354,7 @@ Woof
 `super` is your escape hatch back to the parent's behavior. You'll often use it to *extend* that behavior: "do what the parent does, plus this."
 
 **Intuition.**
-*Mechanism.* An override must have the same **signature** as the inherited method: the same name and the same parameter types <abbr title="The Java Language Specification, Java SE 21, §8.4.2">[4]</abbr>. The `@Override` annotation asks the compiler to verify that for you. If the method doesn't actually override anything, that's an error <abbr title="The Java Language Specification, Java SE 21, §9.6.4.4">[5]</abbr> — which catches typos and signature mismatches.
+*Mechanism.* An override must have the same **signature** as the inherited method: the same name and the same parameter types <abbr title="The Java Language Specification, Java SE 25, §8.4.2">[4]</abbr>. The `@Override` annotation asks the compiler to verify that for you. If the method doesn't actually override anything, that's an error <abbr title="The Java Language Specification, Java SE 25, §9.6.4.4">[5]</abbr> — which catches typos and signature mismatches.
 
 *Concrete bite.* Misspell the method name (or get the parameters wrong), and you've written a *new* method, not an override. `@Override` turns that silent mistake into a compile error:
 
@@ -300,7 +380,7 @@ Main.java:4: error: method does not override or implement a method from a supert
 
 `speakk` (note the typo) overrides nothing, so `@Override` flags it. Without the annotation, this would compile as a brand-new method that nobody ever calls, and `speak()` would quietly keep the parent's behavior.
 
-*Non-example: an override that narrows access.* An override must give at least as much access as the method it replaces <abbr title="The Java Language Specification, Java SE 21, §8.4.8.3">[6]</abbr>. `Object.toString()` is `public`. If you leave `public` off, the name and parameters still match, but the override is rejected:
+*Non-example: an override that narrows access.* An override must give at least as much access as the method it replaces <abbr title="The Java Language Specification, Java SE 25, §8.4.8.3">[6]</abbr>. `Object.toString()` is `public`. If you leave `public` off, the name and parameters still match, but the override is rejected:
 
 ```java run
 class Animal {
@@ -324,7 +404,7 @@ Main.java:3: error: toString() in Animal cannot override toString() in Object
 1 error
 ```
 
-The fix is to declare it `public String toString()`, as §5 does. The return type, by the way, has one degree of freedom: an override may return a *subtype* of the original's return type <abbr title="The Java Language Specification, Java SE 21, §8.4.8.3">[6]</abbr>.
+The fix is to declare it `public String toString()`, as §5 does. The return type, by the way, has one degree of freedom: an override may return a *subtype* of the original's return type <abbr title="The Java Language Specification, Java SE 25, §8.4.8.3">[6]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -379,7 +459,7 @@ Thing: ...
 *Mechanism.* Two types are in play at every call, and each one decides one thing:
 
 - The **declared** type decides, at compile time, which methods you may call at all.
-- For an instance method, the **object's class** decides, at run time, which override runs <abbr title="The Java Language Specification, Java SE 21, §15.12.4.4">[7]</abbr>.
+- For an instance method, the **object's class** decides, at run time, which override runs <abbr title="The Java Language Specification, Java SE 25, §15.12.4.4">[7]</abbr>.
 
 That's why the loop's `Animal` reference can invoke `Dog.speak()`. But the first rule has a bite of its own: `Dog`'s extra method is out of reach through an `Animal` variable, even when the object really is a `Dog`:
 
@@ -435,11 +515,11 @@ Woof
 animal
 ```
 
-`a.speak()` dispatched dynamically to `Dog` (`"Woof"`), but `a.kind` read `Animal`'s field (`"animal"`). Java uses only the declared type to pick the field, never the object's class <abbr title="The Java Language Specification, Java SE 21, §15.11.1">[8]</abbr>.
+`a.speak()` dispatched dynamically to `Dog` (`"Woof"`), but `a.kind` read `Animal`'s field (`"animal"`). Java uses only the declared type to pick the field, never the object's class <abbr title="The Java Language Specification, Java SE 25, §15.11.1">[8]</abbr>.
 
 `Dog`'s `kind` **hides** `Animal`'s, and both fields exist side by side in the object. Hiding a field like this is a code smell precisely because it causes this kind of confusion. Override *methods*; don't hide fields.
 
-*Non-example: a `static` method does not dispatch.* A `static` method belongs to the class, not to an object. So a subclass's `static` method with the same signature **hides** the parent's, rather than overriding it <abbr title="The Java Language Specification, Java SE 21, §8.4.8.2">[9]</abbr>. Just like a field, it's picked by the declared type:
+*Non-example: a `static` method does not dispatch.* A `static` method belongs to the class, not to an object. So a subclass's `static` method with the same signature **hides** the parent's, rather than overriding it <abbr title="The Java Language Specification, Java SE 25, §8.4.8.2">[9]</abbr>. Just like a field, it's picked by the declared type:
 
 ```java run
 class Animal {
@@ -485,8 +565,8 @@ animal
 You met casts on numbers in [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic), and `instanceof` paired with a cast in [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode). On references, a cast changes only the **declared** type. It never changes the object itself.
 
 - An **upcast** (`Dog` to `Animal`) is always safe, so it happens automatically.
-- A **downcast** (`Animal` to `Dog`) needs the cast syntax, `(Dog) a`. It's a promise that the object is a `Dog`, and the JVM checks that promise at run time <abbr title="The Java Language Specification, Java SE 21, §5.1.6">[10]</abbr>.
-- `a instanceof Dog` asks the same question without the risk. It's `true` when the object could be cast to `Dog`, and `false` for `null` <abbr title="The Java Language Specification, Java SE 21, §15.20.2">[12]</abbr>.
+- A **downcast** (`Animal` to `Dog`) needs the cast syntax, `(Dog) a`. It's a promise that the object is a `Dog`, and the JVM checks that promise at run time <abbr title="The Java Language Specification, Java SE 25, §5.1.6">[10]</abbr>.
+- `a instanceof Dog` asks the same question without the risk. It's `true` when the object could be cast to `Dog`, and `false` for `null` <abbr title="The Java Language Specification, Java SE 25, §15.20.2">[12]</abbr>.
 
 ```mermaid
 flowchart LR
@@ -537,7 +617,7 @@ Meow, and no fetch
 **Analysis.** The `Dog` passed the `instanceof` test, so the cast was safe, and `d.fetch()` compiled because `d` is declared as a `Dog`. The `Cat` failed the test, so the code never attempted the cast. Meanwhile, `a.speak()` dispatched as usual; the cast was needed only for `fetch()`.
 
 **Intuition.**
-*Mechanism.* A downcast gets checked twice. First, the compiler rejects any cast between two types that no object could belong to at once. Then the JVM checks the object's class at the moment of the cast. If the object isn't a `Dog` (or a subclass of `Dog`), the cast throws a `ClassCastException` <abbr title="The Java Language Specification, Java SE 21, §15.16">[11]</abbr>.
+*Mechanism.* A downcast gets checked twice. First, the compiler rejects any cast between two types that no object could belong to at once. Then the JVM checks the object's class at the moment of the cast. If the object isn't a `Dog` (or a subclass of `Dog`), the cast throws a `ClassCastException` <abbr title="The Java Language Specification, Java SE 25, §15.16">[11]</abbr>.
 
 *Concrete bite.* This cast compiles, because an `Animal` *could* be a `Dog`. But this particular one is a `Cat`:
 
@@ -602,7 +682,7 @@ A cast can't turn an object into a different class of object. If you want text f
 
 ## 5. `final` and the `Object` methods
 
-Putting `final` on a method forbids overriding it, so no subclass can change that behavior. Meanwhile, every class other than `Object` has a superclass — and if you don't write `extends`, that superclass is `Object` itself <abbr title="The Java Language Specification, Java SE 21, §8.1.4">[1]</abbr>. So every object already comes with methods like `toString`, `equals`, and `hashCode`, which you override to give them meaning.
+Putting `final` on a method forbids overriding it, so no subclass can change that behavior. Meanwhile, every class other than `Object` has a superclass — and if you don't write `extends`, that superclass is `Object` itself <abbr title="The Java Language Specification, Java SE 25, §8.1.4">[1]</abbr>. So every object already comes with methods like `toString`, `equals`, and `hashCode`, which you override to give them meaning.
 
 ```java run
 class Animal {
@@ -631,13 +711,13 @@ unknown
 **Analysis.**
 
 - `System.out.println(a)` called the overridden `toString()`, giving `Animal(Rex)`.
-- `Object`'s default would have printed the class name, an `@`, and the hash code in hexadecimal <abbr title="java.lang.Object, Java SE 21 API">[13]</abbr> — something like `Animal@1b6d3586`.
+- `Object`'s default would have printed the class name, an `@`, and the hash code in hexadecimal <abbr title="java.lang.Object, Java SE 25 API">[13]</abbr> — something like `Animal@1b6d3586`.
 - `species()` is `final`: you can use it, but it's locked against overriding.
 
 Overriding `toString`/`equals`/`hashCode` is how your types get readable printing and correct [value equality](/synapse/programming-languages/java/core-libraries/equals-and-hashcode). You inherit these methods from `Object` whether you ask for them or not.
 
 **Intuition.**
-*Mechanism.* `Object` is the root of every class hierarchy, so its methods are always there to override. A `final` method, on the other hand, can't be overridden or hidden: the compiler rejects any attempt <abbr title="The Java Language Specification, Java SE 21, §8.4.3.3">[16]</abbr>. Its behavior is fixed for the whole hierarchy.
+*Mechanism.* `Object` is the root of every class hierarchy, so its methods are always there to override. A `final` method, on the other hand, can't be overridden or hidden: the compiler rejects any attempt <abbr title="The Java Language Specification, Java SE 25, §8.4.3.3">[16]</abbr>. Its behavior is fixed for the whole hierarchy.
 
 *Concrete bite.* Try to override a `final` method, and it won't compile:
 
@@ -659,7 +739,7 @@ class Dog extends Animal { @Override String species() { return "dog"; } }
 
 `Animal.species()` is `final`, so `Dog` can't override it — the lock holds. javac's next line spells out the reason: `overridden method is final`.
 
-*Non-example: extending a `final` class.* Putting `final` on a *class* forbids subclasses altogether <abbr title="The Java Language Specification, Java SE 21, §8.1.4">[1]</abbr>. `String` is one such `final` class:
+*Non-example: extending a `final` class.* Putting `final` on a *class* forbids subclasses altogether <abbr title="The Java Language Specification, Java SE 25, §8.1.4">[1]</abbr>. `String` is one such `final` class:
 
 ```java run
 class Shout extends String { }
@@ -696,6 +776,7 @@ To add behavior to text, write a class that *has* a `String` field (composition)
 |---|---|
 | A subclass `extends` a superclass and `super(...)`-initializes it | It inherits fields/methods; use inheritance only for a true "is-a" |
 | With no `super(...)`, javac inserts `super();` | The superclass constructor runs first; with no no-argument constructor, it does not compile |
+| Statements before `super(...)` may set fields but not use the object (JDK 25) | Assign the fields an overridden method needs before `super(...)`, or the superclass sees their defaults |
 | `private` members and constructors are not inherited | A subclass reaches a `private` field through a method or a `protected` field |
 | Overriding redeclares an inherited method; `super.m()` reaches the parent | Annotate with `@Override` so a typo'd "override" is a compile error; never narrow the access |
 | The declared type decides which methods compile; the object's class decides which override runs | `a.fetch()` does not compile on an `Animal` variable, even when the object is a `Dog` |
@@ -801,23 +882,23 @@ Woof / animal
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §8.1.4 "Superclasses and Subclasses" (the default direct superclass is `Object`; a `final` class may not be named in `extends`) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1.4>
-2. *The Java Language Specification, Java SE 21*, §8.2 "Class Members" ("Members of a class that are declared private are not inherited"; constructors are not members) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.2>
-3. *The Java Language Specification, Java SE 21*, §8.8.7 "Constructor Body" (the implicit `super();`; the explicit invocation must be first) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.8.7>
-4. *The Java Language Specification, Java SE 21*, §8.4.2 "Method Signature" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.2>
-5. *The Java Language Specification, Java SE 21*, §9.6.4.4 "`@Override`" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-9.html#jls-9.6.4.4>
-6. *The Java Language Specification, Java SE 21*, §8.4.8.3 "Requirements in Overriding and Hiding" (return-type-substitutable; "at least as much access") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.8.3>
-7. *The Java Language Specification, Java SE 21*, §15.12.4.4 "Locate Method to Invoke" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.12.4.4>
-8. *The Java Language Specification, Java SE 21*, §15.11.1 "Field Access Using a Primary" ("only the type of the Primary expression … is used in determining which field to use") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.11.1>
-9. *The Java Language Specification, Java SE 21*, §8.4.8.2 "Hiding (by Class Methods)" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.8.2>
-10. *The Java Language Specification, Java SE 21*, §5.1.6 "Narrowing Reference Conversion" (may require a test at run time) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-5.html#jls-5.1.6>
-11. *The Java Language Specification, Java SE 21*, §15.16 "Cast Expressions" (`ClassCastException` "if a cast is found to be impermissible at run time") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.16>
-12. *The Java Language Specification, Java SE 21*, §15.20.2 "The `instanceof` Operator" (the null reference gives `false`) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.20.2>
-13. `java.lang.Object`, Java SE 21 API (`toString`: `getClass().getName() + '@' + Integer.toHexString(hashCode())`) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html>
-14. `java.util.Stack`, Java SE 21 API (`extends Vector`; `Deque` "should be used in preference to this class") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Stack.html>
+1. *The Java Language Specification, Java SE 25*, §8.1.4 "Superclasses and Subclasses" (the default direct superclass is `Object`; a `final` class may not be named in `extends`) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.4>
+2. *The Java Language Specification, Java SE 25*, §8.2 "Class Members" ("Members of a class that are declared private are not inherited"; constructors are not members) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.2>
+3. *The Java Language Specification, Java SE 25*, §8.8.7 "Constructor Body" (the implicit `super();`; the prologue and the early construction context) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.7>
+4. *The Java Language Specification, Java SE 25*, §8.4.2 "Method Signature" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.2>
+5. *The Java Language Specification, Java SE 25*, §9.6.4.4 "`@Override`" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.6.4.4>
+6. *The Java Language Specification, Java SE 25*, §8.4.8.3 "Requirements in Overriding and Hiding" (return-type-substitutable; "at least as much access") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.8.3>
+7. *The Java Language Specification, Java SE 25*, §15.12.4.4 "Locate Method to Invoke" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.12.4.4>
+8. *The Java Language Specification, Java SE 25*, §15.11.1 "Field Access Using a Primary" ("only the type of the Primary expression … is used in determining which field to use") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.11.1>
+9. *The Java Language Specification, Java SE 25*, §8.4.8.2 "Hiding (by Class Methods)" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.8.2>
+10. *The Java Language Specification, Java SE 25*, §5.1.6 "Narrowing Reference Conversion" (may require a test at run time) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.6>
+11. *The Java Language Specification, Java SE 25*, §15.16 "Cast Expressions" (`ClassCastException` "if a cast is found to be impermissible at run time") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.16>
+12. *The Java Language Specification, Java SE 25*, §15.20.2 "The `instanceof` Operator" (the null reference gives `false`) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.20.2>
+13. `java.lang.Object`, Java SE 25 API (`toString`: `getClass().getName() + '@' + Integer.toHexString(hashCode())`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html>
+14. `java.util.Stack`, Java SE 25 API (`extends Vector`; `Deque` "should be used in preference to this class") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Stack.html>
 15. JEP 513: Flexible Constructor Bodies (JDK 25) — <https://openjdk.org/jeps/513>
-16. *The Java Language Specification, Java SE 21*, §8.4.3.3 "`final` Methods" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.3.3>
-17. *The Java Language Specification, Java SE 21*, §12.5 "Creation of New Class Instances" (room for "all the instance variables that may be hidden") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-12.html#jls-12.5>
+16. *The Java Language Specification, Java SE 25*, §8.4.3.3 "`final` Methods" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.3.3>
+17. *The Java Language Specification, Java SE 25*, §12.5 "Creation of New Class Instances" (room for "all the instance variables that may be hidden") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.5>
 
 ---
 

@@ -55,7 +55,7 @@ This builds on [loops](/synapse/programming-languages/java/control-flow/loops) a
 
 ## 1. `break`: leave the loop now
 
-`break` stops a loop immediately and jumps to the code after it <abbr title="The Java Language Specification, Java SE 21, §14.15">[1]</abbr>. It's how you search: scan until you find a match, then stop. There's no point carrying on.
+`break` stops a loop immediately and jumps to the code after it <abbr title="The Java Language Specification, Java SE 25, §14.15">[1]</abbr>. It's how you search: scan until you find a match, then stop. There's no point carrying on.
 
 ```java run
 public class Main {
@@ -81,7 +81,7 @@ public class Main {
 
 `found` starts at `-1`, a value no search can produce. If the loop ends without a match, `-1` tells you so. A value used this way, to mean "nothing", is a **sentinel**.
 
-A statement right after `break`, in the same block, can never run, and javac rejects it with `unreachable statement` <abbr title="The Java Language Specification, Java SE 21, §14.22">[5]</abbr>. A `break` outside any loop or `switch` fails too: `break outside switch or loop`.
+A statement right after `break`, in the same block, can never run, and javac rejects it with `unreachable statement` <abbr title="The Java Language Specification, Java SE 25, §14.22">[5]</abbr>. A `break` outside any loop or `switch` fails too: `break outside switch or loop`.
 
 A loop inside another loop is a **nested loop**. The inner loop runs all of its passes for *each* pass of the outer one:
 
@@ -107,7 +107,7 @@ public class Main {
 Two outer passes times three inner passes make six pairs. The `println` after the inner loop ends each row.
 
 **Intuition.**
-*Mechanism.* `break` exits the **innermost** statement that encloses it and that it can leave: a loop, or a `switch` <abbr title="The Java Language Specification, Java SE 21, §14.15">[1]</abbr>. It doesn't exit the method, and in nested loops it doesn't exit the outer loop.
+*Mechanism.* `break` exits the **innermost** statement that encloses it and that it can leave: a loop, or a `switch` <abbr title="The Java Language Specification, Java SE 25, §14.15">[1]</abbr>. It doesn't exit the method, and in nested loops it doesn't exit the outer loop.
 
 *Concrete bite.* Put a `break` in an inner loop, and the outer loop keeps right on going:
 
@@ -170,7 +170,7 @@ That scoping has a cost. A `break` meant to abandon a *nested* search stops only
 
 ## 2. `continue`: skip to the next pass
 
-`continue` abandons the *rest of the current pass* and jumps straight to the loop's next step: the update and test <abbr title="The Java Language Specification, Java SE 21, §14.16">[2]</abbr>. It's how you filter: skip the elements that don't qualify, and keep looping for the ones that do.
+`continue` abandons the *rest of the current pass* and jumps straight to the loop's next step: the update and test <abbr title="The Java Language Specification, Java SE 25, §14.16">[2]</abbr>. It's how you filter: skip the elements that don't qualify, and keep looping for the ones that do.
 
 ```java run
 public class Main {
@@ -302,7 +302,7 @@ The catch is the `for`-vs-`while` asymmetry. A `for` always runs its update. But
 
 ## 3. Labeled `break` and `continue`: nested loops
 
-When a `break` needs to leave more than the innermost loop, give the outer loop a **label**: a name followed by `:` <abbr title="The Java Language Specification, Java SE 21, §14.7">[3]</abbr>. Then write `break label`, which exits the named loop and everything inside it.
+When a `break` needs to leave more than the innermost loop, give the outer loop a **label**: a name followed by `:` <abbr title="The Java Language Specification, Java SE 25, §14.7">[3]</abbr>. Then write `break label`, which exits the named loop and everything inside it.
 
 ```java run
 public class Main {
@@ -356,7 +356,7 @@ checked 1
 found 2
 ```
 
-`continue` takes a label too. `continue rows` ends the current pass of the loop named `rows` and starts its next pass <abbr title="The Java Language Specification, Java SE 21, §14.16">[2]</abbr>. Here each row prints only the pairs where `j` is not bigger than `i`:
+`continue` takes a label too. `continue rows` ends the current pass of the loop named `rows` and starts its next pass <abbr title="The Java Language Specification, Java SE 25, §14.16">[2]</abbr>. Here each row prints only the pairs where `j` is not bigger than `i`:
 
 ```java run
 public class Main {
@@ -412,7 +412,7 @@ No enclosing loop carries the label `inner` (the only label is `outer`), so the 
 
 💡 **Earned rule.** Reach for a labeled `break` or `continue` only to leave or skip genuinely nested loops in one move. Name the label for what it leaves (`search:`, `rows:`).
 
-The catch is that labels are rare enough to surprise the next reader. Overuse them, and you recreate the tangled "goto" control flow that structured loops were meant to replace. Java has no `goto` statement at all <abbr title="The Java Language Specification, Java SE 21, §14.7">[3]</abbr>. So prefer extracting the nested search into its own [method](/synapse/programming-languages/java/control-flow/methods), and `return`ing from it once that tool is available.
+The catch is that labels are rare enough to surprise the next reader. Overuse them, and you recreate the tangled "goto" control flow that structured loops were meant to replace. Java has no `goto` statement at all <abbr title="The Java Language Specification, Java SE 25, §14.7">[3]</abbr>. So prefer extracting the nested search into its own [method](/synapse/programming-languages/java/control-flow/methods), and `return`ing from it once that tool is available.
 
 </div>
 
@@ -448,7 +448,7 @@ sum=108 count=6 max=42
 - `count` ticks up once per element, ending at `6`;
 - `max` keeps the largest seen so far, ending at `42`.
 
-Each one starts at a value that's correct for "nothing seen yet". `sum` and `count` start at `0`. `max` starts at `Integer.MIN_VALUE`, the smallest `int` <abbr title="Java SE 21 API, java.lang.Integer.MIN_VALUE">[4]</abbr>, so the very first element is guaranteed to beat it.
+Each one starts at a value that's correct for "nothing seen yet". `sum` and `count` start at `0`. `max` starts at `Integer.MIN_VALUE`, the smallest `int` <abbr title="Java SE 25 API, java.lang.Integer.MIN_VALUE">[4]</abbr>, so the very first element is guaranteed to beat it.
 
 **An average** is `sum / count`, and both are `int`s. So the division truncates, just as [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) showed. Cast one side to keep the fraction:
 
@@ -641,11 +641,11 @@ It gives `2` for `{7, 3, 9, 2, 8}`, and `-11` for `{-4, -11, -6}`. A seed of `0`
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §14.15 "The `break` Statement" ("the innermost enclosing `switch`, `while`, `do`, or `for` statement") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.15>
-2. *The Java Language Specification, Java SE 21*, §14.16 "The `continue` Statement" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.16>
-3. *The Java Language Specification, Java SE 21*, §14.7 "Labeled Statements" ("the Java programming language has no `goto` statement") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.7>
-4. Java SE 21 API, `java.lang.Integer` (`MIN_VALUE`, `MAX_VALUE`) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html#MIN_VALUE>
-5. *The Java Language Specification, Java SE 21*, §14.22 "Unreachable Statements" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.22>
+1. *The Java Language Specification, Java SE 25*, §14.15 "The `break` Statement" ("the innermost enclosing `switch`, `while`, `do`, or `for` statement") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.15>
+2. *The Java Language Specification, Java SE 25*, §14.16 "The `continue` Statement" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.16>
+3. *The Java Language Specification, Java SE 25*, §14.7 "Labeled Statements" ("the Java programming language has no `goto` statement") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.7>
+4. Java SE 25 API, `java.lang.Integer` (`MIN_VALUE`, `MAX_VALUE`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html#MIN_VALUE>
+5. *The Java Language Specification, Java SE 25*, §14.22 "Unreachable Statements" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.22>
 
 ---
 

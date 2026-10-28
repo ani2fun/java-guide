@@ -119,7 +119,7 @@ Main.java:7: error: method square in class Main cannot be applied to given types
 **Intuition.**
 *Mechanism.* A call pauses the caller and binds each argument to the matching parameter. It runs the body until a `return`, then resumes the caller with the returned value dropped in place of the call.
 
-*Concrete bite.* A method that declares a non-`void` return type must return a value on every path, or it won't compile <abbr title="The Java Language Specification, Java SE 21, §8.4.7">[1]</abbr>. The compiler proves that you always return:
+*Concrete bite.* A method that declares a non-`void` return type must return a value on every path, or it won't compile <abbr title="The Java Language Specification, Java SE 25, §8.4.7">[1]</abbr>. The compiler proves that you always return:
 
 ```java run
 public class Main {
@@ -184,7 +184,7 @@ Hello, Ada
 **Analysis.** `greet("Ada")` skipped the early-exit branch and printed the greeting. `greet("")` found an empty name, printed `(no name)`, and `return;` ended the method right there, so the greeting line never ran. A `void` method returns nothing, so `return;` carries no value. It just stops.
 
 **Intuition.**
-*Mechanism.* `void` means "no result", so calling a `void` method is a statement, not an expression. There's nothing to assign <abbr title="The Java Language Specification, Java SE 21, §14.17">[2]</abbr>. A `return;` in any method ends it immediately, while `return value;` ends it *and* supplies the result.
+*Mechanism.* `void` means "no result", so calling a `void` method is a statement, not an expression. There's nothing to assign <abbr title="The Java Language Specification, Java SE 25, §14.17">[2]</abbr>. A `return;` in any method ends it immediately, while `return value;` ends it *and* supplies the result.
 
 *Concrete bite.* Because a `void` call has no value, using it as one fails to compile:
 
@@ -222,7 +222,7 @@ The catch with early returns is that too many scattered ones can hide a method's
 
 ## 3. Scope: where parameters and local variables live
 
-A parameter, and any variable declared inside a method body, is a **local variable**. It exists only while that call runs, and only inside the block that declares it <abbr title="The Java Language Specification, Java SE 21, §6.3">[3]</abbr>. When the method returns, its locals are gone, and no other method can see them:
+A parameter, and any variable declared inside a method body, is a **local variable**. It exists only while that call runs, and only inside the block that declares it <abbr title="The Java Language Specification, Java SE 25, §6.3">[3]</abbr>. When the method returns, its locals are gone, and no other method can see them:
 
 ```java run
 public class Main {
@@ -251,7 +251,7 @@ Main.java:8: error: cannot find symbol
 
 It's the same rule you met in [Loops](/synapse/programming-languages/java/control-flow/loops): a variable lives from its declaration to the end of the block that holds it. A method body is just one more block.
 
-*Non-example: reusing a name inside its own scope.* Inside that range, the name is taken. Declaring it again in an inner block is an error, not a new variable <abbr title="The Java Language Specification, Java SE 21, §6.4">[4]</abbr>:
+*Non-example: reusing a name inside its own scope.* Inside that range, the name is taken. Declaring it again in an inner block is an error, not a new variable <abbr title="The Java Language Specification, Java SE 25, §6.4">[4]</abbr>:
 
 ```java run
 public class Main {
@@ -286,7 +286,7 @@ The cost is that nothing leaks out of a method on its own. That's also the payof
 
 ## 4. Overloading: one name, several signatures
 
-Java lets several methods share a name, as long as their **parameter lists** differ in types or in the number of parameters. That's **overloading** <abbr title="The Java Language Specification, Java SE 21, §8.4.9">[5]</abbr>. The compiler picks the right one from the argument types at the call site.
+Java lets several methods share a name, as long as their **parameter lists** differ in types or in the number of parameters. That's **overloading** <abbr title="The Java Language Specification, Java SE 25, §8.4.9">[5]</abbr>. The compiler picks the right one from the argument types at the call site.
 
 ```java run
 public class Main {
@@ -311,7 +311,7 @@ ababab
 
 **Analysis.** There are three methods named `triple`, told apart by parameter type. `triple(5)` matched the `int` version (`15`), `triple(2.5)` the `double` version (`7.5`), and `triple("ab")` the `String` version (`ababab`). The compiler chose each one from the argument's type. The name alone isn't enough to identify a method.
 
-When there's no exact match, the compiler widens the argument and picks the *closest* fit <abbr title="The Java Language Specification, Java SE 21, §15.12.2">[6]</abbr>:
+When there's no exact match, the compiler widens the argument and picks the *closest* fit <abbr title="The Java Language Specification, Java SE 25, §15.12.2">[6]</abbr>:
 
 ```java run
 public class Main {
@@ -334,7 +334,7 @@ double 5.0
 The `int` `5` fits both `long` and `double`, and `long` is the closer one. The `float` `5.0f` can't become a `long`, so only `double` applies. When two overloads fit equally well, the compiler refuses to guess. With `pair(int, double)` and `pair(double, int)`, the call `pair(1, 2)` gives `reference to pair is ambiguous`.
 
 **Intuition.**
-*Mechanism.* A method is identified by its **signature**: name plus parameter types, not its return type <abbr title="The Java Language Specification, Java SE 21, §8.4.2">[7]</abbr>. The compiler resolves an overloaded call by matching the argument types to a signature, entirely at compile time.
+*Mechanism.* A method is identified by its **signature**: name plus parameter types, not its return type <abbr title="The Java Language Specification, Java SE 25, §8.4.2">[7]</abbr>. The compiler resolves an overloaded call by matching the argument types to a signature, entirely at compile time.
 
 *Concrete bite.* Because the return type *isn't* part of the signature, two methods that differ only by return type count as a duplicate definition:
 
@@ -371,7 +371,7 @@ Overloading costs you resolution surprises. With mixed argument types, the compi
 
 ## 5. Varargs: any number of arguments
 
-Some methods make sense for any number of arguments, like a sum or a maximum. A **varargs** parameter, written with `...` after the type, accepts zero or more arguments <abbr title="The Java Language Specification, Java SE 21, §8.4.1">[8]</abbr>. Inside the method, it's an [array](/synapse/programming-languages/java/control-flow/arrays):
+Some methods make sense for any number of arguments, like a sum or a maximum. A **varargs** parameter, written with `...` after the type, accepts zero or more arguments <abbr title="The Java Language Specification, Java SE 25, §8.4.1">[8]</abbr>. Inside the method, it's an [array](/synapse/programming-languages/java/control-flow/arrays):
 
 ```java run
 public class Main {
@@ -428,7 +428,7 @@ Write `log(String label, int... codes)`. A method may have at most one varargs p
 
 💡 **Earned rule.** Use varargs when callers naturally pass a short, variable list of values. Treat the parameter as an array inside, and handle the empty case, because a caller may pass nothing.
 
-The catch is that overload resolution tries varargs *last* <abbr title="The Java Language Specification, Java SE 21, §15.12.2">[6]</abbr>. A fixed-parameter overload with a fitting type always wins over it.
+The catch is that overload resolution tries varargs *last* <abbr title="The Java Language Specification, Java SE 25, §15.12.2">[6]</abbr>. A fixed-parameter overload with a fitting type always wins over it.
 
 </div>
 
@@ -436,7 +436,7 @@ The catch is that overload resolution tries varargs *last* <abbr title="The Java
 
 ## 6. Pass-by-value: primitives
 
-When you call a method, each argument is **copied** into the parameter <abbr title="The Java Language Specification, Java SE 21, §8.4.1">[8]</abbr>. For a primitive, that means the method gets its own copy of the number, so changing the parameter can't touch the caller's variable.
+When you call a method, each argument is **copied** into the parameter <abbr title="The Java Language Specification, Java SE 25, §8.4.1">[8]</abbr>. For a primitive, that means the method gets its own copy of the number, so changing the parameter can't touch the caller's variable.
 
 ```java run
 public class Main {
@@ -679,14 +679,14 @@ With `x` at `0`, `addOne` prints `inside: 1`, then `outside: 0`. The method chan
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §8.4.7 "Method Body" (a body with a return type must not "complete normally") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.7>
-2. *The Java Language Specification, Java SE 21*, §14.17 "The `return` Statement" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.17>
-3. *The Java Language Specification, Java SE 21*, §6.3 "Scope of a Declaration" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-6.html#jls-6.3>
-4. *The Java Language Specification, Java SE 21*, §6.4 "Shadowing and Obscuring" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-6.html#jls-6.4>
-5. *The Java Language Specification, Java SE 21*, §8.4.9 "Overloading" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.9>
-6. *The Java Language Specification, Java SE 21*, §15.12.2 "Compile-Time Step 2: Determine Method Signature" (three phases; variable arity last) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.12.2>
-7. *The Java Language Specification, Java SE 21*, §8.4.2 "Method Signature" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.2>
-8. *The Java Language Specification, Java SE 21*, §8.4.1 "Formal Parameters" (argument values "initialize newly created parameter variables"; a variable arity parameter must be last) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.1>
+1. *The Java Language Specification, Java SE 25*, §8.4.7 "Method Body" (a body with a return type must not "complete normally") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.7>
+2. *The Java Language Specification, Java SE 25*, §14.17 "The `return` Statement" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.17>
+3. *The Java Language Specification, Java SE 25*, §6.3 "Scope of a Declaration" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3>
+4. *The Java Language Specification, Java SE 25*, §6.4 "Shadowing and Obscuring" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.4>
+5. *The Java Language Specification, Java SE 25*, §8.4.9 "Overloading" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.9>
+6. *The Java Language Specification, Java SE 25*, §15.12.2 "Compile-Time Step 2: Determine Method Signature" (three phases; variable arity last) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.12.2>
+7. *The Java Language Specification, Java SE 25*, §8.4.2 "Method Signature" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.2>
+8. *The Java Language Specification, Java SE 25*, §8.4.1 "Formal Parameters" (argument values "initialize newly created parameter variables"; a variable arity parameter must be last) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.1>
 
 ---
 

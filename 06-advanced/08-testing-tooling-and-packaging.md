@@ -1,6 +1,6 @@
 ---
 title: Testing, Tooling & Packaging
-summary: Tests turn "I think it works" into "the machine proves it works on every build." Java's assert is disabled by default, and a disabled assert does nothing at all, side effects included. That's why you use JUnit, whose @Test methods with assertEquals and assertThrows always run, via mvn test. Build tools (Maven, Gradle) resolve dependencies transitively, then test and package your code. An executable JAR ships it, and a missing library shows up as NoClassDefFoundError. Reading a stack trace and choosing a log level round it off. Shown with real terminal sessions.
+summary: Tests turn "I think it works" into "the machine proves it works on every build." Java's assert is disabled by default, and a disabled assert does nothing at all, side effects included. That's why you use JUnit, whose @Test methods with assertEquals and assertThrows always run, via mvn test. Build tools (Maven, Gradle) resolve dependencies transitively, then test and package your code. An executable JAR ships it, and a missing library shows up as NoClassDefFoundError. Reading a stack trace and choosing a log level round it off. Markdown doc comments (///) document the API for javadoc. Shown with real terminal sessions.
 prereqs: []
 ---
 
@@ -24,9 +24,9 @@ This lesson is about everything *around* the code — the things that make it tr
 
 </div>
 
-Most examples here use multi-file projects and the `javac`/`mvn`/`gradle`/`jar` tools, so they're shown as real terminal sessions. Every command and its output was run on JDK 21 and captured, and the ▶ Run blocks were compiled and run the same way.
+Most examples here use multi-file projects and the `javac`/`mvn`/`gradle`/`jar` tools, so they're shown as real terminal sessions. Every command and its output was run on JDK 25 and captured, and the ▶ Run blocks were compiled and run the same way.
 
-**You'll be able to:** predict what a false `assert` does with and without `-ea`, and explain why an assertion must have no side effects; write a JUnit test with `assertEquals` and `assertThrows`, and read a failing test's report; explain what a build tool does with a single declared dependency, and write it for both Maven and Gradle; build an executable JAR, and fix `no main manifest attribute` and a `NoClassDefFoundError` for a missing library; read a stack trace starting from the first frame in your own code, and predict which log messages a level lets through.
+**You'll be able to:** predict what a false `assert` does with and without `-ea`, and explain why an assertion must have no side effects; write a JUnit test with `assertEquals` and `assertThrows`, and read a failing test's report; explain what a build tool does with a single declared dependency, and write it for both Maven and Gradle; build an executable JAR, and fix `no main manifest attribute` and a `NoClassDefFoundError` for a missing library; document an API with Markdown doc comments; read a stack trace starting from the first frame in your own code, and predict which log messages a level lets through.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -56,7 +56,7 @@ Most examples here use multi-file projects and the `javac`/`mvn`/`gradle`/`jar` 
 
 ## 1. Testing with assertions
 
-At the heart of any test is an **assertion**: a claim that must hold, checked automatically. Java has a built-in `assert` statement, but it's **disabled unless you pass `-ea`** (enable assertions) <abbr title="The java command, JDK 21 documentation (-enableassertions)">[2]</abbr>, which makes it unsuitable as your testing tool.
+At the heart of any test is an **assertion**: a claim that must hold, checked automatically. Java has a built-in `assert` statement, but it's **disabled unless you pass `-ea`** (enable assertions) <abbr title="The java command, JDK 25 documentation (-enableassertions)">[2]</abbr>, which makes it unsuitable as your testing tool.
 
 ```java run
 public class Main {
@@ -89,7 +89,7 @@ Exception in thread "main" java.lang.AssertionError: add(2,2) should be 5
 An assertion that the JVM ignores by default is worthless as a test. That's the motivation for a testing framework whose checks *always* run.
 
 **Intuition.**
-*Mechanism.* `assert cond : msg` throws `AssertionError` if `cond` is false — but only when assertions are enabled. When they're disabled, the JLS says the statement "has no effect whatsoever" <abbr title="The Java Language Specification, Java SE 21, §14.10">[1]</abbr>. Assertions were designed for internal sanity checks during development, not as a testing mechanism.
+*Mechanism.* `assert cond : msg` throws `AssertionError` if `cond` is false — but only when assertions are enabled. When they're disabled, the JLS says the statement "has no effect whatsoever" <abbr title="The Java Language Specification, Java SE 25, §14.10">[1]</abbr>. Assertions were designed for internal sanity checks during development, not as a testing mechanism.
 
 *Concrete bite.* The first run is the trap: `java Main` printed `passed` for code that's wrong.
 
@@ -180,7 +180,7 @@ Run the tests with the build tool (this is the end of the output):
 ```
 $ mvn test
 [INFO] Running CalculatorTest
-[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in CalculatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.027 s -- in CalculatorTest
 [INFO] 
 [INFO] Results:
 [INFO] 
@@ -204,8 +204,8 @@ Both passed: `Tests run: 2, Failures: 0`. Unlike `assert`, these checks *always*
 
 ```
 $ mvn test
-[ERROR] Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.047 s <<< FAILURE! -- in CalculatorTest
-[ERROR] CalculatorTest.addsTwoNumbers -- Time elapsed: 0.006 s <<< FAILURE!
+[ERROR] Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.032 s <<< FAILURE! -- in CalculatorTest
+[ERROR] CalculatorTest.addsTwoNumbers -- Time elapsed: 0.004 s <<< FAILURE!
 org.opentest4j.AssertionFailedError: expected: <4> but was: <5>
 …
 [ERROR] Failures: 
@@ -214,7 +214,7 @@ org.opentest4j.AssertionFailedError: expected: <4> but was: <5>
 [ERROR] Tests run: 2, Failures: 1, Errors: 0, Skipped: 0
 [INFO] 
 [INFO] ------------------------------------------------------------------------
-[INFO] BUILD FAILURE
+[ERROR] BUILD FAILURE
 ```
 
 `expected: <4> but was: <5>` shows why argument order matters: the expected value comes first. The real power here is regression protection. Once `divideByZeroThrows` exists, anyone who later breaks that behavior gets a red build. The test becomes a permanent, executable specification.
@@ -243,7 +243,7 @@ Maven's `pom.xml` declares the project and its dependencies by **coordinates** (
   <artifactId>calc</artifactId>
   <version>1.0</version>
   <properties>
-    <maven.compiler.release>21</maven.compiler.release>
+    <maven.compiler.release>25</maven.compiler.release>
   </properties>
   <dependencies>
     <dependency>
@@ -260,11 +260,11 @@ Maven's `pom.xml` declares the project and its dependencies by **coordinates** (
 
 ```
 $ mvn package
-[INFO] --- compiler:3.15.0:compile (default-compile) @ calc ---
-[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ calc ---
-[INFO] --- surefire:3.5.4:test (default-test) @ calc ---
+[INFO] --- compiler:3.16.0:compile (default-compile) @ calc ---
+[INFO] --- compiler:3.16.0:testCompile (default-testCompile) @ calc ---
+[INFO] --- surefire:3.6.0:test (default-test) @ calc ---
 [INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
-[INFO] --- jar:3.5.0:jar (default-jar) @ calc ---
+[INFO] --- jar:3.5.1:jar (default-jar) @ calc ---
 [INFO] BUILD SUCCESS
 ```
 
@@ -318,7 +318,7 @@ tasks.test {
 }
 ```
 
-With this file, `gradle test` ran both tests, and they passed. Leave out `useJUnitPlatform()`, and Gradle 9.7.1 fails with "the test task did not discover any tests to execute". Leave out the launcher line, and it says `Failed to load JUnit Platform`.
+With this file, `gradle test` ran both tests, and they passed. Leave out `useJUnitPlatform()`, and Gradle 9.8.2 fails with "the test task did not discover any tests to execute". Leave out the launcher line, and it says `Failed to load JUnit Platform`.
 
 **Intuition.**
 *Mechanism.* A build tool models the project as a descriptor (`pom.xml` or `build.gradle.kts`) plus a fixed sequence of steps. It resolves the dependency graph from repositories such as Maven Central, caches the artifacts locally, compiles, runs the tests, and packages — the same way on every machine.
@@ -338,7 +338,7 @@ With this file, `gradle test` ran both tests, and they passed. Leave out `useJUn
 
 ## 4. Shipping an executable JAR
 
-A **JAR** (Java ARchive) is a ZIP file of classes, plus a manifest at `META-INF/MANIFEST.MF` <abbr title="JAR File Specification, JDK 21">[9]</abbr>. To hand someone a runnable program, package it as an **executable JAR**: its manifest names the `Main-Class`, so `java -jar` can launch it directly.
+A **JAR** (Java ARchive) is a ZIP file of classes, plus a manifest at `META-INF/MANIFEST.MF` <abbr title="JAR File Specification, JDK 25">[9]</abbr>. To hand someone a runnable program, package it as an **executable JAR**: its manifest names the `Main-Class`, so `java -jar` can launch it directly.
 
 ```
 $ javac Greeting.java
@@ -357,7 +357,7 @@ Hello from an executable JAR!
 ```
 $ unzip -p app.jar META-INF/MANIFEST.MF
 Manifest-Version: 1.0
-Created-By: 21.0.12.1 (Eclipse Adoptium)
+Created-By: 25.0.5 (Eclipse Adoptium)
 Main-Class: Greeting
 ```
 
@@ -378,7 +378,7 @@ Hello from an executable JAR!
 Naming the class on the command line, with the JAR on the classpath, still works.
 
 **Intuition.**
-*Mechanism.* With `-jar`, "the specified JAR file is the source of all user classes, and other class path settings are ignored" <abbr title="The java command, JDK 21 documentation (-jar)">[2]</abbr>. A JAR contains only *your* classes, so any library your code uses has to come from somewhere else.
+*Mechanism.* With `-jar`, "the specified JAR file is the source of all user classes, and other class path settings are ignored" <abbr title="The java command, JDK 25 documentation (-jar)">[2]</abbr>. A JAR contains only *your* classes, so any library your code uses has to come from somewhere else.
 
 *Concrete bite.* Here, `com.example.App` calls `Shout.loud` from a library, `acme.jar`. The app was compiled against the library, but the executable JAR holds only `App` (output trimmed at `…`):
 
@@ -402,9 +402,9 @@ Caused by: java.lang.ClassNotFoundException: com.acme.Shout
 
 Here are three fixes, each one tested.
 
-**Fix 1: name the classpath yourself.** `java -cp app.jar:acme.jar com.example.App` printed `starting`, then `HELLO!`. (On Windows, separate the entries with `;` instead <abbr title="The java command, JDK 21 documentation (-cp)">[2]</abbr>.)
+**Fix 1: name the classpath yourself.** `java -cp app.jar:acme.jar com.example.App` printed `starting`, then `HELLO!`. (On Windows, separate the entries with `;` instead <abbr title="The java command, JDK 25 documentation (-cp)">[2]</abbr>.)
 
-**Fix 2: a `Class-Path` manifest line.** This line lists the library by a URL relative to the JAR's own location <abbr title="JAR File Specification, JDK 21 (Class-Path Attribute)">[9]</abbr>. Here, `cp.txt` held the line `Class-Path: acme.jar`, and `--manifest` merged it in <abbr title="The jar command, JDK 21 documentation">[3]</abbr>:
+**Fix 2: a `Class-Path` manifest line.** This line lists the library by a URL relative to the JAR's own location <abbr title="JAR File Specification, JDK 25 (Class-Path Attribute)">[9]</abbr>. Here, `cp.txt` held the line `Class-Path: acme.jar`, and `--manifest` merged it in <abbr title="The jar command, JDK 25 documentation">[3]</abbr>:
 
 ```
 $ jar --create --file app2.jar --main-class com.example.App --manifest cp.txt -C app-classes .
@@ -442,6 +442,58 @@ In practice, a build tool produces the fat JAR for you, through a plugin such as
 
 </div>
 
+**Documentation ships too.** A library's users read its API documentation, which the `javadoc` tool generates from **documentation comments** in the source <abbr title="The javadoc command, JDK 25 documentation">[16]</abbr>. A traditional doc comment is written in HTML between `/**` and `*/`. Since JDK 23, you can write it in Markdown instead, on lines that each begin with `///` <abbr title="JEP 467: Markdown Documentation Comments (JDK 23)">[14]</abbr> <abbr title="Documentation Comment Specification for the Standard Doclet (JDK 25), &quot;Markdown Documentation Comments&quot;">[15]</abbr>. To the compiler, they're ordinary comments, so the program runs as usual:
+
+```java run
+/// Converts temperatures between scales.
+///
+/// Every method here is **pure**: it never changes any state.
+public class Main {
+    /// Converts degrees Celsius to degrees Fahrenheit.
+    ///
+    /// For example, `toFahrenheit(100)` returns `212.0`.
+    ///
+    /// @param celsius the temperature in degrees Celsius
+    /// @return the same temperature in degrees Fahrenheit
+    public static double toFahrenheit(double celsius) {
+        return celsius * 9 / 5 + 32;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(toFahrenheit(100));
+        System.out.println(toFahrenheit(-40));
+    }
+}
+```
+
+**Output:**
+```
+212.0
+-40.0
+```
+
+Run `javadoc` on the same file, and it turns the Markdown into HTML. `-quiet` hides the progress messages, so only the warnings are left:
+
+```
+$ javadoc -quiet -d docs Main.java
+Main.java:4: warning: use of default constructor, which does not provide a comment
+public class Main {
+       ^
+Main.java:15: warning: no comment
+    public static void main(String[] args) {
+                       ^
+2 warnings
+$ grep -o '<p>For example.*</p>' docs/Main.html
+<p>For example, <code>toFahrenheit(100)</code> returns <code>212.0</code>.</p>
+```
+
+**Output** *(real captured session on JDK 25):*
+```
+<p>For example, <code>toFahrenheit(100)</code> returns <code>212.0</code>.</p>
+```
+
+The backticks became `<code>`, and `**pure**` became `<strong>pure</strong>` in the class description. Block tags such as `@param` and `@return` work as before. The two warnings are the tool checking coverage: every public element should have a comment, including the constructor that the compiler adds for you. On JDK 22 or earlier, `javadoc` treats `///` lines as plain comments, and also warns `no comment` on the class and on `toFahrenheit`.
+
 ---
 
 ## 5. Debugging strategy
@@ -450,7 +502,7 @@ When a test goes red or production misbehaves, debug methodically, not by guessw
 
 - **Read the stack trace.** It names the exception and the exact line.
 - **Reproduce** the failure reliably. A failing test is the ideal reproduction.
-- **Inspect state** with a debugger (the JDK ships `jdb` <abbr title="The jdb command, JDK 21 documentation">[10]</abbr>, and every IDE has one), or with targeted logging.
+- **Inspect state** with a debugger (the JDK ships `jdb` <abbr title="The jdb command, JDK 25 documentation">[10]</abbr>, and every IDE has one), or with targeted logging.
 - **Bisect**: narrow the problem down by halving it (which commit, which input, which method) until you've isolated the cause.
 
 A stack trace is a map, and you read it from the top:
@@ -479,8 +531,8 @@ public class Main {
 ```
 loading config
 Exception in thread "main" java.lang.NumberFormatException: Cannot parse null string
-	at java.base/java.lang.Integer.parseInt(Integer.java:624)
-	at java.base/java.lang.Integer.parseInt(Integer.java:778)
+	at java.base/java.lang.Integer.parseInt(Integer.java:527)
+	at java.base/java.lang.Integer.parseInt(Integer.java:662)
 	at Main.parsePort(Main.java:5)
 	at Main.loadPort(Main.java:9)
 	at Main.main(Main.java:14)
@@ -494,7 +546,7 @@ Exception in thread "main" java.lang.NumberFormatException: Cannot parse null st
 
 The single most effective debugging move is to turn the bug into a **failing test**. It reproduces the problem on demand, tells you the moment you've fixed it, and then stays behind as a regression guard.
 
-**Logging.** A log message records state as the program runs, along with a **level** that says how much it matters. The JDK's own logging API is `java.util.logging` <abbr title="Java SE 21 API, java.util.logging">[11]</abbr>. Its default configuration lets through `INFO` and above, and drops `FINE` and lower <abbr title="JDK 21, conf/logging.properties (.level= INFO)">[12]</abbr>. This program sends each record to standard output, so you can see which ones get through:
+**Logging.** A log message records state as the program runs, along with a **level** that says how much it matters. The JDK's own logging API is `java.util.logging` <abbr title="Java SE 25 API, java.util.logging">[11]</abbr>. Its default configuration lets through `INFO` and above, and drops `FINE` and lower <abbr title="JDK 25, conf/logging.properties (.level= INFO)">[12]</abbr>. This program sends each record to standard output, so you can see which ones get through:
 
 ```java run
 import java.util.logging.Handler;
@@ -561,6 +613,7 @@ The `orders` logger had no level of its own (`null`), so it used its parent's le
 | Build tools resolve dependencies by coordinates and run the lifecycle | One `<dependency>` pulls in its transitive dependencies; `mvn package` compiles, tests, then packages |
 | Test-scoped dependencies stay out of the shipped JAR | The artifact holds your classes only |
 | An executable JAR's manifest names the `Main-Class` | `java -jar app.jar` runs it; with `-jar`, `-cp` is ignored |
+| `javadoc` builds API docs from doc comments | Write them in Markdown with `///` (JDK 23+), or in HTML with `/** */` |
 | A library missing at run time fails where it is first used | `NoClassDefFoundError`; fix with a classpath, `Class-Path`, or a fat JAR |
 | Debug by reproduce → read the trace → inspect → fix | A failing test is the best reproduction and a permanent regression guard |
 | A log level filters messages | The default passes `INFO` and above; `FINE` needs a lower level |
@@ -632,19 +685,22 @@ That JAR has no `Main-Class` unless you configure one, so `java -jar` says `no m
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §14.10 "The `assert` Statement" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.10>
-2. The `java` command, JDK 21 documentation (`-enableassertions`; `-jar`) — <https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html>
-3. The `jar` command, JDK 21 documentation — <https://docs.oracle.com/en/java/javase/21/docs/specs/man/jar.html>
+1. *The Java Language Specification, Java SE 25*, §14.10 "The `assert` Statement" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.10>
+2. The `java` command, JDK 25 documentation (`-enableassertions`; `-jar`) — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html>
+3. The `jar` command, JDK 25 documentation — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/jar.html>
 4. JUnit 5.10.2 User Guide (§2.1 annotations, §2.3 test classes and methods, §2.11 test instance lifecycle) — <https://docs.junit.org/5.10.2/user-guide/index.html>
 5. JUnit User Guide, current (6.1.3; "JUnit requires Java 17 (or higher) at runtime") — <https://docs.junit.org/current/user-guide/>
 6. Apache Maven, *Introduction to the Build Lifecycle* — <https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html>
 7. Apache Maven, *Introduction to the Dependency Mechanism* (transitive dependencies, "nearest definition", scopes) — <https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html>
 8. Gradle User Guide, *Testing in Java & JVM projects* (`useJUnitPlatform`) — <https://docs.gradle.org/current/userguide/java_testing.html>
-9. JAR File Specification, JDK 21 (`Main-Class`; the `Class-Path` attribute) — <https://docs.oracle.com/en/java/javase/21/docs/specs/jar/jar.html>
-10. The `jdb` command, JDK 21 documentation — <https://docs.oracle.com/en/java/javase/21/docs/specs/man/jdb.html>
-11. `java.util.logging`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.logging/java/util/logging/package-summary.html>
-12. JDK 21, `conf/logging.properties` (`.level= INFO`; `ConsoleHandler.level = INFO`), in every JDK 21 installation
+9. JAR File Specification, JDK 25 (`Main-Class`; the `Class-Path` attribute) — <https://docs.oracle.com/en/java/javase/25/docs/specs/jar/jar.html>
+10. The `jdb` command, JDK 25 documentation — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/jdb.html>
+11. `java.util.logging`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.logging/java/util/logging/package-summary.html>
+12. JDK 25, `conf/logging.properties` (`.level= INFO`; `ConsoleHandler.level = INFO`), in every JDK 25 installation
 13. Apache Maven Shade Plugin — <https://maven.apache.org/plugins/maven-shade-plugin/>
+14. JEP 467: Markdown Documentation Comments (JDK 23) — <https://openjdk.org/jeps/467>
+15. *Documentation Comment Specification for the Standard Doclet (JDK 25)*, "Markdown Documentation Comments" ("consecutive lines, each beginning with optional whitespace followed by `///`") — <https://docs.oracle.com/en/java/javase/25/docs/specs/javadoc/doc-comment-spec.html#markdown-documentation-comments>
+16. The `javadoc` command, JDK 25 documentation — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/javadoc.html>
 
 ---
 

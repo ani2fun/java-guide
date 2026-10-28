@@ -23,7 +23,7 @@ This lesson also adds `intern()` to the [String pool](/synapse/programming-langu
 
 </div>
 
-This is the deep pass of [Strings, the Basics](/synapse/programming-languages/java/first-steps/strings-the-basics). Every output below was produced by compiling and running the code on Java 21.
+This is the deep pass of [Strings, the Basics](/synapse/programming-languages/java/first-steps/strings-the-basics). Every output below was produced by compiling and running the code on Java 25.
 
 **You'll be able to:** explain why `+=` in a loop is O(N²), and rewrite it with a `StringBuilder`; predict `equals` for two builders with the same text, and compare their contents correctly; predict `==` before and after `intern()`; predict what `split` returns for a `.` separator, and fix it; place a text block's closing `"""` to get the indentation and final newline you want.
 
@@ -55,9 +55,9 @@ This is the deep pass of [Strings, the Basics](/synapse/programming-languages/ja
 
 ## 1. Immutability and the cost of `+`
 
-A `String` never changes, so `s = s + "b"` does **not** extend `s`. It builds a new String and points `s` at it <abbr title="The Java Language Specification, Java SE 21, §15.18.1">[1]</abbr>.
+A `String` never changes, so `s = s + "b"` does **not** extend `s`. It builds a new String and points `s` at it <abbr title="The Java Language Specification, Java SE 25, §15.18.1">[1]</abbr>.
 
-You can see the new object with `System.identityHashCode`. It returns a number for an object, and the same object always gives the same number <abbr title="Java SE 21 API, Object.hashCode and System.identityHashCode">[2]</abbr>. So two different numbers mean two different objects:
+You can see the new object with `System.identityHashCode`. It returns a number for an object, and the same object always gives the same number <abbr title="Java SE 25 API, Object.hashCode and System.identityHashCode">[2]</abbr>. So two different numbers mean two different objects:
 
 ```java run
 public class Main {
@@ -80,10 +80,10 @@ false
 
 **Analysis.** After `s = s + "b"`, `s` reads `"ab"`, but `h1 == h2` is `false`, because `s` now refers to a *different* object. The `+` didn't modify the original `"a"`. It allocated a new `"ab"`.
 
-The numbers themselves vary from run to run, which is why we compare them instead of printing them. (The reverse doesn't hold. Distinct numbers for distinct objects are promised only "as far as is reasonably practical" <abbr title="Java SE 21 API, Object.hashCode and System.identityHashCode">[2]</abbr>, so equal numbers prove nothing.)
+The numbers themselves vary from run to run, which is why we compare them instead of printing them. (The reverse doesn't hold. Distinct numbers for distinct objects are promised only "as far as is reasonably practical" <abbr title="Java SE 25 API, Object.hashCode and System.identityHashCode">[2]</abbr>, so equal numbers prove nothing.)
 
 **Intuition.**
-*Mechanism.* The JLS says the result of `+` on strings is a **newly created** String, unless the whole expression is a constant <abbr title="The Java Language Specification, Java SE 21, §15.18.1">[1]</abbr>.
+*Mechanism.* The JLS says the result of `+` on strings is a **newly created** String, unless the whole expression is a constant <abbr title="The Java Language Specification, Java SE 25, §15.18.1">[1]</abbr>.
 
 - Inside one expression such as `a + b + c`, Java may skip the in-between Strings and build the result in one step. Since JDK 9, javac hands that step to a library method chosen at run time <abbr title="JEP 280: Indify String Concatenation">[3]</abbr>.
 - A *loop* is different. Each pass runs the expression again, and each new String copies every character built so far.
@@ -142,7 +142,7 @@ Ignore this rule, and you get a program that works in tests and crawls on large 
 
 ## 2. `StringBuilder`: the O(n) fix
 
-`StringBuilder` is a *mutable* sequence of characters <abbr title="Java SE 21 API, java.lang.StringBuilder">[4]</abbr>. `append` adds to it **in place**, with no new object per step. `toString()` produces the final `String` once, at the end. So the total work is linear.
+`StringBuilder` is a *mutable* sequence of characters <abbr title="Java SE 25 API, java.lang.StringBuilder">[4]</abbr>. `append` adds to it **in place**, with no new object per step. `toString()` produces the final `String` once, at the end. So the total work is linear.
 
 ```java run
 public class Main {
@@ -201,15 +201,15 @@ true
 
 - `reverse`, `insert`, `deleteCharAt`, `setLength` and `setCharAt` all edited the one object `sb`.
 - `same == sb` is `true`, because `append` returned the builder it was called on. That's why `sb.append(x).append(y)` works.
-- `println(sb)` printed the text. `println` turns any object into text with `String.valueOf`, which calls its `toString()` <abbr title="Java SE 21 API, PrintStream.println(Object)">[17]</abbr>.
-- A new, empty builder has room for 16 characters before it must grow <abbr title="Java SE 21 API, java.lang.StringBuilder">[4]</abbr>.
+- `println(sb)` printed the text. `println` turns any object into text with `String.valueOf`, which calls its `toString()` <abbr title="Java SE 25 API, PrintStream.println(Object)">[17]</abbr>.
+- A new, empty builder has room for 16 characters before it must grow <abbr title="Java SE 25 API, java.lang.StringBuilder">[4]</abbr>.
 
 **Intuition.**
 *Mechanism.* A `StringBuilder` keeps its characters in an internal array with spare room, its **capacity**. `append` writes into that room.
 
-When the room runs out, the builder "is automatically made larger" <abbr title="Java SE 21 API, java.lang.StringBuilder">[4]</abbr>. OpenJDK grows it to twice its size plus 2 (16, 34, 70, 142 in a run), so the copies stay rare, and N appends cost O(N) in total. (Since JDK 9, that array holds bytes, not `char`s, to save memory on Latin-1 text <abbr title="JEP 254: Compact Strings">[5]</abbr>. The API is the same.)
+When the room runs out, the builder "is automatically made larger" <abbr title="Java SE 25 API, java.lang.StringBuilder">[4]</abbr>. OpenJDK grows it to twice its size plus 2 (16, 34, 70, 142 in a run), so the copies stay rare, and N appends cost O(N) in total. (Since JDK 9, that array holds bytes, not `char`s, to save memory on Latin-1 text <abbr title="JEP 254: Compact Strings">[5]</abbr>. The API is the same.)
 
-*Concrete bite.* `StringBuilder` does **not** override `equals` <abbr title="Java SE 21 API, StringBuilder.compareTo, API Note">[6]</abbr>. It inherits `Object`'s `equals`, which is identity, the same trap as arrays in [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model):
+*Concrete bite.* `StringBuilder` does **not** override `equals` <abbr title="Java SE 25 API, StringBuilder.compareTo, API Note">[6]</abbr>. It inherits `Object`'s `equals`, which is identity, the same trap as arrays in [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model):
 
 ```java run
 public class Main {
@@ -230,8 +230,8 @@ true
 
 `a.equals(b)` is `false`, because two builders are never "equal" unless they're the same object. To compare *contents*, convert to `String` first. Two shortcuts let you skip the conversion:
 
-- `"hi".contentEquals(a)` compares a String with any sequence of characters <abbr title="Java SE 21 API, String.contentEquals(CharSequence)">[7]</abbr>;
-- `a.compareTo(b) == 0` compares two builders by their characters (since Java 11) <abbr title="Java SE 21 API, StringBuilder.compareTo, API Note">[6]</abbr>.
+- `"hi".contentEquals(a)` compares a String with any sequence of characters <abbr title="Java SE 25 API, String.contentEquals(CharSequence)">[7]</abbr>;
+- `a.compareTo(b) == 0` compares two builders by their characters (since Java 11) <abbr title="Java SE 25 API, StringBuilder.compareTo, API Note">[6]</abbr>.
 
 Why a class compares by identity unless it overrides `equals` is the subject of [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode).
 
@@ -243,13 +243,13 @@ The cost is a little ceremony and a mutable object to manage. The payoff is line
 
 </div>
 
-You may run into `StringBuffer` in older code. It has the same methods, but they are synchronized, so several threads can share one buffer safely <abbr title="Java SE 21 API, java.lang.StringBuffer">[16]</abbr>. The API recommends `StringBuilder` for single-threaded use, as "it will be faster under most implementations" <abbr title="Java SE 21 API, java.lang.StringBuilder">[4]</abbr>.
+You may run into `StringBuffer` in older code. It has the same methods, but they are synchronized, so several threads can share one buffer safely <abbr title="Java SE 25 API, java.lang.StringBuffer">[16]</abbr>. The API recommends `StringBuilder` for single-threaded use, as "it will be faster under most implementations" <abbr title="Java SE 25 API, java.lang.StringBuilder">[4]</abbr>.
 
 ---
 
 ## 3. The pool and `intern()`
 
-Recall from [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model): string literals and constant expressions are **interned**, so equal ones are the same object <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[8]</abbr>. A string computed at run time is a fresh object. `intern()` takes a runtime string and hands back the shared instance from the pool.
+Recall from [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model): string literals and constant expressions are **interned**, so equal ones are the same object <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[8]</abbr>. A string computed at run time is a fresh object. `intern()` takes a runtime string and hands back the shared instance from the pool.
 
 ```java run
 public class Main {
@@ -280,7 +280,7 @@ true
 Written as two literals, `"he" + "llo"` is a constant expression, so it's pooled. The variable `a` is what makes `b` a runtime string.
 
 **Intuition.**
-*Mechanism.* The class `String` keeps a private pool, "initially empty" <abbr title="Java SE 21 API, String.intern()">[9]</abbr>. `intern()` looks for an equal string there. If it finds one, it returns that one. Otherwise, it adds this string and returns it. Literals are interned "as if by execution of the method `String.intern`" <abbr title="The Java Language Specification, Java SE 21, §3.10.5">[8]</abbr>.
+*Mechanism.* The class `String` keeps a private pool, "initially empty" <abbr title="Java SE 25 API, String.intern()">[9]</abbr>. `intern()` looks for an equal string there. If it finds one, it returns that one. Otherwise, it adds this string and returns it. Literals are interned "as if by execution of the method `String.intern`" <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[8]</abbr>.
 
 *Concrete bite.* `b == c` coming out `false` is the identity trap again. Only pooled strings share identity, and a variable-built string isn't pooled. `intern()` *can* make `==` work, but if you need it to compare strings, that's a sign you should use `.equals`.
 
@@ -298,8 +298,8 @@ Never use `intern()` to make `==` "work". It costs a pool lookup on every call. 
 
 Two methods move between one string and many:
 
-- `split(regex)` cuts a string into an array at each separator <abbr title="Java SE 21 API, String.split(String)">[10]</abbr>;
-- `String.join(separator, parts…)` glues pieces together, with the separator between them <abbr title="Java SE 21 API, String.join and String.repeat">[11]</abbr>.
+- `split(regex)` cuts a string into an array at each separator <abbr title="Java SE 25 API, String.split(String)">[10]</abbr>;
+- `String.join(separator, parts…)` glues pieces together, with the separator between them <abbr title="Java SE 25 API, String.join and String.repeat">[11]</abbr>.
 
 ```java run
 import java.util.Arrays;
@@ -327,10 +327,10 @@ red | green | blue
 ababab
 ```
 
-**Analysis.** `split(",")` produced three parts, and `Arrays.toString` printed the array (a plain `println` of an array prints only its type and hash). `String.join` accepts an array or a `List`. `repeat(3)` (Java 11) joins three copies <abbr title="Java SE 21 API, String.join and String.repeat">[11]</abbr>.
+**Analysis.** `split(",")` produced three parts, and `Arrays.toString` printed the array (a plain `println` of an array prints only its type and hash). `String.join` accepts an array or a `List`. `repeat(3)` (Java 11) joins three copies <abbr title="Java SE 25 API, String.join and String.repeat">[11]</abbr>.
 
 **Intuition.**
-*Mechanism.* The argument to `split` isn't plain text. It's a **regular expression**, a small pattern language in which some characters have special meanings <abbr title="Java SE 21 API, java.util.regex.Pattern">[18]</abbr>. Letters and `,` match themselves. `.` means "any character", and `|` means "or".
+*Mechanism.* The argument to `split` isn't plain text. It's a **regular expression**, a small pattern language in which some characters have special meanings <abbr title="Java SE 25 API, java.util.regex.Pattern">[18]</abbr>. Letters and `,` match themselves. `.` means "any character", and `|` means "or".
 
 *Concrete bite.* Split a version number on `.`, and every character is a separator:
 
@@ -358,7 +358,7 @@ public class Main {
 
 **Analysis.**
 
-- `split(".")` matched *every* character, so every part was empty. `split` drops trailing empty strings <abbr title="Java SE 21 API, String.split(String)">[10]</abbr>, so the result has length `0`.
+- `split(".")` matched *every* character, so every part was empty. `split` drops trailing empty strings <abbr title="Java SE 25 API, String.split(String)">[10]</abbr>, so the result has length `0`.
 - `"\\."` is the fix. The regex `\.` means "a literal dot", and a Java string writes the backslash as `\\`.
 - `"a,b,,"` split on `,` lost its two trailing empty fields. Pass a negative limit, `split(",", -1)`, to keep them.
 
@@ -376,7 +376,7 @@ The cost is one more rule to remember. The payoff is that one call can split on 
 
 Two modern tools make assembling readable text easier:
 
-- `formatted(...)` (Java 15) is the instance-method twin of [`String.format`](/synapse/programming-languages/java/first-steps/input-and-output), with the same `%s` and `%d` placeholders <abbr title="Java SE 21 API, String.formatted(Object...)">[12]</abbr>.
+- `formatted(...)` (Java 15) is the instance-method twin of [`String.format`](/synapse/programming-languages/java/first-steps/input-and-output), with the same `%s` and `%d` placeholders <abbr title="Java SE 25 API, String.formatted(Object...)">[12]</abbr>.
 - A **text block** (`"""…"""`, Java 15) is a multi-line string literal. It keeps line breaks and strips the common leading indentation <abbr title="JEP 378: Text Blocks">[13]</abbr>.
 
 ```java run
@@ -411,13 +411,13 @@ Score: 95
 Text blocks spare you the old pain of `"line1\n" + "line2\n"` for multi-line text such as SQL, JSON and HTML.
 
 **Intuition.**
-*Mechanism.* A text block is an ordinary `String` with friendlier syntax <abbr title="The Java Language Specification, Java SE 21, §3.10.6">[14]</abbr>. The compiler processes its content in three steps:
+*Mechanism.* A text block is an ordinary `String` with friendlier syntax <abbr title="The Java Language Specification, Java SE 25, §3.10.6">[14]</abbr>. The compiler processes its content in three steps:
 
 1. It turns every line ending into `\n`.
 2. It removes **incidental white space**: the common leading indentation, and the trailing spaces on every line.
 3. It interprets escape sequences such as `\n` and `\t`.
 
-The opening `"""` must end its line <abbr title="The Java Language Specification, Java SE 21, §3.10.6">[14]</abbr>. A one-line text block doesn't compile:
+The opening `"""` must end its line <abbr title="The Java Language Specification, Java SE 25, §3.10.6">[14]</abbr>. A one-line text block doesn't compile:
 
 ```java run
 public class Main {
@@ -459,7 +459,7 @@ public class Main {
 [end]
 ```
 
-The closing `"""` sat at column 0, so the common indentation was zero, and every line kept its 12 leading spaces. Two escapes give finer control <abbr title="The Java Language Specification, Java SE 21, §3.10.7">[15]</abbr>:
+The closing `"""` sat at column 0, so the common indentation was zero, and every line kept its 12 leading spaces. Two escapes give finer control <abbr title="The Java Language Specification, Java SE 25, §3.10.7">[15]</abbr>:
 
 ```java run
 public class Main {
@@ -594,24 +594,24 @@ public class Main {
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §15.18.1 "String Concatenation Operator `+`" ("The String object is newly created … unless the expression is a constant expression") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.18.1>
-2. `java.lang.System.identityHashCode(Object)` and `java.lang.Object.hashCode()`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/System.html#identityHashCode(java.lang.Object)>
+1. *The Java Language Specification, Java SE 25*, §15.18.1 "String Concatenation Operator `+`" ("The String object is newly created … unless the expression is a constant expression") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.18.1>
+2. `java.lang.System.identityHashCode(Object)` and `java.lang.Object.hashCode()`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/System.html#identityHashCode(java.lang.Object)>
 3. JEP 280: Indify String Concatenation (JDK 9) — <https://openjdk.org/jeps/280>
-4. `java.lang.StringBuilder`, Java SE 21 API (capacity 16; "automatically made larger"; "no guarantee of synchronization") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/StringBuilder.html>
+4. `java.lang.StringBuilder`, Java SE 25 API (capacity 16; "automatically made larger"; "no guarantee of synchronization") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html>
 5. JEP 254: Compact Strings (JDK 9) — <https://openjdk.org/jeps/254>
-6. `java.lang.StringBuilder.compareTo(StringBuilder)`, Java SE 21 API (since 11; "does not override equals") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/StringBuilder.html#compareTo(java.lang.StringBuilder)>
-7. `java.lang.String.contentEquals(CharSequence)`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html#contentEquals(java.lang.CharSequence)>
-8. *The Java Language Specification, Java SE 21*, §3.10.5 "String Literals" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-3.html#jls-3.10.5>
-9. `java.lang.String.intern()`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html#intern()>
-10. `java.lang.String.split(String)`, Java SE 21 API ("Trailing empty strings are therefore not included") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html#split(java.lang.String)>
-11. `java.lang.String.join` (since 1.8) and `String.repeat` (since 11), Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html#join(java.lang.CharSequence,java.lang.CharSequence...)>
-12. `java.lang.String.formatted(Object...)`, Java SE 21 API (since 15) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html#formatted(java.lang.Object...)>
+6. `java.lang.StringBuilder.compareTo(StringBuilder)`, Java SE 25 API (since 11; "does not override equals") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html#compareTo(java.lang.StringBuilder)>
+7. `java.lang.String.contentEquals(CharSequence)`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#contentEquals(java.lang.CharSequence)>
+8. *The Java Language Specification, Java SE 25*, §3.10.5 "String Literals" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.5>
+9. `java.lang.String.intern()`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#intern()>
+10. `java.lang.String.split(String)`, Java SE 25 API ("Trailing empty strings are therefore not included") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#split(java.lang.String)>
+11. `java.lang.String.join` (since 1.8) and `String.repeat` (since 11), Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#join(java.lang.CharSequence,java.lang.CharSequence...)>
+12. `java.lang.String.formatted(Object...)`, Java SE 25 API (since 15) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#formatted(java.lang.Object...)>
 13. JEP 378: Text Blocks (JDK 15) — <https://openjdk.org/jeps/378>
-14. *The Java Language Specification, Java SE 21*, §3.10.6 "Text Blocks" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-3.html#jls-3.10.6>
-15. *The Java Language Specification, Java SE 21*, §3.10.7 "Escape Sequences" (`\s`; line continuation) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-3.html#jls-3.10.7>
-16. `java.lang.StringBuffer`, Java SE 21 API ("The methods are synchronized where necessary") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/StringBuffer.html>
-17. `java.io.PrintStream.println(Object)`, Java SE 21 API ("calls at first String.valueOf(x)") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/PrintStream.html#println(java.lang.Object)>
-18. `java.util.regex.Pattern`, Java SE 21 API (`.` is "Any character"; `X|Y` is "Either X or Y") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/regex/Pattern.html>
+14. *The Java Language Specification, Java SE 25*, §3.10.6 "Text Blocks" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.6>
+15. *The Java Language Specification, Java SE 25*, §3.10.7 "Escape Sequences" (`\s`; line continuation) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.7>
+16. `java.lang.StringBuffer`, Java SE 25 API ("The methods are synchronized where necessary") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuffer.html>
+17. `java.io.PrintStream.println(Object)`, Java SE 25 API ("calls at first String.valueOf(x)") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/PrintStream.html#println(java.lang.Object)>
+18. `java.util.regex.Pattern`, Java SE 25 API (`.` is "Any character"; `X|Y` is "Either X or Y") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/regex/Pattern.html>
 
 ---
 

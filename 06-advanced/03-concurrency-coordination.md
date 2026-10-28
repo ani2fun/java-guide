@@ -63,7 +63,7 @@ Suppose a producer thread puts items into a bounded buffer, and a consumer threa
 
 `synchronized` alone can't handle this. A thread stuck inside a critical section, waiting for the buffer to change, would hold the lock forever — so no other thread could ever get in to change it.
 
-The monitor from the last lesson has a built-in answer <abbr title="The Java Language Specification, Java SE 21, §17.2">[1]</abbr>:
+The monitor from the last lesson has a built-in answer <abbr title="The Java Language Specification, Java SE 25, §17.2">[1]</abbr>:
 
 - Every object has a **wait set**, alongside its monitor.
 - `wait()` releases the lock and puts the thread to sleep in that wait set.
@@ -161,7 +161,7 @@ public class Main {
 Exception in thread "main" java.lang.IllegalMonitorStateException: current thread is not owner
 ```
 
-The second mistake is far worse, because it *usually* works: guarding with `if` instead of `while`. A woken thread re-acquires the lock *later*, after other threads may have run — and another consumer may have emptied the buffer again in the meantime. The API also allows **spurious wakeups**: "A thread can wake up without being notified, interrupted, or timing out" <abbr title="Java SE 21 API, java.lang.Object.wait(long, int)">[2]</abbr>.
+The second mistake is far worse, because it *usually* works: guarding with `if` instead of `while`. A woken thread re-acquires the lock *later*, after other threads may have run — and another consumer may have emptied the buffer again in the meantime. The API also allows **spurious wakeups**: "A thread can wake up without being notified, interrupted, or timing out" <abbr title="Java SE 25 API, java.lang.Object.wait(long, int)">[2]</abbr>.
 
 The program below makes the `if` bug happen on every run. Two consumers wait on an empty queue, and `main` puts in just *one* item. A `static synchronized` method locks the `Main.class` monitor, so the waiting and notifying both happen on `Main.class`.
 
@@ -320,17 +320,17 @@ t1: holds A, wants B
 t2: holds B, wants A
 ```
 
-While it hung, we pointed the JDK's `jstack` tool at the process <abbr title="The jstack command, JDK 21 documentation">[3]</abbr>. `jstack` prints every thread's stack, and it spots the cycle:
+While it hung, we pointed the JDK's `jstack` tool at the process <abbr title="The jstack command, JDK 25 documentation">[3]</abbr>. `jstack` prints every thread's stack, and it spots the cycle:
 
 ```
 Found one Java-level deadlock:
 =============================
 "t1":
-  waiting to lock monitor 0x00000077190d0b60 (object 0x00000071b8c14ba0, a java.lang.Object),
+  waiting to lock monitor 0x0000007bfcd0e4c0 (object 0x0000007020418048, a java.lang.Object),
   which is held by "t2"
 
 "t2":
-  waiting to lock monitor 0x00000077190d0d20 (object 0x00000071b8c14b90, a java.lang.Object),
+  waiting to lock monitor 0x0000007bfcd0e5a0 (object 0x0000007020418038, a java.lang.Object),
   which is held by "t1"
 ```
 
@@ -365,7 +365,7 @@ Break *any one* of them, and you prevent deadlock. The two practical breaks are 
 
 A parked thread releases nothing, so the cycle is permanent. The JVM can *detect* the cycle after the fact (that's what `jstack` does), but it won't break it.
 
-*Concrete bite.* The window for this bug depends on timing. Remove the two `pause()` calls, and the program *usually* completes, because one thread grabs both locks before the other even starts. Without the pauses, 28 of 30 runs on JDK 21 completed and 2 hung. With them, 10 out of 10 hung.
+*Concrete bite.* The window for this bug depends on timing. Remove the two `pause()` calls, and the program *usually* completes, because one thread grabs both locks before the other even starts. Without the pauses, all 30 runs on JDK 25 completed, even though the bug was still there. With them, 10 out of 10 hung.
 
 That's what makes deadlock the cruelest concurrency bug: it passes tests for months, then freezes production the day the load reshuffles the timing.
 
@@ -381,7 +381,7 @@ The cost: lock ordering is an invisible convention that no compiler enforces, so
 
 ## 3. `ReentrantLock`: a lock as an object
 
-`synchronized` is a statement, so you can't ask it to "try to lock, but give up after 50 ms." **`java.util.concurrent.locks.ReentrantLock`** is the same mutual-exclusion idea in the form of an object, with a richer API <abbr title="Java SE 21 API, java.util.concurrent.locks.ReentrantLock">[5]</abbr>:
+`synchronized` is a statement, so you can't ask it to "try to lock, but give up after 50 ms." **`java.util.concurrent.locks.ReentrantLock`** is the same mutual-exclusion idea in the form of an object, with a richer API <abbr title="Java SE 25 API, java.util.concurrent.locks.ReentrantLock">[5]</abbr>:
 
 - `lock()` and `unlock()`;
 - `tryLock()`, with an optional timeout;
@@ -439,7 +439,7 @@ both finished — no deadlock
 - It sleeps for a random beat, so the two don't collide the same way again, and then retries.
 - Within a few rounds, one thread gets both locks and finishes, and then the other goes through.
 
-The `try`/`finally` shape isn't optional style. `synchronized` releases its monitor on *any* exit, whether normal or through an exception <abbr title="The Java Language Specification, Java SE 21, §14.19">[6]</abbr>. `ReentrantLock` doesn't.
+The `try`/`finally` shape isn't optional style. `synchronized` releases its monitor on *any* exit, whether normal or through an exception <abbr title="The Java Language Specification, Java SE 25, §14.19">[6]</abbr>. `ReentrantLock` doesn't.
 
 **Intuition.**
 *Mechanism.* **Reentrant** means the thread holding the lock may acquire it again, just as with nested `synchronized` blocks on one object. `tryLock(timeout)` parks the thread with a deadline, and returns `false` when the deadline expires. `newCondition()` gives you `await`/`signal`/`signalAll` — §1's wait set as a named object. A lock can have several conditions, such as one for "not full" and one for "not empty", so you wake only the threads whose condition changed.
@@ -486,7 +486,7 @@ main can lock it: false
 violation: the lock outlived the thread that took it
 ```
 
-The worker is `TERMINATED`, yet the lock is still held, so every later `lock()` would wait forever. Here's the same scenario, using the `Lock` API's own `try`/`finally` shape <abbr title="Java SE 21 API, java.util.concurrent.locks.Lock">[7]</abbr>:
+The worker is `TERMINATED`, yet the lock is still held, so every later `lock()` would wait forever. Here's the same scenario, using the `Lock` API's own `try`/`finally` shape <abbr title="Java SE 25 API, java.util.concurrent.locks.Lock">[7]</abbr>:
 
 ```java run
 import java.util.concurrent.locks.ReentrantLock;
@@ -530,7 +530,7 @@ main can lock it: true
 
 *Edge: the back-off needs its jitter.* Without the random sleep, the back-off loop above can **livelock**. Two threads moving in perfect step could acquire, fail and release forever: always busy, never making progress. The random delay is load-bearing, not decoration.
 
-**Readers can share.** Many structures are read far more often than they're written, and two readers can't corrupt each other. A `ReadWriteLock` holds a pair of locks: "The read lock may be held simultaneously by multiple reader threads, so long as there are no writers. The write lock is exclusive" <abbr title="Java SE 21 API, java.util.concurrent.locks.ReadWriteLock">[8]</abbr>.
+**Readers can share.** Many structures are read far more often than they're written, and two readers can't corrupt each other. A `ReadWriteLock` holds a pair of locks: "The read lock may be held simultaneously by multiple reader threads, so long as there are no writers. The write lock is exclusive" <abbr title="Java SE 25 API, java.util.concurrent.locks.ReadWriteLock">[8]</abbr>.
 
 ```java run
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -656,7 +656,7 @@ public class Main {
 - The latch demo separates coordination from work. All three workers were *created* up front, and parked on `start.await()`. Nothing ran until main fired the starting gun, and then `done.await()` held main until every worker had checked out.
 - In the semaphore demo, six threads raced for three permits. The high-water mark, `maxSeen`, came out at exactly 3 on every run: the bound is enforced, not just probable.
 
-The third synchronizer, **`CyclicBarrier`**, is a reusable meeting point for a *fixed team*. Each of N threads calls `await()` at the end of a phase. When all N have arrived, an optional **barrier action** runs once, all N are released together, and the barrier resets <abbr title="Java SE 21 API, java.util.concurrent.CyclicBarrier">[9]</abbr>. It's a good fit for iterative simulations, where round k+1 may start only once every thread has finished round k:
+The third synchronizer, **`CyclicBarrier`**, is a reusable meeting point for a *fixed team*. Each of N threads calls `await()` at the end of a phase. When all N have arrived, an optional **barrier action** runs once, all N are released together, and the barrier resets <abbr title="Java SE 25 API, java.util.concurrent.CyclicBarrier">[9]</abbr>. It's a good fit for iterative simulations, where round k+1 may start only once every thread has finished round k:
 
 ```java run
 import java.util.concurrent.BrokenBarrierException;
@@ -703,8 +703,8 @@ the same barrier served 2 rounds
 
 *Concrete bite.* Choose by lifecycle, not by surface similarity. Both traps below are documented in the API, and both run without any error:
 
-- A latch is "a one-shot phenomenon -- the count cannot be reset" <abbr title="Java SE 21 API, java.util.concurrent.CountDownLatch">[10]</abbr>. Once it hits zero, `await()` returns immediately, forever. Reuse it for round two, and round two doesn't wait at all.
-- A semaphore has no owner: "There is no requirement that a thread that releases a permit must have acquired that permit" <abbr title="Java SE 21 API, java.util.concurrent.Semaphore.release()">[11]</abbr>. Release on a path that never acquired, and you've just minted an extra permit.
+- A latch is "a one-shot phenomenon -- the count cannot be reset" <abbr title="Java SE 25 API, java.util.concurrent.CountDownLatch">[10]</abbr>. Once it hits zero, `await()` returns immediately, forever. Reuse it for round two, and round two doesn't wait at all.
+- A semaphore has no owner: "There is no requirement that a thread that releases a permit must have acquired that permit" <abbr title="Java SE 25 API, java.util.concurrent.Semaphore.release()">[11]</abbr>. Release on a path that never acquired, and you've just minted an extra permit.
 
 ```java run
 import java.util.concurrent.CountDownLatch;
@@ -753,7 +753,7 @@ The cost is a vocabulary to learn, and lifecycle rules to respect (one-shot vs r
 
 ## 5. `BlockingQueue`: coordination you don't have to write
 
-Look back at §1: forty lines of careful monitor discipline, just for a bounded producer/consumer buffer. That pattern is so central that the library ships it whole. A **`BlockingQueue`** is a thread-safe queue where `put()` blocks while the queue is full, and `take()` blocks while it's empty <abbr title="Java SE 21 API, java.util.concurrent.BlockingQueue">[12]</abbr>. Here's §1, done by the library:
+Look back at §1: forty lines of careful monitor discipline, just for a bounded producer/consumer buffer. That pattern is so central that the library ships it whole. A **`BlockingQueue`** is a thread-safe queue where `put()` blocks while the queue is full, and `take()` blocks while it's empty <abbr title="Java SE 25 API, java.util.concurrent.BlockingQueue">[12]</abbr>. Here's §1, done by the library:
 
 ```java run
 import java.util.concurrent.ArrayBlockingQueue;
@@ -843,7 +843,7 @@ queue -> c2
 The diagram is the shape to remember: the queue is the *only* shared state, and the library owns it.
 
 **Intuition.**
-*Mechanism.* In OpenJDK 21, `ArrayBlockingQueue` is a fixed ring buffer guarded by one `ReentrantLock` with two `Condition`s, `notEmpty` and `notFull` <abbr title="OpenJDK 21 source, java/util/concurrent/ArrayBlockingQueue.java">[13]</abbr>. That's §3's tools arranged into §1's design, waking only the side whose condition changed. Two relatives keep the same contract, with different trade-offs <abbr title="Java SE 21 API, java.util.concurrent.LinkedBlockingQueue and SynchronousQueue">[12]</abbr>:
+*Mechanism.* In OpenJDK 25, `ArrayBlockingQueue` is a fixed ring buffer guarded by one `ReentrantLock` with two `Condition`s, `notEmpty` and `notFull` <abbr title="OpenJDK 25 source, java/util/concurrent/ArrayBlockingQueue.java">[13]</abbr>. That's §3's tools arranged into §1's design, waking only the side whose condition changed. Two relatives keep the same contract, with different trade-offs <abbr title="Java SE 25 API, java.util.concurrent.LinkedBlockingQueue and SynchronousQueue">[12]</abbr>:
 
 - `LinkedBlockingQueue` is optionally bounded. Its source uses separate locks for the head and the tail, so a producer and a consumer don't contend with each other.
 - `SynchronousQueue` has no capacity at all: "each insert operation must wait for a corresponding remove operation by another thread". It's a direct hand-off.
@@ -926,19 +926,19 @@ One check per objective. Answer before you open anything.
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §17.2 "Wait Sets and Notification" ("Every object, in addition to having an associated monitor, has an associated wait set") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-17.html#jls-17.2>
-2. `java.lang.Object.wait`, Java SE 21 API (spurious wakeups; `IllegalMonitorStateException`) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#wait(long,int)>
-3. The `jstack` command, JDK 21 documentation — <https://docs.oracle.com/en/java/javase/21/docs/specs/man/jstack.html>
+1. *The Java Language Specification, Java SE 25*, §17.2 "Wait Sets and Notification" ("Every object, in addition to having an associated monitor, has an associated wait set") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.2>
+2. `java.lang.Object.wait`, Java SE 25 API (spurious wakeups; `IllegalMonitorStateException`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait(long,int)>
+3. The `jstack` command, JDK 25 documentation — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/jstack.html>
 4. E. G. Coffman, M. J. Elphick and A. Shoshani, "System Deadlocks", *ACM Computing Surveys* 3(2), 67–78, 1971 — <https://doi.org/10.1145/356586.356588>
-5. `java.util.concurrent.locks.ReentrantLock`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/locks/ReentrantLock.html>
-6. *The Java Language Specification, Java SE 21*, §14.19 "The `synchronized` Statement" (the monitor is unlocked whether the body completes normally or abruptly) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.19>
-7. `java.util.concurrent.locks.Lock`, Java SE 21 API (the `lock(); try { … } finally { unlock(); }` idiom) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/locks/Lock.html>
-8. `java.util.concurrent.locks.ReadWriteLock`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/locks/ReadWriteLock.html>
-9. `java.util.concurrent.CyclicBarrier`, Java SE 21 API ("cyclic because it can be re-used after the waiting threads are released") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CyclicBarrier.html>
-10. `java.util.concurrent.CountDownLatch`, Java SE 21 API ("a one-shot phenomenon") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CountDownLatch.html>
-11. `java.util.concurrent.Semaphore.release()`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Semaphore.html#release()>
-12. `java.util.concurrent.BlockingQueue`, `LinkedBlockingQueue` and `SynchronousQueue`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/BlockingQueue.html>
-13. OpenJDK 21 source, `ArrayBlockingQueue.java` (one `ReentrantLock`, `Condition`s `notEmpty` and `notFull`) — <https://github.com/openjdk/jdk21u/blob/master/src/java.base/share/classes/java/util/concurrent/ArrayBlockingQueue.java>
+5. `java.util.concurrent.locks.ReentrantLock`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/locks/ReentrantLock.html>
+6. *The Java Language Specification, Java SE 25*, §14.19 "The `synchronized` Statement" (the monitor is unlocked whether the body completes normally or abruptly) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.19>
+7. `java.util.concurrent.locks.Lock`, Java SE 25 API (the `lock(); try { … } finally { unlock(); }` idiom) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/locks/Lock.html>
+8. `java.util.concurrent.locks.ReadWriteLock`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/locks/ReadWriteLock.html>
+9. `java.util.concurrent.CyclicBarrier`, Java SE 25 API ("cyclic because it can be re-used after the waiting threads are released") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CyclicBarrier.html>
+10. `java.util.concurrent.CountDownLatch`, Java SE 25 API ("a one-shot phenomenon") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CountDownLatch.html>
+11. `java.util.concurrent.Semaphore.release()`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/Semaphore.html#release()>
+12. `java.util.concurrent.BlockingQueue`, `LinkedBlockingQueue` and `SynchronousQueue`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/BlockingQueue.html>
+13. OpenJDK 25 source, `ArrayBlockingQueue.java` (one `ReentrantLock`, `Condition`s `notEmpty` and `notFull`) — <https://github.com/openjdk/jdk25u/blob/master/src/java.base/share/classes/java/util/concurrent/ArrayBlockingQueue.java>
 
 ---
 

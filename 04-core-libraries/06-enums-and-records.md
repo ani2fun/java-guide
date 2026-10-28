@@ -25,7 +25,7 @@ Together, they replace piles of hand-written boilerplate — along with the bugs
 
 </div>
 
-Every output below was produced by compiling and running the code on Java 21.
+Every output below was produced by compiling and running the code on Java 25.
 
 **You'll be able to:** declare an enum, and predict what `ordinal()`, `values()`, `valueOf` and an exhaustive `switch` over it do; give enum constants fields, a constructor and methods; declare a record, predict its `toString`, accessors and `equals`, and validate it in a compact constructor; explain why a record holding a `List` isn't fully immutable, and fix it; predict which classes may implement a sealed interface.
 
@@ -87,16 +87,16 @@ weekday
 **Analysis.**
 
 - `Day.WED` prints its own name.
-- `ordinal()` is its position, counting from zero, so it's `2` <abbr title="Java SE 21 API, java.lang.Enum">[3]</abbr>.
+- `ordinal()` is its position, counting from zero, so it's `2` <abbr title="Java SE 25 API, java.lang.Enum">[3]</abbr>.
 - The `switch` classified it as a `weekday`.
 - `Day.values()` returns all seven constants.
 
 A `Day` variable can hold *only* one of these seven, or `null`. There's no eighth day, and no way to assign a misspelled one, because the compiler checks every `Day` value against the declared set.
 
 **Intuition.**
-*Mechanism.* Each constant becomes an implicitly declared `public static final` field that holds an instance of the enum type <abbr title="The Java Language Specification, Java SE 21, §8.9.3">[4]</abbr>. Those instances are created exactly once, when the enum class is initialized. A variable of the enum type can reference only those instances, so the set of valid values is closed at compile time.
+*Mechanism.* Each constant becomes an implicitly declared `public static final` field that holds an instance of the enum type <abbr title="The Java Language Specification, Java SE 25, §8.9.3">[4]</abbr>. Those instances are created exactly once, when the enum class is initialized. A variable of the enum type can reference only those instances, so the set of valid values is closed at compile time.
 
-Since each constant is the only instance of its kind, `==` is safe for enums. In fact, the JLS explicitly permits it "in place of the `equals` method" <abbr title="The Java Language Specification, Java SE 21, §8.9.1">[5]</abbr>.
+Since each constant is the only instance of its kind, `==` is safe for enums. In fact, the JLS explicitly permits it "in place of the `equals` method" <abbr title="The Java Language Specification, Java SE 25, §8.9.1">[5]</abbr>.
 
 *Concrete bite.* Because the set is closed, the compiler can check a `switch` *expression* over an enum for exhaustiveness. Cover some constants but not all, with no `default`, and it won't compile:
 
@@ -189,9 +189,9 @@ MOON: 16.2
 The field is `final` by choice, because nothing should change a planet's gravity. The JLS doesn't require it, though. An enum with a non-`final` field compiles fine, and then any code can change it. Keep enum fields `final`, since every part of the program shares the one instance.
 
 **Intuition.**
-*Mechanism.* `EARTH(9.81)` calls the enum's constructor when the constant is created — once, as the enum class is initialized <abbr title="The Java Language Specification, Java SE 21, §8.9.3">[4]</abbr>. The fields and methods turn each constant into a small, self-describing object. In other words, an enum is a class whose instances are fixed and named.
+*Mechanism.* `EARTH(9.81)` calls the enum's constructor when the constant is created — once, as the enum class is initialized <abbr title="The Java Language Specification, Java SE 25, §8.9.3">[4]</abbr>. The fields and methods turn each constant into a small, self-describing object. In other words, an enum is a class whose instances are fixed and named.
 
-The constructor is private even when you write no modifier <abbr title="The Java Language Specification, Java SE 21, §8.9.2">[6]</abbr>, so no other code can create a new constant:
+The constructor is private even when you write no modifier <abbr title="The Java Language Specification, Java SE 25, §8.9.2">[6]</abbr>, so no other code can create a new constant:
 
 ```java run
 enum Planet {
@@ -227,7 +227,7 @@ Main.java:10: error: enum classes may not be instantiated
 
 ## 3. Records: immutable data carriers
 
-A **record** is a class whose whole job is to hold data. You declare its **components**, and Java generates the rest <abbr title="The Java Language Specification, Java SE 21, §8.10.3">[7]</abbr>:
+A **record** is a class whose whole job is to hold data. You declare its **components**, and Java generates the rest <abbr title="The Java Language Specification, Java SE 25, §8.10.3">[7]</abbr>:
 
 - a `private final` field per component;
 - a **canonical constructor** that takes every component, in order;
@@ -264,10 +264,10 @@ true
 - a readable `toString`: `Point[x=1, y=2]`;
 - a **correct** `equals`/`hashCode` pair: `a.equals(b)` is `true`, and their hash codes match.
 
-Remember from [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) how much hand-written code that contract took? A record generates it from the components, the same way every time. (One caveat: the `toString` format is not a contract. The API says it "is subject to change" <abbr title="Java SE 21 API, java.lang.Record">[8]</abbr>, so never parse it.)
+Remember from [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) how much hand-written code that contract took? A record generates it from the components, the same way every time. (One caveat: the `toString` format is not a contract. The API says it "is subject to change" <abbr title="Java SE 25 API, java.lang.Record">[8]</abbr>, so never parse it.)
 
 **Intuition.**
-*Mechanism.* A record class is implicitly `final`, and its superclass is always `java.lang.Record`, so it can't `extend` another class <abbr title="The Java Language Specification, Java SE 21, §8.10">[9]</abbr>. The compiler derives the members from the component list. You can still add your own methods, and you can check the values in a **compact constructor** — a constructor with no parameter list that runs before the fields are assigned <abbr title="The Java Language Specification, Java SE 21, §8.10.4.2">[10]</abbr>:
+*Mechanism.* A record class is implicitly `final`, and its superclass is always `java.lang.Record`, so it can't `extend` another class <abbr title="The Java Language Specification, Java SE 25, §8.10">[9]</abbr>. The compiler derives the members from the component list. You can still add your own methods, and you can check the values in a **compact constructor** — a constructor with no parameter list that runs before the fields are assigned <abbr title="The Java Language Specification, Java SE 25, §8.10.4.2">[10]</abbr>:
 
 ```java run
 record Range(int low, int high) {
@@ -422,7 +422,7 @@ classDiagram
 **Analysis.** `Shape` permits exactly `Circle` and `Square`, which are both records here — records and sealed types pair naturally. The diagram shows the closed family: a `Shape` is either a `Circle` or a `Square`, and nothing else can claim to be one. A plain interface can't make that promise, because any class anywhere may implement it.
 
 **Intuition.**
-*Mechanism.* `sealed … permits A, B` writes the allowed subtypes into the type itself, and the compiler lets only those types extend or implement it. Each of them, in turn, must say whether the family stays closed below it <abbr title="The Java Language Specification, Java SE 21, §8.1.1.2">[11]</abbr>:
+*Mechanism.* `sealed … permits A, B` writes the allowed subtypes into the type itself, and the compiler lets only those types extend or implement it. Each of them, in turn, must say whether the family stays closed below it <abbr title="The Java Language Specification, Java SE 25, §8.1.1.2">[11]</abbr>:
 
 - `final`: no subclasses (a record is implicitly `final`);
 - `sealed`: its own `permits` list;
@@ -504,7 +504,7 @@ One check per objective. Answer before you open anything.
 ```
 
 ```quiz
-{"prompt": "record Money(int cents, String currency) {} — what does System.out.println(new Money(100, \"USD\")) print on JDK 21?", "options": ["Money@1b6d3586", "Money[cents=100, currency=USD]", "100 USD"], "answer": "Money[cents=100, currency=USD]"}
+{"prompt": "record Money(int cents, String currency) {} — what does System.out.println(new Money(100, \"USD\")) print on JDK 25?", "options": ["Money@1b6d3586", "Money[cents=100, currency=USD]", "100 USD"], "answer": "Money[cents=100, currency=USD]"}
 ```
 
 ```quiz
@@ -559,15 +559,15 @@ true
 
 1. JEP 395: Records (Java 16) — <https://openjdk.org/jeps/395>
 2. JEP 409: Sealed Classes (Java 17) — <https://openjdk.org/jeps/409>
-3. `java.lang.Enum`, Java SE 21 API (`ordinal()`: "the initial constant is assigned an ordinal of zero"; `valueOf`) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Enum.html>
-4. *The Java Language Specification, Java SE 21*, §8.9.3 "Enum Members" (each constant is an implicitly declared `public static final` field) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.9.3>
-5. *The Java Language Specification, Java SE 21*, §8.9.1 "Enum Constants" (`==` "in place of the equals method") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.9.1>
-6. *The Java Language Specification, Java SE 21*, §8.9.2 "Enum Body Declarations" (a constructor with no access modifier is `private`) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.9.2>
-7. *The Java Language Specification, Java SE 21*, §8.10.3 "Record Members" (a component field "is private, final, and non-static") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.10.3>
-8. `java.lang.Record`, Java SE 21 API (the `toString` format "is subject to change") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html>
-9. *The Java Language Specification, Java SE 21*, §8.10 "Record Classes" (implicitly `final`; the direct superclass is `Record`) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.10>
-10. *The Java Language Specification, Java SE 21*, §8.10.4.2 "Compact Canonical Constructors" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.10.4.2>
-11. *The Java Language Specification, Java SE 21*, §8.1.1.2 "`sealed`, `non-sealed`, and `final` Classes" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1.1.2>
+3. `java.lang.Enum`, Java SE 25 API (`ordinal()`: "the initial constant is assigned an ordinal of zero"; `valueOf`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Enum.html>
+4. *The Java Language Specification, Java SE 25*, §8.9.3 "Enum Members" (each constant is an implicitly declared `public static final` field) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.9.3>
+5. *The Java Language Specification, Java SE 25*, §8.9.1 "Enum Constants" (`==` "in place of the equals method") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.9.1>
+6. *The Java Language Specification, Java SE 25*, §8.9.2 "Enum Body Declarations" (a constructor with no access modifier is `private`) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.9.2>
+7. *The Java Language Specification, Java SE 25*, §8.10.3 "Record Members" (a component field "is private, final, and non-static") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.3>
+8. `java.lang.Record`, Java SE 25 API (the `toString` format "is subject to change") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Record.html>
+9. *The Java Language Specification, Java SE 25*, §8.10 "Record Classes" (implicitly `final`; the direct superclass is `Record`) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10>
+10. *The Java Language Specification, Java SE 25*, §8.10.4.2 "Compact Canonical Constructors" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.4.2>
+11. *The Java Language Specification, Java SE 25*, §8.1.1.2 "`sealed`, `non-sealed`, and `final` Classes" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.1.2>
 
 ---
 

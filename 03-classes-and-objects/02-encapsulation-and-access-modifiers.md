@@ -78,7 +78,7 @@ public class Main {
 **Analysis.** `balance` is `private`, so `main` can't read it directly. Instead, it asks through `getBalance()`, a method the `Account` class deliberately provides. The class now stands between its data and the outside world, and every access goes through code the class controls.
 
 **Intuition.**
-*Mechanism.* The **compiler** enforces `private`. A `private` member can be used only inside the class that declares it <abbr title="The Java Language Specification, Java SE 21, §6.6.1">[1]</abbr>. The compiler rejects any use from elsewhere before the program ever runs.
+*Mechanism.* The **compiler** enforces `private`. A `private` member can be used only inside the class that declares it <abbr title="The Java Language Specification, Java SE 25, §6.6.1">[1]</abbr>. The compiler rejects any use from elsewhere before the program ever runs.
 
 *Concrete bite.* Reach for the field directly, and it won't compile:
 
@@ -225,9 +225,9 @@ The cost is more code than a public field: a getter and a guarded setter in plac
 
 ## 3. The four access levels
 
-A **package** is a named group of classes, such as `java.util`. A file with no `package` line, like every program in this book, belongs to the **unnamed package** <abbr title="The Java Language Specification, Java SE 21, §7.4.2">[2]</abbr>. [Packages, Modules & the Build](/synapse/programming-languages/java/robust-oop/packages-modules-and-the-build) covers naming your own.
+A **package** is a named group of classes, such as `java.util`. A file with no `package` line, like every program in this book, belongs to the **unnamed package** <abbr title="The Java Language Specification, Java SE 25, §7.4.2">[2]</abbr>. [Packages, Modules & the Build](/synapse/programming-languages/java/robust-oop/packages-modules-and-the-build) covers naming your own.
 
-Every field, method, and constructor has one of four visibilities <abbr title="The Java Language Specification, Java SE 21, §6.6.1">[1]</abbr>. From most to least restrictive:
+Every field, method, and constructor has one of four visibilities <abbr title="The Java Language Specification, Java SE 25, §6.6.1">[1]</abbr>. From most to least restrictive:
 
 | Modifier | Visible to | Use for |
 |---|---|---|
@@ -296,7 +296,7 @@ false
 
 `other.balance` compiled, because the code sits inside `Account`. `private` protects a class's data from *other classes*, not one object from another of its kind.
 
-A top-level class itself can be only `public` or package-private. `private class Helper` at the top of a file gives `modifier private not allowed here` <abbr title="The Java Language Specification, Java SE 21, §8.1.1">[3]</abbr>.
+A top-level class itself can be only `public` or package-private. `private class Helper` at the top of a file gives `modifier private not allowed here` <abbr title="The Java Language Specification, Java SE 25, §8.1.1">[3]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -339,7 +339,7 @@ public class Main {
 **Analysis.** `x` and `y` are `final`, set once in the constructor. After that, you can read a `Point` but never change it. There's no setter, and the `final` fields can't be reassigned. The object is frozen the moment construction finishes.
 
 **Intuition.**
-*Mechanism.* `final` on a field is a compile-time guarantee of single assignment. The compiler checks that every constructor assigns the field <abbr title="The Java Language Specification, Java SE 21, §8.3.1.2">[4]</abbr>, and it rejects any later assignment. Forget one, and the error lands on the constructor's closing brace:
+*Mechanism.* `final` on a field is a compile-time guarantee of single assignment. The compiler checks that every constructor assigns the field <abbr title="The Java Language Specification, Java SE 25, §8.3.1.2">[4]</abbr>, and it rejects any later assignment. Forget one, and the error lands on the constructor's closing brace:
 
 ```java run
 class Point {
@@ -389,7 +389,7 @@ Main.java:4: error: cannot assign a value to final variable x
 
 `moveTo` tries to reassign `x`, but `x` is `final` and already assigned in the constructor, so the compiler refuses. To "move" an immutable point, you don't mutate it. You build a *new* `Point`.
 
-*Non-example: a `final` field that holds an array.* `final` freezes the *reference*, not the object it points to <abbr title="The Java Language Specification, Java SE 21, §4.12.4">[5]</abbr>. This class has only `private final` fields and no setters, yet its data changes twice:
+*Non-example: a `final` field that holds an array.* `final` freezes the *reference*, not the object it points to <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[5]</abbr>. This class has only `private final` fields and no setters, yet its data changes twice:
 
 ```java run
 class Scores {
@@ -461,7 +461,7 @@ Now the object owns an array that no one else can reach, and the caller's change
 - everything set in the constructor;
 - a defensive copy of any mutable object the class takes in or hands out.
 
-The cost is that "changing" an immutable object means creating a new one (more allocations), and deep updates get wordy. The payoff is that you can alias an immutable object freely. The aliasing surprise from [Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects) can't bite, because nothing can change behind your back. ([Enums & Records](/synapse/programming-languages/java/core-libraries/enums-and-records) shows `record`, which declares the private fields, the constructor and the accessor methods of such a class for you <abbr title="The Java Language Specification, Java SE 21, §8.10.1">[6]</abbr>.)
+The cost is that "changing" an immutable object means creating a new one (more allocations), and deep updates get wordy. The payoff is that you can alias an immutable object freely. The aliasing surprise from [Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects) can't bite, because nothing can change behind your back. ([Enums & Records](/synapse/programming-languages/java/core-libraries/enums-and-records) shows `record`, which declares the private fields, the constructor and the accessor methods of such a class for you <abbr title="The Java Language Specification, Java SE 25, §8.10.1">[6]</abbr>.)
 
 </div>
 
@@ -538,12 +538,12 @@ Copy the array in the constructor and in the getter, for example with `Arrays.co
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §6.6.1 "Determining Accessibility" (`private`: access "from within the body of the top level class") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-6.html#jls-6.6.1>
-2. *The Java Language Specification, Java SE 21*, §7.4.2 "Unnamed Packages" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-7.html#jls-7.4.2>
-3. *The Java Language Specification, Java SE 21*, §8.1.1 "Class Modifiers" ("The access modifiers protected and private pertain only to member classes") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1.1>
-4. *The Java Language Specification, Java SE 21*, §8.3.1.2 "`final` Fields" (a blank `final` instance variable "must be definitely assigned … at the end of every constructor") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.3.1.2>
-5. *The Java Language Specification, Java SE 21*, §4.12.4 "`final` Variables" (the object's state "may be changed", but the variable "will always refer to the same object") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html#jls-4.12.4>
-6. *The Java Language Specification, Java SE 21*, §8.10.1 "Record Components" (each component gives "a private field declared implicitly, and a public accessor method") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.10.1>
+1. *The Java Language Specification, Java SE 25*, §6.6.1 "Determining Accessibility" (`private`: access "from within the body of the top level class") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.6.1>
+2. *The Java Language Specification, Java SE 25*, §7.4.2 "Unnamed Packages" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.4.2>
+3. *The Java Language Specification, Java SE 25*, §8.1.1 "Class Modifiers" ("The access modifiers protected and private pertain only to member classes") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.1>
+4. *The Java Language Specification, Java SE 25*, §8.3.1.2 "`final` Fields" (a blank `final` instance variable "must be definitely assigned … at the end of every constructor") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.1.2>
+5. *The Java Language Specification, Java SE 25*, §4.12.4 "`final` Variables" (the object's state "may be changed", but the variable "will always refer to the same object") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.4>
+6. *The Java Language Specification, Java SE 25*, §8.10.1 "Record Components" (each component gives "a private field declared implicitly, and a public accessor method") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.1>
 
 ---
 

@@ -23,7 +23,7 @@ One idea ties this chapter, and First Steps as a whole, together: reading input 
 
 </div>
 
-Every output below was produced by compiling and running the code on Java 21.
+Every output below was produced by compiling and running the code on Java 25.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -66,7 +66,7 @@ On your own machine, `Scanner(System.in)` pauses and waits for you to type.
 
 ## 1. Building output with `printf`
 
-You already have `println` for plain lines. For *formatted* output, like a number to two decimals or values slotted into a template, Java gives you `printf` and its sibling `String.format`. A **format string** holds placeholders, and the values that fill them follow in order <abbr title="Java SE 21 API, java.util.Formatter">[1]</abbr>:
+You already have `println` for plain lines. For *formatted* output, like a number to two decimals or values slotted into a template, Java gives you `printf` and its sibling `String.format`. A **format string** holds placeholders, and the values that fill them follow in order <abbr title="Java SE 25 API, java.util.Formatter">[1]</abbr>:
 
 - `%s` is any value, as text.
 - `%d` is a whole number, and `%f` a decimal.
@@ -99,12 +99,12 @@ score = 95
 - `%.2f` rendered `pi` rounded to two decimals: `3.14`.
 - `String.format` does the same formatting, but it *returns* the result as a String instead of printing it. Reach for it when you want to keep the text.
 
-`%n` is the platform's own line separator <abbr title="Java SE 21 API, java.util.Formatter">[1]</abbr>, so prefer it to `\n` in a format string.
+`%n` is the platform's own line separator <abbr title="Java SE 25 API, java.util.Formatter">[1]</abbr>, so prefer it to `\n` in a format string.
 
 **Intuition.**
 *Mechanism.* `printf` walks the format string. At each `%…` it consumes the next argument and renders it according to the **specifier**: `%d` as a whole number, `%.2f` as a decimal with two digits after the point.
 
-*Concrete bite.* The specifier must match the argument's type, or `printf` throws at run time <abbr title="Java SE 21 API, java.util.Formatter">[1]</abbr>:
+*Concrete bite.* The specifier must match the argument's type, or `printf` throws at run time <abbr title="Java SE 25 API, java.util.Formatter">[1]</abbr>:
 
 ```java run
 public class Main {
@@ -152,7 +152,7 @@ To read what a person types, make a `Scanner` over `System.in` (the keyboard) an
 
 - `Scanner` lives in Java's library under the full name `java.util.Scanner`. The `import` line at the top of the file lets you call it by its short name, `Scanner`.
 - `new Scanner(System.in)` builds a new Scanner object; [Classes and objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects) teaches `new`.
-- `nextLine()` returns the whole line typed. `next()` returns the next **token**: a run of characters up to a space or a line break <abbr title="Java SE 21 API, java.util.Scanner">[2]</abbr>.
+- `nextLine()` returns the whole line typed. `next()` returns the next **token**: a run of characters up to a space or a line break <abbr title="Java SE 25 API, java.util.Scanner">[2]</abbr>.
 
 ```java
 import java.util.Scanner;
@@ -193,7 +193,7 @@ public class Main {
 Hello, Ada!
 ```
 
-**`next()` versus `nextLine()`.** `next()` stops at the first space; `nextLine()` takes everything to the end of the line <abbr title="Java SE 21 API, java.util.Scanner">[2]</abbr>. The `\n` in the source below is a line break, from [Strings, the basics](/synapse/programming-languages/java/first-steps/strings-the-basics):
+**`next()` versus `nextLine()`.** `next()` stops at the first space; `nextLine()` takes everything to the end of the line <abbr title="Java SE 25 API, java.util.Scanner">[2]</abbr>. The `\n` in the source below is a line break, from [Strings, the basics](/synapse/programming-languages/java/first-steps/strings-the-basics):
 
 ```java run
 import java.util.Scanner;
@@ -316,7 +316,7 @@ public class Main {
 age=36 name=[]
 ```
 
-`nextInt()` read `36` and stopped before its line break. The `nextLine()` that followed returned everything left on that same line, which is nothing. So `name` is empty (`[]`), not `"Ada"`. `nextLine()` "returns the rest of the current line" <abbr title="Java SE 21 API, java.util.Scanner">[2]</abbr>, and here the rest was empty.
+`nextInt()` read `36` and stopped before its line break. The `nextLine()` that followed returned everything left on that same line, which is nothing. So `name` is empty (`[]`), not `"Ada"`. `nextLine()` "returns the rest of the current line" <abbr title="Java SE 25 API, java.util.Scanner">[2]</abbr>, and here the rest was empty.
 
 The fix is one extra `sc.nextLine()` after the `nextInt()`, which swallows the leftover line break:
 
@@ -410,7 +410,7 @@ public class Main {
 75
 ```
 
-Joining two strings gives `"75"`, not `12`. When you already hold the text, convert it with `Integer.parseInt`, or `Double.parseDouble` for a decimal <abbr title="Java SE 21 API, java.lang.Integer">[3]</abbr>. That's the deliberate conversion that [Variables and primitive types](/synapse/programming-languages/java/first-steps/variables-and-primitive-types) promised:
+Joining two strings gives `"75"`, not `12`. When you already hold the text, convert it with `Integer.parseInt`, or `Double.parseDouble` for a decimal <abbr title="Java SE 25 API, java.lang.Integer">[3]</abbr>. That's the deliberate conversion that [Variables and primitive types](/synapse/programming-languages/java/first-steps/variables-and-primitive-types) promised:
 
 ```java run
 public class Main {
@@ -443,8 +443,8 @@ public class Main {
 
 Parsing can fail, and with real input that's not rare:
 
-- `nextInt()` accepts only a token that *is* an `int`. A word, a decimal, or a number past `2147483647` makes it throw `InputMismatchException` <abbr title="Java SE 21 API, java.util.Scanner">[2]</abbr>.
-- `Integer.parseInt` throws `NumberFormatException` when the String is not a whole number <abbr title="Java SE 21 API, java.lang.Integer">[3]</abbr>.
+- `nextInt()` accepts only a token that *is* an `int`. A word, a decimal, or a number past `2147483647` makes it throw `InputMismatchException` <abbr title="Java SE 25 API, java.util.Scanner">[2]</abbr>.
+- `Integer.parseInt` throws `NumberFormatException` when the String is not a whole number <abbr title="Java SE 25 API, java.lang.Integer">[3]</abbr>.
 
 ```java run
 import java.util.Scanner;
@@ -489,7 +489,7 @@ Exception in thread "main" java.lang.NumberFormatException: For input string: "3
 
 *Concrete bite.* The outputs above are the demonstration: `42` prints, then the bad parse throws and execution stops. Real user input is unpredictable, so this isn't an edge case. It's an ordinary day.
 
-**Decimals and your computer's language.** A Scanner reads numbers in the format of your computer's language settings <abbr title="Java SE 21 API, java.util.Scanner">[2]</abbr>, and so does `printf`. The outputs on this page come from a computer set to US English, where the decimal mark is a point. But on a computer set to German, `nextDouble()` rejects `3.5` with `InputMismatchException` and expects `3,5`, and `printf("%.2f%n", 3.14159)` prints `3,14`.
+**Decimals and your computer's language.** A Scanner reads numbers in the format of your computer's language settings <abbr title="Java SE 25 API, java.util.Scanner">[2]</abbr>, and so does `printf`. The outputs on this page come from a computer set to US English, where the decimal mark is a point. But on a computer set to German, `nextDouble()` rejects `3.5` with `InputMismatchException` and expects `3,5`, and `printf("%.2f%n", 3.14159)` prints `3,14`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -547,7 +547,7 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>A Scanner reads <code>"36\nAda\n"</code>. Why does <code>nextLine()</code> after <code>nextInt()</code> return an empty String, and how do you get <code>Ada</code>?</summary>
 
-`nextInt()` consumes the token `36` and stops before the line break. `nextLine()` returns the rest of the current line <abbr title="Java SE 21 API, java.util.Scanner">[2]</abbr>, and the rest of the `36` line is empty.
+`nextInt()` consumes the token `36` and stops before the line break. `nextLine()` returns the rest of the current line <abbr title="Java SE 25 API, java.util.Scanner">[2]</abbr>, and the rest of the `36` line is empty.
 
 Call `sc.nextLine()` once after `nextInt()` to consume that leftover line break. The next `nextLine()` then returns `Ada`.
 
@@ -576,9 +576,9 @@ For the average of `"7 5"`, divide by `2.0` so the division is floating-point: `
 
 ## 📚 Sources
 
-1. Java SE 21 API, `java.util.Formatter` (conversions `%s`, `%d`, `%f`, `%n`, `%%`; `IllegalFormatConversionException`) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Formatter.html>
-2. Java SE 21 API, `java.util.Scanner` (tokens, `next`, `nextLine`, `nextInt`, `InputMismatchException`, localized numbers) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Scanner.html>
-3. Java SE 21 API, `java.lang.Integer` (`parseInt`, `NumberFormatException`) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html>
+1. Java SE 25 API, `java.util.Formatter` (conversions `%s`, `%d`, `%f`, `%n`, `%%`; `IllegalFormatConversionException`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Formatter.html>
+2. Java SE 25 API, `java.util.Scanner` (tokens, `next`, `nextLine`, `nextInt`, `InputMismatchException`, localized numbers) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Scanner.html>
+3. Java SE 25 API, `java.lang.Integer` (`parseInt`, `NumberFormatException`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html>
 
 ---
 

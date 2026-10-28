@@ -12,7 +12,7 @@ The book is a single text, meant to be read from top to bottom. It starts by ass
 
 ## Reading conventions
 
-- **Every code block with a Run button is real.** Synapse compiles and runs it in a sandboxed **Java 21 (OpenJDK)** runner — the same one that produced every `Output:` block in this book. Click ▶ Run, edit the code, and run it again. The output you see is the output we verified.
+- **Every code block with a Run button is real.** Synapse compiles and runs it in a sandboxed **Java 25 (OpenJDK)** runner — the same one that produced every `Output:` block in this book. Click ▶ Run, edit the code, and run it again. The output you see is the output we verified.
 - **When the lesson is a compile error, the block is labelled `Compiler error:`**, and it shows the real `javac` diagnostic — because in Java, many of the most important lessons happen *before* the program runs.
 - **Blocks without a Run button are deliberate.** They're either short fragments, or programs shown precisely because they need keyboard input that the sandbox can't supply. Their output is still shown, and still real.
 - **Every lesson is built on a thesis** stated in its first paragraph, and follows a fixed rhythm: concept → code → verified output → analysis ("what happened") → an **Intuition** box ("why it must be so").
@@ -131,6 +131,6 @@ flowchart TD
 
 ## A note on the runner
 
-Every runnable block compiles and runs in an isolated **Java 21 (OpenJDK)** sandbox — no setup, no install, nothing to break. The sandbox compiles your code as a class named `Main`, so the examples here use that name. Each block runs on its own (state doesn't carry over from one block to the next), so self-contained examples repeat any setup they need. Anonymous runs work; signing in lets you edit and run, and raises your hourly quota.
+Every runnable block compiles and runs in an isolated **Java 25 (OpenJDK)** sandbox — no setup, no install, nothing to break. The sandbox compiles your code as a class named `Main`, so the examples here use that name. Each block runs on its own (state doesn't carry over from one block to the next), so self-contained examples repeat any setup they need. Anonymous runs work; signing in lets you edit and run, and raises your hourly quota.
 
 One limit is worth knowing early: the sandbox can't pause to read keyboard input. So the interactive `Scanner(System.in)` programs in [Input & Output](/synapse/programming-languages/java/first-steps/input-and-output) are shown statically, each paired with a runnable twin that reads from a fixed source. You do **not** need Java installed locally to read this book — though by Chapter 6 you'll want it, and [Testing, Tooling & Packaging](/synapse/programming-languages/java/advanced/testing-tooling-and-packaging), near the end of the book, shows how to set it up properly.

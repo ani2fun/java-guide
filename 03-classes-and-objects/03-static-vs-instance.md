@@ -100,7 +100,7 @@ c -> cls
 **Analysis.** Each constructor incremented the one shared `count` (`1`, `2`, `3`) and copied it into its own `id`. So the three widgets have distinct ids `1, 2, 3`, while `count` is a single value, `3`, that you reach through the class as `Widget.count`. The diagram shows three objects, each with its own `id`, all pointing at one class that holds the single `count`.
 
 **Intuition.**
-*Mechanism.* A `static` field has exactly one copy, however many objects exist, even zero <abbr title="The Java Language Specification, Java SE 21, §8.3.1.1">[1]</abbr>. It lives with the class. An instance field is created with each object, on that object. `Widget.count` names the class's copy, and `a.id` names that object's copy.
+*Mechanism.* A `static` field has exactly one copy, however many objects exist, even zero <abbr title="The Java Language Specification, Java SE 25, §8.3.1.1">[1]</abbr>. It lives with the class. An instance field is created with each object, on that object. `Widget.count` names the class's copy, and `a.id` names that object's copy.
 
 *Concrete bite.* Because the static field is shared, a change through *any* path shows up for *everyone*. `count` reached `3` because three different constructors all incremented the same variable. That's both the feature (a class-wide tally) and the hazard (shared mutable state that any instance can change).
 
@@ -171,7 +171,7 @@ id 2 of 2
 **Analysis.** `describe()` is an instance method called on `w`, so it sees both `w.id` (`2`) and the shared `count` (`2`). `total()` is `static`, called as `Widget.total()` with no object. It can read `count` because `count` is also `static`, but it has no `id` to read. Instance methods can touch everything, while static methods can touch only static members, unless someone hands them an object.
 
 **Intuition.**
-*Mechanism.* An instance method receives a hidden `this`, and an unqualified field name resolves against it. A `static` method has no `this` <abbr title="The Java Language Specification, Java SE 21, §8.4.3.2">[2]</abbr>. A bare *instance* field name has nothing to resolve against, so the compiler rejects it.
+*Mechanism.* An instance method receives a hidden `this`, and an unqualified field name resolves against it. A `static` method has no `this` <abbr title="The Java Language Specification, Java SE 25, §8.4.3.2">[2]</abbr>. A bare *instance* field name has nothing to resolve against, so the compiler rejects it.
 
 *Concrete bite.* Reading an instance field from a static method is a compile error:
 
@@ -240,7 +240,7 @@ public class Main {
 **Analysis.** `PI` is one shared value, since there's no point giving every circle its own copy of a constant. `final` means nothing can change it. `area()` reads it like any field, and `Circle.PI` reads it through the class. (The JDK already has a more precise one, `Math.PI`.)
 
 **Intuition.**
-*Mechanism.* `static` gives one copy, and `final` forbids reassignment after its single initialization. Some of these fields are special. Take a `static final` field of a primitive type or `String`, set to a compile-time constant such as `100`. That's a **constant variable** <abbr title="The Java Language Specification, Java SE 21, §4.12.4">[3]</abbr>. javac copies its value into every place that reads it <abbr title="The Java Language Specification, Java SE 21, §13.1">[4]</abbr>. §4 shows a consequence.
+*Mechanism.* `static` gives one copy, and `final` forbids reassignment after its single initialization. Some of these fields are special. Take a `static final` field of a primitive type or `String`, set to a compile-time constant such as `100`. That's a **constant variable** <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[3]</abbr>. javac copies its value into every place that reads it <abbr title="The Java Language Specification, Java SE 25, §13.1">[4]</abbr>. §4 shows a consequence.
 
 *Concrete bite.* Try to reassign a `static final`, and javac rejects it, just as it does an instance `final`:
 
@@ -277,7 +277,7 @@ For values that are truly fixed, this costs you nothing. The discipline is savin
 
 ## 4. `static` initialization blocks
 
-You can set a field with a simple value inline. When a class's `static` state needs *computation* to set up, a **`static` block**, `static { … }`, does that work once, when the class is initialized <abbr title="The Java Language Specification, Java SE 21, §8.7">[5]</abbr>.
+You can set a field with a simple value inline. When a class's `static` state needs *computation* to set up, a **`static` block**, `static { … }`, does that work once, when the class is initialized <abbr title="The Java Language Specification, Java SE 25, §8.7">[5]</abbr>.
 
 ```java run viz=array:SQUARES
 class Lookup {
@@ -312,14 +312,14 @@ static block ran
 At that point, the `static` block ran once and filled `SQUARES` (`0, 1, 4, 9, 16`). The reads that followed returned `9` and `16`. Think of a `static` block as the constructor for class-level state.
 
 **Intuition.**
-*Mechanism.* A class is initialized **lazily**, immediately before the first of these <abbr title="The Java Language Specification, Java SE 21, §12.4.1">[6]</abbr>:
+*Mechanism.* A class is initialized **lazily**, immediately before the first of these <abbr title="The Java Language Specification, Java SE 25, §12.4.1">[6]</abbr>:
 
 - an object of the class is created;
 - a `static` method of the class is called;
 - a `static` field of the class is assigned;
 - a `static` field of the class is read, and it is **not** a constant variable (§3).
 
-Initialization runs the `static` field initializers and `static` blocks in source order, exactly **once** per class <abbr title="The Java Language Specification, Java SE 21, §12.4.2">[7]</abbr>. Object construction happens per object, while class initialization happens once per class. The class that holds `main` is initialized before `main` starts <abbr title="The Java Language Specification, Java SE 21, §12.1.3">[8]</abbr>, so a `static` block in `Main` prints before `main`'s first line.
+Initialization runs the `static` field initializers and `static` blocks in source order, exactly **once** per class <abbr title="The Java Language Specification, Java SE 25, §12.4.2">[7]</abbr>. Object construction happens per object, while class initialization happens once per class. The class that holds `main` is initialized before `main` starts <abbr title="The Java Language Specification, Java SE 25, §12.1.3">[8]</abbr>, so a `static` block in `Main` prints before `main`'s first line.
 
 *Concrete bite.* The single `static block ran` line proves the "once". `main` touched `Lookup` twice (`SQUARES[3]` and `SQUARES[4]`), yet the block ran only one time.
 
@@ -382,7 +382,7 @@ Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 5 out of bounds for l
 	at Table.<clinit>(Main.java:5)
 ```
 
-The real fault is the `Caused by` line: index `5` in an array of length `2`. The JVM reports it as an `ExceptionInInitializerError` at the line in `main` that first used `Table` <abbr title="The Java Language Specification, Java SE 21, §12.4.2">[7]</abbr>. `<clinit>` is the JVM's name for a class's combined static initialization code <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.9.2">[9]</abbr>.
+The real fault is the `Caused by` line: index `5` in an array of length `2`. The JVM reports it as an `ExceptionInInitializerError` at the line in `main` that first used `Table` <abbr title="The Java Language Specification, Java SE 25, §12.4.2">[7]</abbr>. `<clinit>` is the JVM's name for a class's combined static initialization code <abbr title="The Java Virtual Machine Specification, Java SE 25, §2.9.2">[9]</abbr>.
 
 The JVM now marks the class as failed. Any later use of it throws `NoClassDefFoundError: Could not initialize class Table`, and the block never runs again.
 
@@ -398,7 +398,7 @@ The catch is that the *moment* it runs is subtle: first use, not program start. 
 
 ## 5. Instance initializers and the order of construction
 
-The `static` block has a per-object twin. An **instance initializer** is a bare block, `{ … }`, in the class body, and it runs every time an object is created <abbr title="The Java Language Specification, Java SE 21, §8.6">[10]</abbr>. This program logs every step of the class and object setup:
+The `static` block has a per-object twin. An **instance initializer** is a bare block, `{ … }`, in the class body, and it runs every time an object is created <abbr title="The Java Language Specification, Java SE 25, §8.6">[10]</abbr>. This program logs every step of the class and object setup:
 
 ```java run
 class Order {
@@ -449,7 +449,7 @@ constructor body
 **Analysis.** The first `new Order()` triggered class initialization: the static field initializer, then the static block, in source order. Then it built the object: the instance field initializer, then the instance block, again in source order, and finally the constructor body. The second `new` skipped the static part, since the class was already initialized, and repeated only the three instance steps.
 
 **Intuition.**
-*Mechanism.* `new` works in a fixed order <abbr title="The Java Language Specification, Java SE 21, §12.5">[11]</abbr>:
+*Mechanism.* `new` works in a fixed order <abbr title="The Java Language Specification, Java SE 25, §12.5">[11]</abbr>:
 
 1. Initialize the class, if this is its first use: `static` initializers and `static` blocks, top to bottom, once.
 2. Allocate the object; every field holds its default (`0`, `false`, `null`).
@@ -458,7 +458,7 @@ constructor body
 
 Both "top to bottom" steps follow **textual order**: the order of the lines in the file.
 
-*Non-example: reading a field before its declaration.* Because static initializers run top to bottom, javac rejects an initializer that reads a field declared further down <abbr title="The Java Language Specification, Java SE 21, §8.3.3">[12]</abbr>:
+*Non-example: reading a field before its declaration.* Because static initializers run top to bottom, javac rejects an initializer that reads a field declared further down <abbr title="The Java Language Specification, Java SE 25, §8.3.3">[12]</abbr>:
 
 ```java run
 public class Main {
@@ -553,18 +553,18 @@ No. `Lookup` is initialized only when it's first used. A class that `main` never
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §8.3.1.1 "`static` Fields" ("exactly one incarnation of the field, no matter how many instances") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.3.1.1>
-2. *The Java Language Specification, Java SE 21*, §8.4.3.2 "`static` Methods" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.3.2>
-3. *The Java Language Specification, Java SE 21*, §4.12.4 "`final` Variables" (constant variable) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html#jls-4.12.4>
-4. *The Java Language Specification, Java SE 21*, §13.1 "The Form of a Binary" (a constant variable "must be resolved at compile time") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-13.html#jls-13.1>
-5. *The Java Language Specification, Java SE 21*, §8.7 "Static Initializers" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.7>
-6. *The Java Language Specification, Java SE 21*, §12.4.1 "When Initialization Occurs" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-12.html#jls-12.4.1>
-7. *The Java Language Specification, Java SE 21*, §12.4.2 "Detailed Initialization Procedure" (initializers "in textual order"; `ExceptionInInitializerError`) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-12.html#jls-12.4.2>
-8. *The Java Language Specification, Java SE 21*, §12.1.3 "Initialize `Test`: Execute Initializers" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-12.html#jls-12.1.3>
-9. *The Java Virtual Machine Specification, Java SE 21*, §2.9.2 "Class Initialization Methods" — <https://docs.oracle.com/javase/specs/jvms/se21/html/jvms-2.html#jvms-2.9.2>
-10. *The Java Language Specification, Java SE 21*, §8.6 "Instance Initializers" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.6>
-11. *The Java Language Specification, Java SE 21*, §12.5 "Creation of New Class Instances" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-12.html#jls-12.5>
-12. *The Java Language Specification, Java SE 21*, §8.3.3 "Restrictions on Field References in Initializers" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.3.3>
+1. *The Java Language Specification, Java SE 25*, §8.3.1.1 "`static` Fields" ("exactly one incarnation of the field, no matter how many instances") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.1.1>
+2. *The Java Language Specification, Java SE 25*, §8.4.3.2 "`static` Methods" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.3.2>
+3. *The Java Language Specification, Java SE 25*, §4.12.4 "`final` Variables" (constant variable) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.4>
+4. *The Java Language Specification, Java SE 25*, §13.1 "The Form of a Binary" (a constant variable "must be resolved at compile time") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-13.html#jls-13.1>
+5. *The Java Language Specification, Java SE 25*, §8.7 "Static Initializers" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.7>
+6. *The Java Language Specification, Java SE 25*, §12.4.1 "When Initialization Occurs" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.4.1>
+7. *The Java Language Specification, Java SE 25*, §12.4.2 "Detailed Initialization Procedure" (initializers "in textual order"; `ExceptionInInitializerError`) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.4.2>
+8. *The Java Language Specification, Java SE 25*, §12.1.3 "Initialize the Initial Class or Interface: Execute Initializers" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.1.3>
+9. *The Java Virtual Machine Specification, Java SE 25*, §2.9.2 "Class Initialization Methods" — <https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-2.html#jvms-2.9.2>
+10. *The Java Language Specification, Java SE 25*, §8.6 "Instance Initializers" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.6>
+11. *The Java Language Specification, Java SE 25*, §12.5 "Creation of New Class Instances" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.5>
+12. *The Java Language Specification, Java SE 25*, §8.3.3 "Restrictions on Field References in Initializers" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.3>
 
 ---
 

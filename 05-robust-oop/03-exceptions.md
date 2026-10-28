@@ -22,7 +22,7 @@ You've already watched programs crash: a [NullPointerException](/synapse/program
 
 </div>
 
-Every output below was produced by compiling and running the code on Java 21.
+Every output below was produced by compiling and running the code on Java 25.
 
 **You'll be able to:** trace which statements run when a `try` block throws, and read from a stack trace which method threw; predict whether a call compiles based on whether its exception is checked, and fix `unreported exception` with `catch` or `throws`; write a custom exception, and catch two unrelated exception types in a single multi-catch clause; predict the order of opening, closing and suppressed exceptions in `try`-with-resources; explain why a `return` inside `finally` loses an exception.
 
@@ -106,9 +106,9 @@ done
 
 ## 2. The hierarchy: checked vs unchecked
 
-Every exception is a `Throwable`, and the tree splits into `Error` and `Exception` <abbr title="The Java Language Specification, Java SE 21, §11.1.1">[1]</abbr>:
+Every exception is a `Throwable`, and the tree splits into `Error` and `Exception` <abbr title="The Java Language Specification, Java SE 25, §11.1.1">[1]</abbr>:
 
-- An `Error` indicates "serious problems that a reasonable application should not try to catch" <abbr title="java.lang.Error, Java SE 21 API">[10]</abbr>, such as running out of memory.
+- An `Error` indicates "serious problems that a reasonable application should not try to catch" <abbr title="java.lang.Error, Java SE 25 API">[10]</abbr>, such as running out of memory.
 - Within `Exception`, the subclass `RuntimeException` and all its descendants are **unchecked**, just like every `Error`.
 - Everything else under `Exception` is **checked**.
 
@@ -154,7 +154,7 @@ Exception in thread "main" java.lang.ArithmeticException: / by zero
 **Analysis.** `divide` can throw `ArithmeticException`. Since that's an *unchecked* exception, it needed no `throws` and no `try`. The code compiled without complaint, ran `divide(10, 2)` just fine (`5`), and then threw on `divide(10, 0)`. Unchecked exceptions represent bugs (a zero divisor, a null dereference, a bad index) that the compiler doesn't force you to anticipate everywhere.
 
 **Intuition.**
-*Mechanism.* The compiler keeps track of *checked* exceptions: any code that can throw one must either `catch` it or declare it with `throws` <abbr title="The Java Language Specification, Java SE 21, §11.2">[2]</abbr>. `RuntimeException`s and `Error`s are exempt. They could happen almost anywhere, so requiring declarations for them would be unbearable.
+*Mechanism.* The compiler keeps track of *checked* exceptions: any code that can throw one must either `catch` it or declare it with `throws` <abbr title="The Java Language Specification, Java SE 25, §11.2">[2]</abbr>. `RuntimeException`s and `Error`s are exempt. They could happen almost anywhere, so requiring declarations for them would be unbearable.
 
 *Concrete bite.* Call something that throws a *checked* exception without handling it, and the compiler refuses:
 
@@ -180,7 +180,7 @@ Main.java:8: error: unreported exception IOException; must be caught or declared
 
 `IOException` is checked, so calling `risky()` without a `try`/`catch` (or a `throws` on `main`) won't compile. Wrapping the call fixes it: `try { risky(); } catch (IOException e) { … }`.
 
-The rule cuts the other way, too. A `catch` for a checked exception that its `try` block can never throw is also an error <abbr title="The Java Language Specification, Java SE 21, §11.2.3">[3]</abbr>. For example, `catch (IOException e)` around a plain `println` gives `exception IOException is never thrown in body of corresponding try statement`.
+The rule cuts the other way, too. A `catch` for a checked exception that its `try` block can never throw is also an error <abbr title="The Java Language Specification, Java SE 25, §11.2.3">[3]</abbr>. For example, `catch (IOException e)` around a plain `println` gives `exception IOException is never thrown in body of corresponding try statement`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -195,7 +195,7 @@ The rule cuts the other way, too. A `catch` for a checked exception that its `tr
 
 ## 3. Several `catch` clauses, and multi-catch
 
-A `try` can have several `catch` clauses. The JVM tries them in order, from top to bottom, and runs the first one whose type matches. When two exceptions need the same handling, a single **multi-catch** clause can list both types, separated by `|` <abbr title="The Java Language Specification, Java SE 21, §14.20">[4]</abbr>:
+A `try` can have several `catch` clauses. The JVM tries them in order, from top to bottom, and runs the first one whose type matches. When two exceptions need the same handling, a single **multi-catch** clause can list both types, separated by `|` <abbr title="The Java Language Specification, Java SE 25, §14.20">[4]</abbr>:
 
 ```java run
 public class Main {
@@ -225,9 +225,9 @@ skipped 2: ArrayIndexOutOfBoundsException
 **Analysis.** Index 1 held `"ten"`, so `parseInt` threw a `NumberFormatException`. Index 2 is past the end of the two-element array, so `parts[i]` threw an `ArrayIndexOutOfBoundsException`. One clause caught both, and `e.getClass()` reported which one had arrived.
 
 **Intuition.**
-*Mechanism.* In a multi-catch, `e` has the closest common supertype of the listed types, so you can call only the methods they share. `e` is also implicitly `final`, which means the handler can't assign to it <abbr title="The Java Language Specification, Java SE 21, §14.20">[4]</abbr>.
+*Mechanism.* In a multi-catch, `e` has the closest common supertype of the listed types, so you can call only the methods they share. `e` is also implicitly `final`, which means the handler can't assign to it <abbr title="The Java Language Specification, Java SE 25, §14.20">[4]</abbr>.
 
-*Concrete bite.* The alternatives may not be related by subclassing <abbr title="The Java Language Specification, Java SE 21, §14.20">[4]</abbr>. `NumberFormatException` extends `IllegalArgumentException`, so listing both is redundant — and javac tells you so:
+*Concrete bite.* The alternatives may not be related by subclassing <abbr title="The Java Language Specification, Java SE 25, §14.20">[4]</abbr>. `NumberFormatException` extends `IllegalArgumentException`, so listing both is redundant — and javac tells you so:
 
 ```java run
 public class Main {
@@ -252,7 +252,7 @@ Main.java:5: error: Alternatives in a multi-catch statement cannot be related by
 
 Keep only `IllegalArgumentException`, since it already catches its subclass.
 
-*Non-example: a general `catch` before a specific one.* Clauses are tried in order. Put `catch (Exception e)` first, and it catches everything, so a later `catch (NumberFormatException e)` could never run. That's a compile-time error <abbr title="The Java Language Specification, Java SE 21, §11.2.3">[3]</abbr>:
+*Non-example: a general `catch` before a specific one.* Clauses are tried in order. Put `catch (Exception e)` first, and it catches everything, so a later `catch (NumberFormatException e)` could never run. That's a compile-time error <abbr title="The Java Language Specification, Java SE 25, §11.2.3">[3]</abbr>:
 
 ```java run
 public class Main {
@@ -293,8 +293,8 @@ The fix: put the specific clause first, and the general one last.
 
 Three tools let you raise failures and give them names:
 
-- `throw` raises an exception <abbr title="The Java Language Specification, Java SE 21, §14.18">[8]</abbr>.
-- `throws` declares that a method may raise a checked exception <abbr title="The Java Language Specification, Java SE 21, §8.4.6">[9]</abbr>.
+- `throw` raises an exception <abbr title="The Java Language Specification, Java SE 25, §14.18">[8]</abbr>.
+- `throws` declares that a method may raise a checked exception <abbr title="The Java Language Specification, Java SE 25, §8.4.6">[9]</abbr>.
 - Your own exception class extends either `Exception` (checked) or `RuntimeException` (unchecked).
 
 A custom type gives the failure a name, and carries its data along.
@@ -420,7 +420,7 @@ from try
 `finally` intercepts every exit path, including a `return` in the middle of the `try`. That's what makes it reliable for cleanup.
 
 **Intuition.**
-*Mechanism.* Whatever ends the `try` — completion, an exception, or a `return` — the `finally` block runs on the way out <abbr title="The Java Language Specification, Java SE 21, §14.20.2">[5]</abbr>. For a `return`, the value is computed first, then `finally` runs, and then control leaves. The only ways to skip it are for the `try` to never end, or for the JVM to stop first — and `System.exit` never returns <abbr title="java.lang.Runtime, Java SE 21 API (exit)">[11]</abbr>.
+*Mechanism.* Whatever ends the `try` — completion, an exception, or a `return` — the `finally` block runs on the way out <abbr title="The Java Language Specification, Java SE 25, §14.20.2">[5]</abbr>. For a `return`, the value is computed first, then `finally` runs, and then control leaves. The only ways to skip it are for the `try` to never end, or for the JVM to stop first — and `System.exit` never returns <abbr title="java.lang.Runtime, Java SE 25 API (exit)">[11]</abbr>.
 
 ```java run
 public class Main {
@@ -444,7 +444,7 @@ The JVM stopped inside the `try`, so there's no `finally ran`.
 
 *Concrete bite.* The surprise is that `finally ran` comes before `from try`, because people expect a `return` to leave immediately. It doesn't. `finally` always gets its turn first — and that's the whole point. You can release the lock or close the file, even if you bailed out early.
 
-*Non-example: a `return` inside `finally`.* If `finally` itself ends abruptly, through a `return` or a `throw`, that outcome replaces the `try`'s, and the original exception is discarded <abbr title="The Java Language Specification, Java SE 21, §14.20.2">[5]</abbr>:
+*Non-example: a `return` inside `finally`.* If `finally` itself ends abruptly, through a `return` or a `throw`, that outcome replaces the `try`'s, and the original exception is discarded <abbr title="The Java Language Specification, Java SE 25, §14.20.2">[5]</abbr>:
 
 ```java run
 public class Main {
@@ -481,7 +481,7 @@ The `IllegalStateException` simply vanished: no crash, no trace, just an ordinar
 
 ## 6. `try`-with-resources
 
-Closing resources by hand in `finally` is verbose and easy to get wrong. With **`try`-with-resources**, you declare the resource in parentheses right after `try`. Any object that implements `AutoCloseable` is then **closed automatically** when the block exits, in the reverse order of opening <abbr title="The Java Language Specification, Java SE 21, §14.20.3">[6]</abbr>.
+Closing resources by hand in `finally` is verbose and easy to get wrong. With **`try`-with-resources**, you declare the resource in parentheses right after `try`. Any object that implements `AutoCloseable` is then **closed automatically** when the block exits, in the reverse order of opening <abbr title="The Java Language Specification, Java SE 25, §14.20.3">[6]</abbr>.
 
 ```java run
 class Resource implements AutoCloseable {
@@ -512,7 +512,7 @@ after
 **Analysis.** The resource opened and got used. Then `close()` ran *automatically* as the `try` block exited — before `after` printed, and with no explicit `finally`. Had `use()` thrown, `close()` would still have run. Think of `try`-with-resources as `finally`-based cleanup, specialized for anything `AutoCloseable` (files, streams, connections, locks), and generated correctly for you.
 
 **Intuition.**
-*Mechanism.* The compiler expands `try (R r = ...)` into a `try`/`finally` that calls `r.close()` on exit <abbr title="The Java Language Specification, Java SE 21, §14.20.3.1">[7]</abbr>. It also handles the edge cases: it closes the resource even if the body throws. And if the body threw *and* `close()` throws too, the `close()` exception is **suppressed**: it gets attached to the body's exception, which is the one you catch <abbr title="The Java Language Specification, Java SE 21, §14.20.3">[6]</abbr>:
+*Mechanism.* The compiler expands `try (R r = ...)` into a `try`/`finally` that calls `r.close()` on exit <abbr title="The Java Language Specification, Java SE 25, §14.20.3.1">[7]</abbr>. It also handles the edge cases: it closes the resource even if the body throws. And if the body threw *and* `close()` throws too, the `close()` exception is **suppressed**: it gets attached to the body's exception, which is the one you catch <abbr title="The Java Language Specification, Java SE 25, §14.20.3">[6]</abbr>:
 
 ```java run
 class Resource implements AutoCloseable {
@@ -546,7 +546,7 @@ caught: body failed
 suppressed: close of file failed
 ```
 
-**Analysis.** The resource was closed before the `catch` ran. The body's `body failed` is the exception that arrived, so the real cause isn't lost. The `close()` failure rode along with it, and `getSuppressed()` <abbr title="java.lang.Throwable, Java SE 21 API (getSuppressed)">[12]</abbr> returned it.
+**Analysis.** The resource was closed before the `catch` ran. The body's `body failed` is the exception that arrived, so the real cause isn't lost. The `close()` failure rode along with it, and `getSuppressed()` <abbr title="java.lang.Throwable, Java SE 25 API (getSuppressed)">[12]</abbr> returned it.
 
 *Concrete bite.* The alternative — a manual `finally { r.close(); }` — is where leaks hide. Forget it, get the ordering wrong, or let `close()` itself throw and mask the real error, and a file handle or connection leaks. `try`-with-resources removes that whole class of bug by construction. The close isn't optional, and it isn't yours to forget.
 
@@ -668,18 +668,18 @@ total: 4
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §11.1.1 "The Kinds of Exceptions" (the checked and unchecked exception classes) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-11.html#jls-11.1.1>
-2. *The Java Language Specification, Java SE 21*, §11.2 "Compile-Time Checking of Exceptions" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-11.html#jls-11.2>
-3. *The Java Language Specification, Java SE 21*, §11.2.3 "Exception Checking" (a `catch` the `try` cannot reach; a `catch` a preceding clause already covers) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-11.html#jls-11.2.3>
-4. *The Java Language Specification, Java SE 21*, §14.20 "The `try` statement" (multi-catch; alternatives may not be subtypes; the parameter is implicitly `final`) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.20>
-5. *The Java Language Specification, Java SE 21*, §14.20.2 "Execution of `try`-`finally` and `try`-`catch`-`finally`" (an abrupt `finally` discards the earlier reason) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.20.2>
-6. *The Java Language Specification, Java SE 21*, §14.20.3 "`try`-with-resources" ("closed in the reverse order"; a later exception "is suppressed") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.20.3>
-7. *The Java Language Specification, Java SE 21*, §14.20.3.1 "Basic `try`-with-resources" (the translation to `try`/`finally`) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.20.3.1>
-8. *The Java Language Specification, Java SE 21*, §14.18 "The `throw` Statement" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.18>
-9. *The Java Language Specification, Java SE 21*, §8.4.6 "Method Throws" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.6>
-10. `java.lang.Error`, Java SE 21 API ("serious problems that a reasonable application should not try to catch") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Error.html>
-11. `java.lang.Runtime`, Java SE 21 API (`exit`: "An invocation of this method never returns normally") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Runtime.html>
-12. `java.lang.Throwable`, Java SE 21 API (`getSuppressed`: exceptions "suppressed, typically by the try-with-resources statement") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Throwable.html>
+1. *The Java Language Specification, Java SE 25*, §11.1.1 "The Kinds of Exceptions" (the checked and unchecked exception classes) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-11.html#jls-11.1.1>
+2. *The Java Language Specification, Java SE 25*, §11.2 "Compile-Time Checking of Exceptions" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-11.html#jls-11.2>
+3. *The Java Language Specification, Java SE 25*, §11.2.3 "Exception Checking" (a `catch` the `try` cannot reach; a `catch` a preceding clause already covers) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-11.html#jls-11.2.3>
+4. *The Java Language Specification, Java SE 25*, §14.20 "The `try` statement" (multi-catch; alternatives may not be subtypes; the parameter is implicitly `final`) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20>
+5. *The Java Language Specification, Java SE 25*, §14.20.2 "Execution of `try`-`finally` and `try`-`catch`-`finally`" (an abrupt `finally` discards the earlier reason) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.2>
+6. *The Java Language Specification, Java SE 25*, §14.20.3 "`try`-with-resources" ("closed in the reverse order"; a later exception "is suppressed") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.3>
+7. *The Java Language Specification, Java SE 25*, §14.20.3.1 "Basic `try`-with-resources" (the translation to `try`/`finally`) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.3.1>
+8. *The Java Language Specification, Java SE 25*, §14.18 "The `throw` Statement" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.18>
+9. *The Java Language Specification, Java SE 25*, §8.4.6 "Method Throws" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.6>
+10. `java.lang.Error`, Java SE 25 API ("serious problems that a reasonable application should not try to catch") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Error.html>
+11. `java.lang.Runtime`, Java SE 25 API (`exit`: "An invocation of this method never returns normally") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runtime.html>
+12. `java.lang.Throwable`, Java SE 25 API (`getSuppressed`: exceptions "suppressed, typically by the try-with-resources statement") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Throwable.html>
 
 ---
 

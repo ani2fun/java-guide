@@ -60,7 +60,7 @@ This lesson uses [streams](/synapse/programming-languages/java/advanced/function
 
 ## 1. NIO.2: `Path` and `Files`
 
-A `Path` names the location of a file or directory. The `Files` class holds static methods that operate on paths: `writeString`, `readString`, `size`, and dozens more <abbr title="Java SE 21 API, java.nio.file.Files">[1]</abbr>. What used to take many lines of open-a-stream-and-close-it ceremony becomes a single call.
+A `Path` names the location of a file or directory. The `Files` class holds static methods that operate on paths: `writeString`, `readString`, `size`, and dozens more <abbr title="Java SE 25 API, java.nio.file.Files">[1]</abbr>. What used to take many lines of open-a-stream-and-close-it ceremony becomes a single call.
 
 ```java run
 import java.nio.file.*;
@@ -93,7 +93,7 @@ size: 26 bytes
 
 There are no streams to open or close by hand, because `Files` handles the resource management for you. The methods declare `IOException`, a [checked exception](/synapse/programming-languages/java/robust-oop/exceptions), so `main` must handle or declare it.
 
-A `Path` also has operations of its own, and none of them touches the disk <abbr title="Java SE 21 API, java.nio.file.Path">[2]</abbr>:
+A `Path` also has operations of its own, and none of them touches the disk <abbr title="Java SE 25 API, java.nio.file.Path">[2]</abbr>:
 
 ```java run
 import java.nio.file.Path;
@@ -191,7 +191,7 @@ banana
 **Intuition.**
 *Mechanism.* `readAllLines` reads the *entire* file into memory as a `List<String>`. It splits on line terminators, and decodes bytes into characters through the charset. It's eager: convenient for small and medium files, with everything in memory at once.
 
-*Concrete bite.* "Everything in memory" is exactly the limit. `readAllLines` on a multi-gigabyte log loads the whole thing, and can exhaust the heap. The API says as much about `readString`: "It is not intended for reading very large files" <abbr title="Java SE 21 API, java.nio.file.Files.readString(Path)">[1]</abbr>. For large or unbounded files, process them line by line *without* holding them all at once, as the next section shows.
+*Concrete bite.* "Everything in memory" is exactly the limit. `readAllLines` on a multi-gigabyte log loads the whole thing, and can exhaust the heap. The API says as much about `readString`: "It is not intended for reading very large files" <abbr title="Java SE 25 API, java.nio.file.Files.readString(Path)">[1]</abbr>. For large or unbounded files, process them line by line *without* holding them all at once, as the next section shows.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -241,7 +241,7 @@ lines > 2: 3
 Crucially, the stream sits in a `try`-with-resources. It's backed by an *open file*, so it must be closed — unlike the in-memory streams from the streams lesson. And because it reads lazily, it never holds the whole file in memory.
 
 **Intuition.**
-*Mechanism.* `Files.lines` opens the file and exposes its lines as a lazy `Stream<String>`, reading on demand as the pipeline pulls. It holds an operating-system file handle, so it has to be closed. The API is explicit about this: "This method must be used within a try-with-resources statement or similar control structure to ensure that the stream's open file is closed promptly" <abbr title="Java SE 21 API, java.nio.file.Files.lines(Path)">[1]</abbr>. The unrelated `java.io` byte streams (`FileInputStream` and friends) are a separate, lower-level world for binary data.
+*Mechanism.* `Files.lines` opens the file and exposes its lines as a lazy `Stream<String>`, reading on demand as the pipeline pulls. It holds an operating-system file handle, so it has to be closed. The API is explicit about this: "This method must be used within a try-with-resources statement or similar control structure to ensure that the stream's open file is closed promptly" <abbr title="Java SE 25 API, java.nio.file.Files.lines(Path)">[1]</abbr>. The unrelated `java.io` byte streams (`FileInputStream` and friends) are a separate, lower-level world for binary data.
 
 *Concrete bite.* The name clash causes real confusion. An `InputStream` is *not* a `Stream`: it has no `map` or `filter`, and the two aren't interchangeable. Forgetting `try`-with-resources on `Files.lines` leaks the file handle, whereas a `list.stream()` holds no resource at all. Same word, two meanings, two lifecycles.
 
@@ -283,7 +283,7 @@ chars: 4
 
 **Analysis.** `"Café"` is **4 characters**, but **5 bytes** on disk. `C`, `a` and `f` take one byte each in UTF-8, while `é` takes two. `readAllBytes` sees the raw bytes (`5`), and `readString` decodes them back into characters (`4`).
 
-Text is an *interpretation* of bytes, and the charset decides which bytes. The `Files` text methods use UTF-8 unless you pass a different charset <abbr title="Java SE 21 API, java.nio.file.Files.readString(Path)">[1]</abbr>. Since JDK 18, UTF-8 is also Java's default charset everywhere else <abbr title="JEP 400: UTF-8 by Default (JDK 18)">[3]</abbr>. Before that, relying on the platform's default charset was a classic source of "works on my machine" bugs.
+Text is an *interpretation* of bytes, and the charset decides which bytes. The `Files` text methods use UTF-8 unless you pass a different charset <abbr title="Java SE 25 API, java.nio.file.Files.readString(Path)">[1]</abbr>. Since JDK 18, UTF-8 is also Java's default charset everywhere else <abbr title="JEP 400: UTF-8 by Default (JDK 18)">[3]</abbr>. Before that, relying on the platform's default charset was a classic source of "works on my machine" bugs.
 
 **Intuition.**
 *Mechanism.* Encoding turns characters into bytes, and decoding turns bytes back into characters. Both directions need the *same* charset. Decode with a different one, and the bytes get read as different characters.
@@ -333,7 +333,7 @@ The cost is being deliberate about encoding at every boundary. The payoff is tex
 
 ## 5. Readers, writers, the console and buffering
 
-Underneath the one-line `Files` helpers sit four families of classes in `java.io` <abbr title="Java SE 21 API, java.io package summary">[4]</abbr>:
+Underneath the one-line `Files` helpers sit four families of classes in `java.io` <abbr title="Java SE 25 API, java.io package summary">[4]</abbr>:
 
 | | Bytes | Characters |
 |---|---|---|
@@ -463,13 +463,13 @@ public class Main {
 }
 ```
 
-**Output** *(illustrative — timings vary per machine; three runs on JDK 21 printed 1133/41, 1168/32 and 980/32 ms):*
+**Output** *(illustrative — timings vary per machine; three runs on JDK 25 printed 977/20, 1018/20 and 973/20 ms):*
 ```
-unbuffered: 2000000 bytes in 1133 ms
-buffered:   2000000 bytes in 41 ms
+unbuffered: 2000000 bytes in 977 ms
+buffered:   2000000 bytes in 20 ms
 ```
 
-It's the same two million `read()` calls, but about 30 times faster with a buffer. (`read()` returns `-1` at the end of a stream, which is how the loop knows to stop.)
+It's the same two million `read()` calls, but about 50 times faster with a buffer. (`read()` returns `-1` at the end of a stream, which is how the loop knows to stop.)
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -483,7 +483,7 @@ The cost is one more wrapper, plus remembering that a `BufferedWriter` holds ont
 
 ## 6. Directories: `Files.list` and `Files.walk`
 
-`Files.createDirectories` creates a directory, along with any missing parents. Two methods read a directory as a `Stream<Path>`, and both hold it open, so both belong in a `try`-with-resources <abbr title="Java SE 21 API, java.nio.file.Files.list(Path) and walk(Path, FileVisitOption...)">[1]</abbr>:
+`Files.createDirectories` creates a directory, along with any missing parents. Two methods read a directory as a `Stream<Path>`, and both hold it open, so both belong in a `try`-with-resources <abbr title="Java SE 25 API, java.nio.file.Files.list(Path) and walk(Path, FileVisitOption...)">[1]</abbr>:
 
 - `Files.list(dir)` gives the entries directly inside `dir`.
 - `Files.walk(dir)` gives `dir` itself, then everything below it, at every depth.
@@ -522,7 +522,7 @@ walk: src/app
 walk: src/app/Main.java
 ```
 
-**Analysis.** `list` saw the two entries at the top level: `README.md` and the directory `src`. `walk` saw five paths: the root itself (which, relative to itself, is the empty path), then every file and directory below it. The program sorts the names, because a directory's entries come back "in no specific order" <abbr title="Java SE 21 API, java.nio.file.DirectoryStream">[9]</abbr>.
+**Analysis.** `list` saw the two entries at the top level: `README.md` and the directory `src`. `walk` saw five paths: the root itself (which, relative to itself, is the empty path), then every file and directory below it. The program sorts the names, because a directory's entries come back "in no specific order" <abbr title="Java SE 25 API, java.nio.file.DirectoryStream">[9]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -536,11 +536,11 @@ The cost is that `walk` visits everything below the root, which could be million
 
 ## 7. Serialization
 
-**Serialization** turns an object into a stream of bytes, and **deserialization** rebuilds an object from those bytes. "Serializability of a class is enabled by the class implementing the `java.io.Serializable` interface" <abbr title="Java SE 21 API, java.io.Serializable">[5]</abbr>. `Serializable` has no methods; it's just a marker.
+**Serialization** turns an object into a stream of bytes, and **deserialization** rebuilds an object from those bytes. "Serializability of a class is enabled by the class implementing the `java.io.Serializable` interface" <abbr title="Java SE 25 API, java.io.Serializable">[5]</abbr>. `Serializable` has no methods; it's just a marker.
 
-- `ObjectOutputStream.writeObject` writes an object, and "Objects referenced by this object are written transitively" <abbr title="Java SE 21 API, java.io.ObjectOutputStream.writeObject(Object)">[11]</abbr>.
+- `ObjectOutputStream.writeObject` writes an object, and "Objects referenced by this object are written transitively" <abbr title="Java SE 25 API, java.io.ObjectOutputStream.writeObject(Object)">[11]</abbr>.
 - `ObjectInputStream.readObject` reads one back, as an `Object` that you then cast.
-- A field marked `transient` is "not part of the persistent state of an object" <abbr title="The Java Language Specification, Java SE 21, §8.3.1.3">[6]</abbr>: it isn't written, and comes back with its default value.
+- A field marked `transient` is "not part of the persistent state of an object" <abbr title="The Java Language Specification, Java SE 25, §8.3.1.3">[6]</abbr>: it isn't written, and comes back with its default value.
 - `serialVersionUID` is a version number for the class's serialized form. If you change the class in an incompatible way, bump it.
 
 This program serializes into a byte array in memory, so it doesn't need a file:
@@ -617,7 +617,7 @@ Exception in thread "main" java.io.NotSerializableException: Main$Point
 
 `Main$Point` is the binary name of the nested class `Point`.
 
-*Edge: records.* A record gets rebuilt through its canonical constructor: "During deserialization the record's canonical constructor is invoked to construct the record object" <abbr title="Java SE 21 API, java.io.ObjectInputStream, &quot;Records&quot;">[7]</abbr>. That means a record's validation runs again on the way in:
+*Edge: records.* A record gets rebuilt through its canonical constructor: "During deserialization the record's canonical constructor is invoked to construct the record object" <abbr title="Java SE 25 API, java.io.ObjectInputStream, &quot;Records&quot;">[7]</abbr>. That means a record's validation runs again on the way in:
 
 ```java run
 import java.io.*;
@@ -649,11 +649,11 @@ canonical constructor ran for x=3
 read back: Point[x=3, y=4]
 ```
 
-The constructor ran twice: once for `new Point(3, 4)`, and once during `readObject`. An ordinary class, by contrast, is rebuilt *without* its own constructor: "the no-arg constructor for the first non-serializable supertype is run" <abbr title="Java Object Serialization Specification, Java SE 21, §3.1">[10]</abbr>. Its own checks never run, so carefully crafted bytes can bypass them.
+The constructor ran twice: once for `new Point(3, 4)`, and once during `readObject`. An ordinary class, by contrast, is rebuilt *without* its own constructor: "the no-arg constructor for the first non-serializable supertype is run" <abbr title="Java Object Serialization Specification, Java SE 25, §3.1">[10]</abbr>. Its own checks never run, so carefully crafted bytes can bypass them.
 
 <div style="border-left:4px solid #da5233;background:rgba(218,82,51,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-⚠️ **Security warning.** The `ObjectInputStream` docs open with this warning: "Deserialization of untrusted data is inherently dangerous and should be avoided" <abbr title="Java SE 21 API, java.io.ObjectInputStream">[7]</abbr>. `readObject` can build objects of any serializable class on the classpath, from bytes that an attacker controls. If you must read serialized data from outside, restrict the classes it may contain with an `ObjectInputFilter` <abbr title="Java SE 21 API, java.io.ObjectInputFilter">[8]</abbr>. For data that crosses a trust boundary, prefer an explicit format such as JSON, and validate it.
+⚠️ **Security warning.** The `ObjectInputStream` docs open with this warning: "Deserialization of untrusted data is inherently dangerous and should be avoided" <abbr title="Java SE 25 API, java.io.ObjectInputStream">[7]</abbr>. `readObject` can build objects of any serializable class on the classpath, from bytes that an attacker controls. If you must read serialized data from outside, restrict the classes it may contain with an `ObjectInputFilter` <abbr title="Java SE 25 API, java.io.ObjectInputFilter">[8]</abbr>. For data that crosses a trust boundary, prefer an explicit format such as JSON, and validate it.
 
 </div>
 
@@ -677,7 +677,7 @@ The cost of serialization is its security and versioning traps. The payoff is a 
 | "stream" means two things: `java.io` bytes vs `java.util.stream` pipeline | They're unrelated types; an `InputStream` has no `map`/`filter` |
 | Text is bytes through a charset; UTF-8 is variable-width | `"Café"` is 4 chars but 5 bytes; the wrong charset mangles it or throws `MalformedInputException` |
 | `InputStream`/`OutputStream` move bytes; `Reader`/`Writer` move characters | `BufferedReader.readLine()` reads lines from a file or the console, `null` at the end |
-| Each unbuffered `read()` can be a system call | Buffering made 2 MB of one-byte reads about 30 times faster |
+| Each unbuffered `read()` can be a system call | Buffering made 2 MB of one-byte reads about 50 times faster |
 | `Files.list` is one level; `Files.walk` is the whole tree | Both are resource-backed streams in unspecified order |
 | Serialization writes a `Serializable` object graph as bytes | `transient` fields come back as defaults; deserializing untrusted data is dangerous |
 
@@ -776,17 +776,17 @@ sum: 14
 
 ## 📚 Sources
 
-1. `java.nio.file.Files`, Java SE 21 API (`readString` and its UTF-8 default; "not intended for reading very large files"; `lines`, `list` and `walk` "must be used within a try-with-resources statement") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/Files.html>
-2. `java.nio.file.Path`, Java SE 21 API (`resolve`, `normalize`, `relativize`) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/Path.html>
+1. `java.nio.file.Files`, Java SE 25 API (`readString` and its UTF-8 default; "not intended for reading very large files"; `lines`, `list` and `walk` "must be used within a try-with-resources statement") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/nio/file/Files.html>
+2. `java.nio.file.Path`, Java SE 25 API (`resolve`, `normalize`, `relativize`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/nio/file/Path.html>
 3. JEP 400: UTF-8 by Default (JDK 18) — <https://openjdk.org/jeps/400>
-4. `java.io` package summary, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/package-summary.html>
-5. `java.io.Serializable`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/Serializable.html>
-6. *The Java Language Specification, Java SE 21*, §8.3.1.3 "`transient` Fields" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.3.1.3>
-7. `java.io.ObjectInputStream`, Java SE 21 API (the deserialization warning; records rebuilt through the canonical constructor) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/ObjectInputStream.html>
-8. `java.io.ObjectInputFilter`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/ObjectInputFilter.html>
-9. `java.nio.file.DirectoryStream`, Java SE 21 API ("The elements returned by the iterator are in no specific order") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/DirectoryStream.html>
-10. *Java Object Serialization Specification*, Java SE 21, §3.1 "The ObjectInputStream Class" — <https://docs.oracle.com/en/java/javase/21/docs/specs/serialization/input.html>
-11. `java.io.ObjectOutputStream`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/ObjectOutputStream.html>
+4. `java.io` package summary, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/package-summary.html>
+5. `java.io.Serializable`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/Serializable.html>
+6. *The Java Language Specification, Java SE 25*, §8.3.1.3 "`transient` Fields" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.1.3>
+7. `java.io.ObjectInputStream`, Java SE 25 API (the deserialization warning; records rebuilt through the canonical constructor) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/ObjectInputStream.html>
+8. `java.io.ObjectInputFilter`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/ObjectInputFilter.html>
+9. `java.nio.file.DirectoryStream`, Java SE 25 API ("The elements returned by the iterator are in no specific order") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/nio/file/DirectoryStream.html>
+10. *Java Object Serialization Specification*, Java SE 25, §3.1 "The ObjectInputStream Class" — <https://docs.oracle.com/en/java/javase/25/docs/specs/serialization/input.html>
+11. `java.io.ObjectOutputStream`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/ObjectOutputStream.html>
 
 ---
 

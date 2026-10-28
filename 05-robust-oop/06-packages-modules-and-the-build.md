@@ -1,6 +1,6 @@
 ---
 title: Packages, Modules & the Build
-summary: Packages give classes a namespace, and the classpath finds them. Across package boundaries, access modifiers take on a second meaning. The JPMS module system (module-info.java) makes a JAR's dependencies and exported packages explicit, enforcing strong encapsulation even on public types. opens grants reflection, provides and uses wire up services through ServiceLoader, and classpath code and plain JARs land in the unnamed and automatic modules. JARs bundle compiled classes, jlink builds a trimmed runtime image, and Maven and Gradle automate the whole build. Shown with real, verified terminal sessions.
+summary: Packages give classes a namespace, and the classpath finds them. Across package boundaries, access modifiers take on a second meaning. The JPMS module system (module-info.java) makes a JAR's dependencies and exported packages explicit, enforcing strong encapsulation even on public types. opens grants reflection, provides and uses wire up services through ServiceLoader, and classpath code and plain JARs land in the unnamed and automatic modules. JARs bundle compiled classes, jlink builds a trimmed runtime image, and Maven and Gradle automate the whole build. An import module declaration (JDK 25) imports every package a module exports. Shown with real, verified terminal sessions.
 prereqs: []
 ---
 
@@ -24,9 +24,9 @@ Everything so far has fit in a single file. Real programs are hundreds of classe
 
 </div>
 
-These examples span *multiple files* and use the `javac`, `jar`, `java` and `jlink` tools, so they're shown as terminal sessions. The in-page ▶ Run sandbox compiles only a single file, so it can't build a multi-package project. Every command and output below was run on JDK 21 and pasted in, not typed by hand.
+These examples span *multiple files* and use the `javac`, `jar`, `java` and `jlink` tools, so they're shown as terminal sessions. The in-page ▶ Run sandbox compiles only a single file, so it can't build a multi-package project. Every command and output below was run on JDK 25 and pasted in, not typed by hand.
 
-**You'll be able to:** predict where `javac -d` puts a class file, and which `java -cp` command runs it; predict from a type's modifier and its module's `exports` and `requires` whether code in another package or module can use it; explain why `exports` isn't enough for reflection, and fix it with `opens`; wire up a service with `provides … with`, `uses` and `ServiceLoader`; name the module that a plain JAR on the module path becomes, and build a runtime image with `jlink`.
+**You'll be able to:** predict where `javac -d` puts a class file, and which `java -cp` command runs it; predict from a type's modifier and its module's `exports` and `requires` whether code in another package or module can use it; import a whole module, and resolve the clash it can cause; explain why `exports` isn't enough for reflection, and fix it with `opens`; wire up a service with `provides … with`, `uses` and `ServiceLoader`; name the module that a plain JAR on the module path becomes, and build a runtime image with `jlink`.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -95,10 +95,10 @@ HELLO!
 
 - `javac -d out` wrote the compiled classes into directories that mirror the package names: `out/com/example/Main.class` and `out/com/example/util/Text.class`.
 - `java -cp out com.example.Main` set the **classpath** to `out`, and ran the class by its full name, `com.example.Main`.
-- The `import` let `Main` write `Text` instead of `com.example.util.Text`. It's a compile-time shorthand, nothing more <abbr title="The Java Language Specification, Java SE 21, §7.5">[2]</abbr>.
+- The `import` let `Main` write `Text` instead of `com.example.util.Text`. It's a compile-time shorthand, nothing more <abbr title="The Java Language Specification, Java SE 25, §7.5">[2]</abbr>.
 
 **Intuition.**
-*Mechanism.* A package is a namespace. The classpath is the list of root locations where the JVM looks for `.class` files. So `java com.example.Main` means "find `com/example/Main.class` under one of the classpath roots." The JLS leaves this file-system mapping up to the host system <abbr title="The Java Language Specification, Java SE 21, §7.2">[1]</abbr>, and the JDK tools use directories.
+*Mechanism.* A package is a namespace. The classpath is the list of root locations where the JVM looks for `.class` files. So `java com.example.Main` means "find `com/example/Main.class` under one of the classpath roots." The JLS leaves this file-system mapping up to the host system <abbr title="The Java Language Specification, Java SE 25, §7.2">[1]</abbr>, and the JDK tools use directories.
 
 *Concrete bite.* The directory rule applies to the *class files*, not the sources. Even if `javac` compiled both files from a single `src/anywhere/` folder, `-d out` would still write `out/com/example/util/Text.class`. Move that class file out of its package directory, and the JVM can't find it when `Main` first needs it:
 
@@ -157,7 +157,7 @@ src2/com/example/Main.java:5: error: whisper(String) is not public in Text; cann
 **Analysis.** `Text` is `public` (so `Main` can use it), and `shout` is `public` (so `Main` can call it). But `whisper` is package-private, belonging to `com.example.util`, and `Main` lives in `com.example` — a *different* package. So `whisper` is off-limits: "not public … cannot be accessed from outside package." The boundary is the package, and the default (no modifier) stops right at it.
 
 **Intuition.**
-*Mechanism.* The compiler checks each access against both the member's modifier *and* the package of the code doing the accessing <abbr title="The Java Language Specification, Java SE 21, §6.6.1">[3]</abbr>. Package-private grants access only to code in the same package. Crossing a package boundary requires `public` (or `protected`, for subclasses).
+*Mechanism.* The compiler checks each access against both the member's modifier *and* the package of the code doing the accessing <abbr title="The Java Language Specification, Java SE 25, §6.6.1">[3]</abbr>. Package-private grants access only to code in the same package. Crossing a package boundary requires `public` (or `protected`, for subclasses).
 
 *Concrete bite.* This is real encapsulation, not just a convention. A package can expose a `public` API while keeping helper classes and methods package-private, and no outside code can reach them, because the compiler enforces it. That's how libraries hide their internals from the code that uses them.
 
@@ -174,7 +174,7 @@ src2/com/example/Main.java:5: error: whisper(String) is not public in Text; cann
 
 ## 3. Modules: `module-info.java`
 
-On the classpath, any `public` type in any package is reachable by anyone. Package-private hides *members*, but a `public` class in an "internal" package is still exposed. The **module system** (JPMS, JDK 9) <abbr title="JEP 261: Module System (JDK 9)">[8]</abbr> closes that gap. A module declares which packages it `exports` and which modules it `requires`, in a `module-info.java` file at its root <abbr title="The Java Language Specification, Java SE 21, §7.7">[4]</abbr>.
+On the classpath, any `public` type in any package is reachable by anyone. Package-private hides *members*, but a `public` class in an "internal" package is still exposed. The **module system** (JPMS, JDK 9) <abbr title="JEP 261: Module System (JDK 9)">[8]</abbr> closes that gap. A module declares which packages it `exports` and which modules it `requires`, in a `module-info.java` file at its root <abbr title="The Java Language Specification, Java SE 25, §7.7">[4]</abbr>.
 
 ```java
 // requires: a module source tree — a module-info.java is not a program
@@ -260,11 +260,60 @@ This is called "strong encapsulation": the classpath's hole (public-but-internal
 
 </div>
 
+**Importing a whole module.** Because a module lists the packages it exports, JDK 25 lets you import all of them at once. `import module java.base;` imports, on demand, every public class and interface in every package that `java.base` exports <abbr title="The Java Language Specification, Java SE 25, §7.5.5">[18]</abbr> <abbr title="JEP 511: Module Import Declarations (JDK 25)">[17]</abbr>. Your own code doesn't have to be a module to use it:
+
+```java run
+import module java.base;
+
+public class Main {
+    public static void main(String[] args) {
+        List<String> names = new ArrayList<>(List.of("cy", "al", "bo"));  // java.util
+        Collections.sort(names);
+        Path file = Path.of("notes", "today.txt");                         // java.nio.file
+        Duration wait = Duration.ofSeconds(90);                            // java.time
+        System.out.println(names);
+        System.out.println(file.getFileName());
+        System.out.println(wait);
+    }
+}
+```
+
+**Output:**
+```
+[al, bo, cy]
+today.txt
+PT1M30S
+```
+
+One line replaced three package imports. The catch is that two modules can export a class with the same simple name. Both `java.util` (in `java.base`) and `java.sql` (in `java.sql`) have a `Date`:
+
+```java run
+import module java.base;
+import module java.sql;
+
+public class Main {
+    public static void main(String[] args) {
+        Date today = new Date(0);
+        System.out.println(today.getTime());
+    }
+}
+```
+
+**Compiler error:**
+```
+Main.java:6: error: reference to Date is ambiguous
+        Date today = new Date(0);
+        ^
+  both class java.sql.Date in java.sql and class java.util.Date in java.util match
+```
+
+Add `import java.util.Date;` under the module imports, and it compiles and prints `0`. A single-type import names one class, so it wins over the on-demand imports. A compact source file, like the one in [What Java Is & Running Code](/synapse/programming-languages/java/first-steps/what-java-is-and-running-code), gets `import module java.base;` automatically.
+
 ---
 
 ## 4. Reflection and `opens`
 
-**Reflection** is code that inspects classes while the program runs: it can list a class's fields and read them by name. JSON and database libraries use it to fill in objects without knowing their classes in advance. But `exports` doesn't grant reflective access to `private` members. For that, you need `opens` <abbr title="The Java Language Specification, Java SE 21, §7.7.2">[5]</abbr>.
+**Reflection** is code that inspects classes while the program runs: it can list a class's fields and read them by name. JSON and database libraries use it to fill in objects without knowing their classes in advance. But `exports` doesn't grant reflective access to `private` members. For that, you need `opens` <abbr title="The Java Language Specification, Java SE 25, §7.7.2">[5]</abbr>.
 
 Here, module `com.lib` exports `com.lib.model`, whose `Secret` class has a `private` field. A second module tries to read that field by reflection:
 
@@ -302,7 +351,7 @@ Exception in thread "main" java.lang.reflect.InaccessibleObjectException: Unable
 **Analysis.** It compiled, because reflection names the field as a string. It failed at run time instead, at `setAccessible(true)` — and the message even names the missing line. Add `opens com.lib.model;` to `com.lib`'s `module-info.java`, recompile, and the same command prints `value = hidden`.
 
 **Intuition.**
-*Mechanism.* `exports` and `opens` grant different things <abbr title="The Java Language Specification, Java SE 21, §7.7.2">[5]</abbr>:
+*Mechanism.* `exports` and `opens` grant different things <abbr title="The Java Language Specification, Java SE 25, §7.7.2">[5]</abbr>:
 
 - `exports` grants compile-time and run-time access to the package's `public` and `protected` types and members.
 - `opens` grants run-time access only, but to *all* members — `private` ones included — through reflection.
@@ -324,11 +373,11 @@ A package can be exported, opened, both, or neither. Writing `opens com.lib.mode
 
 ## 5. Services: `provides`, `uses` and `ServiceLoader`
 
-A **service** lets a module use an implementation that it doesn't name — or even `require`. In this example, three modules share the work <abbr title="The Java Language Specification, Java SE 21, §7.7.3–7.7.4">[6]</abbr>:
+A **service** lets a module use an implementation that it doesn't name — or even `require`. In this example, three modules share the work <abbr title="The Java Language Specification, Java SE 25, §7.7.3–7.7.4">[6]</abbr>:
 
 - `greet.api` exports an interface, `com.greet.api.Greeter`.
 - `greet.english` implements it, and announces that with `provides … with`. Its package isn't exported.
-- `greet.app` declares `uses com.greet.api.Greeter`, and asks `ServiceLoader` for implementations <abbr title="java.util.ServiceLoader, Java SE 21 API">[12]</abbr>.
+- `greet.app` declares `uses com.greet.api.Greeter`, and asks `ServiceLoader` for implementations <abbr title="java.util.ServiceLoader, Java SE 25 API">[12]</abbr>.
 
 ```java
 // requires: three modules — not runnable in the sandbox
@@ -415,10 +464,10 @@ Exception in thread "main" java.util.ServiceConfigurationError: com.greet.api.Gr
 
 ## 6. The unnamed module and automatic modules
 
-Not all code is modular, but the module system has a place for all of it <abbr title="The Java Language Specification, Java SE 21, §7.7.5">[7]</abbr>:
+Not all code is modular, but the module system has a place for all of it <abbr title="The Java Language Specification, Java SE 25, §7.7.5">[7]</abbr>:
 
 - Code on the **classpath** belongs to the **unnamed module**. It reads every module, and exports and opens all of its packages. No named module can `require` it, because it has no name to require.
-- A plain JAR with no `module-info.class`, placed on the **module path**, becomes an **automatic module**. Its name comes from the manifest's `Automatic-Module-Name`, or failing that, from the JAR's file name <abbr title="java.lang.module.ModuleFinder, Java SE 21 API (of)">[13]</abbr>. It reads every other module, and all of its packages are exported and open <abbr title="java.lang.module.ModuleDescriptor, Java SE 21 API">[15]</abbr>.
+- A plain JAR with no `module-info.class`, placed on the **module path**, becomes an **automatic module**. Its name comes from the manifest's `Automatic-Module-Name`, or failing that, from the JAR's file name <abbr title="java.lang.module.ModuleFinder, Java SE 25 API (of)">[13]</abbr>. It reads every other module, and all of its packages are exported and open <abbr title="java.lang.module.ModuleDescriptor, Java SE 25 API">[15]</abbr>.
 
 A classpath program can ask which module it's in:
 
@@ -499,7 +548,7 @@ HELLO!
 HELLO!
 ```
 
-**Analysis.** `jar --create` bundled the `out` directory's classes into `app.jar`, and recorded `com.example.Main` in the manifest as the entry point. That's how `java -jar app.jar` found and ran it <abbr title="The jar command, JDK 21 documentation">[14]</abbr>. A JAR is Java's standard unit of distribution: one file to ship, put on a classpath, or run.
+**Analysis.** `jar --create` bundled the `out` directory's classes into `app.jar`, and recorded `com.example.Main` in the manifest as the entry point. That's how `java -jar app.jar` found and ran it <abbr title="The jar command, JDK 25 documentation">[14]</abbr>. A JAR is Java's standard unit of distribution: one file to ship, put on a classpath, or run.
 
 A JAR that contains a `module-info.class` is called a **modular JAR**. `jar --describe-module` prints its descriptor (the path is shortened here):
 
@@ -516,9 +565,9 @@ $ java --module-path mlib -m com.example.app
 HELLO!
 ```
 
-The same modular JAR works on the classpath too (`java -cp mlib/app.jar com.example.Main` prints `HELLO!`). In that case, its classes belong to the unnamed module <abbr title="java.lang.Module, Java SE 21 API">[16]</abbr>.
+The same modular JAR works on the classpath too (`java -cp mlib/app.jar com.example.Main` prints `HELLO!`). In that case, its classes belong to the unnamed module <abbr title="java.lang.Module, Java SE 25 API">[16]</abbr>.
 
-**A runtime image with `jlink`.** `jlink` links your modules, together with only the JDK modules they need, into a self-contained directory: a **runtime image** with its own `java` <abbr title="JEP 282: jlink: The Java Linker (JDK 9)">[9]</abbr> <abbr title="The jlink command, JDK 21 documentation">[11]</abbr>. The machine that runs it doesn't need a JDK installed.
+**A runtime image with `jlink`.** `jlink` links your modules, together with only the JDK modules they need, into a self-contained directory: a **runtime image** with its own `java` <abbr title="JEP 282: jlink: The Java Linker (JDK 9)">[9]</abbr> <abbr title="The jlink command, JDK 25 documentation">[11]</abbr>. The machine that runs it doesn't need a JDK installed.
 
 ```
 $ jlink --module-path out --add-modules com.example.app --launcher hello=com.example.app/com.example.Main --output image
@@ -526,14 +575,14 @@ $ image/bin/hello
 HELLO!
 $ image/bin/java --list-modules
 com.example.app
-java.base@21.0.12.1
+java.base@25.0.5
 ```
 
 **Analysis.**
 
 - The image holds just two modules: the app, and `java.base`, the one JDK module it `requires`.
 - `--launcher` wrote the launcher script `image/bin/hello`.
-- On this machine, the image took 48 MB, compared with 335 MB for the full JDK it came from (`du -sh`). Your `java.base` version and the sizes will differ.
+- On this machine, the image took 49 MB, compared with 294 MB for the full JDK it came from (`du -sh`). Your `java.base` version and the sizes will differ.
 
 Note that `jlink` needs modules: a classpath-only application has no module graph to link.
 
@@ -569,6 +618,7 @@ or the Gradle equivalent, `implementation("com.google.guava:guava:33.0.0-jre")` 
 | `import` only abbreviates names; it includes no code | The class is resolved at run time via the classpath |
 | Package-private is invisible across a package boundary | A library exposes `public` API and hides internals by default |
 | A module `exports`/`requires` packages explicitly (JPMS) | Even a `public` type in a non-exported package is inaccessible; an unread module is invisible |
+| `import module M;` imports every package `M` exports (JDK 25) | Works in any source file; a clashing simple name needs a single-type import |
 | `opens` grants run-time reflective access, `private` members included | `exports` alone makes `setAccessible(true)` throw `InaccessibleObjectException` |
 | `provides … with` and `uses` connect modules through `ServiceLoader` | The consumer names only the interface; providers come from the module path |
 | Classpath code is in the unnamed module; a plain JAR on the module path is automatic | The unnamed module reads, exports and opens everything; an automatic module's name comes from its JAR |
@@ -586,6 +636,7 @@ or the Gradle equivalent, `implementation("com.google.guava:guava:33.0.0-jre")` 
 | `whisper(String) is not public in Text; cannot be accessed from outside package` | a package-private member used from another package | make it `public`, or move the caller into the package |
 | `package com.example.util is not visible` … `which does not export it` | the package is not exported by its module | add `exports com.example.util;`, or use only the exported API |
 | `package com.example is not visible` … `does not read it` | the using module lacks `requires` | add `requires com.example.app;` |
+| `reference to Date is ambiguous` after two `import module` lines | both modules export a class with that simple name | add a single-type import, such as `import java.util.Date;` |
 | `InaccessibleObjectException` … `does not "opens com.lib.model"` | reflection into a package that is exported but not opened | add `opens com.lib.model;` (or `opens … to` the one module) |
 | `ServiceConfigurationError` … `module greet.app does not declare` … `uses` | `ServiceLoader` called from a module with no `uses` | add `uses <interface>;` |
 | `0 greeter(s) found` | no provider module on the module path | add the provider's module, and check its `provides … with` |
@@ -633,22 +684,24 @@ One check per objective. Answer before you open anything.
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §7.2 "Host Support for Modules and Packages" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-7.html#jls-7.2>
-2. *The Java Language Specification, Java SE 21*, §7.5 "Import Declarations" (makes classes "available by their simple names") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-7.html#jls-7.5>
-3. *The Java Language Specification, Java SE 21*, §6.6.1 "Determining Accessibility" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-6.html#jls-6.6.1>
-4. *The Java Language Specification, Java SE 21*, §7.7 "Module Declarations" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-7.html#jls-7.7>
-5. *The Java Language Specification, Java SE 21*, §7.7.2 "Exported and Opened Packages" (`opens`: "access at run time, but not compile time", and reflective access) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-7.html#jls-7.7.2>
-6. *The Java Language Specification, Java SE 21*, §7.7.3 "Service Consumption" and §7.7.4 "Service Provision" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-7.html#jls-7.7.3>
-7. *The Java Language Specification, Java SE 21*, §7.7.5 "Unnamed Modules" (reads every observable module; exports and opens every package) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-7.html#jls-7.7.5>
+1. *The Java Language Specification, Java SE 25*, §7.2 "Host Support for Modules and Packages" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.2>
+2. *The Java Language Specification, Java SE 25*, §7.5 "Import Declarations" (makes classes "available by their simple names") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.5>
+3. *The Java Language Specification, Java SE 25*, §6.6.1 "Determining Accessibility" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.6.1>
+4. *The Java Language Specification, Java SE 25*, §7.7 "Module Declarations" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7>
+5. *The Java Language Specification, Java SE 25*, §7.7.2 "Exported and Opened Packages" (`opens`: "access at run time, but not compile time", and reflective access) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.2>
+6. *The Java Language Specification, Java SE 25*, §7.7.3 "Service Consumption" and §7.7.4 "Service Provision" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.3>
+7. *The Java Language Specification, Java SE 25*, §7.7.5 "Unnamed Modules" (reads every observable module; exports and opens every package) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.5>
 8. JEP 261: Module System (JDK 9) — <https://openjdk.org/jeps/261>
 9. JEP 282: jlink: The Java Linker (JDK 9) — <https://openjdk.org/jeps/282>
 10. JEP 403: Strongly Encapsulate JDK Internals (JDK 17) — <https://openjdk.org/jeps/403>
-11. The `jlink` command, JDK 21 documentation ("assemble and optimize a set of modules and their dependencies into a custom runtime image") — <https://docs.oracle.com/en/java/javase/21/docs/specs/man/jlink.html>
-12. `java.util.ServiceLoader`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ServiceLoader.html>
-13. `java.lang.module.ModuleFinder`, Java SE 21 API (`of`: automatic module names from `Automatic-Module-Name` or the JAR file name) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/module/ModuleFinder.html>
-14. The `jar` command, JDK 21 documentation — <https://docs.oracle.com/en/java/javase/21/docs/specs/man/jar.html>
-15. `java.lang.module.ModuleDescriptor`, Java SE 21 API (an automatic module "is treated as if all packages are exported and open") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/module/ModuleDescriptor.html>
-16. `java.lang.Module`, Java SE 21 API ("All types that are not in a named module are members of their defining class loader's unnamed module") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Module.html>
+11. The `jlink` command, JDK 25 documentation ("assemble and optimize a set of modules and their dependencies into a custom runtime image") — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/jlink.html>
+12. `java.util.ServiceLoader`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ServiceLoader.html>
+13. `java.lang.module.ModuleFinder`, Java SE 25 API (`of`: automatic module names from `Automatic-Module-Name` or the JAR file name) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/module/ModuleFinder.html>
+14. The `jar` command, JDK 25 documentation — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/jar.html>
+15. `java.lang.module.ModuleDescriptor`, Java SE 25 API (an automatic module "is treated as if all packages are exported and open") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/module/ModuleDescriptor.html>
+16. `java.lang.Module`, Java SE 25 API ("All types that are not in a named module are members of their defining class loader's unnamed module") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Module.html>
+17. JEP 511: Module Import Declarations (JDK 25) — <https://openjdk.org/jeps/511>
+18. *The Java Language Specification, Java SE 25*, §7.5.5 "Single-Module-Import Declarations" ("A single-module-import declaration can be used in any source file") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.5.5>
 
 ---
 

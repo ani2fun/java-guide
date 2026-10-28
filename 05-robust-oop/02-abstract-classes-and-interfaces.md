@@ -24,7 +24,7 @@ Here's the crucial asymmetry: a class `extends` exactly **one** class, but it `i
 
 </div>
 
-Every output below was produced by compiling and running the code on Java 21.
+Every output below was produced by compiling and running the code on Java 25.
 
 **You'll be able to:** write an abstract class with a field, a constructor and a concrete method, and predict the error you get when it's instantiated or when a subclass skips an abstract method; write an interface whose `default` methods share a `private` helper, and call its `static` method through the interface's name; predict from its access level whether an implementing method compiles; resolve a clash between two inherited `default` methods with `X.super.m()`; choose between an abstract class and an interface for a design.
 
@@ -56,7 +56,7 @@ Every output below was produced by compiling and running the code on Java 21.
 
 ## 1. Abstract classes
 
-An `abstract` class can declare `abstract` methods — signatures with no body <abbr title="The Java Language Specification, Java SE 21, §8.4.3.1">[2]</abbr>. Each one says, "every subclass must provide this." Because it has unfinished methods, an abstract class can't be instantiated; only its concrete subclasses can.
+An `abstract` class can declare `abstract` methods — signatures with no body <abbr title="The Java Language Specification, Java SE 25, §8.4.3.1">[2]</abbr>. Each one says, "every subclass must provide this." Because it has unfinished methods, an abstract class can't be instantiated; only its concrete subclasses can.
 
 ```java run viz=array:shapes
 abstract class Shape {
@@ -93,7 +93,7 @@ public class Main {
 
 **Analysis.** `Shape` declares `area()` with no body: it knows that every shape *has* an area, but not how to compute it. `Circle` and `Square` each supply their own version, and the polymorphic loop calls the right one (`12.57`, `9.00`). `Shape` provides the common type and contract, while the subclasses provide the specifics.
 
-Don't forget that an abstract class is still a class. Alongside its abstract methods, it can hold fields, constructors and ordinary methods. Its constructor runs whenever a subclass object is created <abbr title="The Java Language Specification, Java SE 21, §8.1.1.1">[1]</abbr>. Below, the concrete `describe()` calls the abstract `area()`, which dispatches to the subclass:
+Don't forget that an abstract class is still a class. Alongside its abstract methods, it can hold fields, constructors and ordinary methods. Its constructor runs whenever a subclass object is created <abbr title="The Java Language Specification, Java SE 25, §8.1.1.1">[1]</abbr>. Below, the concrete `describe()` calls the abstract `area()`, which dispatches to the subclass:
 
 ```java run
 abstract class Shape {
@@ -132,7 +132,7 @@ square with area 9.00
 `Shape` owns the shared state (`name`) and the shared sentence (`describe()`). Each subclass writes only the part that differs: `area()`.
 
 **Intuition.**
-*Mechanism.* An abstract method has no implementation. So an object of the abstract class would have a "hole" in it: a method with nothing to run. That's why the compiler forbids creating one <abbr title="The Java Language Specification, Java SE 21, §8.1.1.1">[1]</abbr>. It also requires every concrete subclass to override all of the abstract methods it inherits.
+*Mechanism.* An abstract method has no implementation. So an object of the abstract class would have a "hole" in it: a method with nothing to run. That's why the compiler forbids creating one <abbr title="The Java Language Specification, Java SE 25, §8.1.1.1">[1]</abbr>. It also requires every concrete subclass to override all of the abstract methods it inherits.
 
 *Concrete bite.* Try to instantiate the abstract class directly, and it won't compile:
 
@@ -155,7 +155,7 @@ Main.java:5: error: Shape is abstract; cannot be instantiated
 
 `new Shape()` is rejected, because `Shape.area()` has no body, so there's no complete object to make. You can hold a `Shape` reference (pointing to a `Circle` or a `Square`), but you can't create a bare `Shape`.
 
-*Non-example: a subclass that forgets the abstract method.* A class that isn't `abstract` may not have an abstract method, whether declared or inherited <abbr title="The Java Language Specification, Java SE 21, §8.1.1.1">[1]</abbr>. Here, `Triangle` inherits `area()` without a body:
+*Non-example: a subclass that forgets the abstract method.* A class that isn't `abstract` may not have an abstract method, whether declared or inherited <abbr title="The Java Language Specification, Java SE 25, §8.1.1.1">[1]</abbr>. Here, `Triangle` inherits `area()` without a body:
 
 ```java run
 abstract class Shape { abstract double area(); }
@@ -218,11 +218,11 @@ drawing a circle
 
 **Analysis.** `Drawable` declares `draw()` with no body, and `Circle implements Drawable` supplies it. A `Drawable` reference can point at any implementer and call the contracted method — the same "program to the interface" idea you used with `List`.
 
-- An interface method with no body is implicitly `abstract` <abbr title="The Java Language Specification, Java SE 21, §9.4">[3]</abbr>.
-- An interface method with no access modifier is implicitly `public` <abbr title="The Java Language Specification, Java SE 21, §9.4">[3]</abbr>. So the implementing method must be `public` too.
+- An interface method with no body is implicitly `abstract` <abbr title="The Java Language Specification, Java SE 25, §9.4">[3]</abbr>.
+- An interface method with no access modifier is implicitly `public` <abbr title="The Java Language Specification, Java SE 25, §9.4">[3]</abbr>. So the implementing method must be `public` too.
 
 **Intuition.**
-*Mechanism.* An interface defines a type and a method contract. It has no instance fields and no constructor: there's nothing to instantiate, only something to implement. Any field you declare in an interface is implicitly `public static final` — in other words, a constant <abbr title="The Java Language Specification, Java SE 21, §9.3">[4]</abbr>. A class that declares `implements` promises to provide every abstract method, and the compiler checks that promise.
+*Mechanism.* An interface defines a type and a method contract. It has no instance fields and no constructor: there's nothing to instantiate, only something to implement. Any field you declare in an interface is implicitly `public static final` — in other words, a constant <abbr title="The Java Language Specification, Java SE 25, §9.3">[4]</abbr>. A class that declares `implements` promises to provide every abstract method, and the compiler checks that promise.
 
 *Concrete bite.* Leave a contracted method unimplemented, and the class won't compile:
 
@@ -245,7 +245,7 @@ class Circle implements Drawable { }
 
 `Circle` claims to be `Drawable` but never provides `draw()`, so it's incomplete. Either implement the method, or declare `Circle` itself `abstract`. Either way, the contract is enforced at compile time.
 
-*Non-example: an implementation without `public`.* `draw()` in the interface is `public`. If you write the implementation with no modifier, you narrow the access — and an override may not do that <abbr title="The Java Language Specification, Java SE 21, §8.4.8.3">[8]</abbr>:
+*Non-example: an implementation without `public`.* `draw()` in the interface is `public`. If you write the implementation with no modifier, you narrow the access — and an override may not do that <abbr title="The Java Language Specification, Java SE 25, §8.4.8.3">[8]</abbr>:
 
 ```java run
 interface Drawable { void draw(); }
@@ -315,7 +315,7 @@ Hello, Ada
 **Analysis.** `Person` implemented only `name()`. It inherited `greet()` from the interface's `default` body, which called `name()` polymorphically (`"Hello, Ada"`). A `default` method is concrete behavior built on top of the interface's abstract methods: the interface provides the *how*, in terms of the implementer's *what*.
 
 **Intuition.**
-*Mechanism.* A `default` method's implementation lives in the interface, and implementers inherit it unless they override it <abbr title="The Java Language Specification, Java SE 21, §9.4">[3]</abbr>. It can call the interface's abstract methods (like `name()`), which dispatch to the implementing class. So the default's behavior adapts to each implementer.
+*Mechanism.* A `default` method's implementation lives in the interface, and implementers inherit it unless they override it <abbr title="The Java Language Specification, Java SE 25, §9.4">[3]</abbr>. It can call the interface's abstract methods (like `name()`), which dispatch to the implementing class. So the default's behavior adapts to each implementer.
 
 *Concrete bite.* Defaults are what let interfaces evolve. Before JDK 8, adding a method to a widely implemented interface broke every implementer's compile, because each one suddenly lacked the new method. A `default` method adds the capability along with a fallback, so old implementers keep compiling. The cost shows up only when a class inherits *two* defaults with the same signature. §5 shows that clash, and how to fix it.
 
@@ -332,7 +332,7 @@ Hello, Ada
 
 ## 4. `static` and `private` interface methods
 
-An interface can hold two more kinds of method with a body <abbr title="The Java Language Specification, Java SE 21, §9.4">[3]</abbr>:
+An interface can hold two more kinds of method with a body <abbr title="The Java Language Specification, Java SE 25, §9.4">[3]</abbr>:
 
 - A **`static` method** (JDK 8) belongs to the interface itself <abbr title="The Java Language Specification, Java SE 8 Edition, §9.4">[13]</abbr>. You call it as `Interface.method()`, without any object. It's a good home for helpers that go with the type.
 - A **`private` method** (JDK 9) is a helper for the interface's own method bodies <abbr title="JEP 213: Milling Project Coin (JDK 9)">[11]</abbr>. Two `default` methods can share its code without making it part of the contract.
@@ -380,7 +380,7 @@ public class Main {
 - `main` calls it as `Temperature.toFahrenheit(37)`: the interface's name, and no object.
 
 **Intuition.**
-*Mechanism.* A class doesn't inherit `private` or `static` methods from its interfaces <abbr title="The Java Language Specification, Java SE 21, §8.4.8">[5]</abbr>. The `private` helper is invisible outside the interface. The `static` method stays attached to the interface, and you can reach it only through the interface's name.
+*Mechanism.* A class doesn't inherit `private` or `static` methods from its interfaces <abbr title="The Java Language Specification, Java SE 25, §8.4.8">[5]</abbr>. The `private` helper is invisible outside the interface. The `static` method stays attached to the interface, and you can reach it only through the interface's name.
 
 *Concrete bite.* Call the `static` method through an implementing class, and javac can't find it:
 
@@ -411,7 +411,7 @@ Main.java:12: error: cannot find symbol
 1 error
 ```
 
-`Kettle` implements `Temperature`, but `toFahrenheit` isn't a member of `Kettle`. Calling it through a `Kettle` variable, as `k.toFahrenheit(37)`, fails the same way (`location: variable k of type Kettle`). Note that this differs from a class's `static` method, which a subclass *does* inherit <abbr title="The Java Language Specification, Java SE 21, §8.4.8">[5]</abbr>.
+`Kettle` implements `Temperature`, but `toFahrenheit` isn't a member of `Kettle`. Calling it through a `Kettle` variable, as `k.toFahrenheit(37)`, fails the same way (`location: variable k of type Kettle`). Note that this differs from a class's `static` method, which a subclass *does* inherit <abbr title="The Java Language Specification, Java SE 25, §8.4.8">[5]</abbr>.
 
 *Non-example: calling the `private` helper from outside.*
 
@@ -458,7 +458,7 @@ Main.java:15: error: label(double,String) has private access in Temperature
 
 ## 5. One class, many interfaces
 
-Here's the defining difference: a class `extends` **one** class, but `implements` **many** interfaces <abbr title="The Java Language Specification, Java SE 21, §8.1.4">[9]</abbr>. That means a type can *be* several things at once. Interfaces give you multiple inheritance of type, which a single superclass can't.
+Here's the defining difference: a class `extends` **one** class, but `implements` **many** interfaces <abbr title="The Java Language Specification, Java SE 25, §8.1.4">[9]</abbr>. That means a type can *be* several things at once. Interfaces give you multiple inheritance of type, which a single superclass can't.
 
 ```java run
 interface Swimmer { default String move() { return "swimming"; } }
@@ -516,7 +516,7 @@ class C extends A, B {}
 
 `extends A, B` isn't even valid syntax, because a class has at most one superclass. For `C` to be "both," `A` and `B` would need to be interfaces, and `C` would `implement` them.
 
-*Non-example: two defaults with the same signature.* Give `Swimmer` and a new `Walker` interface each a `default` `move()`. A class that implements both now inherits two bodies for one method, and that's a compile-time error <abbr title="The Java Language Specification, Java SE 21, §8.4.8.4">[6]</abbr>:
+*Non-example: two defaults with the same signature.* Give `Swimmer` and a new `Walker` interface each a `default` `move()`. A class that implements both now inherits two bodies for one method, and that's a compile-time error <abbr title="The Java Language Specification, Java SE 25, §8.4.8.4">[6]</abbr>:
 
 ```java run
 interface Swimmer { default String move() { return "swimming"; } }
@@ -540,7 +540,7 @@ class Duck implements Swimmer, Walker { }
 1 error
 ```
 
-The fix is to override `move()` in `Duck`. Inside the override, `Swimmer.super.move()` calls one specific interface's default by name <abbr title="The Java Language Specification, Java SE 21, §15.12.1">[7]</abbr>:
+The fix is to override `move()` in `Duck`. Inside the override, `Swimmer.super.move()` calls one specific interface's default by name <abbr title="The Java Language Specification, Java SE 25, §15.12.1">[7]</abbr>:
 
 ```java run
 interface Swimmer { default String move() { return "swimming"; } }
@@ -707,15 +707,15 @@ swimming and flying
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §8.1.1.1 "`abstract` Classes" (no instance by `new`; a subclass object runs its constructor; no abstract method in a non-abstract class) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1.1.1>
-2. *The Java Language Specification, Java SE 21*, §8.4.3.1 "`abstract` Methods" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.3.1>
-3. *The Java Language Specification, Java SE 21*, §9.4 "Method Declarations" (implicitly `public`; implicitly `abstract` without `private`, `default` or `static`; default, static and private methods) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-9.html#jls-9.4>
-4. *The Java Language Specification, Java SE 21*, §9.3 "Field (Constant) Declarations" ("implicitly public, static, and final") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-9.html#jls-9.3>
-5. *The Java Language Specification, Java SE 21*, §8.4.8 "Inheritance, Overriding, and Hiding" ("A class does not inherit private or static methods from its superinterface types") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.8>
-6. *The Java Language Specification, Java SE 21*, §8.4.8.4 "Inheriting Methods with Override-Equivalent Signatures" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.8.4>
-7. *The Java Language Specification, Java SE 21*, §15.12.1 "Compile-Time Step 1: Determine Type to Search" (`TypeName.super.m()`) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.12.1>
-8. *The Java Language Specification, Java SE 21*, §8.4.8.3 "Requirements in Overriding and Hiding" ("at least as much access") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.8.3>
-9. *The Java Language Specification, Java SE 21*, §8.1.4 "Superclasses and Subclasses" and §8.1.5 "Superinterfaces" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1.4>
+1. *The Java Language Specification, Java SE 25*, §8.1.1.1 "`abstract` Classes" (no instance by `new`; a subclass object runs its constructor; no abstract method in a non-abstract class) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.1.1>
+2. *The Java Language Specification, Java SE 25*, §8.4.3.1 "`abstract` Methods" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.3.1>
+3. *The Java Language Specification, Java SE 25*, §9.4 "Method Declarations" (implicitly `public`; implicitly `abstract` without `private`, `default` or `static`; default, static and private methods) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.4>
+4. *The Java Language Specification, Java SE 25*, §9.3 "Field (Constant) Declarations" ("implicitly public, static, and final") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.3>
+5. *The Java Language Specification, Java SE 25*, §8.4.8 "Inheritance, Overriding, and Hiding" ("A class does not inherit private or static methods from its superinterface types") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.8>
+6. *The Java Language Specification, Java SE 25*, §8.4.8.4 "Inheriting Methods with Override-Equivalent Signatures" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.8.4>
+7. *The Java Language Specification, Java SE 25*, §15.12.1 "Compile-Time Step 1: Determine Type to Search" (`TypeName.super.m()`) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.12.1>
+8. *The Java Language Specification, Java SE 25*, §8.4.8.3 "Requirements in Overriding and Hiding" ("at least as much access") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.8.3>
+9. *The Java Language Specification, Java SE 25*, §8.1.4 "Superclasses and Subclasses" and §8.1.5 "Superinterfaces" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.4>
 10. JEP 126: Lambda Expressions & Virtual Extension Methods (JDK 8) — <https://openjdk.org/jeps/126>
 11. JEP 213: Milling Project Coin (JDK 9; "support for private interface methods") — <https://openjdk.org/jeps/213>
 12. The Java Tutorials, "Multiple Inheritance of State, Implementation, and Type" (Oracle) — <https://docs.oracle.com/javase/tutorial/java/IandI/multipleinheritance.html>

@@ -25,7 +25,7 @@ A lambda turns "what to do" into a value: you can store it in a variable, hand i
 
 </div>
 
-This lesson builds on [methods](/synapse/programming-languages/java/control-flow/methods) and [interfaces](/synapse/programming-languages/java/robust-oop/abstract-classes-and-interfaces). Every output below was produced by compiling and running the code on Java 21.
+This lesson builds on [methods](/synapse/programming-languages/java/control-flow/methods) and [interfaces](/synapse/programming-languages/java/robust-oop/abstract-classes-and-interfaces). Every output below was produced by compiling and running the code on Java 25.
 
 **You'll be able to:** create objects of a `static` nested class and of an inner class, and predict which outer fields each one reads; write an anonymous class and the equivalent lambda for a one-method interface, and predict when a lambda is rejected; predict whether a lambda that uses a local variable compiles; choose `Predicate`, `Function`, `Supplier` or `Consumer` for a task; rewrite a one-call lambda as a method reference, and name the lambda that a method reference stands for.
 
@@ -57,11 +57,11 @@ This lesson builds on [methods](/synapse/programming-languages/java/control-flow
 
 ## 1. Nested classes
 
-You can declare a class inside another class. Java has four kinds of nested class <abbr title="The Java Language Specification, Java SE 21, §8.1.3">[1]</abbr>:
+You can declare a class inside another class. Java has four kinds of nested class <abbr title="The Java Language Specification, Java SE 25, §8.1.3">[1]</abbr>:
 
 - A **`static` nested class** is scoped to its enclosing class, but has no link to any instance of it.
 - A non-static **inner class** (a *member* class) holds a hidden link to an enclosing *instance*, so it can read that instance's fields.
-- A **local class** is declared inside a block, such as a method body, just like a local variable <abbr title="The Java Language Specification, Java SE 21, §14.3">[2]</abbr>.
+- A **local class** is declared inside a block, such as a method body, just like a local variable <abbr title="The Java Language Specification, Java SE 25, §14.3">[2]</abbr>.
 - An **anonymous class** has no name at all (§2).
 
 ```java run
@@ -104,7 +104,7 @@ public class Main {
 The `static` keyword on a nested class means the same thing it means on a field or method: `static` means "no enclosing instance," and non-static means "tied to one."
 
 **Intuition.**
-*Mechanism.* Each inner object is tied to exactly one enclosing object, fixed at the moment the inner object is created <abbr title="The Java Language Specification, Java SE 21, §8.1.3">[1]</abbr>. That link is how it reaches `x`. So two inner objects made from two different outer objects read two different sets of fields:
+*Mechanism.* Each inner object is tied to exactly one enclosing object, fixed at the moment the inner object is created <abbr title="The Java Language Specification, Java SE 25, §8.1.3">[1]</abbr>. That link is how it reaches `x`. So two inner objects made from two different outer objects read two different sets of fields:
 
 ```java run
 class Counter {
@@ -205,7 +205,7 @@ Hello, Ada
 **Analysis.** `new Greeter() { ... }` created an object of an unnamed class that implements `Greeter`, supplying `greet` inline. We never declared a named `class`: the implementation exists only as this one object. Before lambdas, this was how Java passed behavior around — you wrapped it in an anonymous class that implemented an interface.
 
 **Intuition.**
-*Mechanism.* Behind the scenes, the compiler generates a real class with a made-up name, and instantiates it <abbr title="The Java Language Specification, Java SE 21, §15.9.5">[3]</abbr>. Compile the program above in a terminal, and list the class files:
+*Mechanism.* Behind the scenes, the compiler generates a real class with a made-up name, and instantiates it <abbr title="The Java Language Specification, Java SE 25, §15.9.5">[3]</abbr>. Compile the program above in a terminal, and list the class files:
 
 ```text
 $ javac Main.java
@@ -232,7 +232,7 @@ Main.class
 
 ## 3. Lambdas
 
-When an interface has exactly **one** abstract method — making it a **functional interface** <abbr title="The Java Language Specification, Java SE 21, §9.8">[4]</abbr> — a **lambda** can express the implementation as `parameters -> body`. It does the same job as the anonymous class from §2, with all the ceremony stripped away, and it makes behavior a value.
+When an interface has exactly **one** abstract method — making it a **functional interface** <abbr title="The Java Language Specification, Java SE 25, §9.8">[4]</abbr> — a **lambda** can express the implementation as `parameters -> body`. It does the same job as the anonymous class from §2, with all the ceremony stripped away, and it makes behavior a value.
 
 ```java run
 interface Greeter { String greet(String name); }
@@ -260,7 +260,7 @@ running
 - `Runnable` (a built-in functional interface with `void run()`) works the same way, using `()` for no parameters.
 - The lambda *is* an object, which you stored in `g` and `r` and called later: behavior as a value.
 
-A lambda's body can also be a block with a `return`, and its parameters can carry explicit types <abbr title="The Java Language Specification, Java SE 21, §15.27">[5]</abbr>:
+A lambda's body can also be a block with a `return`, and its parameters can carry explicit types <abbr title="The Java Language Specification, Java SE 25, §15.27">[5]</abbr>:
 
 ```java run
 interface IntOp { int apply(int a, int b); }
@@ -291,7 +291,7 @@ With two parameters, you need parentheses. An expression body returns its value 
 **Intuition.**
 *Mechanism.* A lambda implements a functional interface. Because there's only one abstract method, the compiler knows exactly which method the lambda body defines, and it infers the parameter types and return type from that method's signature.
 
-A lambda isn't an anonymous class, though. No `Main$2.class` shows up for one. Inside a lambda, `this` and every other name mean exactly what they mean in the surrounding code <abbr title="The Java Language Specification, Java SE 21, §15.27.2">[6]</abbr>. Inside an anonymous class, by contrast, `this` is the anonymous object.
+A lambda isn't an anonymous class, though. No `Main$2.class` shows up for one. Inside a lambda, `this` and every other name mean exactly what they mean in the surrounding code <abbr title="The Java Language Specification, Java SE 25, §15.27.2">[6]</abbr>. Inside an anonymous class, by contrast, `this` is the anonymous object.
 
 *Concrete bite.* "Exactly one abstract method" is a hard requirement. A lambda can't target an interface with two:
 
@@ -313,7 +313,7 @@ Main.java:5: error: incompatible types: TwoMethods is not a functional interface
     multiple non-overriding abstract methods found in interface TwoMethods
 ```
 
-`TwoMethods` has two abstract methods, so a single lambda body can't say which one it implements. For more than one method, use an anonymous class. And mark your own one-method interfaces with `@FunctionalInterface`: that way, the mistake gets reported at the interface itself, before anyone writes a lambda <abbr title="The Java Language Specification, Java SE 21, §9.6.4.9">[7]</abbr>:
+`TwoMethods` has two abstract methods, so a single lambda body can't say which one it implements. For more than one method, use an anonymous class. And mark your own one-method interfaces with `@FunctionalInterface`: that way, the mistake gets reported at the interface itself, before anyone writes a lambda <abbr title="The Java Language Specification, Java SE 25, §9.6.4.9">[7]</abbr>:
 
 ```java run
 @FunctionalInterface
@@ -334,7 +334,7 @@ Main.java:1: error: Unexpected @FunctionalInterface annotation
 1 error
 ```
 
-*Non-example: changing a variable the lambda uses.* A lambda may use one of its method's local variables only if that variable is **effectively final** — meaning it's never assigned again after its initializer <abbr title="The Java Language Specification, Java SE 21, §15.27.2">[6]</abbr>. A single later assignment breaks the rule, even one that comes after the lambda:
+*Non-example: changing a variable the lambda uses.* A lambda may use one of its method's local variables only if that variable is **effectively final** — meaning it's never assigned again after its initializer <abbr title="The Java Language Specification, Java SE 25, §15.27.2">[6]</abbr>. A single later assignment breaks the rule, even one that comes after the lambda:
 
 ```java run
 interface Greeter { String greet(String name); }
@@ -357,7 +357,7 @@ Main.java:6: error: local variables referenced from a lambda expression must be 
 1 error
 ```
 
-The lambda might run much later, long after `greeting` has changed. The JLS explains the reasoning: capturing a changing local "would likely introduce concurrency problems" <abbr title="The Java Language Specification, Java SE 21, §15.27.2">[6]</abbr>. To fix it, delete the reassignment, or copy the value into a new variable that never changes.
+The lambda might run much later, long after `greeting` has changed. The JLS explains the reasoning: capturing a changing local "would likely introduce concurrency problems" <abbr title="The Java Language Specification, Java SE 25, §15.27.2">[6]</abbr>. To fix it, delete the reassignment, or copy the value into a new variable that never changes.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -372,7 +372,7 @@ The lambda might run much later, long after `greeting` has changed. The JLS expl
 
 ## 4. The built-in functional interfaces
 
-In practice, you rarely need to write `Greeter` or `IntOp` yourself. The `java.util.function` package supplies functional interfaces for all the common shapes <abbr title="java.util.function, Java SE 21 API">[8]</abbr>, and four of them cover most uses:
+In practice, you rarely need to write `Greeter` or `IntOp` yourself. The `java.util.function` package supplies functional interfaces for all the common shapes <abbr title="java.util.function, Java SE 25 API">[8]</abbr>, and four of them cover most uses:
 
 | Interface | Its one method | Shape |
 |---|---|---|
@@ -466,7 +466,7 @@ Charlie
 Both are just shorter spellings of lambdas that delegate to a single method.
 
 **Intuition.**
-*Mechanism.* A method reference refers to a method without calling it <abbr title="The Java Language Specification, Java SE 21, §15.13">[9]</abbr>. The compiler matches the referenced method's shape against the functional interface's method. There are four forms:
+*Mechanism.* A method reference refers to a method without calling it <abbr title="The Java Language Specification, Java SE 25, §15.13">[9]</abbr>. The compiler matches the referenced method's shape against the functional interface's method. There are four forms:
 
 | Form | Example | The lambda it stands for |
 |---|---|---|
@@ -627,15 +627,15 @@ cherry
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §8.1.3 "Inner Classes and Enclosing Instances" (member, local and anonymous inner classes; the immediately enclosing instance is fixed at creation) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1.3>
-2. *The Java Language Specification, Java SE 21*, §14.3 "Local Class and Interface Declarations" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.3>
-3. *The Java Language Specification, Java SE 21*, §15.9.5 "Anonymous Class Declarations" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.9.5>
-4. *The Java Language Specification, Java SE 21*, §9.8 "Functional Interfaces" (one abstract method, "aside from the methods of Object") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-9.html#jls-9.8>
-5. *The Java Language Specification, Java SE 21*, §15.27 "Lambda Expressions" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.27>
-6. *The Java Language Specification, Java SE 21*, §15.27.2 "Lambda Body" (captured locals "must either be final or effectively final"; `this` as in the surrounding context) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.27.2>
-7. *The Java Language Specification, Java SE 21*, §9.6.4.9 "`@FunctionalInterface`" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-9.html#jls-9.6.4.9>
-8. `java.util.function`, Java SE 21 API ("Functional interfaces provide target types for lambda expressions and method references") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html>
-9. *The Java Language Specification, Java SE 21*, §15.13 "Method Reference Expressions" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.13>
+1. *The Java Language Specification, Java SE 25*, §8.1.3 "Inner Classes and Enclosing Instances" (member, local and anonymous inner classes; the immediately enclosing instance is fixed at creation) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.3>
+2. *The Java Language Specification, Java SE 25*, §14.3 "Local Class and Interface Declarations" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.3>
+3. *The Java Language Specification, Java SE 25*, §15.9.5 "Anonymous Class Declarations" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.9.5>
+4. *The Java Language Specification, Java SE 25*, §9.8 "Functional Interfaces" (one abstract method, "aside from the methods of Object") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.8>
+5. *The Java Language Specification, Java SE 25*, §15.27 "Lambda Expressions" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.27>
+6. *The Java Language Specification, Java SE 25*, §15.27.2 "Lambda Body" (captured locals "must either be final or effectively final"; `this` as in the surrounding context) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.27.2>
+7. *The Java Language Specification, Java SE 25*, §9.6.4.9 "`@FunctionalInterface`" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.6.4.9>
+8. `java.util.function`, Java SE 25 API ("Functional interfaces provide target types for lambda expressions and method references") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/package-summary.html>
+9. *The Java Language Specification, Java SE 25*, §15.13 "Method Reference Expressions" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.13>
 
 ---
 

@@ -60,10 +60,10 @@ Before the API, let's look at the thing itself. Your program runs inside a **pro
 
 - A thread is the unit that the OS *schedules*. It's a call stack plus a saved position in the code.
 - The OS can pause and resume a thread at any moment, without asking. That's called **preemptive** scheduling.
-- The stack's default size depends on the platform. The `java` docs list 1024 KB for Linux/x64 and 2048 KB for macOS/Aarch64 <abbr title="The java command, JDK 21 documentation, -Xss">[1]</abbr>.
-- A Java `Thread` created with `new Thread(…)` is a **platform thread**, "typically mapped 1:1 to kernel threads scheduled by the operating system" <abbr title="Java SE 21 API, java.lang.Thread, &quot;Platform threads&quot;">[2]</abbr>.
+- The stack's default size depends on the platform. The `java` docs list 1024 KB for Linux/x64 and 2048 KB for macOS/Aarch64 <abbr title="The java command, JDK 25 documentation, -Xss">[1]</abbr>.
+- A Java `Thread` created with `new Thread(…)` is a **platform thread**, "typically mapped 1:1 to kernel threads scheduled by the operating system" <abbr title="Java SE 25 API, java.lang.Thread, &quot;Platform threads&quot;">[2]</abbr>.
 
-So two Java threads on two cores really do run at the same instant. Everything in this lesson follows from one fact: the JVM's heap "is shared among all Java Virtual Machine threads", while each thread has "a private Java Virtual Machine stack" <abbr title="The Java Virtual Machine Specification, Java SE 21, §2.5.2 and §2.5.3">[3]</abbr>. Separate stacks, shared objects.
+So two Java threads on two cores really do run at the same instant. Everything in this lesson follows from one fact: the JVM's heap "is shared among all Java Virtual Machine threads", while each thread has "a private Java Virtual Machine stack" <abbr title="The Java Virtual Machine Specification, Java SE 25, §2.5.2 and §2.5.3">[3]</abbr>. Separate stacks, shared objects.
 
 You can see the layering for yourself: one process id, several thread ids.
 
@@ -92,7 +92,7 @@ The worker isn't a copy of your program. It's a second path of execution *throug
 
 Now for the API. A `Thread` runs a `Runnable`, which is a functional interface, so a lambda fits nicely. `start()` launches it alongside the caller, and `join()` waits for it to finish.
 
-`main` declares `throws InterruptedException` because `join()` can throw that checked exception. It's thrown if another thread *interrupts* the waiting thread — a polite request to stop <abbr title="Java SE 21 API, java.lang.Thread.join() and interrupt()">[2]</abbr>. You'll see one in §2.
+`main` declares `throws InterruptedException` because `join()` can throw that checked exception. It's thrown if another thread *interrupts* the waiting thread — a polite request to stop <abbr title="Java SE 25 API, java.lang.Thread.join() and interrupt()">[2]</abbr>. You'll see one in §2.
 
 ```java run
 public class Main {
@@ -138,7 +138,7 @@ after run(), state = NEW
 
 The task ran on `main`, and the `Thread` object is still `NEW`, because it never started. The code "works" — sequentially — which hides the mistake until the moment concurrency was the whole point.
 
-*Non-example: starting a thread twice.* "A thread can be started at most once" <abbr title="Java SE 21 API, java.lang.Thread.start()">[2]</abbr>. Once a thread finishes, you can't restart it:
+*Non-example: starting a thread twice.* "A thread can be started at most once" <abbr title="Java SE 25 API, java.lang.Thread.start()">[2]</abbr>. Once a thread finishes, you can't restart it:
 
 ```java run
 public class Main {
@@ -171,7 +171,7 @@ The cost is that coordination is now your job: without it, order and visibility 
 
 ## 2. The six thread states
 
-At any moment, a thread is in exactly one of six states — the constants of the enum `Thread.State` <abbr title="Java SE 21 API, java.lang.Thread.State">[4]</abbr>:
+At any moment, a thread is in exactly one of six states — the constants of the enum `Thread.State` <abbr title="Java SE 25 API, java.lang.Thread.State">[4]</abbr>:
 
 | State | The thread is… |
 |---|---|
@@ -206,7 +206,7 @@ stateDiagram-v2
   TERMINATED --> [*]
 ```
 
-`Thread.sleep(ms)` pauses the current thread for that many milliseconds. `wait()` and its notification are the subject of the [next lesson](/synapse/programming-languages/java/advanced/concurrency-coordination). Note that a woken `wait()` goes to `BLOCKED`, not `RUNNABLE`, because it must re-acquire the lock first <abbr title="Java SE 21 API, java.lang.Thread.State.BLOCKED">[4]</abbr>.
+`Thread.sleep(ms)` pauses the current thread for that many milliseconds. `wait()` and its notification are the subject of the [next lesson](/synapse/programming-languages/java/advanced/concurrency-coordination). Note that a woken `wait()` goes to `BLOCKED`, not `RUNNABLE`, because it must re-acquire the lock first <abbr title="Java SE 25 API, java.lang.Thread.State.BLOCKED">[4]</abbr>.
 
 `t.getState()` reports a thread's state. The program below puts one thread into each state and prints it. Each `while` loop waits until the other thread has reached the target state, and `Thread.onSpinWait()` is a hint that the loop is only waiting.
 
@@ -300,9 +300,9 @@ public class Main {
 }
 ```
 
-**Output** *(illustrative — the value is wrong and **changes every run**; four runs on JDK 21 printed `121926`, `117413`, `109262`, `111800`):*
+**Output** *(illustrative — the value is wrong and **changes every run**; four runs on JDK 25 printed `142847`, `181377`, `174854`, `128340`):*
 ```
-121926
+142847
 ```
 
 Here's a single lost update, frame by frame. The run above produced collisions like this one hundreds of thousands of times:
@@ -385,10 +385,10 @@ public class Main {
 **Analysis.** Now the total is **always** exactly 400,000, run after run. `synchronized` lets only one thread execute `increment()` at a time, so each read-modify-write completes before the next one begins. No two threads interleave inside it, so no update is lost. A single keyword turned random wrong answers into a correct, deterministic result.
 
 **Intuition.**
-*Mechanism.* "Each object in Java is associated with a monitor, which a thread can lock or unlock. Only one thread at a time may hold a lock on a monitor" <abbr title="The Java Language Specification, Java SE 21, §17.1">[5]</abbr>. A monitor is also called an object's intrinsic **lock**.
+*Mechanism.* "Each object in Java is associated with a monitor, which a thread can lock or unlock. Only one thread at a time may hold a lock on a monitor" <abbr title="The Java Language Specification, Java SE 25, §17.1">[5]</abbr>. A monitor is also called an object's intrinsic **lock**.
 
-- A `synchronized` method locks a monitor on entry and unlocks it on exit. A `static` method uses the monitor of its class's `Class` object, while an instance method uses `this` <abbr title="The Java Language Specification, Java SE 21, §8.4.3.6">[6]</abbr>.
-- A `synchronized (obj) { … }` **block** locks the monitor of whichever object you name <abbr title="The Java Language Specification, Java SE 21, §14.19">[7]</abbr>.
+- A `synchronized` method locks a monitor on entry and unlocks it on exit. A `static` method uses the monitor of its class's `Class` object, while an instance method uses `this` <abbr title="The Java Language Specification, Java SE 25, §8.4.3.6">[6]</abbr>.
+- A `synchronized (obj) { … }` **block** locks the monitor of whichever object you name <abbr title="The Java Language Specification, Java SE 25, §14.19">[7]</abbr>.
 - A second thread that tries to lock a monitor that's already held is `BLOCKED` (§2) until the monitor is free.
 
 The block form, using one shared lock object, is just as correct as the method:
@@ -444,9 +444,9 @@ public class Main {
 }
 ```
 
-**Output** *(illustrative — the count changes every run; three runs on JDK 21 printed `192345`, `224750`, `192609`):*
+**Output** *(illustrative — the count changes every run; three runs on JDK 25 printed `157614`, `157749`, `162158`):*
 ```
-192345
+157614
 violation: four locks guard one counter, so updates are still lost
 ```
 
@@ -464,7 +464,7 @@ The cost is contention and less parallelism, because threads queue up at the loc
 
 ## 5. The Java Memory Model and happens-before
 
-`synchronized` actually did two jobs: mutual exclusion *and* **visibility**. The **Java Memory Model** (JMM) defines when one thread's writes are guaranteed to be visible to another, through the **happens-before** relation <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[8]</abbr>. Without such a relationship, a thread may read an older value. With one, it's guaranteed to see the other thread's writes.
+`synchronized` actually did two jobs: mutual exclusion *and* **visibility**. The **Java Memory Model** (JMM) defines when one thread's writes are guaranteed to be visible to another, through the **happens-before** relation <abbr title="The Java Language Specification, Java SE 25, §17.4.5">[8]</abbr>. Without such a relationship, a thread may read an older value. With one, it's guaranteed to see the other thread's writes.
 
 ```mermaid
 ---
@@ -490,13 +490,13 @@ sequenceDiagram
 **Analysis.** The diagram shows the rule that makes §4 correct, beyond mutual exclusion:
 
 - Thread A *unlocks* a monitor, and Thread B later *locks the same monitor*.
-- "An unlock on a monitor happens-before every subsequent lock on that monitor" <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[8]</abbr>.
+- "An unlock on a monitor happens-before every subsequent lock on that monitor" <abbr title="The Java Language Specification, Java SE 25, §17.4.5">[8]</abbr>.
 - So every write A made before unlocking is visible to B after locking.
 
 That's why each `increment()` sees the running total: the lock both serializes the updates *and* publishes them. Without a happens-before edge, as in the §3 race, the JMM allows B to read an older value of `counter`.
 
 **Intuition.**
-*Mechanism.* For the sake of speed, the JMM lets compilers and processors reorder and cache memory operations, so a write by one thread isn't automatically visible to another. Happens-before edges are the guarantees you get. The four this book uses most are in JLS §17.4.5 <abbr title="The Java Language Specification, Java SE 21, §17.4.5">[8]</abbr>:
+*Mechanism.* For the sake of speed, the JMM lets compilers and processors reorder and cache memory operations, so a write by one thread isn't automatically visible to another. Happens-before edges are the guarantees you get. The four this book uses most are in JLS §17.4.5 <abbr title="The Java Language Specification, Java SE 25, §17.4.5">[8]</abbr>:
 
 1. An unlock of a monitor happens-before every later lock of that monitor.
 2. A write to a `volatile` field happens-before every later read of that field.
@@ -589,14 +589,14 @@ One check per objective. Answer before you open anything.
 
 ## 📚 Sources
 
-1. The `java` command, JDK 21 documentation, `-Xss` ("The default value depends on the platform") — <https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html>
-2. `java.lang.Thread`, Java SE 21 API ("Platform threads"; `start()`: "A thread can be started at most once"; `join()`, `interrupt()`) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Thread.html>
-3. *The Java Virtual Machine Specification, Java SE 21*, §2.5.2 "Java Virtual Machine Stacks" and §2.5.3 "Heap" — <https://docs.oracle.com/javase/specs/jvms/se21/html/jvms-2.html#jvms-2.5.3>
-4. `java.lang.Thread.State`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Thread.State.html>
-5. *The Java Language Specification, Java SE 21*, §17.1 "Synchronization" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-17.html#jls-17.1>
-6. *The Java Language Specification, Java SE 21*, §8.4.3.6 "`synchronized` Methods" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.3.6>
-7. *The Java Language Specification, Java SE 21*, §14.19 "The `synchronized` Statement" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.19>
-8. *The Java Language Specification, Java SE 21*, §17.4.5 "Happens-before Order" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-17.html#jls-17.4.5>
+1. The `java` command, JDK 25 documentation, `-Xss` ("The default value depends on the platform") — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html>
+2. `java.lang.Thread`, Java SE 25 API ("Platform threads"; `start()`: "A thread can be started at most once"; `join()`, `interrupt()`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Thread.html>
+3. *The Java Virtual Machine Specification, Java SE 25*, §2.5.2 "Java Virtual Machine Stacks" and §2.5.3 "Heap" — <https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-2.html#jvms-2.5.3>
+4. `java.lang.Thread.State`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Thread.State.html>
+5. *The Java Language Specification, Java SE 25*, §17.1 "Synchronization" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.1>
+6. *The Java Language Specification, Java SE 25*, §8.4.3.6 "`synchronized` Methods" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.3.6>
+7. *The Java Language Specification, Java SE 25*, §14.19 "The `synchronized` Statement" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.19>
+8. *The Java Language Specification, Java SE 25*, §17.4.5 "Happens-before Order" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.4.5>
 
 ---
 

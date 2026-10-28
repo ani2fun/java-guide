@@ -26,7 +26,7 @@ Java is **statically typed**, where *static* means the type is decided before th
 
 The simplest values are the **primitives**: eight built-in types for numbers, true/false, and single characters. A primitive variable holds its value **directly** — the box *is* the number.
 
-That word "directly" will matter later. Java has a second family of variable, the **reference**, which holds the location of a value rather than the value itself; [References, equality and the object model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) teaches it. For now, just remember that primitives hold their value. Every output below was produced by compiling and running the code on Java 21.
+That word "directly" will matter later. Java has a second family of variable, the **reference**, which holds the location of a value rather than the value itself; [References, equality and the object model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) teaches it. For now, just remember that primitives hold their value. Every output below was produced by compiling and running the code on Java 25.
 
 **You'll be able to:** declare a variable with a type and a legal name, and say why `2nd` and `class` are rejected; fix "might not have been initialized" by giving a variable a value before it's read; choose a primitive type for a value based on the exact ranges; predict from the literal's own type and the variable's type whether a declaration compiles; explain why a `var` variable still has one fixed type, and name where `var` isn't allowed.
 
@@ -140,7 +140,7 @@ public class Main {
 25
 ```
 
-*Non-example: reading the box before anything is in it.* The compiler tracks whether each local variable has definitely been given a value before any line reads it — Java calls this **definite assignment** <abbr title="The Java Language Specification, Java SE 21, chapter 16">[1]</abbr>. Read an empty box, and the program doesn't compile:
+*Non-example: reading the box before anything is in it.* The compiler tracks whether each local variable has definitely been given a value before any line reads it — Java calls this **definite assignment** <abbr title="The Java Language Specification, Java SE 25, chapter 16">[1]</abbr>. Read an empty box, and the program doesn't compile:
 
 ```java run
 public class Main {
@@ -163,11 +163,11 @@ Main.java:4: error: variable x might not have been initialized
 
 ### Naming a variable
 
-A variable's name is called an **identifier**, and the rules for it come from the language itself <abbr title="The Java Language Specification, Java SE 21, §3.8">[2]</abbr>:
+A variable's name is called an **identifier**, and the rules for it come from the language itself <abbr title="The Java Language Specification, Java SE 25, §3.8">[2]</abbr>:
 
 - It is made of letters, digits, `_` and `$`.
 - It must **not start with a digit**: `score2` is fine, `2nd` is not.
-- It must not be a **keyword**, one of the words Java reserves for itself, such as `class`, `int` or `public` <abbr title="The Java Language Specification, Java SE 21, §3.9">[3]</abbr>.
+- It must not be a **keyword**, one of the words Java reserves for itself, such as `class`, `int` or `public` <abbr title="The Java Language Specification, Java SE 25, §3.9">[3]</abbr>.
 - Case matters: `age` and `Age` are two different names.
 
 By convention, Java variable names use **camelCase**: start in lower case, and capitalize each later word, as in `totalScore`. Break the "no leading digit" rule, and javac's message doesn't even mention the name:
@@ -248,7 +248,7 @@ Main.java:3: error: incompatible types: String cannot be converted to int
 
 ### `final`: a value that never changes
 
-Some values should never change once they're set: the number of days in a week, say, or a tax rate. Put `final` before the type, and the compiler allows exactly one assignment <abbr title="The Java Language Specification, Java SE 21, §4.12.4">[4]</abbr>. By convention, a constant's name is written in capitals, with `_` between words.
+Some values should never change once they're set: the number of days in a week, say, or a tax rate. Put `final` before the type, and the compiler allows exactly one assignment <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[4]</abbr>. By convention, a constant's name is written in capitals, with `_` between words.
 
 ```java run
 public class Main {
@@ -341,7 +341,7 @@ Each type's size is counted in **bits**. A bit is one binary digit, a 0 or a 1, 
 | `char` | one character | `'A'` | 16 bits | character codes 0 to 65535 |
 | `boolean` | true / false | `true` | not specified | `true` or `false` |
 
-The language fixes the whole-number ranges and the `char` range <abbr title="The Java Language Specification, Java SE 21, §4.2.1">[5]</abbr>. `boolean` has exactly two values, and its size in bits isn't defined <abbr title="The Java Tutorials, Primitive Data Types">[6]</abbr>. You don't need to memorize the ranges, either: each whole-number type carries its own limits as `MIN_VALUE` and `MAX_VALUE`.
+The language fixes the whole-number ranges and the `char` range <abbr title="The Java Language Specification, Java SE 25, §4.2.1">[5]</abbr>. `boolean` has exactly two values, and its size in bits isn't defined <abbr title="The Java Tutorials, Primitive Data Types">[6]</abbr>. You don't need to memorize the ranges, either: each whole-number type carries its own limits as `MIN_VALUE` and `MAX_VALUE`.
 
 ```java run
 public class Main {
@@ -394,7 +394,7 @@ Main.java:3: error: incompatible types: possible lossy conversion from int to by
 
 `200` is an ordinary `int`, but a `byte` tops out at `127`. Storing `200` would lose information, so the compiler calls it a "lossy conversion" and refuses.
 
-**Why `byte b = 100;` compiles.** `100` is an `int` literal too, yet this line compiles. That's because Java makes one exception for a fixed value written in the source, called a **constant**. A constant `int` may go into a `byte`, `short` or `char` variable when the value fits within that type's range <abbr title="The Java Language Specification, Java SE 21, §5.2">[7]</abbr>. The compiler checks the value itself, `100`, and it fits.
+**Why `byte b = 100;` compiles.** `100` is an `int` literal too, yet this line compiles. That's because Java makes one exception for a fixed value written in the source, called a **constant**. A constant `int` may go into a `byte`, `short` or `char` variable when the value fits within that type's range <abbr title="The Java Language Specification, Java SE 25, §5.2">[7]</abbr>. The compiler checks the value itself, `100`, and it fits.
 
 ```java run
 public class Main {
@@ -441,7 +441,7 @@ Main.java:4: error: incompatible types: possible lossy conversion from int to by
 1 error
 ```
 
-A `final` variable counts as a constant when its own value is one <abbr title="The Java Language Specification, Java SE 21, §4.12.4">[4]</abbr>. So `final int n = 100; byte b = n;` does compile, and prints `100`.
+A `final` variable counts as a constant when its own value is one <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[4]</abbr>. So `final int n = 100; byte b = n;` does compile, and prints `100`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -462,8 +462,8 @@ The cost of a wrong choice is either a compile error (for a too-big value) or, w
 
 A **literal** is a value written directly in the source, like `25` or `'A'`. The way you write it fixes *its own* type, independent of any variable — and that type must be compatible with wherever you put it.
 
-- A plain whole number is an `int`; a number with a decimal point is a `double` <abbr title="The Java Language Specification, Java SE 21, §3.10.2">[9]</abbr>.
-- A suffix chooses otherwise: `L` for `long` <abbr title="The Java Language Specification, Java SE 21, §3.10.1">[8]</abbr>, `f` for `float`.
+- A plain whole number is an `int`; a number with a decimal point is a `double` <abbr title="The Java Language Specification, Java SE 25, §3.10.2">[9]</abbr>.
+- A suffix chooses otherwise: `L` for `long` <abbr title="The Java Language Specification, Java SE 25, §3.10.1">[8]</abbr>, `f` for `float`.
 - Single quotes make a `char`; double quotes make a `String`.
 
 ```java run
@@ -495,7 +495,7 @@ A
 - `3.14` is a `double`, and `3.14f` a `float`.
 - `'A'` is a `char`, and `"A"` a `String`.
 
-The type is invisible in the output, but very real to the compiler. A lower-case `l` also makes a `long`, but it looks like the digit `1`, which is why the language specification itself prefers `L` <abbr title="The Java Language Specification, Java SE 21, §3.10.1">[8]</abbr>.
+The type is invisible in the output, but very real to the compiler. A lower-case `l` also makes a `long`, but it looks like the digit `1`, which is why the language specification itself prefers `L` <abbr title="The Java Language Specification, Java SE 25, §3.10.1">[8]</abbr>.
 
 **Intuition.**
 *Mechanism.* The compiler gives every literal a type based on how it's written, before considering where it goes. A bare integer literal is always an `int`, even when the variable next to it is a `long`.
@@ -726,15 +726,15 @@ One check per objective. Answer before you open anything.
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, chapter 16 "Definite Assignment" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-16.html>
-2. *The Java Language Specification, Java SE 21*, §3.8 "Identifiers" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-3.html#jls-3.8>
-3. *The Java Language Specification, Java SE 21*, §3.9 "Keywords" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-3.html#jls-3.9>
-4. *The Java Language Specification, Java SE 21*, §4.12.4 "`final` Variables" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html#jls-4.12.4>
-5. *The Java Language Specification, Java SE 21*, §4.2.1 "Integral Types and Values" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html#jls-4.2.1>
+1. *The Java Language Specification, Java SE 25*, chapter 16 "Definite Assignment" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-16.html>
+2. *The Java Language Specification, Java SE 25*, §3.8 "Identifiers" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.8>
+3. *The Java Language Specification, Java SE 25*, §3.9 "Keywords" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.9>
+4. *The Java Language Specification, Java SE 25*, §4.12.4 "`final` Variables" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.4>
+5. *The Java Language Specification, Java SE 25*, §4.2.1 "Integral Types and Values" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2.1>
 6. *The Java Tutorials*, "Primitive Data Types" (`boolean`: "its 'size' isn't something that's precisely defined") — <https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html>
-7. *The Java Language Specification, Java SE 21*, §5.2 "Assignment Contexts" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-5.html#jls-5.2>
-8. *The Java Language Specification, Java SE 21*, §3.10.1 "Integer Literals" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-3.html#jls-3.10.1>
-9. *The Java Language Specification, Java SE 21*, §3.10.2 "Floating-Point Literals" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-3.html#jls-3.10.2>
+7. *The Java Language Specification, Java SE 25*, §5.2 "Assignment Contexts" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.2>
+8. *The Java Language Specification, Java SE 25*, §3.10.1 "Integer Literals" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.1>
+9. *The Java Language Specification, Java SE 25*, §3.10.2 "Floating-Point Literals" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.2>
 10. JEP 286: Local-Variable Type Inference (JDK 10) — <https://openjdk.org/jeps/286>
 
 ---

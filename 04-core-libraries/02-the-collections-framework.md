@@ -25,7 +25,7 @@ Code written against `List` works with any list, so you can swap implementations
 
 </div>
 
-This is the deep pass of [arrays](/synapse/programming-languages/java/control-flow/arrays). The `<Integer>` notation is a *generic* type, "a `List` of `Integer`". It gets its full treatment in [Generics](/synapse/programming-languages/java/core-libraries/generics). For now, read it as "this list holds `Integer`s". Every output below was produced by compiling and running the code on Java 21.
+This is the deep pass of [arrays](/synapse/programming-languages/java/control-flow/arrays). The `<Integer>` notation is a *generic* type, "a `List` of `Integer`". It gets its full treatment in [Generics](/synapse/programming-languages/java/core-libraries/generics). For now, read it as "this list holds `Integer`s". Every output below was produced by compiling and running the code on Java 25.
 
 **You'll be able to:** add, read, replace and remove elements of a `List`, and predict what a `List.of` list allows; explain why a list holds `Integer`, not `int`, and predict what `remove(1)` removes from a `List<Integer>`; predict when changing a list inside a for-each throws, and remove safely with an `Iterator`; sort a list in natural, reverse and case-insensitive order, and make a class of your own sortable; use a `Deque` as a stack and as a queue, and pick between `ArrayList`, `LinkedList` and `ArrayDeque`.
 
@@ -59,7 +59,7 @@ This is the deep pass of [arrays](/synapse/programming-languages/java/control-fl
 
 ## 1. A `List` grows where an array can't
 
-A `List` is an ordered, *resizable* sequence <abbr title="Java SE 21 API, java.util.List">[1]</abbr>:
+A `List` is an ordered, *resizable* sequence <abbr title="Java SE 25 API, java.util.List">[1]</abbr>:
 
 - `add` appends;
 - `get(i)` reads by index;
@@ -99,12 +99,12 @@ public class Main {
 - `set(1, 100)` replaced it.
 - Printing the list shows `[90, 100, 95]`. A `List` has a readable `toString`, unlike a bare array.
 
-The empty `<>` after `ArrayList` is the **diamond** form <abbr title="The Java Language Specification, Java SE 21, §15.9">[19]</abbr>, and the compiler fills in `Integer` from the variable's type.
+The empty `<>` after `ArrayList` is the **diamond** form <abbr title="The Java Language Specification, Java SE 25, §15.9">[19]</abbr>, and the compiler fills in `Integer` from the variable's type.
 
 **Intuition.**
-*Mechanism.* `ArrayList` keeps its elements in an array. When the array fills, it allocates a bigger one and copies the elements over. The API leaves the growth policy unspecified "beyond the fact that adding an element has constant amortized time cost" <abbr title="Java SE 21 API, java.util.ArrayList">[2]</abbr>. Underneath, `get` and `set` are direct array indexing.
+*Mechanism.* `ArrayList` keeps its elements in an array. When the array fills, it allocates a bigger one and copies the elements over. The API leaves the growth policy unspecified "beyond the fact that adding an element has constant amortized time cost" <abbr title="Java SE 25 API, java.util.ArrayList">[2]</abbr>. Underneath, `get` and `set` are direct array indexing.
 
-*Concrete bite.* Not every `List` grows. `List.of(...)` builds an **unmodifiable** list, and any `add`, `remove` or `set` throws <abbr title="Java SE 21 API, java.util.List, Unmodifiable Lists">[1]</abbr>:
+*Concrete bite.* Not every `List` grows. `List.of(...)` builds an **unmodifiable** list, and any `add`, `remove` or `set` throws <abbr title="Java SE 25 API, java.util.List, Unmodifiable Lists">[1]</abbr>:
 
 ```java run
 import java.util.List;
@@ -138,7 +138,7 @@ A `List` costs you the boxing of primitives (next section) and a little overhead
 
 ## 2. `Integer`, not `int`: wrappers in collections
 
-A collection holds **objects**, never primitives. The type inside `<…>` must be a reference type <abbr title="The Java Language Specification, Java SE 21, §4.5.1">[3]</abbr>, so `List<int>` doesn't compile:
+A collection holds **objects**, never primitives. The type inside `<…>` must be a reference type <abbr title="The Java Language Specification, Java SE 25, §4.5.1">[3]</abbr>, so `List<int>` doesn't compile:
 
 ```java run
 import java.util.List;
@@ -162,8 +162,8 @@ Main.java:6: error: unexpected type
 
 The fix is the **wrapper class** from [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model): `List<Integer>`. Java converts in both directions for you:
 
-- **boxing** wraps an `int` into an `Integer` when you `add` it <abbr title="The Java Language Specification, Java SE 21, §5.1.7">[4]</abbr>;
-- **unboxing** unwraps an `Integer` into an `int` when you assign it to an `int` <abbr title="The Java Language Specification, Java SE 21, §5.1.8">[5]</abbr>.
+- **boxing** wraps an `int` into an `Integer` when you `add` it <abbr title="The Java Language Specification, Java SE 25, §5.1.7">[4]</abbr>;
+- **unboxing** unwraps an `Integer` into an `int` when you assign it to an `int` <abbr title="The Java Language Specification, Java SE 25, §5.1.8">[5]</abbr>.
 
 A list of `Integer` can also hold `null`, which no `int` can. Unbox that `null`, and it throws:
 
@@ -198,7 +198,7 @@ Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.l
 **Analysis.** `add(7)` boxed and `get(0)` unboxed, so `first + 1` is `8`. The list printed `null` without complaint. The crash came in the loop, because `for (int n : nums)` unboxes each element into `int n`, and the second element was `null`. The message names `Iterator.next()`, your first glimpse of the machinery in §4.
 
 **Intuition.**
-*Mechanism.* Boxing is automatic, and so is its failure. A `List` method may take either an index (`int`) or an element (`Object`), and `List` declares both versions: `remove(int index)` and `remove(Object o)` <abbr title="Java SE 21 API, java.util.List">[1]</abbr>. The compiler first looks for a method that fits *without* boxing <abbr title="The Java Language Specification, Java SE 21, §15.12.2">[6]</abbr>. With an `int` argument, `remove(int)` fits, so it wins.
+*Mechanism.* Boxing is automatic, and so is its failure. A `List` method may take either an index (`int`) or an element (`Object`), and `List` declares both versions: `remove(int index)` and `remove(Object o)` <abbr title="Java SE 25 API, java.util.List">[1]</abbr>. The compiler first looks for a method that fits *without* boxing <abbr title="The Java Language Specification, Java SE 25, §15.12.2">[6]</abbr>. With an `int` argument, `remove(int)` fits, so it wins.
 
 *Concrete bite.* `remove(1)` on a `List<Integer>` removes the element at **index** 1, not the value `1`:
 
@@ -282,7 +282,7 @@ classDiagram
 
 **Analysis.** `sum` is written against `List`, so it summed both an `ArrayList` and a `LinkedList` with no change, because they share the `List` contract. The diagram shows the relationship:
 
-- `List` extends `Collection`, the root interface of the framework <abbr title="Java SE 21 API, java.util.Collection">[7]</abbr>;
+- `List` extends `Collection`, the root interface of the framework <abbr title="Java SE 25 API, java.util.Collection">[7]</abbr>;
 - both concrete classes *implement* `List` (the dotted lines).
 
 The variable type (`List`) is the contract, and the `new` type is the implementation.
@@ -304,7 +304,7 @@ The cost is giving up implementation-specific methods, which you rarely need. Th
 
 ## 4. Iteration, the `Iterator`, and the modification trap
 
-An **`Iterator`** walks every collection. It's an object with `hasNext()` and `next()` <abbr title="Java SE 21 API, java.util.Iterator">[8]</abbr>. The enhanced `for` over a collection is shorthand for a loop over its iterator <abbr title="The Java Language Specification, Java SE 21, §14.14.2">[9]</abbr>. That iterator enforces a rule: you may not structurally modify a collection while a for-each is walking it.
+An **`Iterator`** walks every collection. It's an object with `hasNext()` and `next()` <abbr title="Java SE 25 API, java.util.Iterator">[8]</abbr>. The enhanced `for` over a collection is shorthand for a loop over its iterator <abbr title="The Java Language Specification, Java SE 25, §14.14.2">[9]</abbr>. That iterator enforces a rule: you may not structurally modify a collection while a for-each is walking it.
 
 ```java run viz=array:nums
 import java.util.List;
@@ -330,7 +330,7 @@ public class Main {
 **Intuition.**
 *Mechanism.* The list counts its structural changes. The iterator remembers the count it started with and checks it on each `next()`.
 
-Suppose something *other* than the iterator adds or removes an element. The counts then differ, and `next()` throws `ConcurrentModificationException`. This is called **fail-fast**, because it catches the bug instead of silently skipping or repeating elements <abbr title="Java SE 21 API, java.util.ArrayList">[2]</abbr>.
+Suppose something *other* than the iterator adds or removes an element. The counts then differ, and `next()` throws `ConcurrentModificationException`. This is called **fail-fast**, because it catches the bug instead of silently skipping or repeating elements <abbr title="Java SE 25 API, java.util.ArrayList">[2]</abbr>.
 
 *Concrete bite.* Remove from the list inside a for-each, and it throws:
 
@@ -355,7 +355,7 @@ public class Main {
 Exception in thread "main" java.util.ConcurrentModificationException
 ```
 
-`nums.remove(...)` changed the list behind the for-each's iterator, so the following `next()` spotted the mismatch and threw. The check is only "best-effort" <abbr title="Java SE 21 API, java.util.ArrayList">[2]</abbr>. Remove the second-to-last element, and the loop ends before the next `next()`, with no exception and one element never visited:
+`nums.remove(...)` changed the list behind the for-each's iterator, so the following `next()` spotted the mismatch and threw. The check is only "best-effort" <abbr title="Java SE 25 API, java.util.ArrayList">[2]</abbr>. Remove the second-to-last element, and the loop ends before the next `next()`, with no exception and one element never visited:
 
 ```java run
 import java.util.List;
@@ -378,7 +378,7 @@ public class Main {
 [1, 3]
 ```
 
-The result looks right, but the loop never visited `3`, because after the removal `hasNext()` saw no more elements. The API warns that "it would be wrong to write a program that depended on this exception for its correctness" <abbr title="Java SE 21 API, java.util.ArrayList">[2]</abbr>. The fix is to remove **through the iterator**, whose own `remove()` keeps the counts in sync:
+The result looks right, but the loop never visited `3`, because after the removal `hasNext()` saw no more elements. The API warns that "it would be wrong to write a program that depended on this exception for its correctness" <abbr title="Java SE 25 API, java.util.ArrayList">[2]</abbr>. The fix is to remove **through the iterator**, whose own `remove()` keeps the counts in sync:
 
 ```java run viz=array:nums
 import java.util.List;
@@ -418,10 +418,10 @@ The fail-fast check costs you a for-each that can't mutate. The payoff is that m
 
 You sort a list in place with `Collections.sort(list)` or `list.sort(order)`:
 
-- with no order given, elements sort by their **natural ordering**: numbers ascending, strings by character code <abbr title="Java SE 21 API, java.lang.Comparable">[10]</abbr>;
-- a **`Comparator`** is an object that supplies another order. The library has ready-made ones, such as `Comparator.reverseOrder()` and `String.CASE_INSENSITIVE_ORDER` <abbr title="Java SE 21 API, java.util.Comparator and String.CASE_INSENSITIVE_ORDER">[11]</abbr>.
+- with no order given, elements sort by their **natural ordering**: numbers ascending, strings by character code <abbr title="Java SE 25 API, java.lang.Comparable">[10]</abbr>;
+- a **`Comparator`** is an object that supplies another order. The library has ready-made ones, such as `Comparator.reverseOrder()` and `String.CASE_INSENSITIVE_ORDER` <abbr title="Java SE 25 API, java.util.Comparator and String.CASE_INSENSITIVE_ORDER">[11]</abbr>.
 
-Arrays have their own `Arrays.sort` <abbr title="Java SE 21 API, java.util.Arrays.sort">[12]</abbr>.
+Arrays have their own `Arrays.sort` <abbr title="Java SE 25 API, java.util.Arrays.sort">[12]</abbr>.
 
 ```java run
 import java.util.Arrays;
@@ -463,12 +463,12 @@ public class Main {
 **Analysis.**
 
 - The numbers sorted ascending, then descending with `reverseOrder()`.
-- The natural order put `Cherry` first. `String` compares "the Unicode value of each character" <abbr title="Java SE 21 API, String.compareTo">[13]</abbr>, and the capitals `A`–`Z` come before the lowercase `a`–`z`.
+- The natural order put `Cherry` first. `String` compares "the Unicode value of each character" <abbr title="Java SE 25 API, String.compareTo">[13]</abbr>, and the capitals `A`–`Z` come before the lowercase `a`–`z`.
 - `CASE_INSENSITIVE_ORDER` ignored case and gave dictionary order.
 - `Arrays.sort` sorted the `int[]` in place.
 
 **Intuition.**
-*Mechanism.* Natural ordering comes from the **`Comparable`** interface. A class that implements it has a `compareTo` method. It returns a negative number, zero, or a positive number, meaning `this` is less than, equal to, or greater than the other object <abbr title="Java SE 21 API, java.lang.Comparable">[10]</abbr>.
+*Mechanism.* Natural ordering comes from the **`Comparable`** interface. A class that implements it has a `compareTo` method. It returns a negative number, zero, or a positive number, meaning `this` is less than, equal to, or greater than the other object <abbr title="Java SE 25 API, java.lang.Comparable">[10]</abbr>.
 
 `Integer` and `String` implement it. A class you write doesn't, until you say so.
 
@@ -551,7 +551,7 @@ public class Main {
 
 - `implements Comparable<Player>` promises that `Player` has a `compareTo(Player)` method. Interfaces get their own lesson in [Abstract Classes & Interfaces](/synapse/programming-languages/java/robust-oop/abstract-classes-and-interfaces).
 - `Integer.compare` returns the negative, zero or positive result that `compareTo` needs.
-- `players.sort(null)` means "natural order" <abbr title="Java SE 21 API, List.sort">[14]</abbr>, so the players sorted by score.
+- `players.sort(null)` means "natural order" <abbr title="Java SE 25 API, List.sort">[14]</abbr>, so the players sorted by score.
 - The class's own `toString` replaced the default `Player@…` text in the printout.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
@@ -566,7 +566,7 @@ The catch is that `String`'s natural order isn't dictionary order: capitals sort
 
 ## 6. `Deque`: a stack and a queue
 
-A **`Deque`** ("deck", a double-ended queue) is a sequence you can add to and remove from at both ends <abbr title="Java SE 21 API, java.util.Deque">[15]</abbr>. It serves two classic shapes:
+A **`Deque`** ("deck", a double-ended queue) is a sequence you can add to and remove from at both ends <abbr title="Java SE 25 API, java.util.Deque">[15]</abbr>. It serves two classic shapes:
 
 - a **stack** is last-in, first-out (LIFO): `push` adds to the front, `pop` removes from the front;
 - a **queue** is first-in, first-out (FIFO): `offer` adds at the back, `poll` removes from the front.
@@ -611,7 +611,7 @@ a
 **Analysis.** The stack gave back `c`, the last element pushed. The queue gave back `a`, the first element offered. Printing a deque lists it from the front.
 
 **Intuition.**
-*Mechanism.* Each end has two families of methods <abbr title="Java SE 21 API, java.util.Deque">[15]</abbr>. One family throws an exception when the deque is empty: `pop`, `removeFirst`, `getFirst`. The other returns `null`: `poll`, `peek`. `ArrayDeque` also rejects `null` elements, so a `null` from `poll` always means "empty" <abbr title="Java SE 21 API, java.util.ArrayDeque">[16]</abbr>.
+*Mechanism.* Each end has two families of methods <abbr title="Java SE 25 API, java.util.Deque">[15]</abbr>. One family throws an exception when the deque is empty: `pop`, `removeFirst`, `getFirst`. The other returns `null`: `poll`, `peek`. `ArrayDeque` also rejects `null` elements, so a `null` from `poll` always means "empty" <abbr title="Java SE 25 API, java.util.ArrayDeque">[16]</abbr>.
 
 *Concrete bite.* On an empty deque, `poll` and `peek` do no harm, but `pop` throws:
 
@@ -640,7 +640,7 @@ Exception in thread "main" java.util.NoSuchElementException
 
 💡 **Earned rule.** For a stack or a queue, declare a `Deque` and create an `ArrayDeque`. Use `poll` and `peek` when empty is normal, and check for `null`. Use `pop` when empty is a bug that should throw.
 
-You may run into the old `Stack` class. Its API says a `Deque` "should be used in preference to this class" <abbr title="Java SE 21 API, java.util.Stack">[17]</abbr>.
+You may run into the old `Stack` class. Its API says a `Deque` "should be used in preference to this class" <abbr title="Java SE 25 API, java.util.Stack">[17]</abbr>.
 
 </div>
 
@@ -651,8 +651,8 @@ You may run into the old `Stack` class. Its API says a `Deque` "should be used i
 `ArrayList`, `LinkedList` and `ArrayDeque` differ in performance, because each stores its elements differently:
 
 - `ArrayList` uses an array;
-- `LinkedList` uses a chain of nodes, each linked to the next and the previous <abbr title="Java SE 21 API, java.util.LinkedList">[18]</abbr>;
-- `ArrayDeque` uses a resizable array <abbr title="Java SE 21 API, java.util.ArrayDeque">[16]</abbr>.
+- `LinkedList` uses a chain of nodes, each linked to the next and the previous <abbr title="Java SE 25 API, java.util.LinkedList">[18]</abbr>;
+- `ArrayDeque` uses a resizable array <abbr title="Java SE 25 API, java.util.ArrayDeque">[16]</abbr>.
 
 The choice is about *cost*, not behavior.
 
@@ -664,7 +664,7 @@ The choice is about *cost*, not behavior.
 | add or remove in the middle | O(n): shift elements | O(1) *at a node you hold* | not offered |
 | memory per element | low (one array slot) | higher (a node and two links) | low (one array slot) |
 
-`LinkedList` "will traverse the list from the beginning or the end, whichever is closer" to reach an index <abbr title="Java SE 21 API, java.util.LinkedList">[18]</abbr>. That's why `get(i)` is O(n). `ArrayDeque` "is likely to be … faster than `LinkedList` when used as a queue" <abbr title="Java SE 21 API, java.util.ArrayDeque">[16]</abbr>.
+`LinkedList` "will traverse the list from the beginning or the end, whichever is closer" to reach an index <abbr title="Java SE 25 API, java.util.LinkedList">[18]</abbr>. That's why `get(i)` is O(n). `ArrayDeque` "is likely to be … faster than `LinkedList` when used as a queue" <abbr title="Java SE 25 API, java.util.ArrayDeque">[16]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -773,25 +773,25 @@ public class Main {
 
 ## 📚 Sources
 
-1. `java.util.List`, Java SE 21 API ("Unmodifiable Lists"; `remove(int)` and `remove(Object)`) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html>
-2. `java.util.ArrayList`, Java SE 21 API (growth policy; "fail-fast … on a best-effort basis") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayList.html>
-3. *The Java Language Specification, Java SE 21*, §4.5.1 "Type Arguments of Parameterized Types" ("Type arguments may be either reference types or wildcards") — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html#jls-4.5.1>
-4. *The Java Language Specification, Java SE 21*, §5.1.7 "Boxing Conversion" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-5.html#jls-5.1.7>
-5. *The Java Language Specification, Java SE 21*, §5.1.8 "Unboxing Conversion" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-5.html#jls-5.1.8>
-6. *The Java Language Specification, Java SE 21*, §15.12.2 "Compile-Time Step 2: Determine Method Signature" (the first phase permits no boxing) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.12.2>
-7. `java.util.Collection`, Java SE 21 API ("The root interface in the collection hierarchy") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html>
-8. `java.util.Iterator`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Iterator.html>
-9. *The Java Language Specification, Java SE 21*, §14.14.2 "The enhanced `for` statement" (translation to an `Iterator` loop) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.14.2>
-10. `java.lang.Comparable`, Java SE 21 API (natural ordering; `compareTo` returns "a negative integer, zero, or a positive integer") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Comparable.html>
-11. `java.util.Comparator.reverseOrder()` and `java.lang.String.CASE_INSENSITIVE_ORDER`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Comparator.html#reverseOrder()>
-12. `java.util.Arrays.sort(int[])`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Arrays.html#sort(int%5B%5D)>
-13. `java.lang.String.compareTo(String)`, Java SE 21 API ("based on the Unicode value of each character") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html#compareTo(java.lang.String)>
-14. `java.util.List.sort(Comparator)`, Java SE 21 API ("If the specified comparator is null then … the elements' natural ordering should be used") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html#sort(java.util.Comparator)>
-15. `java.util.Deque`, Java SE 21 API (the two method families; stack and queue tables) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Deque.html>
-16. `java.util.ArrayDeque`, Java SE 21 API ("Null elements are prohibited"; faster than `Stack` and `LinkedList`) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayDeque.html>
-17. `java.util.Stack`, Java SE 21 API — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Stack.html>
-18. `java.util.LinkedList`, Java SE 21 API ("Doubly-linked list"; index operations traverse) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/LinkedList.html>
-19. *The Java Language Specification, Java SE 21*, §15.9 "Class Instance Creation Expressions" (the diamond form `<>`) — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.9>
+1. `java.util.List`, Java SE 25 API ("Unmodifiable Lists"; `remove(int)` and `remove(Object)`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html>
+2. `java.util.ArrayList`, Java SE 25 API (growth policy; "fail-fast … on a best-effort basis") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ArrayList.html>
+3. *The Java Language Specification, Java SE 25*, §4.5.1 "Type Arguments of Parameterized Types" ("Type arguments may be either reference types or wildcards") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.5.1>
+4. *The Java Language Specification, Java SE 25*, §5.1.7 "Boxing Conversion" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.7>
+5. *The Java Language Specification, Java SE 25*, §5.1.8 "Unboxing Conversion" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.8>
+6. *The Java Language Specification, Java SE 25*, §15.12.2 "Compile-Time Step 2: Determine Method Signature" (the first phase permits no boxing) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.12.2>
+7. `java.util.Collection`, Java SE 25 API ("The root interface in the collection hierarchy") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Collection.html>
+8. `java.util.Iterator`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Iterator.html>
+9. *The Java Language Specification, Java SE 25*, §14.14.2 "The enhanced `for` statement" (translation to an `Iterator` loop) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2>
+10. `java.lang.Comparable`, Java SE 25 API (natural ordering; `compareTo` returns "a negative integer, zero, or a positive integer") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Comparable.html>
+11. `java.util.Comparator.reverseOrder()` and `java.lang.String.CASE_INSENSITIVE_ORDER`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Comparator.html#reverseOrder()>
+12. `java.util.Arrays.sort(int[])`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Arrays.html#sort(int%5B%5D)>
+13. `java.lang.String.compareTo(String)`, Java SE 25 API ("based on the Unicode value of each character") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#compareTo(java.lang.String)>
+14. `java.util.List.sort(Comparator)`, Java SE 25 API ("If the specified comparator is null then … the elements' natural ordering should be used") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html#sort(java.util.Comparator)>
+15. `java.util.Deque`, Java SE 25 API (the two method families; stack and queue tables) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Deque.html>
+16. `java.util.ArrayDeque`, Java SE 25 API ("Null elements are prohibited"; faster than `Stack` and `LinkedList`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ArrayDeque.html>
+17. `java.util.Stack`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Stack.html>
+18. `java.util.LinkedList`, Java SE 25 API ("Doubly-linked list"; index operations traverse) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/LinkedList.html>
+19. *The Java Language Specification, Java SE 25*, §15.9 "Class Instance Creation Expressions" (the diamond form `<>`) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.9>
 
 ---
 

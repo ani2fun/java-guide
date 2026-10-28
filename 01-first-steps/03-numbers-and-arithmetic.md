@@ -26,7 +26,7 @@ The same `/` means different things depending on what sits to its left and right
 
 </div>
 
-This lesson builds directly on [the primitive types](/synapse/programming-languages/java/first-steps/variables-and-primitive-types): the sizes and ranges you met there decide each result here. Every output below was produced by compiling and running the code on Java 21.
+This lesson builds directly on [the primitive types](/synapse/programming-languages/java/first-steps/variables-and-primitive-types): the sizes and ranges you met there decide each result here. Every output below was produced by compiling and running the code on Java 25.
 
 **You'll be able to:** predict the result of `/` and `%` on whole numbers, negatives included; write a division that keeps its fraction, by converting an operand before the division happens; predict when `int` arithmetic overflows, and fix it with `long` or `Math.multiplyExact`; update a variable with `+=` and `++`, and predict the value that `a++` hands back; explain why `0.1 + 0.2` doesn't print `0.3`.
 
@@ -87,7 +87,7 @@ public class Main {
 **Analysis.** `7 + 2 = 9`, `7 - 2 = 5`, and `7 * 2 = 14`. `7 % 2 = 1`, because `7` is `3 * 2 + 1`, leaving a remainder of `1`. `%` is how you test divisibility (a remainder of `0` when dividing by `2` means "even"). It's also how you fold a value into a range.
 
 **Intuition.**
-*Mechanism.* `%` returns the remainder, and in Java, its sign follows the **left** operand — the **dividend** (the number being divided) — not the right one <abbr title="The Java Language Specification, Java SE 21, §15.17.3">[1]</abbr>.
+*Mechanism.* `%` returns the remainder, and in Java, its sign follows the **left** operand — the **dividend** (the number being divided) — not the right one <abbr title="The Java Language Specification, Java SE 25, §15.17.3">[1]</abbr>.
 
 *Concrete bite.* That means it isn't the mathematical "modulo," which is never negative for a positive divisor:
 
@@ -106,7 +106,7 @@ public class Main {
 1
 ```
 
-`-7 % 2` is `-1`, not `1`, because the result took the sign of `-7`. `7 % -2` is `1`, taking the sign of `7`. The magnitude is the remainder, but the sign comes from the dividend. When you need the never-negative version, `Math.floorMod` gives it to you; its result takes the divisor's sign <abbr title="Java SE 21 API, java.lang.Math">[2]</abbr>:
+`-7 % 2` is `-1`, not `1`, because the result took the sign of `-7`. `7 % -2` is `1`, taking the sign of `7`. The magnitude is the remainder, but the sign comes from the dividend. When you need the never-negative version, `Math.floorMod` gives it to you; its result takes the divisor's sign <abbr title="Java SE 25 API, java.lang.Math">[2]</abbr>:
 
 ```java run
 public class Main {
@@ -167,7 +167,7 @@ public class Main {
 40
 ```
 
-*Non-example: using `a++` as a value.* On a line of its own, `a++` simply adds 1. Inside a larger expression, though, it also hands back a value — and that value is the **old** one <abbr title="The Java Language Specification, Java SE 21, §15.14.2">[3]</abbr>. Written in front, `++a` adds 1 first, and hands back the **new** value:
+*Non-example: using `a++` as a value.* On a line of its own, `a++` simply adds 1. Inside a larger expression, though, it also hands back a value — and that value is the **old** one <abbr title="The Java Language Specification, Java SE 25, §15.14.2">[3]</abbr>. Written in front, `++a` adds 1 first, and hands back the **new** value:
 
 ```java run
 public class Main {
@@ -217,7 +217,7 @@ public class Main {
 0
 ```
 
-**Analysis.** `7 / 2` is `3` (not `3.5`), `1 / 2` is `0`, and `9 / 10` is `0`. The fraction isn't rounded; it's **truncated** — dropped toward zero, so `-7 / 2` is `-3` <abbr title="The Java Language Specification, Java SE 21, §15.17.2">[4]</abbr>. Both operands are `int`, so the result is an `int`, and an `int` has nowhere to keep a fractional part.
+**Analysis.** `7 / 2` is `3` (not `3.5`), `1 / 2` is `0`, and `9 / 10` is `0`. The fraction isn't rounded; it's **truncated** — dropped toward zero, so `-7 / 2` is `-3` <abbr title="The Java Language Specification, Java SE 25, §15.17.2">[4]</abbr>. Both operands are `int`, so the result is an `int`, and an `int` has nowhere to keep a fractional part.
 
 **Intuition.**
 *Mechanism.* When both operands are integer types, `/` computes the integer quotient. The result has that same integer type, so a fractional part simply can't exist.
@@ -247,7 +247,7 @@ public class Main {
 
 The cost of forgetting is a silent wrong answer, rather than an error. `3.0` looks perfectly reasonable, which is exactly what makes this Java's most common arithmetic bug. The fix is the next section's job.
 
-Dividing an integer by zero is different, because it isn't silent. `7 / 0` and `7 % 0` throw an `ArithmeticException` (`/ by zero`) at run time <abbr title="The Java Language Specification, Java SE 21, §15.17.2">[4]</abbr>, as [What Java is](/synapse/programming-languages/java/first-steps/what-java-is-and-running-code) showed.
+Dividing an integer by zero is different, because it isn't silent. `7 / 0` and `7 % 0` throw an `ArithmeticException` (`/ by zero`) at run time <abbr title="The Java Language Specification, Java SE 25, §15.17.2">[4]</abbr>, as [What Java is](/synapse/programming-languages/java/first-steps/what-java-is-and-running-code) showed.
 
 </div>
 
@@ -255,7 +255,7 @@ Dividing an integer by zero is different, because it isn't silent. `7 / 0` and `
 
 ## 3. Mixing numeric types, and casting
 
-When operands have different numeric types, Java **promotes** the narrower one to the wider type before computing, so `int / double` becomes `double / double` <abbr title="The Java Language Specification, Java SE 21, §5.6">[5]</abbr>. To force a type yourself, use a **cast**: write the type in parentheses, such as `(double)`, in front of a value.
+When operands have different numeric types, Java **promotes** the narrower one to the wider type before computing, so `int / double` becomes `double / double` <abbr title="The Java Language Specification, Java SE 25, §5.6">[5]</abbr>. To force a type yourself, use a **cast**: write the type in parentheses, such as `(double)`, in front of a value.
 
 ```java run
 public class Main {
@@ -309,7 +309,7 @@ The parentheses force `7 / 2` to happen first (integer division → `3`), and on
 
 ### Small types are promoted to `int`
 
-Promotion has a second rule: arithmetic never runs on `byte`, `short` or `char`. Each operand is promoted to at least `int` first <abbr title="The Java Language Specification, Java SE 21, §5.6">[5]</abbr>. So `byte + byte` is an `int`, which doesn't fit back into a `byte`:
+Promotion has a second rule: arithmetic never runs on `byte`, `short` or `char`. Each operand is promoted to at least `int` first <abbr title="The Java Language Specification, Java SE 25, §5.6">[5]</abbr>. So `byte + byte` is an `int`, which doesn't fit back into a `byte`:
 
 ```java run
 public class Main {
@@ -353,7 +353,7 @@ B
 
 ### A cast to a smaller type can change the value
 
-A narrowing cast between whole-number types keeps only the bits that fit <abbr title="The Java Language Specification, Java SE 21, §5.1.3">[6]</abbr>, so a value outside the target range comes out as a different number. A `double` that's too big for an `int`, meanwhile, stops at the `int` limit:
+A narrowing cast between whole-number types keeps only the bits that fit <abbr title="The Java Language Specification, Java SE 25, §5.1.3">[6]</abbr>, so a value outside the target range comes out as a different number. A `double` that's too big for an `int`, meanwhile, stops at the `int` limit:
 
 ```java run
 public class Main {
@@ -376,7 +376,7 @@ public class Main {
 
 `(int) -3.9` is `-3`: toward zero, not down. `(byte) 200` is `-56` — a different number entirely, with no warning. `3.0e10` is 3 × 10¹⁰ written in **scientific notation**; cast to an `int`, it stops at `2147483647`.
 
-*Non-example: `+=` hides a cast.* `b = b + 1;` on a `byte` doesn't compile, for the reason above. But `b += 1;` does, because a compound assignment casts its result back to the variable's type <abbr title="The Java Language Specification, Java SE 21, §15.26.2">[7]</abbr>. And that hidden cast wraps, just like any other:
+*Non-example: `+=` hides a cast.* `b = b + 1;` on a `byte` doesn't compile, for the reason above. But `b += 1;` does, because a compound assignment casts its result back to the variable's type <abbr title="The Java Language Specification, Java SE 25, §15.26.2">[7]</abbr>. And that hidden cast wraps, just like any other:
 
 ```java run
 public class Main {
@@ -403,7 +403,7 @@ public class Main {
 
 ## 4. Silent integer overflow
 
-An `int` is 32 bits, with a range of −2147483648 to 2147483647. When arithmetic produces a result outside that range, Java does **not** grow the type to fit. Instead, it silently **wraps around** to the opposite end. There's no error at all: the integer operators don't signal overflow in any way <abbr title="The Java Language Specification, Java SE 21, §4.2.2">[8]</abbr>.
+An `int` is 32 bits, with a range of −2147483648 to 2147483647. When arithmetic produces a result outside that range, Java does **not** grow the type to fit. Instead, it silently **wraps around** to the opposite end. There's no error at all: the integer operators don't signal overflow in any way <abbr title="The Java Language Specification, Java SE 25, §4.2.2">[8]</abbr>.
 
 ```java run
 public class Main {
@@ -470,7 +470,7 @@ public class Main {
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** When a value can pass 2147483647, use `long` (64 bits, up to 9223372036854775807). Make at least one operand a `long`, so the operation runs in 64 bits: `100000L * 100000` gives the correct `10000000000`. The cost of ignoring overflow is the most dangerous kind of bug there is: a wrong number with nothing to flag it. When you need to be certain, `Math.multiplyExact` and `Math.addExact` **throw** instead of wrapping <abbr title="Java SE 21 API, java.lang.Math">[2]</abbr>:
+💡 **Earned rule.** When a value can pass 2147483647, use `long` (64 bits, up to 9223372036854775807). Make at least one operand a `long`, so the operation runs in 64 bits: `100000L * 100000` gives the correct `10000000000`. The cost of ignoring overflow is the most dangerous kind of bug there is: a wrong number with nothing to flag it. When you need to be certain, `Math.multiplyExact` and `Math.addExact` **throw** instead of wrapping <abbr title="Java SE 25 API, java.lang.Math">[2]</abbr>:
 
 </div>
 
@@ -493,7 +493,7 @@ Swapping a silent wrong answer for a loud `ArithmeticException` is usually the t
 
 ## 5. Decimals are approximate
 
-A `double` stores a number in binary, in 64 bits. Most decimal fractions — `0.1` among them — have no exact binary form, so a `double` holds the nearest value it can <abbr title="Java SE 21 API, java.math.BigDecimal, the BigDecimal(double) constructor">[9]</abbr>. That tiny difference shows up in arithmetic:
+A `double` stores a number in binary, in 64 bits. Most decimal fractions — `0.1` among them — have no exact binary form, so a `double` holds the nearest value it can <abbr title="Java SE 25 API, java.math.BigDecimal, the BigDecimal(double) constructor">[9]</abbr>. That tiny difference shows up in arithmetic:
 
 ```java run
 public class Main {
@@ -517,7 +517,7 @@ public class Main {
 **Intuition.**
 *Mechanism.* `double` trades exactness for range and speed. Each value is the nearest member of a fixed set of binary fractions, and each operation rounds its result to that set.
 
-*Concrete bite.* Unlike integer division, floating-point division by zero doesn't throw. Instead, it gives a special value: **Infinity**, or **NaN** ("not a number") for `0.0 / 0` <abbr title="The Java Language Specification, Java SE 21, §15.17.2">[4]</abbr>. And the program just carries on with it:
+*Concrete bite.* Unlike integer division, floating-point division by zero doesn't throw. Instead, it gives a special value: **Infinity**, or **NaN** ("not a number") for `0.0 / 0` <abbr title="The Java Language Specification, Java SE 25, §15.17.2">[4]</abbr>. And the program just carries on with it:
 
 ```java run
 public class Main {
@@ -538,7 +538,7 @@ NaN
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Treat `double` results as close, not exact: expect `0.30000000000000004`, and never rely on a `double` landing on an exact decimal. For money, count in whole cents with `long`, or use `java.math.BigDecimal`, which stores decimal digits exactly <abbr title="Java SE 21 API, java.math.BigDecimal">[10]</abbr>. The cost is ceremony: you add two `BigDecimal` values with a method call, not with `+`.
+💡 **Earned rule.** Treat `double` results as close, not exact: expect `0.30000000000000004`, and never rely on a `double` landing on an exact decimal. For money, count in whole cents with `long`, or use `java.math.BigDecimal`, which stores decimal digits exactly <abbr title="Java SE 25 API, java.math.BigDecimal">[10]</abbr>. The cost is ceremony: you add two `BigDecimal` values with a method call, not with `+`.
 
 </div>
 
@@ -546,7 +546,7 @@ NaN
 
 ## 6. Precedence and the `Math` class
 
-When several operators meet in one expression, Java follows **precedence** rules. `*`, `/` and `%` bind tighter than `+` and `-`, and parentheses override that order. Operators at the same level run from left to right, so `10 - 4 - 3` is `(10 - 4) - 3`, which is `3`. For arithmetic beyond the basic operators, the `Math` class supplies `sqrt`, `pow`, `abs`, `max`, `min`, and more <abbr title="Java SE 21 API, java.lang.Math">[2]</abbr>.
+When several operators meet in one expression, Java follows **precedence** rules. `*`, `/` and `%` bind tighter than `+` and `-`, and parentheses override that order. Operators at the same level run from left to right, so `10 - 4 - 3` is `(10 - 4) - 3`, which is `3`. For arithmetic beyond the basic operators, the `Math` class supplies `sqrt`, `pow`, `abs`, `max`, `min`, and more <abbr title="Java SE 25 API, java.lang.Math">[2]</abbr>.
 
 ```java run
 public class Main {
@@ -690,7 +690,7 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>Why does <code>System.out.println(0.1 + 0.2);</code> print <code>0.30000000000000004</code>? And what does <code>7.0 / 0</code> print?</summary>
 
-A `double` stores binary fractions, and `0.1` and `0.2` have no exact binary form <abbr title="Java SE 21 API, java.math.BigDecimal, the BigDecimal(double) constructor">[9]</abbr>. Each one is stored as the nearest value, and the sum of those two nearest values is a hair above `0.3`.
+A `double` stores binary fractions, and `0.1` and `0.2` have no exact binary form <abbr title="Java SE 25 API, java.math.BigDecimal, the BigDecimal(double) constructor">[9]</abbr>. Each one is stored as the nearest value, and the sum of those two nearest values is a hair above `0.3`.
 
 `7.0 / 0` prints `Infinity`. Floating-point division by zero gives a special value; only integer division by zero throws.
 
@@ -709,16 +709,16 @@ A `double` stores binary fractions, and `0.1` and `0.2` have no exact binary for
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 21*, §15.17.3 "Remainder Operator `%`" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.17.3>
-2. Java SE 21 API, `java.lang.Math` (`floorMod`, `addExact`, `multiplyExact`, `pow`) — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Math.html>
-3. *The Java Language Specification, Java SE 21*, §15.14.2 "Postfix Increment Operator `++`" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.14.2>
-4. *The Java Language Specification, Java SE 21*, §15.17.2 "Division Operator `/`" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.17.2>
-5. *The Java Language Specification, Java SE 21*, §5.6 "Numeric Contexts" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-5.html#jls-5.6>
-6. *The Java Language Specification, Java SE 21*, §5.1.3 "Narrowing Primitive Conversion" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-5.html#jls-5.1.3>
-7. *The Java Language Specification, Java SE 21*, §15.26.2 "Compound Assignment Operators" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.26.2>
-8. *The Java Language Specification, Java SE 21*, §4.2.2 "Integer Operations" — <https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html#jls-4.2.2>
-9. Java SE 21 API, `java.math.BigDecimal`, constructor `BigDecimal(double)` ("0.1 cannot be represented exactly as a `double`") — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(double)>
-10. Java SE 21 API, `java.math.BigDecimal` — <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html>
+1. *The Java Language Specification, Java SE 25*, §15.17.3 "Remainder Operator `%`" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.17.3>
+2. Java SE 25 API, `java.lang.Math` (`floorMod`, `addExact`, `multiplyExact`, `pow`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Math.html>
+3. *The Java Language Specification, Java SE 25*, §15.14.2 "Postfix Increment Operator `++`" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.14.2>
+4. *The Java Language Specification, Java SE 25*, §15.17.2 "Division Operator `/`" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.17.2>
+5. *The Java Language Specification, Java SE 25*, §5.6 "Numeric Contexts" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.6>
+6. *The Java Language Specification, Java SE 25*, §5.1.3 "Narrowing Primitive Conversion" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.3>
+7. *The Java Language Specification, Java SE 25*, §15.26.2 "Compound Assignment Operators" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.26.2>
+8. *The Java Language Specification, Java SE 25*, §4.2.2 "Integer Operations" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2.2>
+9. Java SE 25 API, `java.math.BigDecimal`, constructor `BigDecimal(double)` ("0.1 cannot be represented exactly as a `double`") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(double)>
+10. Java SE 25 API, `java.math.BigDecimal` — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/BigDecimal.html>
 
 ---
 
