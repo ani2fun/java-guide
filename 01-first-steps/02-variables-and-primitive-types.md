@@ -441,7 +441,24 @@ Main.java:4: error: incompatible types: possible lossy conversion from int to by
 1 error
 ```
 
-A `final` variable counts as a constant when its own value is one <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[4]</abbr>. So `final int n = 100; byte b = n;` does compile, and prints `100`.
+Adding `final` brings the exception back. A `final` variable counts as a constant when it's declared with a constant value <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[4]</abbr>, so the compiler can check the value again:
+
+```java run
+public class Main {
+    public static void main(String[] args) {
+        final int n = 100;   // final, and the value is written right here: a constant
+        byte b = n;
+        System.out.println(b);
+    }
+}
+```
+
+**Output:**
+```
+100
+```
+
+Both parts matter. Split it into `final int n;` and `n = 100;`, and `n` is no longer a constant, so `byte b = n;` fails with the same error as before.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
