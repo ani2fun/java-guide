@@ -169,7 +169,7 @@ Main.java:7: error: constructor Animal in class Animal cannot be applied to give
 
 The caret points at `Dog`'s body, which is where the invisible `super();` sits. The fix is the `super(name);` from the first example. Note that constructors aren't inherited either: `Dog` gets no `Dog(String)` unless it declares one itself <abbr title="The Java Language Specification, Java SE 25, §8.2">[2]</abbr>.
 
-*Non-example: a superclass constructor calls an overridden method.* `Animal`'s constructor calls `describe()`, and `Dog` overrides it. The call runs `Dog`'s version, before `Dog`'s constructor has set `name`:
+*Watch out: a superclass constructor calls an overridden method.* `Animal`'s constructor calls `describe()`, and `Dog` overrides it. The call runs `Dog`'s version, before `Dog`'s constructor has set `name`:
 
 ```java run
 class Animal {
@@ -249,7 +249,7 @@ The code before `super(...)` can assign fields, check arguments and compute valu
 
 </div>
 
-*Non-example: a `private` field is not inherited.* Members declared `private` are not inherited by subclasses <abbr title="The Java Language Specification, Java SE 25, §8.2">[2]</abbr>. The field still exists inside a `Dog` object, but `Dog`'s code can't refer to it by name:
+*Watch out: a `private` field is not inherited.* Members declared `private` are not inherited by subclasses <abbr title="The Java Language Specification, Java SE 25, §8.2">[2]</abbr>. The field still exists inside a `Dog` object, but `Dog`'s code can't refer to it by name:
 
 ```java run
 class Animal {
@@ -277,7 +277,7 @@ Main.java:6: error: secret has private access in Animal
 
 To fix it, give the superclass a method that returns the value, or mark the field `protected` so subclasses can see it ([access levels](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers)).
 
-*Non-example: inheriting only to reuse code.* The test for whether to inherit is the "is-a" relationship. A `Dog` genuinely *is an* `Animal`. But the JDK's own `java.util.Stack` fails this test: it `extends Vector`, which is a growable list <abbr title="java.util.Stack, Java SE 25 API">[14]</abbr>. As a result, every list method comes along for the ride — including insert-at-any-position, which breaks "last in, first out":
+*Watch out: inheriting only to reuse code.* The test for whether to inherit is the "is-a" relationship. A `Dog` genuinely *is an* `Animal`. But the JDK's own `java.util.Stack` fails this test: it `extends Vector`, which is a growable list <abbr title="java.util.Stack, Java SE 25 API">[14]</abbr>. As a result, every list method comes along for the ride — including insert-at-any-position, which breaks "last in, first out":
 
 ```java run
 import java.util.Stack;
@@ -380,7 +380,7 @@ Main.java:4: error: method does not override or implement a method from a supert
 
 `speakk` (note the typo) overrides nothing, so `@Override` flags it. Without the annotation, this would compile as a brand-new method that nobody ever calls, and `speak()` would quietly keep the parent's behavior.
 
-*Non-example: an override that narrows access.* An override must give at least as much access as the method it replaces <abbr title="The Java Language Specification, Java SE 25, §8.4.8.3">[6]</abbr>. `Object.toString()` is `public`. If you leave `public` off, the name and parameters still match, but the override is rejected:
+*Watch out: an override that narrows access.* An override must give at least as much access as the method it replaces <abbr title="The Java Language Specification, Java SE 25, §8.4.8.3">[6]</abbr>. `Object.toString()` is `public`. If you leave `public` off, the name and parameters still match, but the override is rejected:
 
 ```java run
 class Animal {
@@ -519,7 +519,7 @@ animal
 
 `Dog`'s `kind` **hides** `Animal`'s, and both fields exist side by side in the object. Hiding a field like this is a code smell precisely because it causes this kind of confusion. Override *methods*; don't hide fields.
 
-*Non-example: a `static` method does not dispatch.* A `static` method belongs to the class, not to an object. So a subclass's `static` method with the same signature **hides** the parent's, rather than overriding it <abbr title="The Java Language Specification, Java SE 25, §8.4.8.2">[9]</abbr>. Just like a field, it's picked by the declared type:
+*Watch out: a `static` method does not dispatch.* A `static` method belongs to the class, not to an object. So a subclass's `static` method with the same signature **hides** the parent's, rather than overriding it <abbr title="The Java Language Specification, Java SE 25, §8.4.8.2">[9]</abbr>. Just like a field, it's picked by the declared type:
 
 ```java run
 class Animal {
@@ -644,7 +644,7 @@ Exception in thread "main" java.lang.ClassCastException: class Cat cannot be cas
 
 The message names both classes: the object's actual class (`Cat`) and the cast's target (`Dog`). The failure happens at run time, on line 9 — far from the line that put a `Cat` into `a`.
 
-*Non-example: a cast between unrelated types.* A `Dog` can never be a `String`. Both are classes, and neither one extends the other, so the compiler refuses the cast outright:
+*Watch out: a cast between unrelated types.* A `Dog` can never be a `String`. Both are classes, and neither one extends the other, so the compiler refuses the cast outright:
 
 ```java run
 class Animal { }
@@ -739,7 +739,7 @@ class Dog extends Animal { @Override String species() { return "dog"; } }
 
 `Animal.species()` is `final`, so `Dog` can't override it — the lock holds. javac's next line spells out the reason: `overridden method is final`.
 
-*Non-example: extending a `final` class.* Putting `final` on a *class* forbids subclasses altogether <abbr title="The Java Language Specification, Java SE 25, §8.1.4">[1]</abbr>. `String` is one such `final` class:
+*Watch out: extending a `final` class.* Putting `final` on a *class* forbids subclasses altogether <abbr title="The Java Language Specification, Java SE 25, §8.1.4">[1]</abbr>. `String` is one such `final` class:
 
 ```java run
 class Shout extends String { }

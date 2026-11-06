@@ -81,7 +81,7 @@ public class Main {
 **Intuition.**
 *Mechanism.* `while (cond)` evaluates `cond` *before* each pass, and the body runs only while it's true. If the body never changes what `cond` depends on, the condition stays true forever. That's an **infinite loop**.
 
-*Non-example: the missing update.* Leave out the `i++`, and nothing ever makes `i < 3` false:
+*Watch out: the missing update.* Leave out the `i++`, and nothing ever makes `i < 3` false:
 
 ```java run
 // expects-hang: the body never changes i, so i < 3 stays true forever
@@ -318,7 +318,7 @@ after: 3
 
 The last value is `3`, not `2`. The loop stops only when the test fails, and it fails at `3`.
 
-*Non-example: a stray semicolon.* Just as with `if` in [Conditionals](/synapse/programming-languages/java/control-flow/conditionals), a `;` after the header becomes the whole body:
+*Watch out: a stray semicolon.* Just as with `if` in [Conditionals](/synapse/programming-languages/java/control-flow/conditionals), a `;` after the header becomes the whole body:
 
 ```java run
 public class Main {
@@ -337,7 +337,7 @@ hi
 
 The loop ran three times with an empty body. Then the block after it ran once, on its own. (A `while (i < 3);` is even worse: its empty body never changes `i`, so it never ends.)
 
-*Non-example: a `double` counter.* A counter that steps by `0.1` inherits the rounding you saw in [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic):
+*Watch out: a `double` counter.* A counter that steps by `0.1` inherits the rounding you saw in [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic):
 
 ```java run
 public class Main {
@@ -412,7 +412,7 @@ public class Main {
 
 **Analysis.** The loop ran once per element: `n` was `2`, then `4`, then `6`, adding each to `sum` (`0 → 2 → 6 → 12`). There's no index and no boundary to get wrong. The loop visits every element exactly once and stops. It's the safest loop when "every element, in order" is all you need.
 
-*Non-example: a `String` isn't a list here.* A `String` holds characters, but the enhanced `for` accepts only an array or an `Iterable`, the type behind Java's collections:
+*Watch out: a `String` isn't a list here.* A `String` holds characters, but the enhanced `for` accepts only an array or an `Iterable`, the type behind Java's collections:
 
 ```java run
 public class Main {

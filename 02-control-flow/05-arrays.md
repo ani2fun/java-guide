@@ -145,7 +145,7 @@ A `String[]` slot starts as **`null`**: "no object yet". [References, Equality &
 
 *Concrete bite.* The size is fixed at creation: `.length` is a property of the array, not a target you can change. (You'll feel that limit firsthand in §5.) For now, the point is that every slot exists from the start. An unassigned `int` slot is `0`, not "empty" or "undefined".
 
-*Non-example: a literal assigned later.* The `{…}` shorthand works only in a declaration <abbr title="The Java Language Specification, Java SE 25, §10.6">[1]</abbr>. Declare first and assign the braces later, and javac can't parse it:
+*Watch out: a literal assigned later.* The `{…}` shorthand works only in a declaration <abbr title="The Java Language Specification, Java SE 25, §10.6">[1]</abbr>. Declare first and assign the braces later, and javac can't parse it:
 
 ```java run
 public class Main {
@@ -470,7 +470,7 @@ public class Main {
 
 `a` is unchanged. Each "add" to a full array costs a new array plus a copy of every element: O(N) work.
 
-*Non-example: `=` doesn't copy.* Assigning one array variable to another shares the array. It doesn't make a second one:
+*Watch out: `=` doesn't copy.* Assigning one array variable to another shares the array. It doesn't make a second one:
 
 ```java run
 public class Main {

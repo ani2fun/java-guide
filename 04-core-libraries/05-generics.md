@@ -112,7 +112,7 @@ Main.java:10: error: incompatible types: String cannot be converted to Integer
 
 `sb.get()` is statically a `String`, so the compiler refuses to assign it to an `Integer`: the type argument carried `String` all the way through to the return type. Notice *when* the error arrives — at compile time, not as a `ClassCastException` at run time.
 
-*Non-example: a raw type.* If you leave out the type argument, you get a **raw type**: `List` instead of `List<String>`. The JLS allows raw types "only as a concession to compatibility of legacy code" — code written before Java 5 added generics <abbr title="The Java Language Specification, Java SE 25, §4.8">[3]</abbr>. With a raw type, the compiler checks nothing:
+*Watch out: a raw type.* If you leave out the type argument, you get a **raw type**: `List` instead of `List<String>`. The JLS allows raw types "only as a concession to compatibility of legacy code" — code written before Java 5 added generics <abbr title="The Java Language Specification, Java SE 25, §4.8">[3]</abbr>. With a raw type, the compiler checks nothing:
 
 ```java run
 import java.util.ArrayList;
@@ -226,7 +226,7 @@ Main.java:8: error: method max in class Main cannot be applied to given types;
   reason: inference variable T has incompatible bounds
 ```
 
-*Non-example: `var` with a diamond.* The diamond infers its type from the variable's declared type. With `var`, there is no declared type, so the compiler falls back to the widest type, `Object`:
+*Watch out: `var` with a diamond.* The diamond infers its type from the variable's declared type. With `var`, there is no declared type, so the compiler falls back to the widest type, `Object`:
 
 ```java run
 import java.util.ArrayList;

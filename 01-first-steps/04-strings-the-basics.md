@@ -140,7 +140,7 @@ it's
 
 Each `\"` printed a quote, `\n` split the line in two, and `\\` printed a single backslash. Inside double quotes, a single quote needs no escape (`"it's"`). You need the escape only inside a `char` literal (`'\''`).
 
-*Non-example: an unescaped quote.* Leave out the backslashes, and the String ends at the second `"`. javac then reads `hi` as code:
+*Watch out: an unescaped quote.* Leave out the backslashes, and the String ends at the second `"`. javac then reads `hi` as code:
 
 ```java run
 public class Main {
@@ -360,7 +360,7 @@ sum: 3
 
 The parentheses force `1 + 2 = 3` first, then the concatenation.
 
-*Non-example: two `char`s before any String.* A `char` is a number to `+`, as [Numbers and arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) showed with `'A' + 1`. So `'J' + 'a'` adds character codes, and only then meets the String:
+*Watch out: two `char`s before any String.* A `char` is a number to `+`, as [Numbers and arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) showed with `'A' + 1`. So `'J' + 'a'` adds character codes, and only then meets the String:
 
 ```java run
 public class Main {
@@ -449,7 +449,7 @@ true
 
 The text is `"yes"` both ways. `==` compared object identities, found two different objects, and said `false`. `.equals` compared characters and said `true`.
 
-*Non-example: text joined while the program runs.* The same thing happens with no `new` in sight. Strings built by concatenation at run time are new objects, never taken from the pool <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[4]</abbr>:
+*Watch out: text joined while the program runs.* The same thing happens with no `new` in sight. Strings built by concatenation at run time are new objects, never taken from the pool <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[4]</abbr>:
 
 ```java run
 public class Main {

@@ -140,7 +140,7 @@ public class Main {
 25
 ```
 
-*Non-example: reading the box before anything is in it.* The compiler tracks whether each local variable has definitely been given a value before any line reads it — Java calls this **definite assignment** <abbr title="The Java Language Specification, Java SE 25, chapter 16">[1]</abbr>. Read an empty box, and the program doesn't compile:
+*Watch out: reading the box before anything is in it.* The compiler tracks whether each local variable has definitely been given a value before any line reads it — Java calls this **definite assignment** <abbr title="The Java Language Specification, Java SE 25, chapter 16">[1]</abbr>. Read an empty box, and the program doesn't compile:
 
 ```java run
 public class Main {
@@ -265,7 +265,7 @@ public class Main {
 21
 ```
 
-*Non-example: reassigning a `final` variable.* The type was never the only promise you could make. With `final`, the value is a promise too — and the compiler holds you to it:
+*Watch out: reassigning a `final` variable.* The type was never the only promise you could make. With `final`, the value is a promise too — and the compiler holds you to it:
 
 ```java run
 public class Main {
@@ -421,7 +421,7 @@ A
 
 The last line shows the other direction. An `int` goes into a `double` without needing any exception, because every `int` value fits. [Numbers and arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) covers these conversions in full.
 
-*Non-example: the same value, in a variable.* The exception applies to constants only. Put `100` into an ordinary `int` variable first, and the compiler no longer checks the value. It checks the type instead — and an `int` doesn't always fit in a `byte`:
+*Watch out: the same value, in a variable.* The exception applies to constants only. Put `100` into an ordinary `int` variable first, and the compiler no longer checks the value. It checks the type instead — and an `int` doesn't always fit in a `byte`:
 
 ```java run
 public class Main {
@@ -535,7 +535,7 @@ public class Main {
 3000000000
 ```
 
-*Non-example: a decimal without its `f`.* The same rule bites `float`. `0.5` is a `double` literal, and a `double` doesn't always fit in a `float`:
+*Watch out: a decimal without its `f`.* The same rule bites `float`. `0.5` is a `double` literal, and a `double` doesn't always fit in a `float`:
 
 ```java run
 public class Main {
@@ -625,7 +625,7 @@ The error names `int`, even though you wrote `var`. That's the proof: `x`'s type
 
 </div>
 
-*Non-example: `var` with no initializer.* Leave out the initializer, and the compiler can't even guess:
+*Watch out: `var` with no initializer.* Leave out the initializer, and the compiler can't even guess:
 
 ```java run
 public class Main {

@@ -251,7 +251,7 @@ Main.java:8: error: cannot find symbol
 
 It's the same rule you met in [Loops](/synapse/programming-languages/java/control-flow/loops): a variable lives from its declaration to the end of the block that holds it. A method body is just one more block.
 
-*Non-example: reusing a name inside its own scope.* Inside that range, the name is taken. Declaring it again in an inner block is an error, not a new variable <abbr title="The Java Language Specification, Java SE 25, §6.4">[4]</abbr>:
+*Watch out: reusing a name inside its own scope.* Inside that range, the name is taken. Declaring it again in an inner block is an error, not a new variable <abbr title="The Java Language Specification, Java SE 25, §6.4">[4]</abbr>:
 
 ```java run
 public class Main {
@@ -402,7 +402,7 @@ public class Main {
 
 `sum()` passed an empty array, so the loop never ran and `total` stayed `0`. The last call passed an array directly, and that works too. For the same reason, `main(String... args)` is a legal way to write `main`.
 
-*Non-example: a varargs parameter that isn't last.* The compiler matches arguments left to right, so the open-ended list has to come at the end:
+*Watch out: a varargs parameter that isn't last.* The compiler matches arguments left to right, so the open-ended list has to come at the end:
 
 ```java run
 public class Main {

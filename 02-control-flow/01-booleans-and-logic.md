@@ -211,7 +211,7 @@ Main.java:4: error: incompatible types: int cannot be converted to boolean
 
 `(x = 5)` assigns `5` to `x` and evaluates to the `int` `5`, and storing that in a `boolean` fails to compile. The very typo that compiles and misbehaves in C is a compile error here.
 
-*Non-example: the slip the compiler can't see.* The protection comes from the types. When the variable is itself a `boolean`, the assignment produces a `boolean`, so the typo compiles:
+*Watch out: the slip the compiler can't see.* The protection comes from the types. When the variable is itself a `boolean`, the assignment produces a `boolean`, so the typo compiles:
 
 ```java run
 public class Main {
@@ -279,7 +279,7 @@ These three build every compound condition you'll ever write. Here are all four 
 | `false` | `true` | `false` | `true` |
 | `false` | `false` | `false` | `false` |
 
-*Non-example: a chained comparison.* In maths, you write "x is between 1 and 10" as 1 < x < 10. Java rejects that:
+*Watch out: a chained comparison.* In maths, you write "x is between 1 and 10" as 1 < x < 10. Java rejects that:
 
 ```java run
 public class Main {

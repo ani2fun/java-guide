@@ -246,7 +246,7 @@ concat:  [a, b, c]
 **Intuition.**
 *Mechanism.* `flatMap(List::stream)` turned each inner list into a stream, and poured all those streams into one. The empty list contributed zero elements, so it simply vanished. `Stream.of(…)` makes a stream from the values you list, and `concat` ran one stream after the other.
 
-*Concrete bite.* The `map` line is the non-example: it printed `[[1, 2], [3], []]`, still three lists. Asking `map` to flatten does nothing, because `map` never changes the number of elements.
+*Concrete bite.* The `map` line is the trap: it printed `[[1, 2], [3], []]`, still three lists. Asking `map` to flatten does nothing, because `map` never changes the number of elements.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -347,7 +347,7 @@ public class Main {
 {false=2, true=3}
 ```
 
-*Non-example: `toMap` with a repeated key.* `Collectors.toMap(keyFn, valueFn)` builds one entry per element. When two elements produce the same key, it throws <abbr title="Java SE 25 API, java.util.stream.Collectors.toMap(Function, Function)">[3]</abbr>:
+*Watch out: `toMap` with a repeated key.* `Collectors.toMap(keyFn, valueFn)` builds one entry per element. When two elements produce the same key, it throws <abbr title="Java SE 25 API, java.util.stream.Collectors.toMap(Function, Function)">[3]</abbr>:
 
 ```java run
 import java.util.List;
@@ -536,7 +536,7 @@ public class Main {
 [1, 2, 4, 8, 16]
 ```
 
-*Non-example: a stateful step breaks the one-at-a-time flow.* `sorted` is **stateful**: it can't pass on the smallest element until it has seen them all <abbr title="Java SE 25 API, java.util.stream package summary, stateless and stateful operations">[1]</abbr>. Put it before `findFirst`, and every element gets pulled:
+*Watch out: a stateful step breaks the one-at-a-time flow.* `sorted` is **stateful**: it can't pass on the smallest element until it has seen them all <abbr title="Java SE 25 API, java.util.stream package summary, stateless and stateful operations">[1]</abbr>. Put it before `findFirst`, and every element gets pulled:
 
 ```java run
 import java.util.List;
@@ -566,7 +566,7 @@ found: 2
 
 All five elements were peeked, because `sorted` needed every one of them before `filter` could see any.
 
-*Non-example: `peek` as logic.* Laziness also means that a side effect inside a pipeline might never run:
+*Watch out: `peek` as logic.* Laziness also means that a side effect inside a pipeline might never run:
 
 ```java run
 import java.util.List;

@@ -121,7 +121,7 @@ Exception in thread "main" java.util.IllegalFormatConversionException: d != java
 
 `%d` demands a whole number, but it got a String, so `printf` throws `IllegalFormatConversionException`. Read the message as "`d` does not fit a `String`". The reverse fails too: `printf("%.2f%n", 5)` throws `f != java.lang.Integer`, because `5` is an `int`. Write `5.0`, or divide by `2.0` first.
 
-*Non-example: a bare `%` sign.* A `%` always starts a specifier. So `"50% done"` is read as `% d`, a specifier with no value to fill it:
+*Watch out: a bare `%` sign.* A `%` always starts a specifier. So `"50% done"` is read as `% d`, a specifier with no value to fill it:
 
 ```java run
 public class Main {

@@ -104,7 +104,7 @@ c -> cls
 
 *Concrete bite.* Because the static field is shared, a change through *any* path shows up for *everyone*. `count` reached `3` because three different constructors all incremented the same variable. That's both the feature (a class-wide tally) and the hazard (shared mutable state that any instance can change).
 
-*Non-example: a `static` field read through an object.* Java lets you write `a.count`, and it looks like `a`'s own field. It isn't:
+*Watch out: a `static` field read through an object.* Java lets you write `a.count`, and it looks like `a`'s own field. It isn't:
 
 ```java run
 class Widget {
@@ -353,7 +353,7 @@ Config initialized
 
 `Config.MAX` printed `100` with no initialization, because the `100` was already compiled into `Main`. `Config.calls` isn't a constant, so reading it initialized `Config`, and the block printed first.
 
-*Non-example: a `static` block that throws.* A `static` block runs where the class is first used, so its failure lands there too, wrapped in a new error:
+*Watch out: a `static` block that throws.* A `static` block runs where the class is first used, so its failure lands there too, wrapped in a new error:
 
 ```java run
 class Table {
@@ -458,7 +458,7 @@ constructor body
 
 Both "top to bottom" steps follow **textual order**: the order of the lines in the file.
 
-*Non-example: reading a field before its declaration.* Because static initializers run top to bottom, javac rejects an initializer that reads a field declared further down <abbr title="The Java Language Specification, Java SE 25, §8.3.3">[12]</abbr>:
+*Watch out: reading a field before its declaration.* Because static initializers run top to bottom, javac rejects an initializer that reads a field declared further down <abbr title="The Java Language Specification, Java SE 25, §8.3.3">[12]</abbr>:
 
 ```java run
 public class Main {

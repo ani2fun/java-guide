@@ -107,7 +107,7 @@ Main.java:3: error: ';' expected
 
 The compiler read the whole file and found that the statement on line 3 had no `;`, so it refused to produce bytecode. Nothing ran, which is why `Hello, world!` appears nowhere.
 
-*Non-example: a mistake the compiler can't see.* Some mistakes get past the compiler, and fail only while the program runs. Dividing a whole number by zero is one of them: the compiler accepts `10 / 0`, but the JVM refuses to compute it.
+*Watch out: a mistake the compiler can't see.* Some mistakes get past the compiler, and fail only while the program runs. Dividing a whole number by zero is one of them: the compiler accepts `10 / 0`, but the JVM refuses to compute it.
 
 ```java run
 public class Main {
@@ -445,7 +445,7 @@ Putting `//` before a line to disable it is called **commenting out**.
 
 *Concrete bite.* The missing line is the proof: the output is just `code runs`. The commented-out `println` was legal code, but it sat behind `//`, so the compiler never saw it as a statement, and it produced nothing.
 
-*Non-example: a block comment inside a block comment.* Comments don't nest <abbr title="The Java Language Specification, Java SE 25, §3.7">[3]</abbr>. A `/* ... */` comment ends at the **first** `*/`, wherever that happens to be. Wrap a line that already carries a block comment, and the outer comment ends too early:
+*Watch out: a block comment inside a block comment.* Comments don't nest <abbr title="The Java Language Specification, Java SE 25, §3.7">[3]</abbr>. A `/* ... */` comment ends at the **first** `*/`, wherever that happens to be. Wrap a line that already carries a block comment, and the outer comment ends too early:
 
 ```java run
 public class Main {

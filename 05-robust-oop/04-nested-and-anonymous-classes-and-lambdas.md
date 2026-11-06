@@ -334,7 +334,7 @@ Main.java:1: error: Unexpected @FunctionalInterface annotation
 1 error
 ```
 
-*Non-example: changing a variable the lambda uses.* A lambda may use one of its method's local variables only if that variable is **effectively final** — meaning it's never assigned again after its initializer <abbr title="The Java Language Specification, Java SE 25, §15.27.2">[6]</abbr>. A single later assignment breaks the rule, even one that comes after the lambda:
+*Watch out: changing a variable the lambda uses.* A lambda may use one of its method's local variables only if that variable is **effectively final** — meaning it's never assigned again after its initializer <abbr title="The Java Language Specification, Java SE 25, §15.27.2">[6]</abbr>. A single later assignment breaks the rule, even one that comes after the lambda:
 
 ```java run
 interface Greeter { String greet(String name); }

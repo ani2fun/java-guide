@@ -164,7 +164,7 @@ Main.java:9: error: the switch expression does not cover all possible input valu
 
 Every such `switch` in the program stops compiling until it handles `Pentagon`. You first met this error in [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching).
 
-*Non-example: a `default` over a sealed type.* A `default` makes any `switch` exhaustive <abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[3]</abbr> — which also silences the check above:
+*Watch out: a `default` over a sealed type.* A `default` makes any `switch` exhaustive <abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[3]</abbr> — which also silences the check above:
 
 ```java run
 // ⚠️ ANTI-PATTERN — a default branch over a sealed type.  Do not copy it.
@@ -267,7 +267,7 @@ There's no `if (x != null)`, and no `NullPointerException`: the chain handles ab
 
 *Concrete bite.* `Optional` is meant as a return type. Its API says it's "primarily intended for use as a method return type where there is a clear need to represent 'no result'" <abbr title="Java SE 25 API, java.util.Optional">[7]</abbr>. The same note adds that a variable of type `Optional` "should never itself be `null`".
 
-*Non-example: an `Optional` field left `null`.* A field of type `Optional` starts out as `null`, just like any other reference field:
+*Watch out: an `Optional` field left `null`.* A field of type `Optional` starts out as `null`, just like any other reference field:
 
 ```java run
 // ⚠️ ANTI-PATTERN — an Optional field left null.  Do not copy it.
@@ -375,7 +375,7 @@ Point[x=3, y=4]
 
 *Concrete bite: `final` is shallow.* A record's `final` field fixes the *reference*, not the object it points to. So a record holding a caller's `ArrayList` changes whenever the caller changes the list. [Enums & Records](/synapse/programming-languages/java/core-libraries/enums-and-records) shows this, along with the fix: `List.copyOf` in a compact constructor.
 
-*Non-example: an unmodifiable view is not a copy.* `Collections.unmodifiableList` looks like the same fix, but it returns a **view**, and reads "read through" to the original list <abbr title="Java SE 25 API, java.util.Collections.unmodifiableList">[8]</abbr>. `List.copyOf`, by contrast, returns an unmodifiable list that "will not reflect" later changes <abbr title="Java SE 25 API, java.util.List.copyOf">[9]</abbr>:
+*Watch out: an unmodifiable view is not a copy.* `Collections.unmodifiableList` looks like the same fix, but it returns a **view**, and reads "read through" to the original list <abbr title="Java SE 25 API, java.util.Collections.unmodifiableList">[8]</abbr>. `List.copyOf`, by contrast, returns an unmodifiable list that "will not reflect" later changes <abbr title="Java SE 25 API, java.util.List.copyOf">[9]</abbr>:
 
 ```java run
 import java.util.ArrayList;
@@ -408,7 +408,7 @@ view.add: UnsupportedOperationException
 
 Nobody can change the list *through* `view` — `add` threw. But `source` still could, and `view` showed `Linus`. The copy, meanwhile, kept `[Ada]`.
 
-*Non-example: `var` with a diamond.* `var` copies its type from the initializer, and `new ArrayList<>()` with nothing to infer from gives `ArrayList<Object>`. OpenJDK's style guide calls this "DANGEROUS" <abbr title="OpenJDK, Local Variable Type Inference: Style Guidelines, G6">[10]</abbr>:
+*Watch out: `var` with a diamond.* `var` copies its type from the initializer, and `new ArrayList<>()` with nothing to infer from gives `ArrayList<Object>`. OpenJDK's style guide calls this "DANGEROUS" <abbr title="OpenJDK, Local Variable Type Inference: Style Guidelines, G6">[10]</abbr>:
 
 ```java run
 import java.util.ArrayList;

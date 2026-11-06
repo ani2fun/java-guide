@@ -167,7 +167,7 @@ null
 
 Number fields start at zero, `boolean` at `false`, and `char` at the character with code `0`. Every reference type (`String`, arrays, your own classes) starts at `null`, meaning no object at all. A field may also declare its own start value, as in `int width = 1;` <abbr title="The Java Language Specification, Java SE 25, §8.3.2">[3]</abbr>.
 
-*Non-example: a local variable gets no default.* The rule covers fields, not a method's local variables. An object variable declared without `new` isn't a usable object:
+*Watch out: a local variable gets no default.* The rule covers fields, not a method's local variables. An object variable declared without `new` isn't a usable object:
 
 ```java run
 class Rectangle {
@@ -386,7 +386,7 @@ Main.java:10: error: cannot reference width before supertype constructor has bee
 
 The message says "supertype constructor" because `this(5, 5)` will, in turn, call the superclass constructor. Until that has happened, the object isn't ready to use. On older JDKs, both of these programs fail with `call to this must be first statement in constructor`, and you'll still see code written around that old rule.
 
-*Non-example: a constructor with a return type.* Write `void` in front of a constructor, and it becomes an ordinary method that happens to share the class's name:
+*Watch out: a constructor with a return type.* Write `void` in front of a constructor, and it becomes an ordinary method that happens to share the class's name:
 
 ```java run
 class Rectangle {

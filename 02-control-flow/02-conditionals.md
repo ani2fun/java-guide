@@ -124,7 +124,7 @@ leave the house
 
 `cold` is `false`, so `wear a coat` is correctly skipped, but `leave the house` printed anyway. The indentation suggests both lines are guarded, but only the first one is. The braceless `if` controls exactly one statement, and the second runs no matter what.
 
-*Non-example: a stray semicolon.* A `;` on its own is a statement too. It's the **empty statement**, and it does nothing <abbr title="The Java Language Specification, Java SE 25, §14.6">[3]</abbr>. Put one after the condition, and the `if` guards that nothing:
+*Watch out: a stray semicolon.* A `;` on its own is a statement too. It's the **empty statement**, and it does nothing <abbr title="The Java Language Specification, Java SE 25, §14.6">[3]</abbr>. Put one after the condition, and the `if` guards that nothing:
 
 ```java run
 public class Main {
@@ -266,7 +266,7 @@ C
 
 `95` deserves an `A`, but `score >= 70` is checked first and matches. So it prints `C` and never reaches `>= 90`. The compiler sees nothing wrong. The logic is legal, just ordered backwards.
 
-*Non-example: a chain with no final `else`.* A chain often sets a variable. Without an `else`, some values set nothing, and the compiler spots that path <abbr title="The Java Language Specification, Java SE 25, Chapter 16">[10]</abbr>:
+*Watch out: a chain with no final `else`.* A chain often sets a variable. Without an `else`, some values set nothing, and the compiler spots that path <abbr title="The Java Language Specification, Java SE 25, Chapter 16">[10]</abbr>:
 
 ```java run
 public class Main {
@@ -634,7 +634,7 @@ Main.java:4: error: illegal start of expression
 
 `if` can't start an expression, so Java rejects `String s = if …`. The ternary `String s = cond ? "yes" : "no";` is the expression form that works.
 
-*Non-example: a ternary inside a `+` chain.* `?:` binds more loosely than `+` and every comparison. Without parentheses, the text joins the number first:
+*Watch out: a ternary inside a `+` chain.* `?:` binds more loosely than `+` and every comparison. Without parentheses, the text joins the number first:
 
 ```java run
 public class Main {

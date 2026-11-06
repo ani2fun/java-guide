@@ -138,7 +138,7 @@ after run(), state = NEW
 
 The task ran on `main`, and the `Thread` object is still `NEW`, because it never started. The code "works" — sequentially — which hides the mistake until the moment concurrency was the whole point.
 
-*Non-example: starting a thread twice.* "A thread can be started at most once" <abbr title="Java SE 25 API, java.lang.Thread.start()">[2]</abbr>. Once a thread finishes, you can't restart it:
+*Watch out: starting a thread twice.* "A thread can be started at most once" <abbr title="Java SE 25 API, java.lang.Thread.start()">[2]</abbr>. Once a thread finishes, you can't restart it:
 
 ```java run
 public class Main {

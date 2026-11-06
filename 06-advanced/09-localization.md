@@ -125,7 +125,7 @@ default locale: en_US
 **Intuition.**
 *Mechanism.* `forLanguageTag` reads a **BCP 47** language tag — the web standard — which separates its parts with hyphens. It skips the first part it can't read, along with every part after it <abbr title="Java SE 25 API, java.util.Locale.forLanguageTag">[1]</abbr>. A bad tag never makes it throw.
 
-*Non-example: an underscore in a tag.* `fr_FR` is how a locale *prints*, not how a tag is written. As a tag, that whole string is one unreadable part:
+*Watch out: an underscore in a tag.* `fr_FR` is how a locale *prints*, not how a tag is written. As a tag, that whole string is one unreadable part:
 
 ```java run
 import java.util.Locale;
@@ -409,7 +409,7 @@ Exception in thread "main" java.time.DateTimeException: Unable to extract ZoneId
 
 Use a `ZonedDateTime` for `FULL` or `LONG` date-times, or stick with `MEDIUM` and `SHORT`.
 
-*Non-example: typing the output back in.* Since JDK 20, US English times put a **narrow no-break space** (U+202F) before `AM` and `PM`, a change that came with the move to CLDR version 42 <abbr title="JDK-8284840: Update CLDR to Version 42.0 (JDK 20)">[10]</abbr>. A formatter can parse its own output, but it rejects the same time typed with an ordinary space:
+*Watch out: typing the output back in.* Since JDK 20, US English times put a **narrow no-break space** (U+202F) before `AM` and `PM`, a change that came with the move to CLDR version 42 <abbr title="JDK-8284840: Update CLDR to Version 42.0 (JDK 20)">[10]</abbr>. A formatter can parse its own output, but it rejects the same time typed with an ordinary space:
 
 ```java run
 import java.time.LocalTime;

@@ -323,7 +323,7 @@ Main.java:6: error: x has private access in Point
 
 `p.x = 5` is rejected, because the component field is `private` and `final`. The only way to read it is through the accessor `p.x()`. To "change" a point, you build a new one.
 
-*Non-example: a mutable component.* `final` protects the field, not the object the field refers to — just like the `final` array in [Encapsulation & Access Modifiers](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers). So a record that holds a `List` shares that list with whoever else has it:
+*Watch out: a mutable component.* `final` protects the field, not the object the field refers to — just like the `final` array in [Encapsulation & Access Modifiers](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers). So a record that holds a `List` shares that list with whoever else has it:
 
 ```java run
 import java.util.ArrayList;

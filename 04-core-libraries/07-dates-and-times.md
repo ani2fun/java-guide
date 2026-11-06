@@ -136,7 +136,7 @@ before
 Exception in thread "main" java.time.DateTimeException: Invalid date 'February 29' as '2023' is not a leap year
 ```
 
-*Non-example: throwing the result away.* Every `java.time` object is **immutable**: once built, it never changes <abbr title="Java SE 25 API, java.time.LocalDate: &quot;This class is immutable and thread-safe&quot;">[2]</abbr>. So `plusDays` can't move a date. Instead, it returns a *new* date, and the old one stays exactly where it was. It's the same trap you met with [`greeting.toUpperCase();`](/synapse/programming-languages/java/first-steps/strings-the-basics) on a String:
+*Watch out: throwing the result away.* Every `java.time` object is **immutable**: once built, it never changes <abbr title="Java SE 25 API, java.time.LocalDate: &quot;This class is immutable and thread-safe&quot;">[2]</abbr>. So `plusDays` can't move a date. Instead, it returns a *new* date, and the old one stays exactly where it was. It's the same trap you met with [`greeting.toUpperCase();`](/synapse/programming-languages/java/first-steps/strings-the-basics) on a String:
 
 ```java run
 import java.time.LocalDate;
@@ -480,7 +480,7 @@ One instant, three clock readings. Notice that offsets aren't always whole hours
 **Intuition.**
 *Mechanism.* A `ZonedDateTime` holds three things: the local date-time, the offset and the zone. Its `equals` compares all three <abbr title="Java SE 25 API, java.time.chrono.ChronoZonedDateTime.equals and isEqual">[8]</abbr>, while its `isEqual` compares only the instant.
 
-*Non-example: `equals` to ask "same moment?"* Take two objects for the same call, one per city. They describe the same moment, yet they aren't `equals`:
+*Watch out: `equals` to ask "same moment?"* Take two objects for the same call, one per city. They describe the same moment, yet they aren't `equals`:
 
 ```java run
 import java.time.LocalDateTime;
@@ -740,7 +740,7 @@ YYYY -> 2025-12-30
 - `hh` printed `02`: that's 14:07 on a 12-hour clock, with no `a` to say PM.
 - `YYYY` is the **week-based year** <abbr title="Java SE 25 API, DateTimeFormatter pattern letter Y">[9]</abbr>. The week containing 30 December 2024 counts as week 1 of 2025, so the date printed a year late. The bug shows up only in the few days around New Year, which is exactly why it tends to survive testing.
 
-*Non-example: parsing text that isn't ISO.* Without a formatter, `LocalDate.parse` accepts only ISO-8601:
+*Watch out: parsing text that isn't ISO.* Without a formatter, `LocalDate.parse` accepts only ISO-8601:
 
 ```java run
 import java.time.LocalDate;

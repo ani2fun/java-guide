@@ -180,7 +180,7 @@ public class Main {
 
 With `balance` public, `acct.balance = -999` succeeds. The class never gets a chance to object, and a "bank account" now holds `-999`. No method can enforce a rule, because the assignment skips methods entirely.
 
-*Non-example: a guard the constructor skips.* The constructor is a way in too. Here `deposit` has a guard, but the constructor stores whatever it's given:
+*Watch out: a guard the constructor skips.* The constructor is a way in too. Here `deposit` has a guard, but the constructor stores whatever it's given:
 
 ```java run
 class Account {
@@ -314,7 +314,7 @@ Start narrow, and you may have to widen later. Start `public`, and every member 
 
 ## 4. Immutability by design
 
-The strongest form of encapsulation allows no changes at all. You can assign a `final` field exactly once, at its declaration or in the constructor, and never again. A class whose fields are all `final`, with no setters, has its state fixed for life. Its objects are **immutable**, as long as the fields hold primitives or other immutable objects (the non-example below shows why).
+The strongest form of encapsulation allows no changes at all. You can assign a `final` field exactly once, at its declaration or in the constructor, and never again. A class whose fields are all `final`, with no setters, has its state fixed for life. Its objects are **immutable**, as long as the fields hold primitives or other immutable objects (the "Watch out" below shows why).
 
 ```java run
 class Point {
@@ -389,7 +389,7 @@ Main.java:4: error: cannot assign a value to final variable x
 
 `moveTo` tries to reassign `x`, but `x` is `final` and already assigned in the constructor, so the compiler refuses. To "move" an immutable point, you don't mutate it. You build a *new* `Point`.
 
-*Non-example: a `final` field that holds an array.* `final` freezes the *reference*, not the object it points to <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[5]</abbr>. This class has only `private final` fields and no setters, yet its data changes twice:
+*Watch out: a `final` field that holds an array.* `final` freezes the *reference*, not the object it points to <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[5]</abbr>. This class has only `private final` fields and no setters, yet its data changes twice:
 
 ```java run
 class Scores {

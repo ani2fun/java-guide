@@ -115,7 +115,7 @@ The `if` returns whenever `o` isn't a `String`. So on the line after it, `o` mus
 
 *Concrete bite.* The redundancy this removes is real. The classic `instanceof` + cast names the type twice, and the two can drift apart. The pattern names the type once and binds the result, so there's no second cast to get wrong.
 
-*Non-example: a binding where the test may have failed.* With `||`, the right side runs only when the left side is `false` — which is exactly when `s` was never bound:
+*Watch out: a binding where the test may have failed.* With `||`, the right side runs only when the left side is `false` — which is exactly when `s` was never bound:
 
 ```java run
 public class Main {
@@ -229,7 +229,7 @@ other: 2.5
 
 *Concrete bite.* This replaces the verbose `if (o instanceof A a) … else if (o instanceof B b) …` ladder with a flat, value-producing form. The `default` is required *only* because the selector type (`Object`) is open. Close the type set with `sealed`, and the next section removes even that.
 
-*Non-example: a `null` selector without `case null`.* `default` doesn't match `null`. Without a `case null`, a `null` selector throws a `NullPointerException` <abbr title="The Java Language Specification, Java SE 25, §14.11.3">[8]</abbr>:
+*Watch out: a `null` selector without `case null`.* `default` doesn't match `null`. Without a `case null`, a `null` selector throws a `NullPointerException` <abbr title="The Java Language Specification, Java SE 25, §14.11.3">[8]</abbr>:
 
 ```java run
 public class Main {
@@ -255,7 +255,7 @@ Exception in thread "main" java.lang.NullPointerException
 
 To fix it, add `case null ->`, or check for `null` before the `switch`.
 
-*Non-example: a general case before a specific one.* Cases are tried in order. Put `case CharSequence cs` first, and it takes every `String`, so a later `case String s` could never run. javac calls that later case **dominated**, and rejects it <abbr title="The Java Language Specification, Java SE 25, §14.11.1">[6]</abbr>:
+*Watch out: a general case before a specific one.* Cases are tried in order. Put `case CharSequence cs` first, and it takes every `String`, so a later `case String s` could never run. javac calls that later case **dominated**, and rejects it <abbr title="The Java Language Specification, Java SE 25, §14.11.1">[6]</abbr>:
 
 ```java run
 public class Main {

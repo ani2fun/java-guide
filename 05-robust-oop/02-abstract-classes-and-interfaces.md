@@ -155,7 +155,7 @@ Main.java:5: error: Shape is abstract; cannot be instantiated
 
 `new Shape()` is rejected, because `Shape.area()` has no body, so there's no complete object to make. You can hold a `Shape` reference (pointing to a `Circle` or a `Square`), but you can't create a bare `Shape`.
 
-*Non-example: a subclass that forgets the abstract method.* A class that isn't `abstract` may not have an abstract method, whether declared or inherited <abbr title="The Java Language Specification, Java SE 25, §8.1.1.1">[1]</abbr>. Here, `Triangle` inherits `area()` without a body:
+*Watch out: a subclass that forgets the abstract method.* A class that isn't `abstract` may not have an abstract method, whether declared or inherited <abbr title="The Java Language Specification, Java SE 25, §8.1.1.1">[1]</abbr>. Here, `Triangle` inherits `area()` without a body:
 
 ```java run
 abstract class Shape { abstract double area(); }
@@ -245,7 +245,7 @@ class Circle implements Drawable { }
 
 `Circle` claims to be `Drawable` but never provides `draw()`, so it's incomplete. Either implement the method, or declare `Circle` itself `abstract`. Either way, the contract is enforced at compile time.
 
-*Non-example: an implementation without `public`.* `draw()` in the interface is `public`. If you write the implementation with no modifier, you narrow the access — and an override may not do that <abbr title="The Java Language Specification, Java SE 25, §8.4.8.3">[8]</abbr>:
+*Watch out: an implementation without `public`.* `draw()` in the interface is `public`. If you write the implementation with no modifier, you narrow the access — and an override may not do that <abbr title="The Java Language Specification, Java SE 25, §8.4.8.3">[8]</abbr>:
 
 ```java run
 interface Drawable { void draw(); }
@@ -413,7 +413,7 @@ Main.java:12: error: cannot find symbol
 
 `Kettle` implements `Temperature`, but `toFahrenheit` isn't a member of `Kettle`. Calling it through a `Kettle` variable, as `k.toFahrenheit(37)`, fails the same way (`location: variable k of type Kettle`). Note that this differs from a class's `static` method, which a subclass *does* inherit <abbr title="The Java Language Specification, Java SE 25, §8.4.8">[5]</abbr>.
 
-*Non-example: calling the `private` helper from outside.*
+*Watch out: calling the `private` helper from outside.*
 
 ```java run
 interface Temperature {
@@ -516,7 +516,7 @@ class C extends A, B {}
 
 `extends A, B` isn't even valid syntax, because a class has at most one superclass. For `C` to be "both," `A` and `B` would need to be interfaces, and `C` would `implement` them.
 
-*Non-example: two defaults with the same signature.* Give `Swimmer` and a new `Walker` interface each a `default` `move()`. A class that implements both now inherits two bodies for one method, and that's a compile-time error <abbr title="The Java Language Specification, Java SE 25, §8.4.8.4">[6]</abbr>:
+*Watch out: two defaults with the same signature.* Give `Swimmer` and a new `Walker` interface each a `default` `move()`. A class that implements both now inherits two bodies for one method, and that's a compile-time error <abbr title="The Java Language Specification, Java SE 25, §8.4.8.4">[6]</abbr>:
 
 ```java run
 interface Swimmer { default String move() { return "swimming"; } }

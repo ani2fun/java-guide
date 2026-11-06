@@ -93,7 +93,7 @@ An assertion that the JVM ignores by default is worthless as a test. That's the 
 
 *Concrete bite.* The first run is the trap: `java Main` printed `passed` for code that's wrong.
 
-*Non-example: an assertion with a side effect.* "No effect whatsoever" includes the condition itself: it isn't even evaluated. So if you put work inside an `assert`, that work vanishes along with the assertion:
+*Watch out: an assertion with a side effect.* "No effect whatsoever" includes the condition itself: it isn't even evaluated. So if you put work inside an `assert`, that work vanishes along with the assertion:
 
 ```java run
 public class Main {
@@ -365,7 +365,7 @@ Main-Class: Greeting
 
 This is a plain, **non-modular** JAR, because it has no `module-info.class`. A JAR that does have one is a **modular JAR**. [Packages, Modules & the Build](/synapse/programming-languages/java/robust-oop/packages-modules-and-the-build) builds both kinds, and also shows how a plain JAR on the module path becomes an automatic module, and how `jlink` makes a runtime image.
 
-*Non-example: a JAR with no `Main-Class`.* Build the JAR without `--main-class`, and `java -jar` has no class to start. The same goes for the JAR that `mvn package` built in §3:
+*Watch out: a JAR with no `Main-Class`.* Build the JAR without `--main-class`, and `java -jar` has no class to start. The same goes for the JAR that `mvn package` built in §3:
 
 ```
 $ jar --create --file plain.jar Greeting.class

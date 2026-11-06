@@ -133,7 +133,7 @@ public class Main {
 
 For each `i`, the inner loop printed `j = 1`, then hit `break` at `j == 2`. But that `break` ended only the *inner* loop. The outer loop dutifully moved on to the next `i` and started a fresh inner loop, three times over. `break` stopped the inner search, not the whole thing.
 
-*Non-example: `break` inside a `switch`.* A colon-style `switch` from [Conditionals](/synapse/programming-languages/java/control-flow/conditionals) uses `break` to end each case. Inside a loop, that `break` leaves the `switch`, not the loop:
+*Watch out: `break` inside a `switch`.* A colon-style `switch` from [Conditionals](/synapse/programming-languages/java/control-flow/conditionals) uses `break` to end each case. Inside a loop, that `break` leaves the `switch`, not the loop:
 
 ```java run
 public class Main {
@@ -245,7 +245,7 @@ checking 3
 
 `checking i` prints on every pass, because it's *above* the `continue`. `i is odd` prints only for odd `i`, because for even `i` the `continue` skipped it. The `continue` cut the body short without ending the loop.
 
-*Non-example: `continue` in a `while`, above the update.* Here the `i++` sits below the `continue`:
+*Watch out: `continue` in a `while`, above the update.* Here the `i++` sits below the `continue`:
 
 ```java run
 // expects-hang: continue skips the i++, so i stays 2 and the loop never ends
@@ -334,7 +334,7 @@ done
 
 **Analysis.** The loops ran until `i * j == 4` (at `i = 2, j = 2`). Then `break outer` left **both** loops at once, and execution jumped past the outer loop to `done`. A plain `break` there would have ended only the inner loop and let the outer one carry on to `i = 3`. The label is what made it abandon the whole nested search.
 
-The same label fixes the §1 `switch` non-example. Name the loop, and `break search` leaves the loop from inside the `switch`:
+The same label fixes the `switch` trap from §1. Name the loop, and `break search` leaves the loop from inside the `switch`:
 
 ```java run
 public class Main {
@@ -523,7 +523,7 @@ public class Main {
 
 The real maximum is `-1`, but `0` was never in the data. It was a bad starting value that no negative element could beat, so the loop reported `0`, a value that isn't even in `temps`. The logic is right. The *seed* was wrong.
 
-*Non-example: no data at all.* An empty list defeats the accumulators in a different way, because the loop body never runs:
+*Watch out: no data at all.* An empty list defeats the accumulators in a different way, because the loop body never runs:
 
 ```java run
 public class Main {

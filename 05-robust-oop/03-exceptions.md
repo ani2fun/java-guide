@@ -252,7 +252,7 @@ Main.java:5: error: Alternatives in a multi-catch statement cannot be related by
 
 Keep only `IllegalArgumentException`, since it already catches its subclass.
 
-*Non-example: a general `catch` before a specific one.* Clauses are tried in order. Put `catch (Exception e)` first, and it catches everything, so a later `catch (NumberFormatException e)` could never run. That's a compile-time error <abbr title="The Java Language Specification, Java SE 25, §11.2.3">[3]</abbr>:
+*Watch out: a general `catch` before a specific one.* Clauses are tried in order. Put `catch (Exception e)` first, and it catches everything, so a later `catch (NumberFormatException e)` could never run. That's a compile-time error <abbr title="The Java Language Specification, Java SE 25, §11.2.3">[3]</abbr>:
 
 ```java run
 public class Main {
@@ -444,7 +444,7 @@ The JVM stopped inside the `try`, so there's no `finally ran`.
 
 *Concrete bite.* The surprise is that `finally ran` comes before `from try`, because people expect a `return` to leave immediately. It doesn't. `finally` always gets its turn first — and that's the whole point. You can release the lock or close the file, even if you bailed out early.
 
-*Non-example: a `return` inside `finally`.* If `finally` itself ends abruptly, through a `return` or a `throw`, that outcome replaces the `try`'s, and the original exception is discarded <abbr title="The Java Language Specification, Java SE 25, §14.20.2">[5]</abbr>:
+*Watch out: a `return` inside `finally`.* If `finally` itself ends abruptly, through a `return` or a `throw`, that outcome replaces the `try`'s, and the original exception is discarded <abbr title="The Java Language Specification, Java SE 25, §14.20.2">[5]</abbr>:
 
 ```java run
 public class Main {

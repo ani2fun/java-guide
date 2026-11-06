@@ -167,7 +167,7 @@ public class Main {
 40
 ```
 
-*Non-example: using `a++` as a value.* On a line of its own, `a++` simply adds 1. Inside a larger expression, though, it also hands back a value — and that value is the **old** one <abbr title="The Java Language Specification, Java SE 25, §15.14.2">[3]</abbr>. Written in front, `++a` adds 1 first, and hands back the **new** value:
+*Watch out: using `a++` as a value.* On a line of its own, `a++` simply adds 1. Inside a larger expression, though, it also hands back a value — and that value is the **old** one <abbr title="The Java Language Specification, Java SE 25, §15.14.2">[3]</abbr>. Written in front, `++a` adds 1 first, and hands back the **new** value:
 
 ```java run
 public class Main {
@@ -376,7 +376,7 @@ public class Main {
 
 `(int) -3.9` is `-3`: toward zero, not down. `(byte) 200` is `-56` — a different number entirely, with no warning. `3.0e10` is 3 × 10¹⁰ written in **scientific notation**; cast to an `int`, it stops at `2147483647`.
 
-*Non-example: `+=` hides a cast.* `b = b + 1;` on a `byte` doesn't compile, for the reason above. But `b += 1;` does, because a compound assignment casts its result back to the variable's type <abbr title="The Java Language Specification, Java SE 25, §15.26.2">[7]</abbr>. And that hidden cast wraps, just like any other:
+*Watch out: `+=` hides a cast.* `b = b + 1;` on a `byte` doesn't compile, for the reason above. But `b += 1;` does, because a compound assignment casts its result back to the variable's type <abbr title="The Java Language Specification, Java SE 25, §15.26.2">[7]</abbr>. And that hidden cast wraps, just like any other:
 
 ```java run
 public class Main {
@@ -445,7 +445,7 @@ public class Main {
 
 `100000 * 100000` is ten billion, far beyond an `int`, so it wraps to a meaningless `1410065408`. Nothing looked dangerous, yet the type quietly betrayed the arithmetic.
 
-*Non-example: a `long` box, too late.* Storing the product in a `long` doesn't help. The multiplication still runs as `int * int`, wraps, and only then widens — just like `average` in §2. Make one operand a `long` *before* the multiplication:
+*Watch out: a `long` box, too late.* Storing the product in a `long` doesn't help. The multiplication still runs as `int * int`, wraps, and only then widens — just like `average` in §2. Make one operand a `long` *before* the multiplication:
 
 ```java run
 public class Main {

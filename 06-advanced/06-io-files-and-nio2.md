@@ -591,7 +591,7 @@ same object? false
 
 **Analysis.** The `Account` became 82 bytes, and then a *new* object with the same `owner` and `balance`. The `transient` token wasn't written, so it came back as `null`. `readObject` declares `ClassNotFoundException`, because the reading JVM must have the class in order to rebuild the object.
 
-*Non-example: a class that isn't `Serializable`.* Every object in the graph must be serializable. Otherwise, `writeObject` throws:
+*Watch out: a class that isn't `Serializable`.* Every object in the graph must be serializable. Otherwise, `writeObject` throws:
 
 ```java run
 import java.io.*;

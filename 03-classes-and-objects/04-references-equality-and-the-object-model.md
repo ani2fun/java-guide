@@ -169,7 +169,7 @@ Same operator, two meanings, and the operands decide which: references or primit
 
 *Concrete bite.* The trap is `a == b` coming out `false` for two identical-looking arrays. On references, `==` can't see contents, only identity.
 
-*Non-example: `.equals` on arrays.* The usual advice is "compare contents with `.equals`". For arrays, that advice fails:
+*Watch out: `.equals` on arrays.* The usual advice is "compare contents with `.equals`". For arrays, that advice fails:
 
 ```java run
 import java.util.Arrays;
@@ -348,7 +348,7 @@ Since Java 14, the message names what was null and what you tried to do <abbr ti
 
 *Concrete bite.* The `null` line works, and the `s.length()` line throws. The boundary is *use*. Fields of a reference type start as `null`, and so do the slots of a new object array and many "not found" results. So any object you didn't definitely set could be `null`, and the first method call on it crashes.
 
-*Non-example: an NPE with no dot in sight.* Unboxing is a hidden method call. Store a `null` `Integer` into an `int`, and the JVM must call `intValue()` on nothing <abbr title="The Java Language Specification, Java SE 25, §5.1.8">[8]</abbr>:
+*Watch out: an NPE with no dot in sight.* Unboxing is a hidden method call. Store a `null` `Integer` into an `int`, and the JVM must call `intValue()` on nothing <abbr title="The Java Language Specification, Java SE 25, §5.1.8">[8]</abbr>:
 
 ```java run
 public class Main {
