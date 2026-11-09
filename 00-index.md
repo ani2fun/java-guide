@@ -119,7 +119,7 @@ flowchart TD
 
 **Chapter 7 — Next Steps** *(optional, after the book)* — where to go once the language is yours. It isn't part of the strict reading order.
 
-- [Java Backend Engineer Roadmap](/synapse/programming-languages/java/next-steps/java-backend-engineer-roadmap) — a module-by-module path from this book to a job-ready backend developer, then on to senior, staff and principal engineer.
+- [Java Backend to Staff Engineer Roadmap](/synapse/programming-languages/java/next-steps/java-backend-engineer-roadmap) — a module-by-module path from this book to a job-ready backend developer, then on to senior, staff and principal engineer.
 
 ---
 

@@ -1,99 +1,62 @@
 ---
-title: "Java Backend Engineer Roadmap"
+title: "Java Backend to Staff Engineer Roadmap"
 summary: "A Java-only version of the boot.dev backend path, from first program to job-ready backend developer, then on to senior, staff and principal engineer. Every course maps to a Java equivalent, and each module lists topics, resources, a project and a 'done when' test. A self-assessment shows where to start."
 essential: false
 ---
 
-# Java Backend Engineer Roadmap
+# Java Backend to Staff Engineer Roadmap
 
-This is a Java-only version of the boot.dev backend path. It extends the path towards higher level engineering roles. Every boot.dev course is mapped to a Java equivalent. Each module lists topics, sub-topics, the best resources, and a project that proves the skill.
+**Last updated:** 9 Nov 2026 · **Links checked:** 8 Nov 2026
+
+This is a Java-only version of the boot.dev backend path. It extends the path toward Senior, Staff and Principal engineer roles. Every boot.dev course is mapped to a Java equivalent. Each module lists topics, sub-topics, the best resources, and a project that proves the skill.
 
 Jump anywhere from the contents below; every stage and phase ends with a link back here.
 
 ## Contents
 
-- [How to use this roadmap](#how-to-use-this-roadmap)
-  - [Your first two weeks](#your-first-two-weeks)
-- [Self-assessment: find your gaps](#self-assessment-find-your-gaps)
-- [Phase 1: Java backend foundations](#phase-1-java-backend-foundations)
-  - [Course map: boot.dev to Java](#course-map-bootdev-to-java)
-  - [Stage 1: Foundations (modules 1-4)](#stage-1-foundations-modules-1-4)
-    - [Module 1: Java fundamentals](#module-1-java-fundamentals)
-    - [Module 2: Linux and the command line (keep)](#module-2-linux-and-the-command-line-keep)
-    - [Module 3: Bookbot CLI project](#module-3-bookbot-cli-project)
-    - [Module 4: Git (keep)](#module-4-git-keep)
-  - [Stage 2: Objects and functions (modules 5-7)](#stage-2-objects-and-functions-modules-5-7)
-    - [Module 5: Object-oriented Java](#module-5-object-oriented-java)
-    - [Module 6: Asteroids game project](#module-6-asteroids-game-project)
-    - [Module 7: Functional Java](#module-7-functional-java)
-  - [Stage 3: AI agent and algorithms (modules 8-9)](#stage-3-ai-agent-and-algorithms-modules-8-9)
-    - [Module 8: AI agent project](#module-8-ai-agent-project)
-    - [Module 9: Data structures and algorithms](#module-9-data-structures-and-algorithms)
-  - [Stage 4: Projects and professional tooling (modules 10-12)](#stage-4-projects-and-professional-tooling-modules-10-12)
-    - [Module 10: Static site generator project](#module-10-static-site-generator-project)
-    - [Module 11: Personal project](#module-11-personal-project)
-    - [Module 12: Intermediate Java, build tools and testing](#module-12-intermediate-java-build-tools-and-testing)
-  - [Stage 5: HTTP and data (modules 13-16)](#stage-5-http-and-data-modules-13-16)
-    - [Module 13: HTTP clients](#module-13-http-clients)
-    - [Module 14: Pokedex CLI project](#module-14-pokedex-cli-project)
-    - [Module 15: SQL and JDBC](#module-15-sql-and-jdbc)
-    - [Module 16: RSS blog aggregator project](#module-16-rss-blog-aggregator-project)
-  - [Stage 6: Servers, storage and containers (modules 17-19)](#stage-6-servers-storage-and-containers-modules-17-19)
-    - [Module 17: REST APIs with Spring Boot](#module-17-rest-apis-with-spring-boot)
-    - [Module 18: File storage and CDNs with AWS](#module-18-file-storage-and-cdns-with-aws)
-    - [Module 19: Docker (keep)](#module-19-docker-keep)
-  - [Stage 7: Security, messaging and caching (modules 20-22)](#stage-7-security-messaging-and-caching-modules-20-22)
-    - [Module 20: Web security with Spring Security](#module-20-web-security-with-spring-security)
-    - [Module 21: Messaging with RabbitMQ and Kafka](#module-21-messaging-with-rabbitmq-and-kafka)
-    - [Module 22: Redis and caching](#module-22-redis-and-caching)
-  - [Stage 8: AI-assisted work, capstone and job hunt (modules 23-25)](#stage-8-ai-assisted-work-capstone-and-job-hunt-modules-23-25)
-    - [Module 23: AI-assisted development](#module-23-ai-assisted-development)
-    - [Module 24: Capstone project](#module-24-capstone-project)
-    - [Module 25: Finding a job (keep)](#module-25-finding-a-job-keep)
-- [Phase 2: Senior engineer](#phase-2-senior-engineer)
-  - [Part 1: Engineering craft](#part-1-engineering-craft)
-    - [JVM internals and performance](#jvm-internals-and-performance)
-    - [Concurrency in depth](#concurrency-in-depth)
-    - [Code quality and design](#code-quality-and-design)
-    - [Testing strategy](#testing-strategy)
-  - [Part 2: Systems](#part-2-systems)
-    - [Databases in depth](#databases-in-depth)
-    - [Distributed systems](#distributed-systems)
-    - [Architecture and design](#architecture-and-design)
-    - [Operations and reliability](#operations-and-reliability)
-  - [Habits and exit criteria](#habits-and-exit-criteria)
-- [Phase 3: Staff engineer](#phase-3-staff-engineer)
-  - [System design at scale](#system-design-at-scale)
-  - [Technical writing](#technical-writing)
-  - [Influence, alignment and multiplying others](#influence-alignment-and-multiplying-others)
-  - [Business and product sense](#business-and-product-sense)
-  - [Practice at work](#practice-at-work)
-- [Phase 4: Principal engineer](#phase-4-principal-engineer)
-- [Quick reference and sources](#quick-reference-and-sources)
+1. [How to use this roadmap](#how-to-use-this-roadmap)
+2. [Self-assessment: find your gaps](#self-assessment-find-your-gaps)
+3. [Phase 1: Java backend foundations](#phase-1-java-backend-foundations)
+   - [Course map: boot.dev to Java](#course-map-bootdev-to-java)
+   - [Stage 1: Foundations (modules 1-4)](#stage-1-foundations-modules-1-4): [1 Java fundamentals](#module-1-java-fundamentals) · [2 Linux](#module-2-linux-and-the-command-line-keep) · [3 Bookbot](#module-3-bookbot-cli-project) · [4 Git](#module-4-git-keep)
+   - [Stage 2: Objects and functions (modules 5-7)](#stage-2-objects-and-functions-modules-5-7): [5 OOP](#module-5-object-oriented-java) · [6 Asteroids](#module-6-asteroids-game-project) · [7 Functional Java](#module-7-functional-java)
+   - [Stage 3: AI agent and algorithms (modules 8-9)](#stage-3-ai-agent-and-algorithms-modules-8-9): [8 AI agent](#module-8-ai-agent-project) · [9 DS&A](#module-9-data-structures-and-algorithms)
+   - [Stage 4: Projects and professional tooling (modules 10-12)](#stage-4-projects-and-professional-tooling-modules-10-12): [10 Site generator](#module-10-static-site-generator-project) · [11 Personal project](#module-11-personal-project) · [12 Build tools and testing](#module-12-intermediate-java-build-tools-and-testing)
+   - [Stage 5: HTTP and data (modules 13-16)](#stage-5-http-and-data-modules-13-16): [13 HTTP clients](#module-13-http-clients) · [14 Pokedex](#module-14-pokedex-cli-project) · [15 SQL](#module-15-sql-and-jdbc) · [16 Blog aggregator](#module-16-rss-blog-aggregator-project)
+   - [Stage 6: Servers, storage and containers (modules 17-19)](#stage-6-servers-storage-and-containers-modules-17-19): [17 Spring Boot](#module-17-rest-apis-with-spring-boot) · [18 S3 and CDNs](#module-18-file-storage-and-cdns-with-aws) · [19 Docker](#module-19-docker-keep)
+   - [Stage 7: Security, messaging and caching (modules 20-22)](#stage-7-security-messaging-and-caching-modules-20-22): [20 Security](#module-20-web-security-with-spring-security) · [21 Messaging](#module-21-messaging-with-rabbitmq-and-kafka) · [22 Redis](#module-22-redis-and-caching)
+   - [Stage 8: AI-assisted work, capstone and job hunt (modules 23-25)](#stage-8-ai-assisted-work-capstone-and-job-hunt-modules-23-25): [23 AI coding](#module-23-ai-assisted-development) · [24 Capstone](#module-24-capstone-project) · [25 Job search](#module-25-finding-a-job-keep)
+4. [Phase 2: Senior engineer](#phase-2-senior-engineer)
+   - [Part 1: Engineering craft](#part-1-engineering-craft): [JVM performance](#jvm-internals-and-performance) · [Concurrency](#concurrency-in-depth) · [Code quality](#code-quality-and-design) · [Testing strategy](#testing-strategy)
+   - [Part 2: Systems](#part-2-systems): [Databases](#databases-in-depth) · [Distributed systems](#distributed-systems) · [Architecture](#architecture-and-design) · [Operations](#operations-and-reliability)
+   - [Habits and exit criteria](#habits-and-exit-criteria)
+5. [Phase 3: Staff engineer](#phase-3-staff-engineer): [System design](#system-design-at-scale) · [Technical writing](#technical-writing) · [Influence](#influence-alignment-and-multiplying-others) · [Business sense](#business-and-product-sense) · [Practice at work](#practice-at-work)
+6. [Phase 4: Principal engineer](#phase-4-principal-engineer)
+7. [Quick reference and sources](#quick-reference-and-sources)
 
 ---
 
 ## How to use this roadmap
 
-Keep boot.dev's backend sequence as the backbone and swap every Python and Go course for a Java equivalent. Then layer on senior, staff and principal skills. Phase 1 takes most beginners about 12 months; the later phases are measured in years of real work, not courses.
+Keep boot.dev's backend sequence as the backbone and swap every Python and Go course for a Java equivalent. Then layer on senior, staff and principal skills. The later phases are built through real work, not courses.
 
-| Phase | Goal | Typical time |
-| --- | --- | --- |
-| [1. Java backend foundations](#phase-1-java-backend-foundations) | Job-ready backend developer | 9 to 15 months |
-| [2. Senior engineer](#phase-2-senior-engineer) | Own production systems end to end | 2 to 5 years on the job |
-| [3. Staff engineer](#phase-3-staff-engineer) | Lead technical direction across teams | Roughly 6 to 10+ years total |
-| [4. Principal engineer](#phase-4-principal-engineer) | Set org-wide technical strategy | Roughly 10 to 15+ years total |
+| Phase | Goal |
+| --- | --- |
+| [1. Java backend foundations](#phase-1-java-backend-foundations) | Job-ready backend developer |
+| [2. Senior engineer](#phase-2-senior-engineer) | Own production systems end to end |
+| [3. Staff engineer](#phase-3-staff-engineer) | Lead technical direction across teams |
+| [4. Principal engineer](#phase-4-principal-engineer) | Set org-wide technical strategy |
 
 Staff and Principal titles are earned through scope and impact at work. This syllabus builds the skills; promotion comes from using them on real problems and making that impact visible.
 
-### Your first two weeks
+### Getting started
 
 1. Score yourself in the [self-assessment](#self-assessment-find-your-gaps) (0 to 3 per area).
 2. Start at the earliest phase where any core area scores 0 or 1. Skim or skip modules where you already score 3.
 3. Set up the toolchain: the latest Java LTS JDK, IntelliJ IDEA, Gradle or Maven, Git and Docker.
-4. Fix a weekly rhythm, for example 10 hours: 6 building, 3 studying, 1 writing up what you learned.
+4. Fix a regular rhythm that splits your time between building, studying and writing up what you learned.
 5. Start a learning log and a "brag doc" of shipped work. Both matter later for senior and staff promotions.
-6. Re-run the self-assessment every 3 months and re-plan from the lowest scores.
+6. Re-run the self-assessment after each stage and re-plan from the lowest scores.
 
 [↑ Back to contents](#contents)
 
@@ -129,7 +92,7 @@ Score each area honestly: 0 = never used it, 1 = followed a tutorial, 2 = used i
 
 ## Phase 1: Java backend foundations
 
-Phase 1 takes 9 to 15 months at about 10 hours a week, in eight stages. Each module below lists topics, resources (use the one marked **Primary** first), a project or practice task, and a "done when" test.
+Phase 1 has eight stages. Each module below lists topics, resources (use the one marked **Primary** first), a project or practice task, and a "done when" test.
 
 **Phase 1 is done when** you can build, test, containerize and deploy a secured Spring Boot service with a database, cache and message queue, without following a tutorial.
 
@@ -169,7 +132,7 @@ Every course in boot.dev's backend path ([official course list](https://cdn.jsde
 
 ### Stage 1: Foundations (modules 1-4)
 
-About 6 to 8 weeks at 10 hours a week. Install [Eclipse Temurin JDK 25](https://adoptium.net/temurin/releases) (the current LTS release) and IntelliJ IDEA Community before you start.
+Install [Eclipse Temurin JDK 25](https://adoptium.net/temurin/releases) (the current LTS release) and IntelliJ IDEA Community before you start.
 
 #### Module 1: Java fundamentals
 
@@ -204,6 +167,13 @@ Whichever you choose, learn the newest language features (records, `var`, switch
 - [Dev.java: Your First Steps in Java](https://dev.java/learn/first-steps/) and [Language Basics](https://dev.java/learn/language/constructs/): Oracle's official, current tutorials.
 - [Exercism Java track](https://exercism.org/tracks/java): 159 free exercises with optional human mentor feedback.
 
+**On Synapse**
+
+- [First Steps: Overview](/synapse/programming-languages/java/first-steps/index) (Java)
+- [Control Flow: Overview](/synapse/programming-languages/java/control-flow/index) (Java)
+- [Input & Output](/synapse/programming-languages/java/first-steps/input-and-output) (Java)
+- [The Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework) (Java)
+
 **Practice:** finish the first four parts of your main course (MOOC Parts 1-4 or the equivalent) and 25 Exercism exercises.
 
 **Done when:** you can write a 100-line program with methods, loops and lists without a tutorial.
@@ -224,7 +194,7 @@ Whichever you choose, learn the newest language features (records, `var`, switch
 
 **Resources**
 
-- **Primary:** [boot.dev Learn Linux](https://www.boot.dev/courses/learn-linux): about 10 hours across 66 lessons, in the same order as the topics above.
+- **Primary:** [boot.dev Learn Linux](https://www.boot.dev/courses/learn-linux): 66 lessons, in the same order as the topics above.
 - [The Linux Command Line by William Shotts](https://linuxcommand.org/tlcl.php): the best free book on the subject, available as a PDF.
 - [MIT Missing Semester (2026)](https://missing.csail.mit.edu/): lectures with videos on the shell, the command-line environment, debugging, Git and packaging.
 - [OverTheWire Bandit](https://overthewire.org/wargames/bandit/): a game played over SSH that drills the commands.
@@ -242,6 +212,11 @@ Whichever you choose, learn the newest language features (records, `var`, switch
 - [Dev.java: file I/O](https://dev.java/learn/api/io/)
 - [Dev.java: Collections and Streams](https://dev.java/learn/api/collections-and-streams/)
 
+**On Synapse**
+
+- [I/O, Files & NIO.2](/synapse/programming-languages/java/advanced/io-files-and-nio2) (Java)
+- [Sets & Maps](/synapse/programming-languages/java/core-libraries/sets-and-maps) (Java)
+
 **Build:** a program that takes a book's text file path as an argument and prints the word count and character frequencies, sorted from most to least common, as in the boot.dev original.
 
 #### Module 4: Git (keep)
@@ -257,7 +232,7 @@ Whichever you choose, learn the newest language features (records, `var`, switch
 
 **Resources**
 
-- **Primary:** [boot.dev Learn Git](https://www.boot.dev/courses/learn-git): about 8 hours, taught by ThePrimeagen, and covers internals first.
+- **Primary:** [boot.dev Learn Git](https://www.boot.dev/courses/learn-git): taught by ThePrimeagen, and covers internals first.
 - [Pro Git book](https://git-scm.com/book/en/v2): free and official; read chapters 1-3 and 7.
 - [Learn Git Branching](https://learngitbranching.js.org/): interactive visual exercises for branching and rebasing.
 
@@ -269,7 +244,7 @@ Whichever you choose, learn the newest language features (records, `var`, switch
 
 ### Stage 2: Objects and functions (modules 5-7)
 
-About 8 to 10 weeks. This stage turns you from someone who writes Java into someone who designs with it.
+This stage turns you from someone who writes Java into someone who designs with it.
 
 #### Module 5: Object-oriented Java
 
@@ -295,6 +270,16 @@ About 8 to 10 weeks. This stage turns you from someone who writes Java into some
 - Dev.java: [Classes and Objects](https://dev.java/learn/language/oop/classes-objects/), [Records](https://dev.java/learn/language/oop/records/), [Inheritance](https://dev.java/learn/language/oop/inheritance/), [Interfaces](https://dev.java/learn/language/oop/interfaces/), [Generics](https://dev.java/learn/language/fp/generics/).
 - [Effective Java, 3rd edition (Joshua Bloch)](https://www.informit.com/store/effective-java-9780134685991): the standard book on writing good Java. Read the chapters on creating objects, classes and interfaces, and generics.
 - [Refactoring Guru: Design Patterns in Java](https://refactoring.guru/design-patterns/java): clear diagrams and Java code for every classic pattern.
+
+**On Synapse**
+
+- [Classes & Objects: Overview](/synapse/programming-languages/java/classes-and-objects/index) (Java)
+- [Robust OOP & Error Handling: Overview](/synapse/programming-languages/java/robust-oop/index) (Java)
+- [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) (Java)
+- [Generics](/synapse/programming-languages/java/core-libraries/generics) (Java)
+- [Enums & Records](/synapse/programming-languages/java/core-libraries/enums-and-records) (Java)
+- [SOLID Principles](/synapse/low-level-design/solid-principles/solid-principles) (Low Level Design)
+- [Introduction to Design Patterns](/synapse/low-level-design/design-patterns/introduction-design-patterns) (Low Level Design)
 
 **Practice:** model a library system with a sealed `Item` interface, records for value objects and an enum for loan status.
 
@@ -330,6 +315,13 @@ About 8 to 10 weeks. This stage turns you from someone who writes Java into some
 - **Primary:** Dev.java: [Lambda Expressions](https://dev.java/learn/language/fp/lambdas/), [Collections and Streams](https://dev.java/learn/api/collections-and-streams/), [Using Pattern Matching](https://dev.java/learn/language/fp/pattern-matching/), [Refactoring to the Functional Style](https://dev.java/learn/language/fp/refactoring-to-functional-style/).
 - [Modern Java in Action (Manning)](https://www.manning.com/books/modern-java-in-action): the best book on streams and lambdas. It dates from 2018 and covers up to Java 10, so take newer features from Dev.java.
 
+**On Synapse**
+
+- [Nested & Anonymous Classes; Lambdas](/synapse/programming-languages/java/robust-oop/nested-and-anonymous-classes-and-lambdas) (Java)
+- [Functional Java & the Streams API](/synapse/programming-languages/java/advanced/functional-java-and-streams) (Java)
+- [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching) (Java)
+- [Modern Java Idioms & the Type System](/synapse/programming-languages/java/advanced/modern-java-idioms) (Java)
+
 **Practice:** rewrite Bookbot using only streams. Then model shapes as a sealed interface and compute areas with a pattern-matching `switch`.
 
 **Done when:** you can turn a 20-line loop into a readable stream pipeline, and know when a plain loop is clearer.
@@ -340,7 +332,7 @@ About 8 to 10 weeks. This stage turns you from someone who writes Java into some
 
 ### Stage 3: AI agent and algorithms (modules 8-9)
 
-About 10 to 12 weeks, most of it on algorithms. DS&A is the module most worth over-investing in: it pays off in interviews and in every system you build.
+Most of this stage is algorithms. DS&A is the module most worth over-investing in: it pays off in interviews and in every system you build.
 
 #### Module 8: AI agent project
 
@@ -394,6 +386,15 @@ About 10 to 12 weeks, most of it on algorithms. DS&A is the module most worth ov
 - [boot.dev Learn DS&A](https://www.boot.dev/courses/learn-data-structures-and-algorithms-python): 16 chapters that make a good topic checklist.
 - Practice: [NeetCode](https://neetcode.io/roadmap) (structured problem roadmap with video solutions) and [LeetCode Top Interview 150](https://leetcode.com/studyplan/top-interview-150/).
 
+**On Synapse**
+
+- [Time and Space Complexity](/synapse/dsa/complexity/time-complexity) (DSA)
+- [Merge Sorting](/synapse/dsa/sorting-algorithms/merge-sorting/merge-sorting) (DSA)
+- [Understanding Recursion in Data Structures and Algorithms](/synapse/dsa/basic-problem-set-1/recursion/recursion-concepts) (DSA)
+- [The Algorithm Design Canvas](/synapse/dsa/appendix/algorithm-design-canvas) (DSA)
+- [The Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework) (Java)
+- [equals & hashCode](/synapse/programming-languages/java/core-libraries/equals-and-hashcode) (Java)
+
 **Practice:** implement your own `ArrayList`, linked list, `HashMap`, binary search tree and min-heap in Java with JUnit tests. Then solve 100-150 problems, grouped by pattern.
 
 **Done when:** you can build a hash map from scratch and solve most medium-level problems in 30-40 minutes.
@@ -404,7 +405,7 @@ About 10 to 12 weeks, most of it on algorithms. DS&A is the module most worth ov
 
 ### Stage 4: Projects and professional tooling (modules 10-12)
 
-About 8 to 10 weeks. From here on, every project is a Gradle or Maven build with tests, the way it would be at work.
+From here on, every project is a Gradle or Maven build with tests, the way it would be at work.
 
 #### Module 10: Static site generator project
 
@@ -420,7 +421,7 @@ About 8 to 10 weeks. From here on, every project is a Gradle or Maven build with
 
 #### Module 11: Personal project
 
-**Topics:** choosing a scope you can finish in 2-4 weeks; writing requirements as a short README first; project layout; dependency management; tests for core logic; clean commit history.
+**Topics:** choosing a scope small enough to finish; writing requirements as a short README first; project layout; dependency management; tests for core logic; clean commit history.
 
 **Resources**
 
@@ -456,6 +457,15 @@ Replaces boot.dev's Learn Golang course.
 - Dev.java: [Annotations and Exceptions](https://dev.java/learn/language/annotations-exceptions/), [Dates and Regular Expressions](https://dev.java/learn/api/date-time-regex/), [Modules](https://dev.java/learn/organizing/modules/), [Virtual Threads](https://dev.java/learn/api/virtual-threads/).
 - [Helsinki Java MOOC](https://java-programming.mooc.fi/), Parts 12-14, for more practice.
 
+**On Synapse**
+
+- [Testing, Tooling & Packaging](/synapse/programming-languages/java/advanced/testing-tooling-and-packaging) (Java)
+- [Packages, Modules & the Build](/synapse/programming-languages/java/robust-oop/packages-modules-and-the-build) (Java)
+- [Exceptions](/synapse/programming-languages/java/robust-oop/exceptions) (Java)
+- [Dates & Times](/synapse/programming-languages/java/core-libraries/dates-and-times) (Java)
+- [Concurrency: the Basics](/synapse/programming-languages/java/advanced/concurrency-the-basics) (Java)
+- [Concurrency: High-Level & Virtual Threads](/synapse/programming-languages/java/advanced/concurrency-high-level-and-virtual-threads) (Java)
+
 **Practice:** convert Bookbot and the site generator into Gradle builds with tests. Then process 1,000 files concurrently with virtual threads and measure the speed-up.
 
 **Done when:** `./gradlew build` runs your tests and produces a working JAR, and you can explain a race condition and how to fix it.
@@ -466,7 +476,7 @@ Replaces boot.dev's Learn Golang course.
 
 ### Stage 5: HTTP and data (modules 13-16)
 
-About 10 to 12 weeks. This is where you become a backend developer: talking to APIs and storing data properly.
+This is where you become a backend developer: talking to APIs and storing data properly.
 
 #### Module 13: HTTP clients
 
@@ -486,6 +496,11 @@ About 10 to 12 weeks. This is where you become a backend developer: talking to A
 - **Primary:** MDN: [Overview of HTTP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview), [HTTP messages](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Messages), [Status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status), [Caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching), [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS), [Cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies).
 - [OpenJDK: Introduction to the Java HTTP Client](https://openjdk.org/groups/net/httpclient/intro.html)
 - [Baeldung: Java HttpClient guide](https://www.baeldung.com/java-9-http-client) and [Jackson tutorials](https://www.baeldung.com/jackson)
+
+**On Synapse**
+
+- [Networking Essentials](/synapse/system-design-from-first-principles/foundations/networking-essentials) (System Design)
+- [API Design](/synapse/system-design-from-first-principles/foundations/api-design) (System Design)
 
 **Done when:** you can call a paginated JSON API, map the results to records, and handle timeouts and 4xx/5xx errors cleanly.
 
@@ -513,11 +528,22 @@ About 10 to 12 weeks. This is where you become a backend developer: talking to A
 
 **Resources**
 
-- **Primary:** [boot.dev Learn SQL](https://www.boot.dev/courses/learn-sql) (keep): about 30 hours across 97 lessons, from tables to performance.
+- **Primary:** [boot.dev Learn SQL](https://www.boot.dev/courses/learn-sql) (keep): 97 lessons, from tables to performance.
 - [SQLBolt](https://sqlbolt.com/): quick interactive lessons, good for review.
 - [PostgreSQL tutorial](https://www.postgresql.org/docs/current/tutorial.html): official, for PostgreSQL 18.
 - [Use The Index, Luke](https://use-the-index-luke.com/): free book on indexing, written for developers.
 - [Oracle: JDBC Basics](https://docs.oracle.com/javase/tutorial/jdbc/basics/index.html): written for JDK 8, but the core JDBC API is unchanged.
+
+**On Synapse**
+
+- [SQL](/synapse/programming-languages/sql/index) (SQL)
+- [Joins](/synapse/programming-languages/sql/multiple-tables/joins) (SQL)
+- [GROUP BY and HAVING](/synapse/programming-languages/sql/aggregation/group-by-and-having) (SQL)
+- [Window Basics](/synapse/programming-languages/sql/window-functions/window-basics) (SQL)
+- [Non-recursive CTEs](/synapse/programming-languages/sql/ctes-and-recursion/non-recursive-ctes) (SQL)
+- [Normalisation](/synapse/programming-languages/sql/schema-and-constraints/normalisation) (SQL)
+- [EXPLAIN and Query Plans](/synapse/programming-languages/sql/indexes-and-performance/explain-and-query-plans) (SQL)
+- [ACID and Transactions](/synapse/programming-languages/sql/transactions-and-concurrency/acid-and-transactions) (SQL)
 
 **Practice:** design a blog schema (users, posts, comments, tags) and write 20 queries, including joins and window functions. Then run them from Java with `PreparedStatement`.
 
@@ -534,6 +560,11 @@ About 10 to 12 weeks. This is where you become a backend developer: talking to A
 - [jOOQ](https://www.jooq.org/): type-safe SQL in Java, widely used in production.
 - [ROME](https://github.com/rometools/rome): the standard Java library for RSS and Atom.
 
+**On Synapse**
+
+- [Keys and References](/synapse/programming-languages/sql/schema-and-constraints/keys-and-references) (SQL)
+- [Data Definition](/synapse/programming-languages/sql/foundations/data-definition) (SQL)
+
 **Build:** the boot.dev "Gator" aggregator in Java: register users, add and follow feeds, fetch them on a schedule into PostgreSQL, and browse the latest posts.
 
 [↑ Back to contents](#contents)
@@ -542,7 +573,7 @@ About 10 to 12 weeks. This is where you become a backend developer: talking to A
 
 ### Stage 6: Servers, storage and containers (modules 17-19)
 
-About 12 to 14 weeks. Spring Boot is the center of the Java backend job market, so give Module 17 the most time.
+Spring Boot is the center of the Java backend job market, so give Module 17 the most time.
 
 #### Module 17: REST APIs with Spring Boot
 
@@ -571,6 +602,13 @@ Replaces boot.dev's Learn HTTP Servers course.
 - [Spring Data JPA reference](https://docs.spring.io/spring-data/jpa/reference/) and [Vlad Mihalcea's Hibernate tutorials](https://vladmihalcea.com/tutorials/hibernate/), the best source on JPA performance.
 - [Testcontainers: Getting started in a Spring Boot project](https://testcontainers.com/guides/testing-spring-boot-rest-api-using-testcontainers/)
 
+**On Synapse**
+
+- [API Design](/synapse/system-design-from-first-principles/foundations/api-design) (System Design)
+- [API & Database Design](/synapse/low-level-design/best-practices/apis-db-design) (Low Level Design)
+- [Dependency Injection & Error Handling](/synapse/low-level-design/best-practices/dependency-injection-and-error-handling) (Low Level Design)
+- [Authentication & Authorization](/synapse/system-design-from-first-principles/production-engineering/authn-authz) (System Design)
+
 **Build:** a social-posting API like boot.dev's "Chirpy". Include users, posts, login with JWT and refresh tokens, a webhook endpoint and an admin metrics endpoint. Test it against a real PostgreSQL in Testcontainers.
 
 **Done when:** you can build a validated, documented, tested CRUD API with auth in a day, without a tutorial.
@@ -594,6 +632,11 @@ Replaces boot.dev's Learn HTTP Servers course.
 - [Amazon CloudFront developer guide](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html)
 - [Testcontainers: Testing AWS integrations with LocalStack](https://testcontainers.com/guides/testing-aws-service-integrations-using-localstack/)
 
+**On Synapse**
+
+- [Object Storage & Blobs](/synapse/system-design-from-first-principles/building-blocks/object-storage-and-blobs) (System Design)
+- [CDN & Edge](/synapse/system-design-from-first-principles/building-blocks/cdn-and-edge) (System Design)
+
 **Build:** add image or video uploads to your Module 17 API using presigned URLs, served through CloudFront. Set an AWS billing alarm before you start.
 
 #### Module 19: Docker (keep)
@@ -614,7 +657,7 @@ Take boot.dev's course as is, then add the Java specifics below.
 
 **Resources**
 
-- **Primary:** [boot.dev Learn Docker](https://www.boot.dev/courses/learn-docker) (keep): about 18 hours across 43 lessons.
+- **Primary:** [boot.dev Learn Docker](https://www.boot.dev/courses/learn-docker) (keep): 43 lessons.
 - [Docker: Get started](https://docs.docker.com/get-started/) and [Docker Compose docs](https://docs.docker.com/compose/)
 - [Spring Boot: Container Images](https://docs.spring.io/spring-boot/reference/packaging/container-images/index.html): efficient images, Dockerfiles and Buildpacks.
 - [Jib](https://github.com/GoogleContainerTools/jib): build Java images from Gradle or Maven without a Docker daemon.
@@ -627,7 +670,7 @@ Take boot.dev's course as is, then add the Java specifics below.
 
 ### Stage 7: Security, messaging and caching (modules 20-22)
 
-About 10 to 12 weeks. These three topics separate a junior who can build an API from one who can run it safely at scale.
+These three topics separate a junior who can build an API from one who can run it safely at scale.
 
 #### Module 20: Web security with Spring Security
 
@@ -652,6 +695,11 @@ About 10 to 12 weeks. These three topics separate a junior who can build an API 
 - [Spring Security reference](https://docs.spring.io/spring-security/reference/index.html): 7.1 is the current stable line.
 - [Dev.java: Security fundamentals](https://dev.java/learn/security/): encryption, digital signatures and certificates with the JDK.
 - [Testcontainers: Securing Spring Boot with Keycloak](https://testcontainers.com/guides/securing-spring-boot-microservice-using-keycloak-and-testcontainers/)
+
+**On Synapse**
+
+- [Authentication & Authorization](/synapse/system-design-from-first-principles/production-engineering/authn-authz) (System Design)
+- [Design a Rate Limiter](/synapse/system-design-from-first-principles/case-studies/rate-limiter) (System Design)
 
 **Practice:** lock down your Module 17 API with Spring Security and ownership checks. Then try to break it using what you learned in the PortSwigger labs.
 
@@ -683,6 +731,15 @@ Replaces boot.dev's Learn Pub/Sub Architecture course.
 - [Spring for Apache Kafka reference](https://docs.spring.io/spring-kafka/reference/)
 - [Testcontainers: Testing a Spring Boot Kafka listener](https://testcontainers.com/guides/testing-spring-boot-kafka-listener-using-testcontainers/)
 
+**On Synapse**
+
+- [Queues & Brokers](/synapse/system-design-from-first-principles/building-blocks/queues-and-brokers) (System Design)
+- [Kafka](/synapse/system-design-from-first-principles/key-technologies/kafka) (System Design)
+- [Idempotency & Exactly-once](/synapse/system-design-from-first-principles/patterns/idempotency-and-exactly-once) (System Design)
+- [Event-driven: CQRS, Outbox & CDC](/synapse/system-design-from-first-principles/patterns/event-driven-cqrs-outbox-cdc) (System Design)
+- [Multi-step Processes & Sagas](/synapse/system-design-from-first-principles/patterns/multi-step-processes-and-sagas) (System Design)
+- [Encoding & Schema Evolution](/synapse/system-design-from-first-principles/data-foundations/encoding-and-evolution) (System Design)
+
 **Build:** a notification service, split out of your API, that consumes "post created" events. Run it over RabbitMQ first and then Kafka, with a dead-letter queue and an idempotent consumer.
 
 #### Module 22: Redis and caching
@@ -702,6 +759,12 @@ Replaces boot.dev's Learn Pub/Sub Architecture course.
 - Java clients: [Jedis guide](https://redis.io/docs/latest/develop/clients/jedis/) and [Lettuce guide](https://redis.io/docs/latest/develop/clients/lettuce/)
 - [Spring Data Redis reference](https://docs.spring.io/spring-data/redis/reference/)
 
+**On Synapse**
+
+- [Caching](/synapse/system-design-from-first-principles/building-blocks/caching) (System Design)
+- [Redis](/synapse/system-design-from-first-principles/key-technologies/redis) (System Design)
+- [Design a Rate Limiter](/synapse/system-design-from-first-principles/case-studies/rate-limiter) (System Design)
+
 **Build:** cache your API's feed endpoint, rate-limit the login endpoint, and add a leaderboard using a sorted set. Measure latency before and after.
 
 [↑ Back to contents](#contents)
@@ -710,7 +773,7 @@ Replaces boot.dev's Learn Pub/Sub Architecture course.
 
 ### Stage 8: AI-assisted work, capstone and job hunt (modules 23-25)
 
-About 10 to 14 weeks. The capstone is the single most important item on your resume, so do not rush it.
+The capstone is the single most important item on your resume, so do not rush it.
 
 #### Module 23: AI-assisted development
 
@@ -752,6 +815,12 @@ About 10 to 14 weeks. The capstone is the single most important item on your res
 - [GitHub Actions: Building and testing Java with Gradle](https://docs.github.com/en/actions/tutorials/build-and-test-code/java-with-gradle)
 - [Docker Compose docs](https://docs.docker.com/compose/)
 
+**On Synapse**
+
+- [Design Ticketmaster](/synapse/system-design-from-first-principles/case-studies/ticketmaster) (System Design)
+- [Inventory Reservations at Scale in PostgreSQL](/synapse/system-design-from-first-principles/reference/inventory-reservations-postgres) (System Design)
+- [Design a URL Shortener](/synapse/system-design-from-first-principles/case-studies/url-shortener) (System Design)
+
 #### Module 25: Finding a job (keep)
 
 Take boot.dev's course as is, then add the Java interview prep below.
@@ -781,7 +850,7 @@ Take boot.dev's course as is, then add the Java interview prep below.
 
 ## Phase 2: Senior engineer
 
-Senior means you own production systems end to end and others can rely on your judgment. Expect 2 to 5 years on the job. Learn these topics alongside your work, applying each one to systems you own rather than studying it in isolation.
+Senior means you own production systems end to end and others can rely on your judgment. Learn these topics alongside your work, applying each one to systems you own rather than studying it in isolation.
 
 ### Part 1: Engineering craft
 
@@ -810,6 +879,10 @@ The goal of this part is depth: understanding why your code behaves the way it d
 - [async-profiler](https://github.com/async-profiler/async-profiler): the standard low-overhead profiler for Java.
 - [Eclipse Mission Control](https://adoptium.net/jmc): the free GUI for analyzing Flight Recorder files.
 
+**On Synapse**
+
+- [The Java Memory Model & Performance](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance) (Java)
+
 **Practice:** load-test your capstone, record with Flight Recorder, and fix the top hotspot. Then plant a memory leak and find it from a heap dump.
 
 #### Concurrency in depth
@@ -828,6 +901,16 @@ The goal of this part is depth: understanding why your code behaves the way it d
 - **Primary:** [Java Concurrency in Practice (Brian Goetz)](https://jcip.net/): from 2006, but still the definitive book on the memory model and thread safety.
 - [Dev.java: Virtual Threads](https://dev.java/learn/api/virtual-threads/) for everything newer than the book.
 
+**On Synapse**
+
+- [Concurrency: the Basics](/synapse/programming-languages/java/advanced/concurrency-the-basics) (Java)
+- [Concurrency: Coordination](/synapse/programming-languages/java/advanced/concurrency-coordination) (Java)
+- [Concurrency: High-Level & Virtual Threads](/synapse/programming-languages/java/advanced/concurrency-high-level-and-virtual-threads) (Java)
+- [The Java Memory Model & Performance](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance) (Java)
+- [Thread Pools & Executors](/synapse/low-level-design/multithreading-concurrency/thread-pools-and-executors) (Low Level Design)
+- [Deadlock](/synapse/low-level-design/multithreading-concurrency/deadlock) (Low Level Design)
+- [Producer-Consumer](/synapse/low-level-design/multithreading-concurrency/producer-consumer) (Low Level Design)
+
 **Practice:** build a thread-safe rate limiter and a bounded blocking queue, then stress-test them with many threads.
 
 #### Code quality and design
@@ -835,6 +918,12 @@ The goal of this part is depth: understanding why your code behaves the way it d
 **Topics:** all of *Effective Java*; refactoring in small, safe steps; designing clean module boundaries; writing code reviews that teach; static analysis and consistent formatting in CI.
 
 **Resources:** [Effective Java, 3rd edition](https://www.informit.com/store/effective-java-9780134685991) (now read cover to cover) and [Refactoring Guru](https://refactoring.guru/design-patterns/java).
+
+**On Synapse**
+
+- [Software Design Principles](/synapse/low-level-design/basics/design-principles) (Low Level Design)
+- [SOLID Principles](/synapse/low-level-design/solid-principles/solid-principles) (Low Level Design)
+- [Introduction to Design Patterns](/synapse/low-level-design/design-patterns/introduction-design-patterns) (Low Level Design)
 
 #### Testing strategy
 
@@ -851,6 +940,11 @@ The goal of this part is depth: understanding why your code behaves the way it d
 
 - **Primary:** [Unit Testing Principles, Practices, and Patterns (Vladimir Khorikov, 2020)](https://www.manning.com/books/unit-testing): the best book on what to test and how.
 - [Testcontainers guides](https://testcontainers.com/guides/)
+
+**On Synapse**
+
+- [Testing, Tooling & Packaging](/synapse/programming-languages/java/advanced/testing-tooling-and-packaging) (Java)
+- [Deployment Strategies](/synapse/system-design-from-first-principles/production-engineering/deployment-strategies) (System Design)
 
 ### Part 2: Systems
 
@@ -872,6 +966,16 @@ This part moves from one service to many: data under concurrency, distributed fa
 - **Primary:** [Use The Index, Luke](https://use-the-index-luke.com/) and the [PostgreSQL documentation](https://www.postgresql.org/docs/current/tutorial.html)
 - [Vlad Mihalcea's Hibernate tutorials](https://vladmihalcea.com/tutorials/hibernate/) for transactions and locking through JPA
 
+**On Synapse**
+
+- [Isolation Levels](/synapse/programming-languages/sql/transactions-and-concurrency/isolation-levels) (SQL)
+- [MVCC and Locking](/synapse/programming-languages/sql/transactions-and-concurrency/mvcc-and-locking) (SQL)
+- [B-Tree Indexes](/synapse/programming-languages/sql/indexes-and-performance/b-tree-indexes) (SQL)
+- [Other Index Types](/synapse/programming-languages/sql/indexes-and-performance/other-index-types) (SQL)
+- [Transactions & Isolation](/synapse/system-design-from-first-principles/distributed-data/transactions-and-isolation) (System Design)
+- [PostgreSQL](/synapse/system-design-from-first-principles/key-technologies/postgresql) (System Design)
+- [Scaling Reads](/synapse/system-design-from-first-principles/patterns/scaling-reads) (System Design)
+
 #### Distributed systems
 
 **Topics**
@@ -890,6 +994,17 @@ This part moves from one service to many: data under concurrency, distributed fa
 - [MIT 6.5840 Distributed Systems (Spring 2026)](https://pdos.csail.mit.edu/6.824/): lectures and classic papers. Its labs are in Go; implementing Raft in Java instead is an excellent exercise.
 - [Release It!, 2nd edition (Michael Nygard)](https://pragprog.com/titles/mnee2/release-it-second-edition/): stability patterns and anti-patterns from real outages.
 
+**On Synapse**
+
+- [Replication](/synapse/system-design-from-first-principles/distributed-data/replication) (System Design)
+- [Sharding & Consistent Hashing](/synapse/system-design-from-first-principles/distributed-data/sharding-and-consistent-hashing) (System Design)
+- [Faults, Clocks & Time](/synapse/system-design-from-first-principles/distributed-data/faults-clocks-and-time) (System Design)
+- [Linearizability & Ordering](/synapse/system-design-from-first-principles/distributed-data/linearizability-and-ordering) (System Design)
+- [CAP & PACELC, Honestly](/synapse/system-design-from-first-principles/distributed-data/cap-and-pacelc-honestly) (System Design)
+- [Consensus & Coordination](/synapse/system-design-from-first-principles/distributed-data/consensus-and-coordination) (System Design)
+- [Distributed Transactions](/synapse/system-design-from-first-principles/distributed-data/distributed-transactions) (System Design)
+- [Resilience & Incident Response](/synapse/system-design-from-first-principles/production-engineering/resilience-and-incidents) (System Design)
+
 #### Architecture and design
 
 **Topics**
@@ -906,6 +1021,12 @@ This part moves from one service to many: data under concurrency, distributed fa
 - [Fundamentals of Software Architecture, 2nd edition (Richards and Ford, 2025)](https://www.oreilly.com/library/view/fundamentals-of-software/9781098175504/)
 - [Building Microservices, 2nd edition (Sam Newman, 2021)](https://www.oreilly.com/library/view/building-microservices-2nd/9781492034018/)
 
+**On Synapse**
+
+- [Service Architecture: Monoliths to Microservices](/synapse/system-design-from-first-principles/production-engineering/service-architecture) (System Design)
+- [Thinking in Trade-offs](/synapse/system-design-from-first-principles/foundations/thinking-in-tradeoffs) (System Design)
+- [Encoding & Schema Evolution](/synapse/system-design-from-first-principles/data-foundations/encoding-and-evolution) (System Design)
+
 #### Operations and reliability
 
 **Topics**
@@ -919,8 +1040,16 @@ This part moves from one service to many: data under concurrency, distributed fa
 **Resources**
 
 - **Primary:** [Google SRE books](https://sre.google/books/): *Site Reliability Engineering* and *The Site Reliability Workbook* are free to read online.
-- Kubernetes: [Learn Kubernetes Basics](https://kubernetes.io/docs/tutorials/kubernetes-basics/) (official) or [boot.dev Learn Kubernetes](https://www.boot.dev/courses/learn-kubernetes) (about 24 hours, 51 lessons)
+- Kubernetes: [Learn Kubernetes Basics](https://kubernetes.io/docs/tutorials/kubernetes-basics/) (official) or [boot.dev Learn Kubernetes](https://www.boot.dev/courses/learn-kubernetes) (51 lessons)
 - [OpenTelemetry for Java](https://opentelemetry.io/docs/languages/java/), [Micrometer](https://docs.micrometer.io/micrometer/reference/), [Prometheus overview](https://prometheus.io/docs/introduction/overview/)
+
+**On Synapse**
+
+- [Observability](/synapse/system-design-from-first-principles/production-engineering/observability) (System Design)
+- [Deployment Strategies](/synapse/system-design-from-first-principles/production-engineering/deployment-strategies) (System Design)
+- [Capacity & Autoscaling](/synapse/system-design-from-first-principles/production-engineering/capacity-and-autoscaling) (System Design)
+- [Resilience & Incident Response](/synapse/system-design-from-first-principles/production-engineering/resilience-and-incidents) (System Design)
+- [Service Discovery & Mesh](/synapse/system-design-from-first-principles/production-engineering/service-discovery-and-mesh) (System Design)
 
 **Practice:** deploy your capstone to Kubernetes with traces, metrics and an SLO dashboard. Then run a game day where you break a dependency and write the postmortem.
 
@@ -962,6 +1091,18 @@ Pick the one that fits you and your company.
 - **Primary:** [System Design Primer](https://github.com/donnemartin/system-design-primer): free and comprehensive, with flashcards.
 - [ByteByteGo](https://bytebytego.com/): Alex Xu's system design material, including the *System Design Interview* books.
 - Revisit [Designing Data-Intensive Applications](https://dataintensive.net/) and [Fundamentals of Software Architecture](https://www.oreilly.com/library/view/fundamentals-of-software/9781098175504/) with design reviews in mind.
+
+**On Synapse**
+
+- [System Design from First Principles](/synapse/system-design-from-first-principles/index) (System Design)
+- [The Delivery Framework](/synapse/system-design-from-first-principles/interview-playbook/delivery-framework) (System Design)
+- [Estimation & the Numbers](/synapse/system-design-from-first-principles/foundations/estimation-and-numbers) (System Design)
+- [Load Balancing & Gateways](/synapse/system-design-from-first-principles/building-blocks/load-balancing-and-gateways) (System Design)
+- [Scaling Writes](/synapse/system-design-from-first-principles/patterns/scaling-writes) (System Design)
+- [Design a URL Shortener](/synapse/system-design-from-first-principles/case-studies/url-shortener) (System Design)
+- [Design a News Feed](/synapse/system-design-from-first-principles/case-studies/news-feed) (System Design)
+- [Design WhatsApp](/synapse/system-design-from-first-principles/case-studies/whatsapp) (System Design)
+- [Design a Rate Limiter](/synapse/system-design-from-first-principles/case-studies/rate-limiter) (System Design)
 
 **Practice:** design six classic systems on paper (URL shortener, news feed, chat, rate limiter, notifications, payments). Then compare your designs with how real companies describe theirs.
 
