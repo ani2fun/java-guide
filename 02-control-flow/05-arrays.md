@@ -60,7 +60,7 @@ There are two ways to make an array <abbr title="The Java Language Specification
 - `new int[n]` makes one with `n` slots, each set to a **default** (`0` for `int`);
 - an array **literal** `{…}` makes one already filled.
 
-Either way, `.length` reports its size.
+Either way, `.length` gives the number of slots, whether or not you've assigned them.
 
 ```java run viz=array:scores
 public class Main {
