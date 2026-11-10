@@ -365,7 +365,7 @@ Exception in thread "main" java.lang.reflect.InaccessibleObjectException: Unable
 
 A package can be exported, opened, both, or neither. Writing `opens com.lib.model to some.module;` limits the opening to a single module.
 
-*Concrete bite.* On the classpath, the same `Peek` prints `value = hidden` without any `opens` at all. That's because classpath code lives in the unnamed module, which opens everything (§6). So code that worked fine on the classpath can fail the day it moves to the module path — and frameworks hit exactly this problem.
+*Concrete bite.* On the classpath, the same `Peek` prints `value = hidden` without any `opens` at all. That's because classpath code lives in the unnamed module, which opens everything ([§6](#6-the-unnamed-module-and-automatic-modules)). So code that worked fine on the classpath can fail the day it moves to the module path — and frameworks hit exactly this problem.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -683,9 +683,9 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>The 🧪 box below: the directory for <code>com.shop.model</code>, <code>validate()</code>, and <code>com.shop.internal</code>.</summary>
 
-- `package com.shop.model;` belongs in `…/com/shop/model/`. For the source file, that's a convention; for the class file, it's required, and `javac -d` puts it there (§1).
+- `package com.shop.model;` belongs in `…/com/shop/model/`. For the source file, that's a convention; for the class file, it's required, and `javac -d` puts it there ([§1](#1-packages-and-the-classpath)).
 - From `com.shop.web`, the `public` field of `Order` is accessible. The package-private `validate()` isn't: you get `validate() is not public in Order; cannot be accessed from outside package`.
-- A module that declares only `exports com.shop.api;` hides every `public` class in `com.shop.internal`: `package com.shop.internal is not visible` (§3). The one line that changes that is `exports com.shop.internal;`.
+- A module that declares only `exports com.shop.api;` hides every `public` class in `com.shop.internal`: `package com.shop.internal is not visible` ([§3](#3-modules-module-infojava)). The one line that changes that is `exports com.shop.internal;`.
 
 </details>
 

@@ -131,7 +131,7 @@ public class Main {
 -3
 ```
 
-The last line is a sneak preview of §2: `-7 / 2` is `-3`, not `-4`.
+The last line is a sneak preview of [§2](#2-integer-division-truncates): `-7 / 2` is `-3`, not `-4`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -475,7 +475,7 @@ public class Main {
 
 `100000 * 100000` is ten billion, far beyond an `int`, so it wraps to a meaningless `1410065408`. Nothing looked dangerous, yet the type quietly betrayed the arithmetic.
 
-*Watch out: a `long` box, too late.* Storing the product in a `long` doesn't help. The multiplication still runs as `int * int`, wraps, and only then widens — just like `average` in §2. Make one operand a `long` *before* the multiplication:
+*Watch out: a `long` box, too late.* Storing the product in a `long` doesn't help. The multiplication still runs as `int * int`, wraps, and only then widens — just like `average` in [§2](#2-integer-division-truncates). Make one operand a `long` *before* the multiplication:
 
 ```java run
 import static java.lang.IO.println;

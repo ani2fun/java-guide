@@ -614,7 +614,7 @@ unknown
 10.00
 ```
 
-- The `switch` version of `describe` prints the same three lines as the §1 `if` chain.
+- The `switch` version of `describe` prints the same three lines as the [§1](#1-pattern-matching-for-instanceof) `if` chain.
 - A `Json` switch that handles only `JNum` and `JStr` doesn't compile: you get `the switch expression does not cover all possible input values`. `JNull` is permitted, but unhandled.
 - `area(new Rect(2, 5))` is `10.00`. No `default` is needed, because `Shape` permits only `Circle` and `Rect`, and both have a case.
 
@@ -642,9 +642,9 @@ unknown
 
 🧪 **Predict, then check.**
 
-1. Rewrite the §1 `describe` as a pattern `switch`, and predict its three outputs.
+1. Rewrite the [§1](#1-pattern-matching-for-instanceof) `describe` as a pattern `switch`, and predict its three outputs.
 2. Take `sealed interface Json permits JNull, JNum, JStr {}`, with records `JNull()`, `JNum(double v)` and `JStr(String s)`. Predict whether a `switch` handling only `JNum` and `JStr` compiles, and the error if not.
-3. Predict the area printed by `area(new Rect(2, 5))` using the §4 record pattern, and explain why no `default` is needed.
+3. Predict the area printed by `area(new Rect(2, 5))` using the [§4](#4-record-patterns) record pattern, and explain why no `default` is needed.
 
 </div>
 

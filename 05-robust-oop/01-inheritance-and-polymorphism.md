@@ -422,7 +422,7 @@ Main.java:5: error: toString() in Animal cannot override toString() in Object
 1 error
 ```
 
-The fix is to declare it `public String toString()`, as §5 does. The return type, by the way, has one degree of freedom: an override may return a *subtype* of the original's return type <abbr title="The Java Language Specification, Java SE 25, §8.4.8.3">[6]</abbr>.
+The fix is to declare it `public String toString()`, as [§5](#5-final-and-the-object-methods) does. The return type, by the way, has one degree of freedom: an override may return a *subtype* of the original's return type <abbr title="The Java Language Specification, Java SE 25, §8.4.8.3">[6]</abbr>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -514,7 +514,7 @@ Main.java:16: error: cannot find symbol
 1 error
 ```
 
-The compiler looked for `fetch()` in `Animal`, the declared type, and didn't find it. §4 shows you how to reach it.
+The compiler looked for `fetch()` in `Animal`, the declared type, and didn't find it. [§4](#4-reference-casting-instanceof-and-classcastexception) shows you how to reach it.
 
 *Concrete bite.* The dynamic rule applies to **methods**, not **fields**. A field access is resolved by the *declared* type, at compile time:
 
@@ -941,7 +941,7 @@ Woof / animal
 🧪 **Predict, then check.**
 
 1. Add a `Bird extends Animal` that overrides `speak()` to return `"Tweet"`. Put a `Dog`, a `Cat`, and a `Bird` in an `Animal[]`, then predict the three lines printed when you call `speak()` on each.
-2. Predict what `a.speak()` and `a.kind` print for `Animal a = new Dog();`, given the §3 hidden field.
+2. Predict what `a.speak()` and `a.kind` print for `Animal a = new Dog();`, given the [§3](#3-dynamic-dispatch-polymorphism) hidden field.
 3. Predict the compiler's reaction to a subclass overriding a `final` method, and explain why fields and methods resolve differently.
 
 </div>

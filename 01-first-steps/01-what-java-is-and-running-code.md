@@ -61,7 +61,7 @@ You don't need anything installed. Every block with a ▶ Run button compiles an
 
 A **program** is a list of **instructions**, also called **statements**, carried out in order. In Java, every statement has to live inside a **method**, which is a named block of statements. And every method lives inside a **class**, which is a named container.
 
-That's more scaffolding than some languages ask for, and §3 explains every word of it. For now, here's a small complete Java program. Go ahead and run it.
+That's more scaffolding than some languages ask for, and [§3](#3-reading-public-static-void-mainstring-args) explains every word of it. For now, here's a small complete Java program. Go ahead and run it.
 
 ```java run
 import static java.lang.IO.println;
@@ -86,7 +86,7 @@ Hello, world!
 
 The text between the double quotes is shown exactly as written; the quotes themselves aren't printed. The `;` ends the statement, the way a period ends a sentence.
 
-The `import static java.lang.IO.println;` line above the class is what makes the name `println` available. Take it as "print a line" for now; §4 explains where it comes from.
+The `import static java.lang.IO.println;` line above the class is what makes the name `println` available. Take it as "print a line" for now; [§4](#4-println--how-a-program-talks-back) explains where it comes from.
 
 **Intuition.**
 *Mechanism.* Running this happens in two phases, not one. First, the **compiler** (`javac`) reads the entire file and translates it to bytecode. Only if that succeeds does the **JVM** start executing `main`, one statement at a time, from top to bottom. The compiler's job is to check everything *before* anything runs.
@@ -585,7 +585,7 @@ A block comment ends at the first `*/`. The inner `old note */` closes the outer
 
 <div style="border-left:4px solid #6d28d9;background:rgba(109,40,217,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-🧪 **Predict, then check.** Look again at the §3 program whose method is named `greet` instead of `main`. Before re-running it, answer two questions: does it **compile**? And does it **run**? Then fix it by renaming `greet` to `main`, and predict the output before you click Run. 
+🧪 **Predict, then check.** Look again at the [§3](#3-reading-public-static-void-mainstring-args) program whose method is named `greet` instead of `main`. Before re-running it, answer two questions: does it **compile**? And does it **run**? Then fix it by renaming `greet` to `main`, and predict the output before you click Run. 
 
 If you can explain why the broken version compiles but won't start, you've got the most important idea in this chapter. **Java checks your program at compile time and again at run time, and the two stages fail in different ways.**
 

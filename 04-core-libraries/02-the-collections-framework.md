@@ -201,7 +201,7 @@ public class Main {
 Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.lang.Integer.intValue()" because the return value of "java.util.Iterator.next()" is null
 ```
 
-**Analysis.** `add(7)` boxed and `get(0)` unboxed, so `first + 1` is `8`. The list printed `null` without complaint. The crash came in the loop, because `for (int n : nums)` unboxes each element into `int n`, and the second element was `null`. The message names `Iterator.next()`, your first glimpse of the machinery in §4.
+**Analysis.** `add(7)` boxed and `get(0)` unboxed, so `first + 1` is `8`. The list printed `null` without complaint. The crash came in the loop, because `for (int n : nums)` unboxes each element into `int n`, and the second element was `null`. The message names `Iterator.next()`, your first glimpse of the machinery in [§4](#4-iteration-the-iterator-and-the-modification-trap).
 
 **Intuition.**
 *Mechanism.* Boxing is automatic, and so is its failure. A `List` method may take either an index (`int`) or an element (`Object`), and `List` declares both versions: `remove(int index)` and `remove(Object o)` <abbr title="Java SE 25 API, java.util.List">[1]</abbr>. The compiler first looks for a method that fits *without* boxing <abbr title="The Java Language Specification, Java SE 25, §15.12.2">[6]</abbr>. With an `int` argument, `remove(int)` fits, so it wins.

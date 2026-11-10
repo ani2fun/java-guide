@@ -94,7 +94,7 @@ The worker isn't a copy of your program. It's a second path of execution *throug
 
 Now for the API. A `Thread` runs a `Runnable`, which is a functional interface, so a lambda fits nicely. `start()` launches it alongside the caller, and `join()` waits for it to finish.
 
-`main` declares `throws InterruptedException` because `join()` can throw that checked exception. It's thrown if another thread *interrupts* the waiting thread — a polite request to stop <abbr title="Java SE 25 API, java.lang.Thread.join() and interrupt()">[2]</abbr>. You'll see one in §2.
+`main` declares `throws InterruptedException` because `join()` can throw that checked exception. It's thrown if another thread *interrupts* the waiting thread — a polite request to stop <abbr title="Java SE 25 API, java.lang.Thread.join() and interrupt()">[2]</abbr>. You'll see one in [§2](#2-the-six-thread-states).
 
 ```java run
 import static java.lang.IO.println;
@@ -185,7 +185,7 @@ At any moment, a thread is in exactly one of six states — the constants of the
 |---|---|
 | `NEW` | created, not yet started |
 | `RUNNABLE` | running, or ready to run when the scheduler picks it |
-| `BLOCKED` | waiting to acquire a lock, to enter a `synchronized` block or method (§4) |
+| `BLOCKED` | waiting to acquire a lock, to enter a `synchronized` block or method ([§4](#4-synchronized)) |
 | `WAITING` | waiting with no time limit, for example inside `join()` |
 | `TIMED_WAITING` | waiting with a time limit, for example inside `Thread.sleep(ms)` |
 | `TERMINATED` | finished: `run()` returned or threw |
@@ -348,11 +348,11 @@ sequenceDiagram
 **Analysis.** The result is far below 400,000, and it's different on each run. The culprit is that `counter++` is *not atomic*. It's really three steps: read `counter`, add one, and write it back.
 
 - The diagram traces one collision. Both threads read `5` before either one writes, both compute `6`, and B's write lands right on top of A's.
-- The scheduler can pause a thread *between any two of those steps* — that's exactly what preemptive scheduling (§1) means.
+- The scheduler can pause a thread *between any two of those steps* — that's exactly what preemptive scheduling ([§1](#1-threads-and-runnable)) means.
 - Out of 400,000 increments, most were lost. Yet nothing threw: the program "succeeded" and printed a wrong number.
 
 **Intuition.**
-*Mechanism.* `counter++` is a read-modify-write. With no coordination, the steps of different threads interleave in any order. One thread's write gets overwritten by another thread that read the old value: a **lost update**. The same lack of coordination also allows a **stale read**, where a thread doesn't see another thread's recent write at all (§5).
+*Mechanism.* `counter++` is a read-modify-write. With no coordination, the steps of different threads interleave in any order. One thread's write gets overwritten by another thread that read the old value: a **lost update**. The same lack of coordination also allows a **stale read**, where a thread doesn't see another thread's recent write at all ([§5](#5-the-java-memory-model-and-happens-before)).
 
 *Concrete bite.* Those varying, sub-400,000 outputs are the race made visible. It's the [parallel-stream data race](/synapse/programming-languages/java/advanced/functional-java-and-streams) from the last lesson, now in raw threads. It's also why "it passed in testing" means little for concurrent code. A race might show up once in a thousand runs, then constantly under production load.
 
@@ -403,7 +403,7 @@ public class Main {
 
 - A `synchronized` method locks a monitor on entry and unlocks it on exit. A `static` method uses the monitor of its class's `Class` object, while an instance method uses `this` <abbr title="The Java Language Specification, Java SE 25, §8.4.3.6">[6]</abbr>.
 - A `synchronized (obj) { … }` **block** locks the monitor of whichever object you name <abbr title="The Java Language Specification, Java SE 25, §14.19">[7]</abbr>.
-- A second thread that tries to lock a monitor that's already held is `BLOCKED` (§2) until the monitor is free.
+- A second thread that tries to lock a monitor that's already held is `BLOCKED` ([§2](#2-the-six-thread-states)) until the monitor is free.
 
 The block form, using one shared lock object, is just as correct as the method:
 
@@ -505,13 +505,13 @@ sequenceDiagram
   B->>B: reads counter, sees 1
 ```
 
-**Analysis.** The diagram shows the rule that makes §4 correct, beyond mutual exclusion:
+**Analysis.** The diagram shows the rule that makes [§4](#4-synchronized) correct, beyond mutual exclusion:
 
 - Thread A *unlocks* a monitor, and Thread B later *locks the same monitor*.
 - "An unlock on a monitor happens-before every subsequent lock on that monitor" <abbr title="The Java Language Specification, Java SE 25, §17.4.5">[8]</abbr>.
 - So every write A made before unlocking is visible to B after locking.
 
-That's why each `increment()` sees the running total: the lock both serializes the updates *and* publishes them. Without a happens-before edge, as in the §3 race, the JMM allows B to read an older value of `counter`.
+That's why each `increment()` sees the running total: the lock both serializes the updates *and* publishes them. Without a happens-before edge, as in the [§3](#3-race-conditions) race, the JMM allows B to read an older value of `counter`.
 
 **Intuition.**
 *Mechanism.* For the sake of speed, the JMM lets compilers and processors reorder and cache memory operations, so a write by one thread isn't automatically visible to another. Happens-before edges are the guarantees you get. The four this book uses most are in JLS §17.4.5 <abbr title="The Java Language Specification, Java SE 25, §17.4.5">[8]</abbr>:
@@ -597,9 +597,9 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>The 🧪 box below: two threads, a million increments each; <code>start()</code> vs <code>run()</code>; and why a <code>running</code> flag should be <code>volatile</code>.</summary>
 
-1. Two threads each doing an unsynchronized `counter += 1` a million times *can* print `2000000`, if no two read-modify-writes happen to interleave. But it's unlikely, because with a million chances, the collision from §3 happens often. The §3 runs lost most of their 400,000 updates.
-2. `t.start()` prints the new thread's name, while `t.run()` prints `main`, as the §1 example showed.
-3. A `boolean` write is atomic, but atomicity isn't the problem. Without a happens-before edge, the polling thread may never see the write. A `volatile` write happens-before every later read of that field (edge 2 in §5), so the reader sees `false` promptly.
+1. Two threads each doing an unsynchronized `counter += 1` a million times *can* print `2000000`, if no two read-modify-writes happen to interleave. But it's unlikely, because with a million chances, the collision from [§3](#3-race-conditions) happens often. The [§3](#3-race-conditions) runs lost most of their 400,000 updates.
+2. `t.start()` prints the new thread's name, while `t.run()` prints `main`, as the [§1](#1-threads-and-runnable) example showed.
+3. A `boolean` write is atomic, but atomicity isn't the problem. Without a happens-before edge, the polling thread may never see the write. A `volatile` write happens-before every later read of that field (edge 2 in [§5](#5-the-java-memory-model-and-happens-before)), so the reader sees `false` promptly.
 
 </details>
 

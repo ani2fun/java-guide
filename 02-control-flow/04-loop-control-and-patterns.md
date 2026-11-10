@@ -165,13 +165,13 @@ checked 3
 checked 4
 ```
 
-The search found `2` and kept going. The `break` belonged to the `switch`, so the loop never saw it. A labeled `break`, coming up in §3, reaches the loop.
+The search found `2` and kept going. The `break` belonged to the `switch`, so the loop never saw it. A labeled `break`, coming up in [§3](#3-labeled-break-and-continue-nested-loops), reaches the loop.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
 💡 **Earned rule.** Use `break` to stop a scan the moment its job is done. Remember that it leaves only the innermost loop or `switch`.
 
-That scoping has a cost. A `break` meant to abandon a *nested* search stops only the inner loop, and silently lets the outer one carry on. The labeled `break` in §3 fixes exactly that.
+That scoping has a cost. A `break` meant to abandon a *nested* search stops only the inner loop, and silently lets the outer one carry on. The labeled `break` in [§3](#3-labeled-break-and-continue-nested-loops) fixes exactly that.
 
 </div>
 
@@ -355,7 +355,7 @@ done
 
 **Analysis.** The loops ran until `i * j == 4` (at `i = 2, j = 2`). Then `break outer` left **both** loops at once, and execution jumped past the outer loop to `done`. A plain `break` there would have ended only the inner loop and let the outer one carry on to `i = 3`. The label is what made it abandon the whole nested search.
 
-The same label fixes the `switch` trap from §1. Name the loop, and `break search` leaves the loop from inside the `switch`:
+The same label fixes the `switch` trap from [§1](#1-break-leave-the-loop-now). Name the loop, and `break search` leaves the loop from inside the `switch`:
 
 ```java run
 import static java.lang.IO.println;

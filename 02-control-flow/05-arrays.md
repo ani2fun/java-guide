@@ -149,7 +149,7 @@ null
 
 A `String[]` slot starts as **`null`**: "no object yet". [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) covers `null` in full.
 
-*Concrete bite.* The size is fixed at creation: `.length` is a property of the array, not a target you can change. (You'll feel that limit firsthand in §5.) For now, the point is that every slot exists from the start. An unassigned `int` slot is `0`, not "empty" or "undefined".
+*Concrete bite.* The size is fixed at creation: `.length` is a property of the array, not a target you can change. (You'll feel that limit firsthand in [§5](#5-arrays-are-not-growable-lists).) For now, the point is that every slot exists from the start. An unassigned `int` slot is `0`, not "empty" or "undefined".
 
 *Watch out: a literal assigned later.* The `{…}` shorthand works only in a declaration <abbr title="The Java Language Specification, Java SE 25, §10.6">[1]</abbr>. Declare first and assign the braces later, and javac can't parse it:
 
@@ -220,7 +220,7 @@ public class Main {
 [0, 0, 0]
 ```
 
-The first loop assigned to a copy, as in [Loops](/synapse/programming-languages/java/control-flow/loops), so the array printed unchanged. The second wrote through the index, and every slot became `0`. §3 comes back to that choice.
+The first loop assigned to a copy, as in [Loops](/synapse/programming-languages/java/control-flow/loops), so the array printed unchanged. The second wrote through the index, and every slot became `0`. [§3](#3-iterating-an-array) comes back to that choice.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -330,7 +330,7 @@ public class Main {
 **Intuition.**
 *Mechanism.* The classic `for` reads `nums[i]` on each pass, using the index it controls. The enhanced `for` walks `0..length-1` for you and hands over each value <abbr title="The Java Language Specification, Java SE 25, §14.14.2">[7]</abbr>: a copy, as [Loops](/synapse/programming-languages/java/control-flow/loops) showed. Same traversal, different access.
 
-*Concrete bite.* The choice matters beyond style, because only the indexed `for` can write back. §1's `Arrays.toString` run showed it: `for (int n : nums) n = 0;` left `[5, 10, 15]`, while the indexed loop gave `[0, 0, 0]`.
+*Concrete bite.* The choice matters beyond style, because only the indexed `for` can write back. [§1](#1-creating-arrays)'s `Arrays.toString` run showed it: `for (int n : nums) n = 0;` left `[5, 10, 15]`, while the indexed loop gave `[0, 0, 0]`.
 
 Walking backwards needs the index too. Start at the last index, `length - 1`, and stop after `0`: `for (int i = a.length - 1; i >= 0; i--)`. Start at `a.length`, and it throws at once. Stop at `i > 0`, and you skip the first element.
 

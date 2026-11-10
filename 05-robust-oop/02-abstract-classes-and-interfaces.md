@@ -325,7 +325,7 @@ Hello, Ada
 **Intuition.**
 *Mechanism.* A `default` method's implementation lives in the interface, and implementers inherit it unless they override it <abbr title="The Java Language Specification, Java SE 25, §9.4">[3]</abbr>. It can call the interface's abstract methods (like `name()`), which dispatch to the implementing class. So the default's behavior adapts to each implementer.
 
-*Concrete bite.* Defaults are what let interfaces evolve. Before JDK 8, adding a method to a widely implemented interface broke every implementer's compile, because each one suddenly lacked the new method. A `default` method adds the capability along with a fallback, so old implementers keep compiling. The cost shows up only when a class inherits *two* defaults with the same signature. §5 shows that clash, and how to fix it.
+*Concrete bite.* Defaults are what let interfaces evolve. Before JDK 8, adding a method to a widely implemented interface broke every implementer's compile, because each one suddenly lacked the new method. A `default` method adds the capability along with a fallback, so old implementers keep compiling. The cost shows up only when a class inherits *two* defaults with the same signature. [§5](#5-one-class-many-interfaces) shows that clash, and how to fix it.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 

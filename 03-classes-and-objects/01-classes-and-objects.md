@@ -272,11 +272,11 @@ A constructor has no return type, not even `void`. Its job is to initialize, and
 **Intuition.**
 *Mechanism.* `new` works in a fixed order <abbr title="The Java Language Specification, Java SE 25, §12.5">[6]</abbr>:
 
-1. It allocates the object and sets every field to its default (§1).
+1. It allocates the object and sets every field to its default ([§1](#1-a-class-bundles-fields-and-methods)).
 2. It runs the field initializers, such as `int width = 1;`, and then the constructor body.
 3. It returns the reference.
 
-If you write **no** constructor, javac adds a **default constructor**: no parameters, and none of your code <abbr title="The Java Language Specification, Java SE 25, §8.8.9">[7]</abbr>. That's why `new Rectangle()` worked in §1. The moment you declare *any* constructor, javac stops adding it.
+If you write **no** constructor, javac adds a **default constructor**: no parameters, and none of your code <abbr title="The Java Language Specification, Java SE 25, §8.8.9">[7]</abbr>. That's why `new Rectangle()` worked in [§1](#1-a-class-bundles-fields-and-methods). The moment you declare *any* constructor, javac stops adding it.
 
 *Concrete bite.* So once you add a constructor that takes arguments, you can no longer call `new Rectangle()`:
 
@@ -729,7 +729,7 @@ public class Main {
 
 🧪 **Predict, then check.**
 
-1. Add a `String name` field and a constructor `Rectangle(int width, int height, String name)` to the §3 class. Predict what `area()` returns if you write `width = width` but `this.name = name`.
+1. Add a `String name` field and a constructor `Rectangle(int width, int height, String name)` to the [§3](#3-this-and-per-instance-state) class. Predict what `area()` returns if you write `width = width` but `this.name = name`.
 2. Predict the output of `Counter x = new Counter(); Counter y = new Counter(); Counter z = x; x.increment(); z.increment(); y.increment();`, then printing `x.count`, `y.count` and `z.count`.
 3. Explain why `area()` needs no parameters even though it uses `width` and `height`.
 

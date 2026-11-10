@@ -249,7 +249,7 @@ Since Java 19, an `ExecutorService` is also `AutoCloseable`. Its `close()` "invo
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use an `ExecutorService` instead of raw `Thread`s. Submit tasks, collect results through `Future`, and shut down deliberately: `shutdown()` → `awaitTermination` → `shutdownNow()`, or `try`-with-resources. For CPU-bound work, size a fixed pool near the core count. For work that mostly *blocks*, don't tune a bigger pool — use §4's virtual threads instead.
+💡 **Earned rule.** Use an `ExecutorService` instead of raw `Thread`s. Submit tasks, collect results through `Future`, and shut down deliberately: `shutdown()` → `awaitTermination` → `shutdownNow()`, or `try`-with-resources. For CPU-bound work, size a fixed pool near the core count. For work that mostly *blocks*, don't tune a bigger pool — use [§4](#4-virtual-threads)'s virtual threads instead.
 
 The cost is owning the lifecycle, and unwrapping `ExecutionException`. The payoff is pooled, reusable threads, queued tasks, and exceptions that reach the caller instead of disappearing.
 
@@ -516,7 +516,7 @@ public class Main {
 fallback: service down
 ```
 
-The `thenApply` stage never ran. A failed stage completes the future *exceptionally*, later value stages get skipped, and the exception travels down the chain until `exceptionally` turns it back into a value. The handler receives it wrapped in a `CompletionException`, which is why the code calls `getCause()`. Without the handler, the exception would surface at `get()`, wrapped in `ExecutionException`, just as in §1.
+The `thenApply` stage never ran. A failed stage completes the future *exceptionally*, later value stages get skipped, and the exception travels down the chain until `exceptionally` turns it back into a value. The handler receives it wrapped in a `CompletionException`, which is why the code calls `getCause()`. Without the handler, the exception would surface at `get()`, wrapped in `ExecutionException`, just as in [§1](#1-executorservice-and-future).
 
 **Intuition.**
 *Mechanism.* A `CompletableFuture` represents a value that will be ready later, plus a graph of continuations. `thenApply`, `thenCompose` and `thenCombine` register callbacks that fire on completion. So instead of blocking thread by thread, you build a dependency graph that the executor drives. Failures travel through the same graph as values do: every stage completes either *normally* or *exceptionally*.

@@ -27,7 +27,7 @@ Here's the thesis of this lesson: **coordination means waiting until some condit
 
 This lesson builds directly on [threads, races, and `synchronized`](/synapse/programming-languages/java/advanced/concurrency-the-basics). It also sets up the next lesson's [executors and virtual threads](/synapse/programming-languages/java/advanced/concurrency-high-level-and-virtual-threads), which are built from these primitives.
 
-Thread scheduling is nondeterministic, so several outputs below vary from run to run. Those are **labeled illustrative**, and each one shows a single real captured run. The deadlock in §2 never finishes, so its output is a captured run too.
+Thread scheduling is nondeterministic, so several outputs below vary from run to run. Those are **labeled illustrative**, and each one shows a single real captured run. The deadlock in [§2](#2-deadlock-the-price-of-multiple-locks) never finishes, so its output is a captured run too.
 
 **You'll be able to:** write a guarded block with `while`, `wait()` and `notifyAll()`, and predict what an `if` guard does with two consumers; name the four conditions of a deadlock, and break one with lock ordering or a timed `tryLock`; release a `ReentrantLock` in `finally`, and predict what an exception does to a lock released without it; choose a latch, a semaphore, a barrier or a blocking queue for a coordination shape, and predict each one's lifecycle.
 
@@ -366,7 +366,7 @@ flowchart LR
 3. **No preemption:** a lock cannot be taken away from its holder.
 4. **Circular wait:** the cycle in the diagram.
 
-Break *any one* of them, and you prevent deadlock. The two practical breaks are **order** (both threads take A before B, so no cycle can form) and **timeout** (give up waiting and release what you hold, as §3 shows). And notice what the output *doesn't* show: no exception, no stack trace. A deadlocked server simply stops answering.
+Break *any one* of them, and you prevent deadlock. The two practical breaks are **order** (both threads take A before B, so no cycle can form) and **timeout** (give up waiting and release what you hold, as [§3](#3-reentrantlock-a-lock-as-an-object) shows). And notice what the output *doesn't* show: no exception, no stack trace. A deadlocked server simply stops answering.
 
 **Intuition.**
 *Mechanism.* Each `synchronized (x)` blocks until `x`'s monitor is free, while *keeping* every monitor it already holds. The scheduler has no insight into your intent: it just parks t1 on B's entry queue, and t2 on A's.
@@ -396,7 +396,7 @@ The cost: lock ordering is an invisible convention that no compiler enforces, so
 - a fairness option;
 - `newCondition()`, for separate wait sets.
 
-The price of that power is that *you* must release the lock — always, in `finally`. Here's §2's deadlock defused, with the same locks, the same opposite order and the same 100 ms overlap. This time, a timed `tryLock` breaks hold-and-wait:
+The price of that power is that *you* must release the lock — always, in `finally`. Here's [§2](#2-deadlock-the-price-of-multiple-locks)'s deadlock defused, with the same locks, the same opposite order and the same 100 ms overlap. This time, a timed `tryLock` breaks hold-and-wait:
 
 ```java run
 import java.util.concurrent.TimeUnit;
@@ -443,7 +443,7 @@ t1: got both locks, working
 both finished — no deadlock
 ```
 
-**Analysis.** Both threads hit the §2 collision: each holds its first lock and wants the other's. But this time, `tryLock(50 ms)` *fails instead of parking forever*.
+**Analysis.** Both threads hit the [§2](#2-deadlock-the-price-of-multiple-locks) collision: each holds its first lock and wants the other's. But this time, `tryLock(50 ms)` *fails instead of parking forever*.
 
 - Each thread releases what it holds ("backing off"), which breaks hold-and-wait.
 - It sleeps for a random beat, so the two don't collide the same way again, and then retries.
@@ -452,7 +452,7 @@ both finished — no deadlock
 The `try`/`finally` shape isn't optional style. `synchronized` releases its monitor on *any* exit, whether normal or through an exception <abbr title="The Java Language Specification, Java SE 25, §14.19">[6]</abbr>. `ReentrantLock` doesn't.
 
 **Intuition.**
-*Mechanism.* **Reentrant** means the thread holding the lock may acquire it again, just as with nested `synchronized` blocks on one object. `tryLock(timeout)` parks the thread with a deadline, and returns `false` when the deadline expires. `newCondition()` gives you `await`/`signal`/`signalAll` — §1's wait set as a named object. A lock can have several conditions, such as one for "not full" and one for "not empty", so you wake only the threads whose condition changed.
+*Mechanism.* **Reentrant** means the thread holding the lock may acquire it again, just as with nested `synchronized` blocks on one object. `tryLock(timeout)` parks the thread with a deadline, and returns `false` when the deadline expires. `newCondition()` gives you `await`/`signal`/`signalAll` — [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks)'s wait set as a named object. A lock can have several conditions, such as one for "not full" and one for "not empty", so you wake only the threads whose condition changed.
 
 *Concrete bite: `unlock()` outside `finally`.* An exception between `lock()` and `unlock()` skips the unlock, and the lock then outlives the thread that took it:
 
@@ -717,7 +717,7 @@ the same barrier served 2 rounds
 ```
 
 **Intuition.**
-*Mechanism.* All three are §1's pattern (state + lock + wait-until-condition), packaged with the loops and notifications already written for you:
+*Mechanism.* All three are [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks)'s pattern (state + lock + wait-until-condition), packaged with the loops and notifications already written for you:
 
 - A latch's condition is `count == 0`, and it never resets.
 - A semaphore's condition is `permits > 0`, which `release()` restores.
@@ -777,7 +777,7 @@ The cost is a vocabulary to learn, and lifecycle rules to respect (one-shot vs r
 
 ## 5. `BlockingQueue`: coordination you don't have to write
 
-Look back at §1: forty lines of careful monitor discipline, just for a bounded producer/consumer buffer. That pattern is so central that the library ships it whole. A **`BlockingQueue`** is a thread-safe queue where `put()` blocks while the queue is full, and `take()` blocks while it's empty <abbr title="Java SE 25 API, java.util.concurrent.BlockingQueue">[12]</abbr>. Here's §1, done by the library:
+Look back at [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks): forty lines of careful monitor discipline, just for a bounded producer/consumer buffer. That pattern is so central that the library ships it whole. A **`BlockingQueue`** is a thread-safe queue where `put()` blocks while the queue is full, and `take()` blocks while it's empty <abbr title="Java SE 25 API, java.util.concurrent.BlockingQueue">[12]</abbr>. Here's [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks), done by the library:
 
 ```java run
 import java.util.concurrent.ArrayBlockingQueue;
@@ -860,7 +860,7 @@ queue -> c2
 
 ```
 
-**Analysis.** All of §1's machinery (the `while`/`wait` guards, the `notifyAll` calls, the capacity checks) now lives inside `put` and `take`.
+**Analysis.** All of [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks)'s machinery (the `while`/`wait` guards, the `notifyAll` calls, the capacity checks) now lives inside `put` and `take`.
 
 - The slow consumer applies **backpressure** through the bounded capacity. At most two items wait in the queue, and then the producer blocks. However fast production gets, memory can't balloon.
 - The **poison pill** is a sentinel value enqueued after the last real item. It travels through the same channel as the data, so the consumer drains everything already produced, *then* stops. There's no separate "please stop" flag to synchronize.
@@ -869,7 +869,7 @@ queue -> c2
 The diagram is the shape to remember: the queue is the *only* shared state, and the library owns it.
 
 **Intuition.**
-*Mechanism.* In OpenJDK 25, `ArrayBlockingQueue` is a fixed ring buffer guarded by one `ReentrantLock` with two `Condition`s, `notEmpty` and `notFull` <abbr title="OpenJDK 25 source, java/util/concurrent/ArrayBlockingQueue.java">[13]</abbr>. That's §3's tools arranged into §1's design, waking only the side whose condition changed. Two relatives keep the same contract, with different trade-offs <abbr title="Java SE 25 API, java.util.concurrent.LinkedBlockingQueue and SynchronousQueue">[12]</abbr>:
+*Mechanism.* In OpenJDK 25, `ArrayBlockingQueue` is a fixed ring buffer guarded by one `ReentrantLock` with two `Condition`s, `notEmpty` and `notFull` <abbr title="OpenJDK 25 source, java/util/concurrent/ArrayBlockingQueue.java">[13]</abbr>. That's [§3](#3-reentrantlock-a-lock-as-an-object)'s tools arranged into [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks)'s design, waking only the side whose condition changed. Two relatives keep the same contract, with different trade-offs <abbr title="Java SE 25 API, java.util.concurrent.LinkedBlockingQueue and SynchronousQueue">[12]</abbr>:
 
 - `LinkedBlockingQueue` is optionally bounded. Its source uses separate locks for the head and the tail, so a producer and a consumer don't contend with each other.
 - `SynchronousQueue` has no capacity at all: "each insert operation must wait for a corresponding remove operation by another thread". It's a direct hand-off.
@@ -897,7 +897,7 @@ The cost: a queue per stage adds hand-off latency, plus a capacity to tune. Too 
 | `ReentrantLock` makes the lock an object: `tryLock(timeout)`, interruptible, several `Condition`s | Timed acquisition breaks hold-and-wait; the price is manual `finally { unlock(); }` |
 | A `ReadWriteLock` shares the read lock, never the write lock | Readers run together; a writer waits for all readers to leave |
 | Latch = one-shot countdown gate; semaphore = N ownerless permits; barrier = reusable team rendezvous | Check the shelf before writing a guarded block; respect each one's lifecycle |
-| `BlockingQueue` packages the §1 pattern: `put` blocks when full, `take` when empty | Stages + queues + transferred ownership beat shared structures + locks |
+| `BlockingQueue` packages the [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks) pattern: `put` blocks when full, `take` when empty | Stages + queues + transferred ownership beat shared structures + locks |
 
 ## 7. Gotcha checklist
 
@@ -940,11 +940,11 @@ One check per objective. Answer before you open anything.
 ```
 
 <details>
-<summary>The 🧪 box below: <code>if</code> with two consumers; a lucky run of §2; a semaphore released twice.</summary>
+<summary>The 🧪 box below: <code>if</code> with two consumers; a lucky run of <a href="#2-deadlock-the-price-of-multiple-locks">§2</a>; a semaphore released twice.</summary>
 
-1. With `if`, the line that throws is `items.removeFirst()` in `take`. Both consumers wait on an empty buffer; one item arrives, and `notifyAll()` wakes both of them. The first to re-acquire the lock takes the item. The second skips the check and calls `removeFirst()` on an empty `ArrayDeque`, which throws `NoSuchElementException`, as the §1 anti-pattern shows.
+1. With `if`, the line that throws is `items.removeFirst()` in `take`. Both consumers wait on an empty buffer; one item arrives, and `notifyAll()` wakes both of them. The first to re-acquire the lock takes the item. The second skips the check and calls `removeFirst()` on an empty `ArrayDeque`, which throws `NoSuchElementException`, as the [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks) anti-pattern shows.
 2. Yes: without the `pause()` calls, 28 of 30 runs completed. The luck removes **circular wait**: one thread took both locks before the other took any, so no cycle formed.
-3. `maxSeen` can reach 4, because a second `release()` adds a fourth permit. The `Semaphore` doesn't object, since a permit has no owner. The §4 example prints `permits after one acquire and two releases: 4`.
+3. `maxSeen` can reach 4, because a second `release()` adds a fourth permit. The `Semaphore` doesn't object, since a permit has no owner. The [§4](#4-synchronizers-countdownlatch-semaphore-cyclicbarrier) example prints `permits after one acquire and two releases: 4`.
 
 </details>
 
@@ -972,8 +972,8 @@ One check per objective. Answer before you open anything.
 
 🧪 **Predict, then check.**
 
-1. Predict what §1's buffer does if both `wait()` calls used `if` instead of `while`, with *two* consumer threads. Which line can now throw, and under what wakeup order?
-2. Predict whether §2's program can ever complete normally on a lucky run, and which of the four deadlock conditions the luck removes.
+1. Predict what [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks)'s buffer does if both `wait()` calls used `if` instead of `while`, with *two* consumer threads. Which line can now throw, and under what wakeup order?
+2. Predict whether [§2](#2-deadlock-the-price-of-multiple-locks)'s program can ever complete normally on a lucky run, and which of the four deadlock conditions the luck removes.
 3. Predict `maxSeen` in the semaphore demo if one thread's code path called `release()` twice, and whether the `Semaphore` would object.
 
 </div>

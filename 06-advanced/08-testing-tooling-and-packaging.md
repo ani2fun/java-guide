@@ -369,7 +369,7 @@ Main-Class: Greeting
 
 This is a plain, **non-modular** JAR, because it has no `module-info.class`. A JAR that does have one is a **modular JAR**. [Packages, Modules & the Build](/synapse/programming-languages/java/robust-oop/packages-modules-and-the-build) builds both kinds, and also shows how a plain JAR on the module path becomes an automatic module, and how `jlink` makes a runtime image.
 
-*Watch out: a JAR with no `Main-Class`.* Build the JAR without `--main-class`, and `java -jar` has no class to start. The same goes for the JAR that `mvn package` built in §3:
+*Watch out: a JAR with no `Main-Class`.* Build the JAR without `--main-class`, and `java -jar` has no class to start. The same goes for the JAR that `mvn package` built in [§3](#3-build-tools-and-dependencies):
 
 ```
 $ jar --create --file plain.jar Greeting.class
@@ -722,7 +722,7 @@ That JAR has no `Main-Class` unless you configure one, so `java -jar` says `no m
 2. Predict whether a JUnit test `assertEquals(4, calc.add(2, 3))` passes, and what the failure message would show.
 3. Write a `pom.xml` `<dependency>` for a library `com.acme:widgets:2.1.0`. Explain what `mvn package` does with it, and why you need a fat JAR to run the result with `java -jar`.
 
-§1, §2's failing test and the ✅ `<details>` answer each one in turn.
+[§1](#1-testing-with-assertions), [§2](#2-junit)'s failing test and the ✅ `<details>` answer each one in turn.
 
 </div>
 

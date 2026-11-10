@@ -221,7 +221,7 @@ Reach for it out of habit, and you pay with a body that runs even when it should
 
 ## 3. The classic `for`
 
-Counting loops have three moving parts: a starting value, a continue-condition, and a step. The `for` loop puts all three on one line: `for (init; test; update)` <abbr title="The Java Language Specification, Java SE 25, §14.14.1">[3]</abbr>. It's the same logic as the `while` in §1, gathered in one place.
+Counting loops have three moving parts: a starting value, a continue-condition, and a step. The `for` loop puts all three on one line: `for (init; test; update)` <abbr title="The Java Language Specification, Java SE 25, §14.14.1">[3]</abbr>. It's the same logic as the `while` in [§1](#1-while-test-before-each-pass), gathered in one place.
 
 ```java run
 import static java.lang.IO.print;
@@ -591,13 +591,13 @@ One check per objective. Answer before you open anything.
 ```
 
 <details>
-<summary>The 🧪 box below: the countdown, the two loops that start at 3, and the §1 loop as a <code>for</code>.</summary>
+<summary>The 🧪 box below: the countdown, the two loops that start at 3, and the <a href="#1-while-test-before-each-pass">§1</a> loop as a <code>for</code>.</summary>
 
 `for (int i = 10; i > 0; i -= 2)` prints five numbers: `10 8 6 4 2`. At `0`, the test `0 > 0` fails.
 
 With the variable at `3` and the condition `< 3`, the `while` body runs **0** times, and the `do-while` body runs **1** time.
 
-The §1 loop as a `for`:
+The [§1](#1-while-test-before-each-pass) loop as a `for`:
 
 `for (int i = 0; i < 5; i++) { System.out.print(i + " "); }`
 
@@ -623,7 +623,7 @@ It prints `0 1 2 3 4`, the same line.
 
 1. Predict the exact output of `for (int i = 10; i > 0; i -= 2) System.out.print(i + " ");`: how many numbers, and which?
 2. Predict how many times each loop body runs when the variable starts at `3` and the condition is `< 3`: a `while`, then a `do-while`.
-3. Rewrite the §1 `while` (printing `0 1 2 3 4`) as a `for` loop, and confirm it prints the same line.
+3. Rewrite the [§1](#1-while-test-before-each-pass) `while` (printing `0 1 2 3 4`) as a `for` loop, and confirm it prints the same line.
 
 </div>
 

@@ -81,7 +81,7 @@ HELLO
 
 **Analysis.** `Box<String>` made `T` mean `String`, so `get()` returned a `String` that you could use as one (`toUpperCase`) without a cast. Likewise, `Box<Integer>`'s `get()` returned an `Integer`, ready for arithmetic. One class definition, two type-safe uses.
 
-`new Box<>("hello")` uses the diamond you met in [the Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework): the compiler infers `String` from the variable's type. You'll see more of this **type inference** in §2.
+`new Box<>("hello")` uses the diamond you met in [the Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework): the compiler infers `String` from the variable's type. You'll see more of this **type inference** in [§2](#2-generic-methods-and-bounded-types).
 
 **Intuition.**
 *Mechanism.* The compiler checks every use of a `Box<String>` as if `T` were `String`. The guarantee is static: any code that makes a `Box<String>` hold or return something other than a `String` simply doesn't compile.
@@ -443,7 +443,7 @@ ArrayList
 **Analysis.** Both lists report the *same* class, `ArrayList`, and `getClass() == getClass()` is `true`. At run time, the `<String>` and `<Integer>` are simply gone: generics were enforced during compilation, then erased. That's why generics need no extra classes — and why some things are impossible.
 
 **Intuition.**
-*Mechanism.* Erasure replaces each type variable with the erasure of its bound, or with `Object` when there is no bound <abbr title="The Java Language Specification, Java SE 25, §4.6">[8]</abbr>. Wherever the code needs the real type, the compiler inserts a cast. You can see both effects with `javap -c`, the JDK's bytecode printer, on the §1 `Box<String>` program:
+*Mechanism.* Erasure replaces each type variable with the erasure of its bound, or with `Object` when there is no bound <abbr title="The Java Language Specification, Java SE 25, §4.6">[8]</abbr>. Wherever the code needs the real type, the compiler inserts a cast. You can see both effects with `javap -c`, the JDK's bytecode printer, on the [§1](#1-generic-classes-type-parameters) `Box<String>` program:
 
 ```text
 $ javap -c Main
@@ -451,7 +451,7 @@ $ javap -c Main
       14: checkcast     #18                 // class java/lang/String
 ```
 
-In the bytecode, `Box.get` returns `Object`, and a `checkcast` to `String` follows the call. That cast can't fail here, because the compiler already proved the types. A raw type, as in §1, skips that proof — and the inserted cast is exactly what threw.
+In the bytecode, `Box.get` returns `Object`, and a `checkcast` to `String` follows the call. That cast can't fail here, because the compiler already proved the types. A raw type, as in [§1](#1-generic-classes-type-parameters), skips that proof — and the inserted cast is exactly what threw.
 
 *Concrete bite.* Because the type argument is gone at run time, the JVM has no way to check it. So `instanceof` accepts `List<String>` only when the compiler can prove the `<String>` part in advance <abbr title="The Java Language Specification, Java SE 25, §15.20.2">[9]</abbr>. Starting from an `Object`, it can't:
 
@@ -591,7 +591,7 @@ One check per objective. Answer before you open anything.
 <summary>The 🧪 box below: <code>Pair</code>, <code>firstOrNull</code>, the two <code>getClass()</code> calls, and <code>instanceof Map&lt;String,Integer&gt;</code>.</summary>
 
 - `new Pair<String, Integer>("x", 1).second() + 1` is `2`: `second()` returns an `Integer`, which unboxes for the `+`.
-- `static <T> T firstOrNull(List<T> xs)` compiles. Adding `xs.get(0).compareTo(...)` inside it does not: `cannot find symbol`, as in §2, until `T` gets a bound.
+- `static <T> T firstOrNull(List<T> xs)` compiles. Adding `xs.get(0).compareTo(...)` inside it does not: `cannot find symbol`, as in [§2](#2-generic-methods-and-bounded-types), until `T` gets a bound.
 - `new ArrayList<String>().getClass() == new ArrayList<Double>().getClass()` is `true`: erasure leaves one class.
 - `obj instanceof Map<String,Integer>` is rejected because the JVM keeps no type arguments, so it can't check `<String,Integer>` — and starting from an `Object`, the compiler can't prove it either.
 

@@ -380,7 +380,7 @@ Point[x=3, y=4]
 - This "transform by producing a new value" approach is the immutable idiom, just like a `String` operation.
 - `var` inferred the types — `Point`, `Point`, `List<String>` — from the initializers. The [static type](/synapse/programming-languages/java/first-steps/variables-and-primitive-types) is still there; you just didn't write it.
 
-`var` changes nothing about scope. A `var` local lives in its block like any other local ([Methods](/synapse/programming-languages/java/control-flow/methods), §3), and it shadows a field by the same rules ([Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects)).
+`var` changes nothing about scope. A `var` local lives in its block like any other local ([Methods](/synapse/programming-languages/java/control-flow/methods), [§3](/synapse/programming-languages/java/control-flow/methods#3-scope-where-parameters-and-local-variables-live)), and it shadows a field by the same rules ([Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects)).
 
 **Intuition.**
 *Mechanism.* An immutable object's state is fixed at construction, and "changes" allocate a new object. Since nothing can change it behind your back, aliases are harmless. A record's fields are `private final` <abbr title="The Java Language Specification, Java SE 25, §8.10.3">[1]</abbr>, and `final` fields are what make an object safe to hand between threads <abbr title="The Java Language Specification, Java SE 25, §17.5">[13]</abbr> ([The Java Memory Model & Performance](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance)). `var` is compile-time inference: the variable has a concrete type, which you simply didn't spell out <abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[11]</abbr>.
@@ -601,7 +601,7 @@ One check per objective. Answer before you open anything.
 ```
 
 <details>
-<summary>In §4, how many payments are cards? Count them with a stream and <code>instanceof</code>. Then make <code>amountOf</code> unnecessary.</summary>
+<summary>In <a href="#4-composing-it-all">§4</a>, how many payments are cards? Count them with a stream and <code>instanceof</code>. Then make <code>amountOf</code> unnecessary.</summary>
 
 Two. Now declare `double amount();` in `Payment`. Each record already has a public accessor `amount()` with that exact name and return type <abbr title="The Java Language Specification, Java SE 25, §8.10.3">[1]</abbr>, so it implements the interface method with no extra code. `Payment::amount` can then replace `amountOf`:
 
@@ -660,11 +660,11 @@ total: 350.0
 
 🧪 **Predict, then check.**
 
-1. Add a `Pentagon(double side)` to the §1 `Shape` hierarchy, and predict what the compiler says about `area` until you add its case.
-2. Predict what §2 prints if `config` held `"port" -> "abc"` and you parsed it with `.map(Integer::parseInt)`. Would `orElse(80)` save you?
-3. Extend §4 to print the *count* of `Card` payments, using a stream `filter` with `p instanceof Card`, and predict the result.
+1. Add a `Pentagon(double side)` to the [§1](#1-data-oriented-design-records--sealed--patterns) `Shape` hierarchy, and predict what the compiler says about `area` until you add its case.
+2. Predict what [§2](#2-optional-over-null) prints if `config` held `"port" -> "abc"` and you parsed it with `.map(Integer::parseInt)`. Would `orElse(80)` save you?
+3. Extend [§4](#4-composing-it-all) to print the *count* of `Card` payments, using a stream `filter` with `p instanceof Card`, and predict the result.
 
-§1's bite, §2's edge and the ✅ `<details>` answer each one in turn.
+[§1](#1-data-oriented-design-records--sealed--patterns)'s bite, [§2](#2-optional-over-null)'s edge and the ✅ `<details>` answer each one in turn.
 
 </div>
 

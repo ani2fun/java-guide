@@ -541,7 +541,7 @@ One check per objective. Answer before you open anything.
 
 No. `final` stops `values` from pointing at a different array, but the array's contents can still change. The caller kept its own reference to the array it passed in, and every caller of the getter receives the same array.
 
-Copy the array in the constructor and in the getter, for example with `Arrays.copyOf(values, values.length)`. The §4 proof shows the difference: `0` / `-1` without the copies, `90` / `90` with them.
+Copy the array in the constructor and in the getter, for example with `Arrays.copyOf(values, values.length)`. The [§4](#4-immutability-by-design) proof shows the difference: `0` / `-1` without the copies, `90` / `90` with them.
 
 </details>
 

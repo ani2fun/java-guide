@@ -774,7 +774,7 @@ One check per objective. Answer before you open anything.
 ```
 
 <details>
-<summary>The 🧪 box below: the grade chain for 90, 70 and 69; the §3 <code>switch</code> for <code>day = 2</code> with and without <code>break</code>; and the chain as a <code>switch</code> expression.</summary>
+<summary>The 🧪 box below: the grade chain for 90, 70 and 69; the <a href="#3-the-switch-statement">§3</a> <code>switch</code> for <code>day = 2</code> with and without <code>break</code>; and the chain as a <code>switch</code> expression.</summary>
 
 The chain prints `A` for 90, `C` for 70 and `F` for 69.
 
@@ -811,8 +811,8 @@ It prints `A` for 100 and 90, `B` for 85, `C` for 70, and `F` for 69. The `defau
 
 🧪 **Predict, then check.**
 
-1. For the §2 grade chain, predict the printed letter for `score = 90`, then `score = 70`, then `score = 69`.
-2. Take the §3 `switch` and predict the output for `day = 2` **with** the `break`s, and again **without** them.
+1. For the [§2](#2-else-if-chains) grade chain, predict the printed letter for `score = 90`, then `score = 70`, then `score = 69`.
+2. Take the [§3](#3-the-switch-statement) `switch` and predict the output for `day = 2` **with** the `break`s, and again **without** them.
 3. Rewrite the grade chain as a `switch` expression that assigns the letter to a `String` and prints it. Decide what its `default` should be. Build it and confirm.
 
 </div>

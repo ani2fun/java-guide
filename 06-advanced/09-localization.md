@@ -906,7 +906,7 @@ The text itself is ambiguous; only its locale says what it means. So parse it wi
 
 <div style="border-left:4px solid #6d28d9;background:rgba(109,40,217,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-🧪 **Predict, then check.** Take the §4 program with three bundles, and change `Locale.setDefault(Locale.US)` to `Locale.setDefault(Locale.CANADA_FRENCH)`. Before you run it, predict the `de-DE` line: which greeting, which farewell, and which bundle?
+🧪 **Predict, then check.** Take the [§4](#4-resource-bundles-translated-text) program with three bundles, and change `Locale.setDefault(Locale.US)` to `Locale.setDefault(Locale.CANADA_FRENCH)`. Before you run it, predict the `de-DE` line: which greeting, which farewell, and which bundle?
 
 If you predicted `Allo, Au revoir (bundle fr_CA)`, you've got the lesson's hardest idea. **A missing language falls back to the machine's language before the base bundle, so the reply depends on where the program runs.**
 

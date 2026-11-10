@@ -937,7 +937,7 @@ To keep the new date, write `d = d.plusDays(1);`.
 
 <div style="border-left:4px solid #6d28d9;background:rgba(109,40,217,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-🧪 **Predict, then check.** Take the §5 alarm program, and change the start to 09:00 on **2 November** 2024 — the day before the clocks fall back. Before you run it, predict all three lines: `plusDays(1)`, `plusHours(24)`, and the elapsed `Duration`.
+🧪 **Predict, then check.** Take the [§5](#5-daylight-saving-time-gaps-and-overlaps) alarm program, and change the start to 09:00 on **2 November** 2024 — the day before the clocks fall back. Before you run it, predict all three lines: `plusDays(1)`, `plusHours(24)`, and the elapsed `Duration`.
 
 If you predicted 09:00, 08:00 and `PT25H`, you've got the lesson's hardest idea. **A day on the calendar and 24 hours on a stopwatch are different amounts, and `java.time` makes you say which one you mean.**
 

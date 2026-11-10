@@ -605,7 +605,7 @@ Main.java:5: error: incompatible types: possible lossy conversion from double to
 1 error
 ```
 
-The fix is the suffix: `float ratio = 0.5f;`, as in §3.
+The fix is the suffix: `float ratio = 0.5f;`, as in [§3](#3-the-eight-primitive-types).
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 

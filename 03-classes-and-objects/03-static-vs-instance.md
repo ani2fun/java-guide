@@ -250,7 +250,7 @@ public class Main {
 **Analysis.** `PI` is one shared value, since there's no point giving every circle its own copy of a constant. `final` means nothing can change it. `area()` reads it like any field, and `Circle.PI` reads it through the class. (The JDK already has a more precise one, `Math.PI`.)
 
 **Intuition.**
-*Mechanism.* `static` gives one copy, and `final` forbids reassignment after its single initialization. Some of these fields are special. Take a `static final` field of a primitive type or `String`, set to a compile-time constant such as `100`. That's a **constant variable** <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[3]</abbr>. javac copies its value into every place that reads it <abbr title="The Java Language Specification, Java SE 25, §13.1">[4]</abbr>. §4 shows a consequence.
+*Mechanism.* `static` gives one copy, and `final` forbids reassignment after its single initialization. Some of these fields are special. Take a `static final` field of a primitive type or `String`, set to a compile-time constant such as `100`. That's a **constant variable** <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[3]</abbr>. javac copies its value into every place that reads it <abbr title="The Java Language Specification, Java SE 25, §13.1">[4]</abbr>. [§4](#4-static-initialization-blocks) shows a consequence.
 
 *Concrete bite.* Try to reassign a `static final`, and javac rejects it, just as it does an instance `final`:
 
@@ -329,7 +329,7 @@ At that point, the `static` block ran once and filled `SQUARES` (`0, 1, 4, 9, 16
 - an object of the class is created;
 - a `static` method of the class is called;
 - a `static` field of the class is assigned;
-- a `static` field of the class is read, and it is **not** a constant variable (§3).
+- a `static` field of the class is read, and it is **not** a constant variable ([§3](#3-static-final-constants)).
 
 Initialization runs the `static` field initializers and `static` blocks in source order, exactly **once** per class <abbr title="The Java Language Specification, Java SE 25, §12.4.2">[7]</abbr>. Object construction happens per object, while class initialization happens once per class. The class that holds `main` is initialized before `main` starts <abbr title="The Java Language Specification, Java SE 25, §12.1.3">[8]</abbr>, so a `static` block in `Main` prints before `main`'s first line.
 
@@ -563,7 +563,7 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>A class has, in this order: a static block printing <code>S</code>, an instance block printing <code>I</code>, and a constructor printing <code>C</code>. <code>main</code> calls <code>new</code> on it twice. What prints? And would <code>static block ran</code> print if <code>main</code> never mentioned <code>Lookup</code>?</summary>
 
-`S`, `I`, `C`, then `I`, `C`. The class initializes once, on the first `new`. Each object then runs its instance block, then its constructor body. The §5 proof shows the same order with field initializers added.
+`S`, `I`, `C`, then `I`, `C`. The class initializes once, on the first `new`. Each object then runs its instance block, then its constructor body. The [§5](#5-instance-initializers-and-the-order-of-construction) proof shows the same order with field initializers added.
 
 No. `Lookup` is initialized only when it's first used. A class that `main` never touches is never initialized, so its `static` block never runs.
 
@@ -592,7 +592,7 @@ No. `Lookup` is initialized only when it's first used. A class that `main` never
 
 🧪 **Predict, then check.**
 
-1. Predict the output of `new Widget(); new Widget(); System.out.println(Widget.count);` for the §1 class.
+1. Predict the output of `new Widget(); new Widget(); System.out.println(Widget.count);` for the [§1](#1-static-fields-are-shared) class.
 2. Decide whether a method `static double areaOf(double r)` (using only `r` and `PI`) would compile inside `Circle`, and whether `static double area()` (using the instance field `radius`) would.
 3. Predict whether `static block ran` would print if `main` *never* mentioned `Lookup` at all, and explain why.
 

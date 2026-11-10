@@ -262,7 +262,7 @@ concat:  [a, b, c]
 
 💡 **Earned rule.** Sort inside a pipeline with `sorted(Comparator.comparing(key))`. Flatten nested data with `flatMap`, not `map`. Join two streams with `Stream.concat`.
 
-The cost: `sorted` must see every element before it passes on the first one, as §4 shows. The payoff is that ordering and flattening become steps in the pipeline, instead of loops wrapped around it.
+The cost: `sorted` must see every element before it passes on the first one, as [§4](#4-lazy-evaluation) shows. The payoff is that ordering and flattening become steps in the pipeline, instead of loops wrapped around it.
 
 </div>
 
@@ -419,7 +419,7 @@ OptionalDouble.empty
 0.0
 ```
 
-The `sum()` of no elements is `0`, but an average of no elements has no value at all. That's why `average()` returns an `OptionalDouble`, the primitive cousin of the `Optional` you'll meet in §5.
+The `sum()` of no elements is `0`, but an average of no elements has no value at all. That's why `average()` returns an `OptionalDouble`, the primitive cousin of the `Optional` you'll meet in [§5](#5-optional).
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 

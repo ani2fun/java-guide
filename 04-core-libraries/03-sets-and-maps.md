@@ -547,7 +547,7 @@ One check per objective. Answer before you open anything.
 <summary>The 🧪 box below: the set size, the three sets of <code>5, 3, 5, 1</code>, <code>m.get("a")</code>, and the fixed counting loop.</summary>
 
 - Adding `"x"`, `"y"`, `"x"`, `"z"`, `"y"` leaves size `3`.
-- Adding `5, 3, 5, 1`: `TreeSet` prints `[1, 3, 5]`, `LinkedHashSet` prints `[5, 3, 1]`, and `HashSet` printed `[1, 3, 5]` on JDK 25, by the small-`Integer` accident of §2.
+- Adding `5, 3, 5, 1`: `TreeSet` prints `[1, 3, 5]`, `LinkedHashSet` prints `[5, 3, 1]`, and `HashSet` printed `[1, 3, 5]` on JDK 25, by the small-`Integer` accident of [§2](#2-three-flavors-hashed-sorted-insertion-ordered).
 - `System.out.println(m.get("a"))` prints `null`. `int n = m.get("a");` throws `NullPointerException`, because the `null` gets unboxed.
 - The fixed loop is `m.put(w, m.getOrDefault(w, 0) + 1);`.
 

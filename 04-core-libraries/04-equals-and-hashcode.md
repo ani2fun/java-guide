@@ -496,10 +496,10 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>The 🧪 box below: the four predictions.</summary>
 
-- `new Point(1,2).equals(new Point(1,2))` with no overrides: `false` — the §1 proof.
-- With `equals` but no `hashCode`: `contains` is `false` and `size()` is `2` — the §3 proof.
-- With `hashCode` from `Objects.hash(x, y)`: `contains` is `true` and `size()` is `1` — the §4 proof.
-- With `equals(Point)` instead of `equals(Object)`: the set still calls `equals(Object)`, which is the inherited identity check. Matching hash codes lead the set to the right bucket, but identity says "different", so `contains` is `false` — the §2 proof.
+- `new Point(1,2).equals(new Point(1,2))` with no overrides: `false` — the [§1](#1-default-equals-is-identity) proof.
+- With `equals` but no `hashCode`: `contains` is `false` and `size()` is `2` — the [§3](#3-the-hashcode-contract) proof.
+- With `hashCode` from `Objects.hash(x, y)`: `contains` is `true` and `size()` is `1` — the [§4](#4-generating-both-correctly) proof.
+- With `equals(Point)` instead of `equals(Object)`: the set still calls `equals(Object)`, which is the inherited identity check. Matching hash codes lead the set to the right bucket, but identity says "different", so `contains` is `false` — the [§2](#2-overriding-equals-for-value-equality) proof.
 
 </details>
 
@@ -521,7 +521,7 @@ One check per objective. Answer before you open anything.
 
 🧪 **Predict, then check.**
 
-1. For the §1 `Point` (no overrides), predict `new Point(1,2).equals(new Point(1,2))`.
+1. For the [§1](#1-default-equals-is-identity) `Point` (no overrides), predict `new Point(1,2).equals(new Point(1,2))`.
 2. Add a correct `equals` but **no** `hashCode`. Put one `Point(1,2)` in a `HashSet`, then predict both `contains(new Point(1,2))` and `size()` after you add a second equal point.
 3. Add `hashCode` via `Objects.hash(x, y)`, and predict the same two values again.
 4. Explain why overriding `equals` with a `Point` parameter (instead of `Object`) would leave the set broken, even *with* a `hashCode`.

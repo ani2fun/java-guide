@@ -529,7 +529,7 @@ One check per objective. Answer before you open anything.
 
 - `p == q` with `100`: `true`. Both boxed values come from the cache.
 - `r == s` with `200`: `false`, and `r.equals(s)`: `true`. `200` is outside the cache.
-- `x == y` for `"ab" + "c"` and `"abc"`: `true`. `"ab" + "c"` is a constant expression, so it's interned like a literal <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[11]</abbr>. Built from a variable, as in §4, it would be `false`.
+- `x == y` for `"ab" + "c"` and `"abc"`: `true`. `"ab" + "c"` is a constant expression, so it's interned like a literal <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[11]</abbr>. Built from a variable, as in [§4](#4-the-string-pool), it would be `false`.
 - `z + "!"` with `z` set to `null`: prints `null!`. String concatenation writes a `null` reference as the text `null`.
 - `z.toUpperCase()`: throws `NullPointerException: Cannot invoke "String.toUpperCase()" because "<local5>" is null`. The `5` counts the locals of a `main` that declares `p`, `q`, `r`, `s` and `z`, in that order.
 

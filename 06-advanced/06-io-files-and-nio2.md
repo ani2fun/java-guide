@@ -797,7 +797,7 @@ sum: 14
 ```
 
 - `"a€b"` is 3 characters but 5 bytes: `a` and `b` take one byte each, and `€` takes three.
-- `Files.readString(Path.of("nope.txt"))` fails at `readString`, with `NoSuchFileException: nope.txt`, because `Path.of` only builds a name (§1).
+- `Files.readString(Path.of("nope.txt"))` fails at `readString`, with `NoSuchFileException: nope.txt`, because `Path.of` only builds a name ([§1](#1-nio2-path-and-files)).
 - `Files.lines` holds an open file, so it needs `try`-with-resources. `List.stream()` reads a list that's already in memory, and holds nothing to close.
 
 </details>
@@ -826,7 +826,7 @@ sum: 14
 
 1. Predict the byte count and character count that `Files.writeString`, followed by `readAllBytes`/`readString`, report for the string `"a€b"` (the euro sign `€` is 3 bytes in UTF-8).
 2. Predict whether `Files.readString(Path.of("nope.txt"))` throws at `Path.of` or at `readString`, and which exception it throws.
-3. Rewrite the §3 example to *sum* the numbers in the file with a stream, and work out why the `Files.lines` stream needs a `try`-with-resources where a `List.stream()` wouldn't.
+3. Rewrite the [§3](#3-the-stream-name-clash) example to *sum* the numbers in the file with a stream, and work out why the `Files.lines` stream needs a `try`-with-resources where a `List.stream()` wouldn't.
 
 </div>
 

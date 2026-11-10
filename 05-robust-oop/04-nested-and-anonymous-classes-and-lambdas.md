@@ -62,7 +62,7 @@ You can declare a class inside another class. Java has four kinds of nested clas
 - A **`static` nested class** is scoped to its enclosing class, but has no link to any instance of it.
 - A non-static **inner class** (a *member* class) holds a hidden link to an enclosing *instance*, so it can read that instance's fields.
 - A **local class** is declared inside a block, such as a method body, just like a local variable <abbr title="The Java Language Specification, Java SE 25, §14.3">[2]</abbr>.
-- An **anonymous class** has no name at all (§2).
+- An **anonymous class** has no name at all ([§2](#2-anonymous-classes)).
 
 ```java run
 import static java.lang.IO.println;
@@ -223,7 +223,7 @@ Main$1.class
 Main.class
 ```
 
-`Main$1` is the anonymous class. It can read the enclosing method's local variables, as long as they're effectively final (§3 defines the term). That makes it a self-contained bundle of behavior.
+`Main$1` is the anonymous class. It can read the enclosing method's local variables, as long as they're effectively final ([§3](#3-lambdas) defines the term). That makes it a self-contained bundle of behavior.
 
 *Concrete bite.* The problem is the ceremony: four lines (`new Greeter() { @Override public String greet... }`) to express one line of logic. For an interface with a *single* method, almost all of that is noise — and that noise is exactly what a lambda removes.
 
@@ -240,7 +240,7 @@ Main.class
 
 ## 3. Lambdas
 
-When an interface has exactly **one** abstract method — making it a **functional interface** <abbr title="The Java Language Specification, Java SE 25, §9.8">[4]</abbr> — a **lambda** can express the implementation as `parameters -> body`. It does the same job as the anonymous class from §2, with all the ceremony stripped away, and it makes behavior a value.
+When an interface has exactly **one** abstract method — making it a **functional interface** <abbr title="The Java Language Specification, Java SE 25, §9.8">[4]</abbr> — a **lambda** can express the implementation as `parameters -> body`. It does the same job as the anonymous class from [§2](#2-anonymous-classes), with all the ceremony stripped away, and it makes behavior a value.
 
 ```java run
 import static java.lang.IO.println;
@@ -264,7 +264,7 @@ Hello, Ada
 running
 ```
 
-**Analysis.** `name -> "Hello, " + name` is a `Greeter`: the same behavior as the anonymous class from §2, written as a single expression.
+**Analysis.** `name -> "Hello, " + name` is a `Greeter`: the same behavior as the anonymous class from [§2](#2-anonymous-classes), written as a single expression.
 
 - The compiler infers that `name` is the parameter of `greet`, and that the expression is its return value.
 - `Runnable` (a built-in functional interface with `void run()`) works the same way, using `()` for no parameters.
@@ -642,7 +642,7 @@ cherry
 ```
 
 - `add.apply(3, 4)` is `7`.
-- The `Greeter` lambda prints `Hello, Ada`, just like the §2 anonymous class.
+- The `Greeter` lambda prints `Hello, Ada`, just like the [§2](#2-anonymous-classes) anonymous class.
 - `String::compareToIgnoreCase` stands for `(a, b) -> a.compareToIgnoreCase(b)`, so `Apple` sorts first despite its capital letter. `System.out::println` stands for `s -> System.out.println(s)`.
 
 </details>
@@ -668,7 +668,7 @@ cherry
 🧪 **Predict, then check.**
 
 1. Write a functional interface `IntOp { int apply(int a, int b); }`, and predict what `IntOp add = (a, b) -> a + b; System.out.println(add.apply(3, 4));` prints.
-2. Rewrite the §2 anonymous `Greeter` as a lambda, and confirm that the output is identical.
+2. Rewrite the [§2](#2-anonymous-classes) anonymous `Greeter` as a lambda, and confirm that the output is identical.
 3. Predict the output of sorting `["banana","Apple","cherry"]` with `String::compareToIgnoreCase`, then printing with `forEach(System.out::println)`. Explain which lambda each method reference stands for.
 
 </div>

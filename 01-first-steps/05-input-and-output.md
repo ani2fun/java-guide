@@ -614,7 +614,7 @@ For the average of `"7 5"`, divide by `2.0` so the division is floating-point: `
 
 <div style="border-left:4px solid #6d28d9;background:rgba(109,40,217,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-🧪 **Predict, then check.** Take the §4 runnable twin and predict its output if the source string were `"10 20"` instead of `"7 5"`. Now predict what happens if the source were `"ten 20"`. Which line throws, and with what exception?
+🧪 **Predict, then check.** Take the [§4](#4-a-first-interactive-program) runnable twin and predict its output if the source string were `"10 20"` instead of `"7 5"`. Now predict what happens if the source were `"ten 20"`. Which line throws, and with what exception?
 
 Finally, change the twin to read two numbers and print their **average** to two decimals with `printf`. Hint: as you saw in [Numbers and arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic), `nextInt` gives you `int`s, so force floating-point division before the `%.2f`. Or reach for `nextDouble` if you'd rather read decimals directly. Build it and confirm.
 

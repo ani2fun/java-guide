@@ -188,7 +188,7 @@ flowchart LR
 
 - **Program order:** "If x and y are actions of the same thread and x comes before y in program order, then hb(x, y)."
 - **Monitor lock:** an unlock happens-before every later lock of the same monitor. That's why [`synchronized`](/synapse/programming-languages/java/advanced/concurrency-the-basics) publishes writes.
-- **`volatile`:** a write happens-before every later read of that field (§1).
+- **`volatile`:** a write happens-before every later read of that field ([§1](#1-volatile-visibility-not-atomicity)).
 - **Start and join:** `Thread.start()` happens-before the started thread's actions, and a thread's actions happen-before another thread returns from `join()` on it.
 
 Think of each one as a bridge, across which writes are guaranteed to be visible.
@@ -229,7 +229,7 @@ public class Main {
 reader sees data=42 label=answer
 ```
 
-This output is guaranteed, not lucky: the flag's edge carries the earlier writes along with it. That's the "safe publication" idiom that §3 develops.
+This output is guaranteed, not lucky: the flag's edge carries the earlier writes along with it. That's the "safe publication" idiom that [§3](#3-safe-publication-reordering-final-and-double-checked-locking) develops.
 
 *Concrete bite.* This relation is the *only* guarantee you get. Two threads with no edge between them can see each other's writes in any order, or not at all. "It seemed to work" means nothing; correctness needs an actual happens-before edge. That's why every access to shared state needs `synchronized`, `volatile`, or a `java.util.concurrent` tool.
 
@@ -245,7 +245,7 @@ The cost is a more formal mental model. The payoff is the only sound way to know
 
 ## 3. Safe publication: reordering, `final`, and double-checked locking
 
-§2's rules have a surprising consequence: **a constructor is not a fence.** Picture one thread building an object and handing it to another thread through a plain field:
+[§2](#2-happens-before-in-depth)'s rules have a surprising consequence: **a constructor is not a fence.** Picture one thread building an object and handing it to another thread through a plain field:
 
 ```text
 // Thread A                          // Thread B
@@ -265,7 +265,7 @@ This one is described rather than demonstrated. The reordering is allowed, but i
 Publishing an object so that its fields travel along with the reference is called **safe publication**. There are three tools for it, plus a fourth that the class loader gives you:
 
 1. **`final` fields.** The JLS guarantees them. A thread that sees the reference only after the object "has been completely initialized is guaranteed to see the correctly initialized values for that object's final fields" <abbr title="The Java Language Specification, Java SE 25, §17.5">[4]</abbr>. The object counts as initialized "when its constructor finishes", so the constructor must not let `this` escape to another thread before it ends.
-2. **A `volatile` reference.** The `volatile` write of the reference happens-before the `volatile` read. By §2's transitivity, it carries every earlier write along with it, the fields included.
+2. **A `volatile` reference.** The `volatile` write of the reference happens-before the `volatile` read. By [§2](#2-happens-before-in-depth)'s transitivity, it carries every earlier write along with it, the fields included.
 3. **A lock.** Publish and consume under the same monitor, and the unlock→lock edge carries the writes.
 
 This is the deepest reason [records](/synapse/programming-languages/java/core-libraries/enums-and-records) are safe to hand between threads. A record's component fields are "private, final, and non-static" <abbr title="The Java Language Specification, Java SE 25, §8.10.3">[5]</abbr>. The guarantee also covers objects reached through those `final` fields, as they were when the constructor finished <abbr title="The Java Language Specification, Java SE 25, §17.5">[4]</abbr>. It doesn't cover changes made *after* construction, though: a record holding a mutable `ArrayList` is only shallowly immutable.
@@ -365,7 +365,7 @@ all four got loaded
 `Holder` wasn't initialized when `Main` started, so nothing was constructed yet. The first `getInstance()` triggered the initialization — exactly once, no matter how many threads raced there.
 
 **Intuition.**
-*Mechanism.* Unless something forbids it, the JIT and the processor may make the reference write visible before the field writes. `final` fields add a guarantee at constructor exit; `volatile` adds a write→read edge; a monitor adds unlock→lock; and class initialization adds its own lock. All of them are §2's rules, aimed at one moment: the instant an object becomes reachable by another thread.
+*Mechanism.* Unless something forbids it, the JIT and the processor may make the reference write visible before the field writes. `final` fields add a guarantee at constructor exit; `volatile` adds a write→read edge; a monitor adds unlock→lock; and class initialization adds its own lock. All of them are [§2](#2-happens-before-in-depth)'s rules, aimed at one moment: the instant an object becomes reachable by another thread.
 
 *Concrete bite.* The signature of this bug is its rarity. Unsafe publication can run clean for months on one JVM and processor, then produce impossible-looking `NullPointerException`s on another, with a different memory model or different JIT decisions. Testing on your machine can't catch it; only reasoning about edges can.
 
@@ -533,7 +533,7 @@ public class Main {
 OutOfMemoryError: Java heap space, after caching about 58 MB
 ```
 
-Compare it with the §5 garbage program: that one allocated 2000 MB and never ran out, because nothing held onto its arrays. This one kept every array in `cache`, and ran out after about 58 MB of a 64 MB heap. The GC frees what's *unreachable*, and a live reference defeats it.
+Compare it with the [§5](#5-garbage-collection-and-tuning) garbage program: that one allocated 2000 MB and never ran out, because nothing held onto its arrays. This one kept every array in `cache`, and ran out after about 58 MB of a 64 MB heap. The GC frees what's *unreachable*, and a live reference defeats it.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -604,8 +604,8 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>The 🧪 box below: a <code>volatile</code> counter; plain fields and a <code>volatile</code> <code>ready</code>; records; 10 calls vs 10 million.</summary>
 
-1. No. `volatile` makes each read and write visible, but `counter++` is still three steps. The §1 runs printed `135052`, `145718` and `139859`, not `400000`.
-2. Program order puts each plain write before `ready = true` in the writer. The `volatile` write happens-before the read that sees `true`. And program order puts that read before the reader's field reads. Transitivity chains all three together, as the §2 example shows.
+1. No. `volatile` makes each read and write visible, but `counter++` is still three steps. The [§1](#1-volatile-visibility-not-atomicity) runs printed `135052`, `145718` and `139859`, not `400000`.
+2. Program order puts each plain write before `ready = true` in the writer. The `volatile` write happens-before the read that sees `true`. And program order puts that read before the reader's field reads. Transitivity chains all three together, as the [§2](#2-happens-before-in-depth) example shows.
 3. A `record` uses **`final` fields**: its component fields are `private final`. Once the constructor finishes, any thread that sees the reference also sees the component values, with no synchronization needed. Mutable objects inside it are covered only as they were at construction time.
 4. In a run on JDK 25, a method called 10 times never appeared at all: it never got hot, so it stayed interpreted. A method called 10 million times appeared at tier 3, then at tier 4. A benchmark that doesn't warm up measures the interpreter and C1 — not the C2 code that actually runs in production.
 
@@ -637,7 +637,7 @@ One check per objective. Answer before you open anything.
 
 1. Predict whether making a shared `int counter` `volatile` is enough for four threads to increment it to exactly the right total, and explain why.
 2. Explain, in terms of happens-before, why writing several plain fields and then setting a `volatile` `ready = true` lets a reader that sees `ready == true` also see those fields.
-3. Predict which of §3's publication tools a `record` uses, and why that makes records safe to hand between threads with no synchronization at all.
+3. Predict which of [§3](#3-safe-publication-reordering-final-and-double-checked-locking)'s publication tools a `record` uses, and why that makes records safe to hand between threads with no synchronization at all.
 4. Predict what `-XX:+PrintCompilation` shows for a method called 10 times versus 10 million times, and why a benchmark must warm up.
 
 </div>

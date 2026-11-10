@@ -725,7 +725,7 @@ With `x` at `0`, `addOne` prints `inside: 1`, then `outside: 0`. The method chan
 🧪 **Predict, then check.**
 
 1. A method `static int[] doubled(int[] in)` loops `in[i] *= 2` and returns `in`. It is called as `int[] a = {1,2,3}; doubled(a); System.out.println(a[0]);`. Does `a[0]` change, and why?
-2. Predict what `addOne` (from §6) prints for `inside`/`outside` if `x` starts at `0`.
+2. Predict what `addOne` (from [§6](#6-pass-by-value-primitives)) prints for `inside`/`outside` if `x` starts at `0`.
 3. Write an overloaded `area(int side)` (square) and `area(int w, int h)` (rectangle). Decide why the compiler can tell them apart.
 
 </div>
