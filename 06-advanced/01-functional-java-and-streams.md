@@ -67,6 +67,8 @@ Calling `collection.stream()` starts a pipeline, which has three parts <abbr tit
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<String> names = List.of("Ada", "Linus", "Grace", "Bjarne");
@@ -74,7 +76,7 @@ public class Main {
             .filter(n -> n.length() > 3)
             .map(String::toUpperCase)
             .collect(Collectors.toList());
-        System.out.println(result);
+        println(result);
     }
 }
 ```
@@ -122,12 +124,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> editable = List.of(3, 1, 2).stream()
             .collect(Collectors.toCollection(ArrayList::new));
         editable.add(4);
-        System.out.println("toCollection(ArrayList::new): " + editable);
+        println("toCollection(ArrayList::new): " + editable);
         List<Integer> fixed = List.of(3, 1, 2).stream().toList();
         fixed.add(4);
     }
@@ -149,11 +153,13 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Stream<String> s = List.of("a", "b").stream();
-        System.out.println(s.count());
-        System.out.println(s.count());
+        println(s.count());
+        println(s.count());
     }
 }
 ```
@@ -190,13 +196,15 @@ Three more intermediate operations reshape a stream, rather than filtering or tr
 import java.util.Comparator;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<String> names = List.of("Grace", "Ada", "Linus", "Bo");
-        System.out.println(names.stream().sorted().toList());
-        System.out.println(names.stream().sorted(Comparator.comparing(String::length)).toList());
-        System.out.println(names.stream().sorted(Comparator.reverseOrder()).limit(2).toList());
-        System.out.println(names);
+        println(names.stream().sorted().toList());
+        println(names.stream().sorted(Comparator.comparing(String::length)).toList());
+        println(names.stream().sorted(Comparator.reverseOrder()).limit(2).toList());
+        println(names);
     }
 }
 ```
@@ -222,16 +230,18 @@ public class Main {
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<List<Integer>> nested = List.of(List.of(1, 2), List.of(3), List.of());
         List<List<Integer>> mapped = nested.stream().map(l -> l).toList();
         List<Integer> flat = nested.stream().flatMap(List::stream).toList();
-        System.out.println("map:     " + mapped);
-        System.out.println("flatMap: " + flat);
+        println("map:     " + mapped);
+        println("flatMap: " + flat);
 
         List<String> joined = Stream.concat(Stream.of("a", "b"), Stream.of("c")).toList();
-        System.out.println("concat:  " + joined);
+        println("concat:  " + joined);
     }
 }
 ```
@@ -267,6 +277,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> nums = List.of(1, 2, 3, 4, 5);
@@ -274,10 +286,10 @@ public class Main {
         String joined = nums.stream().map(String::valueOf).collect(Collectors.joining(", "));
         Map<String, List<Integer>> byParity =
             nums.stream().collect(Collectors.groupingBy(n -> n % 2 == 0 ? "even" : "odd"));
-        System.out.println(sum);
-        System.out.println(joined);
-        System.out.println("odd=" + byParity.get("odd"));
-        System.out.println("even=" + byParity.get("even"));
+        println(sum);
+        println(joined);
+        println("odd=" + byParity.get("odd"));
+        println("even=" + byParity.get("even"));
     }
 }
 ```
@@ -304,11 +316,13 @@ even=[2, 4]
 ```java run
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> nums = List.of(1, 2, 3, 4, 5);
-        System.out.println(nums.stream().reduce(0, Integer::sum));
-        System.out.println(nums.stream().reduce(1, Integer::sum));
+        println(nums.stream().reduce(0, Integer::sum));
+        println(nums.stream().reduce(1, Integer::sum));
     }
 }
 ```
@@ -328,6 +342,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> nums = List.of(1, 2, 3, 4, 5);
@@ -335,8 +351,8 @@ public class Main {
             nums.stream().collect(Collectors.partitioningBy(n -> n > 2));
         Map<Boolean, Long> counts =
             nums.stream().collect(Collectors.partitioningBy(n -> n > 2, Collectors.counting()));
-        System.out.println(parts);
-        System.out.println(counts);
+        println(parts);
+        println(counts);
     }
 }
 ```
@@ -354,12 +370,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<String> names = List.of("Ada", "Bo", "Al");
         Map<Character, String> byInitial =
             names.stream().collect(Collectors.toMap(n -> n.charAt(0), n -> n));
-        System.out.println(byInitial);
+        println(byInitial);
     }
 }
 ```
@@ -377,16 +395,18 @@ Exception in thread "main" java.lang.IllegalStateException: Duplicate key A (att
 import java.util.List;
 import java.util.OptionalDouble;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<String> words = List.of("stream", "of", "words");
         int total = words.stream().mapToInt(String::length).sum();
         OptionalDouble avg = words.stream().mapToInt(String::length).average();
         OptionalDouble none = List.<String>of().stream().mapToInt(String::length).average();
-        System.out.println(total);
-        System.out.println(avg);
-        System.out.println(none);
-        System.out.println(none.orElse(0.0));
+        println(total);
+        println(avg);
+        println(none);
+        println(none.orElse(0.0));
     }
 }
 ```
@@ -415,13 +435,15 @@ The cost is learning the collector vocabulary. The payoff is that aggregation, g
 import java.util.stream.Gatherers;
 import java.util.stream.Stream;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Stream.of(1, 2, 3, 4, 5, 6, 7)
+        println(Stream.of(1, 2, 3, 4, 5, 6, 7)
                 .gather(Gatherers.windowFixed(3)).toList());
-        System.out.println(Stream.of(1, 2, 3, 4)
+        println(Stream.of(1, 2, 3, 4)
                 .gather(Gatherers.windowSliding(2)).toList());
-        System.out.println(Stream.of(1, 2, 3, 4)
+        println(Stream.of(1, 2, 3, 4)
                 .gather(Gatherers.scan(() -> 0, Integer::sum)).toList());
     }
 }
@@ -442,6 +464,8 @@ That's what you write when you build your own gatherer. This one drops an elemen
 import java.util.stream.Gatherer;
 import java.util.stream.Stream;
 
+import static java.lang.IO.println;
+
 public class Main {
     // drops an element that equals the one just before it
     static Gatherer<String, ?, String> dropRepeats() {
@@ -456,10 +480,10 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        System.out.println(Stream.of("a", "a", "b", "b", "b", "a", "c", "c")
+        println(Stream.of("a", "a", "b", "b", "b", "a", "c", "c")
                 .gather(dropRepeats())
                 .toList());
-        System.out.println(Stream.of("x", "x", "y", "z", "z")
+        println(Stream.of("x", "x", "y", "z", "z")
                 .gather(dropRepeats())
                 .limit(2)
                 .toList());
@@ -484,14 +508,16 @@ Intermediate operations are **lazy**: they process nothing until a terminal oper
 ```java run
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> nums = List.of(1, 2, 3, 4, 5);
         var first = nums.stream()
-            .peek(n -> System.out.println("peek " + n))
+            .peek(n -> println("peek " + n))
             .filter(n -> n % 2 == 0)
             .findFirst();
-        System.out.println("found: " + first.get());
+        println("found: " + first.get());
     }
 }
 ```
@@ -518,14 +544,16 @@ Stateless steps such as `filter` and `map` remember nothing between elements. A 
 ```java run
 import java.util.stream.Stream;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int first = Stream.iterate(1, n -> n * 2)
             .filter(n -> n > 1000)
             .findFirst()
             .get();
-        System.out.println(first);
-        System.out.println(Stream.iterate(1, n -> n * 2).limit(5).toList());
+        println(first);
+        println(Stream.iterate(1, n -> n * 2).limit(5).toList());
     }
 }
 ```
@@ -541,15 +569,17 @@ public class Main {
 ```java run
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> nums = List.of(5, 3, 4, 1, 2);
         var first = nums.stream()
-            .peek(n -> System.out.println("peek " + n))
+            .peek(n -> println("peek " + n))
             .sorted()
             .filter(n -> n % 2 == 0)
             .findFirst();
-        System.out.println("found: " + first.get());
+        println("found: " + first.get());
     }
 }
 ```
@@ -571,13 +601,15 @@ All five elements were peeked, because `sorted` needed every one of them before 
 ```java run
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> nums = List.of(1, 2, 3);
-        nums.stream().peek(n -> System.out.println("peek " + n));
-        System.out.println("no terminal operation, so no peek lines");
-        long n = nums.stream().peek(x -> System.out.println("peek " + x)).count();
-        System.out.println("count = " + n);
+        nums.stream().peek(n -> println("peek " + n));
+        println("no terminal operation, so no peek lines");
+        long n = nums.stream().peek(x -> println("peek " + x)).count();
+        println("count = " + n);
     }
 }
 ```
@@ -611,14 +643,16 @@ A stream query that might find nothing returns an **`Optional<T>`**: a container
 import java.util.Optional;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<String> names = List.of("Ada", "Linus");
         Optional<String> found = names.stream().filter(n -> n.startsWith("L")).findFirst();
-        System.out.println(found.isPresent());
-        System.out.println(found.orElse("none"));
+        println(found.isPresent());
+        println(found.orElse("none"));
         Optional<String> missing = names.stream().filter(n -> n.startsWith("Z")).findFirst();
-        System.out.println(missing.orElse("none"));
+        println(missing.orElse("none"));
     }
 }
 ```
@@ -646,10 +680,12 @@ None of them ever exposes a raw `null`.
 ```java run
 import java.util.Optional;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Optional<String> empty = Optional.empty();
-        System.out.println(empty.get());
+        println(empty.get());
     }
 }
 ```
@@ -666,20 +702,22 @@ Exception in thread "main" java.util.NoSuchElementException: No value present
 ```java run
 import java.util.Optional;
 
+import static java.lang.IO.println;
+
 public class Main {
     static String fallback() {
-        System.out.println("  fallback() ran");
+        println("  fallback() ran");
         return "none";
     }
 
     public static void main(String[] args) {
         Optional<String> found = Optional.of("Linus");
-        System.out.println("orElse:");
-        System.out.println(found.orElse(fallback()));
-        System.out.println("orElseGet:");
-        System.out.println(found.orElseGet(() -> fallback()));
-        System.out.println(found.map(String::length).orElse(0));
-        System.out.println(Optional.<String>empty().map(String::length).orElse(0));
+        println("orElse:");
+        println(found.orElse(fallback()));
+        println("orElseGet:");
+        println(found.orElseGet(() -> fallback()));
+        println(found.map(String::length).orElse(0));
+        println(Optional.<String>empty().map(String::length).orElse(0));
     }
 }
 ```
@@ -716,10 +754,12 @@ A **thread** is one independent path of execution through a program. A program c
 ```java run
 import java.util.stream.LongStream;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         long sum = LongStream.rangeClosed(1, 1_000_000).parallel().sum();
-        System.out.println(sum);
+        println(sum);
     }
 }
 ```
@@ -741,18 +781,20 @@ First, a word on why the example below counts in an `int[]`. A lambda may use a 
 ```java run
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int total = 0;
         List.of(1, 2, 3).stream().forEach(n -> total += n);
-        System.out.println(total);
+        println(total);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:6: error: local variables referenced from a lambda expression must be final or effectively final
+Main.java:8: error: local variables referenced from a lambda expression must be final or effectively final
         List.of(1, 2, 3).stream().forEach(n -> total += n);
                                                ^
 1 error
@@ -763,11 +805,13 @@ Here, the compiler is protecting you. An array slot isn't a local variable, thou
 ```java run
 import java.util.stream.IntStream;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] counter = {0};
         IntStream.range(0, 1_000_000).parallel().forEach(n -> counter[0]++);
-        System.out.println(counter[0]);
+        println(counter[0]);
     }
 }
 ```
@@ -788,12 +832,14 @@ The fix is to let the stream do the counting itself, as a reduction. Same scenar
 ```java run
 import java.util.stream.IntStream;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         long count = IntStream.range(0, 1_000_000).parallel().count();
         long evens = IntStream.range(0, 1_000_000).parallel().filter(n -> n % 2 == 0).count();
-        System.out.println(count);
-        System.out.println(evens);
+        println(count);
+        println(evens);
     }
 }
 ```
@@ -883,14 +929,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Stream.of(1, 2, 3, 4).filter(n -> n % 2 == 0).map(n -> n * n).collect(Collectors.toList()));
+        println(Stream.of(1, 2, 3, 4).filter(n -> n % 2 == 0).map(n -> n * n).collect(Collectors.toList()));
         var first = Stream.of(10, 20, 30).peek(System.out::println).map(n -> n + 1).findFirst();
-        System.out.println(first.get());
+        println(first.get());
         var longWord = List.of("a", "bb", "ccc").stream().filter(s -> s.length() > 5).findFirst();
-        System.out.println(longWord.isPresent());
-        System.out.println(longWord.orElse("none"));
+        println(longWord.isPresent());
+        println(longWord.orElse("none"));
     }
 }
 ```

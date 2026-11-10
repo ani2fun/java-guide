@@ -68,11 +68,13 @@ So two Java threads on two cores really do run at the same instant. Everything i
 You can see the layering for yourself: one process id, several thread ids.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        System.out.println("main   -> pid=" + ProcessHandle.current().pid()
+        println("main   -> pid=" + ProcessHandle.current().pid()
                 + " threadId=" + Thread.currentThread().threadId());
-        Thread t = new Thread(() -> System.out.println("worker -> pid=" + ProcessHandle.current().pid()
+        Thread t = new Thread(() -> println("worker -> pid=" + ProcessHandle.current().pid()
                 + " threadId=" + Thread.currentThread().threadId()), "worker-1");
         t.start();
         t.join();
@@ -95,13 +97,15 @@ Now for the API. A `Thread` runs a `Runnable`, which is a functional interface, 
 `main` declares `throws InterruptedException` because `join()` can throw that checked exception. It's thrown if another thread *interrupts* the waiting thread — a polite request to stop <abbr title="Java SE 25 API, java.lang.Thread.join() and interrupt()">[2]</abbr>. You'll see one in §2.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        Runnable task = () -> System.out.println("worker thread: " + Thread.currentThread().getName());
+        Runnable task = () -> println("worker thread: " + Thread.currentThread().getName());
         Thread t = new Thread(task, "worker-1");
         t.start();
         t.join();
-        System.out.println("main thread: " + Thread.currentThread().getName());
+        println("main thread: " + Thread.currentThread().getName());
     }
 }
 ```
@@ -120,12 +124,14 @@ main thread: main
 *Concrete bite.* `start()` and `run()` are different methods. `t.run()` is just an ordinary method call on the *current* thread: no new thread, no concurrency.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        Runnable task = () -> System.out.println("running on: " + Thread.currentThread().getName());
+        Runnable task = () -> println("running on: " + Thread.currentThread().getName());
         Thread t = new Thread(task, "worker-1");
         t.run();
-        System.out.println("after run(), state = " + t.getState());
+        println("after run(), state = " + t.getState());
     }
 }
 ```
@@ -141,9 +147,11 @@ The task ran on `main`, and the `Thread` object is still `NEW`, because it never
 *Watch out: starting a thread twice.* "A thread can be started at most once" <abbr title="Java SE 25 API, java.lang.Thread.start()">[2]</abbr>. Once a thread finishes, you can't restart it:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        Thread t = new Thread(() -> System.out.println("worker ran"));
+        Thread t = new Thread(() -> println("worker ran"));
         t.start();
         t.join();
         t.start();
@@ -211,6 +219,8 @@ stateDiagram-v2
 `t.getState()` reports a thread's state. The program below puts one thread into each state and prints it. Each `while` loop waits until the other thread has reached the target state, and `Thread.onSpinWait()` is a hint that the loop is only waiting.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static final Object lock = new Object();
 
@@ -219,14 +229,14 @@ public class Main {
             try {
                 Thread.sleep(60_000);
             } catch (InterruptedException e) {
-                System.out.println("sleeper interrupted");
+                println("sleeper interrupted");
             }
         });
-        System.out.println("before start:     " + sleeper.getState());
+        println("before start:     " + sleeper.getState());
         sleeper.start();
         while (sleeper.getState() != Thread.State.TIMED_WAITING) Thread.onSpinWait();
-        System.out.println("while sleeping:   " + sleeper.getState());
-        System.out.println("main itself:      " + Thread.currentThread().getState());
+        println("while sleeping:   " + sleeper.getState());
+        println("main itself:      " + Thread.currentThread().getState());
 
         Thread blocked = new Thread(() -> { synchronized (lock) { } });
         Thread joiner = new Thread(() -> {
@@ -235,17 +245,17 @@ public class Main {
         synchronized (lock) {
             blocked.start();
             while (blocked.getState() != Thread.State.BLOCKED) Thread.onSpinWait();
-            System.out.println("waiting for lock: " + blocked.getState());
+            println("waiting for lock: " + blocked.getState());
         }
         joiner.start();
         while (joiner.getState() != Thread.State.WAITING) Thread.onSpinWait();
-        System.out.println("inside join():    " + joiner.getState());
+        println("inside join():    " + joiner.getState());
 
         sleeper.interrupt();
         sleeper.join();
         joiner.join();
         blocked.join();
-        System.out.println("after it ends:    " + sleeper.getState());
+        println("after it ends:    " + sleeper.getState());
     }
 }
 ```
@@ -284,6 +294,8 @@ The cost: a state is only a snapshot, and it may change the moment you read it. 
 When several threads update the same shared variable without coordination, their operations interleave, and updates get lost. Here, four threads each increment a shared `counter` 100,000 times. The correct total should be 400,000.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int counter = 0;
     public static void main(String[] args) throws InterruptedException {
@@ -295,7 +307,7 @@ public class Main {
             threads[i].start();
         }
         for (Thread t : threads) t.join();
-        System.out.println(counter);
+        println(counter);
     }
 }
 ```
@@ -359,6 +371,8 @@ The cost is a healthy pessimism about shared state. The payoff is that, by coord
 `synchronized` turns a method or block into a **critical section**: only one thread at a time can hold its lock and execute it. Wrap the increment in a `synchronized` method, and the updates are serialized — the race disappears.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int counter = 0;
     static synchronized void increment() { counter++; }
@@ -372,7 +386,7 @@ public class Main {
             threads[i].start();
         }
         for (Thread t : threads) t.join();
-        System.out.println(counter);
+        println(counter);
     }
 }
 ```
@@ -394,6 +408,8 @@ public class Main {
 The block form, using one shared lock object, is just as correct as the method:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int counter = 0;
     static final Object lock = new Object();
@@ -409,7 +425,7 @@ public class Main {
             threads[i].start();
         }
         for (Thread t : threads) t.join();
-        System.out.println(counter);
+        println(counter);
     }
 }
 ```
@@ -423,6 +439,8 @@ public class Main {
 
 ```java run
 // ⚠️ ANTI-PATTERN — each thread locks its own object, so nothing is excluded.  Do not copy it.
+import static java.lang.IO.println;
+
 public class Main {
     static int counter = 0;
 
@@ -438,8 +456,8 @@ public class Main {
             threads[i].start();
         }
         for (Thread t : threads) t.join();
-        System.out.println(counter);
-        System.out.println("violation: four locks guard one counter, so updates are still lost");
+        println(counter);
+        println("violation: four locks guard one counter, so updates are still lost");
     }
 }
 ```

@@ -54,6 +54,8 @@ Every output below was produced by compiling and running the code on Java 25.
 A class can declare a **type parameter**, written `<T>`, and then use `T` as a stand-in type throughout its body <abbr title="The Java Language Specification, Java SE 25, §8.1.2">[1]</abbr>. The caller fills in the real type by supplying a **type argument**, such as `String` in `Box<String>` <abbr title="The Java Language Specification, Java SE 25, §4.5">[2]</abbr>. From then on, the compiler enforces that type everywhere.
 
 ```java run
+import static java.lang.IO.println;
+
 class Box<T> {
     private T value;
     Box(T value) { this.value = value; }
@@ -64,9 +66,9 @@ public class Main {
     public static void main(String[] args) {
         Box<String> sb = new Box<>("hello");
         String s = sb.get();
-        System.out.println(s.toUpperCase());
+        println(s.toUpperCase());
         Box<Integer> ib = new Box<>(42);
-        System.out.println(ib.get() + 1);
+        println(ib.get() + 1);
     }
 }
 ```
@@ -87,6 +89,8 @@ HELLO
 *Concrete bite.* You feel that guarantee as a compile error the moment you misuse the box:
 
 ```java run
+import static java.lang.IO.println;
+
 class Box<T> {
     private T value;
     Box(T value) { this.value = value; }
@@ -97,14 +101,14 @@ public class Main {
     public static void main(String[] args) {
         Box<String> sb = new Box<>("hi");
         Integer n = sb.get();
-        System.out.println(n);
+        println(n);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:10: error: incompatible types: String cannot be converted to Integer
+Main.java:12: error: incompatible types: String cannot be converted to Integer
         Integer n = sb.get();
                           ^
 1 error
@@ -118,6 +122,8 @@ Main.java:10: error: incompatible types: String cannot be converted to Integer
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List names = new ArrayList();      // raw type: no <String>
@@ -125,7 +131,7 @@ public class Main {
         names.add(42);                     // nothing stops this
         List<String> typed = names;        // unchecked: allowed, with a warning
         for (String s : typed) {
-            System.out.println(s.length());
+            println(s.length());
         }
     }
 }
@@ -154,14 +160,16 @@ The cost is a more abstract class definition, plus one restriction: `T` must be 
 A *method* can have its own type parameter too. You declare it just before the return type: `<T> T pick(...)` <abbr title="The Java Language Specification, Java SE 25, §8.4.4">[4]</abbr>. Add a **bound**, `<T extends Something>`, and `T` is restricted to subtypes of `Something`. In exchange, you can call `Something`'s methods on `T`.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static <T extends Comparable<T>> T max(T a, T b) {
         return a.compareTo(b) >= 0 ? a : b;
     }
 
     public static void main(String[] args) {
-        System.out.println(max(3, 7));
-        System.out.println(max("apple", "banana"));
+        println(max(3, 7));
+        println(max("apple", "banana"));
     }
 }
 ```
@@ -204,23 +212,25 @@ With an unbounded `T`, all the compiler knows about `a` is that it's an `Object`
 Inference has its limits, too. `max(3, "banana")` asks for a single `T` that is both an `Integer` and a `String`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static <T extends Comparable<T>> T max(T a, T b) {
         return a.compareTo(b) >= 0 ? a : b;
     }
 
     public static void main(String[] args) {
-        System.out.println(Main.<Integer>max(3, 7));
-        System.out.println(max(3, "banana"));
+        println(Main.<Integer>max(3, 7));
+        println(max(3, "banana"));
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:8: error: method max in class Main cannot be applied to given types;
-        System.out.println(max(3, "banana"));
-                           ^
+Main.java:10: error: method max in class Main cannot be applied to given types;
+        println(max(3, "banana"));
+                ^
   required: T,T
   found:    int,String
   reason: inference variable T has incompatible bounds
@@ -270,6 +280,8 @@ The cost of a bound is that it narrows what callers may pass. The payoff is that
 import java.util.List;
 import java.util.ArrayList;
 
+import static java.lang.IO.println;
+
 public class Main {
     static double sum(List<? extends Number> nums) {
         double total = 0;
@@ -282,8 +294,8 @@ public class Main {
         ints.add(1); ints.add(2); ints.add(3);
         List<Double> dbls = new ArrayList<>();
         dbls.add(1.5); dbls.add(2.5);
-        System.out.println(sum(ints));
-        System.out.println(sum(dbls));
+        println(sum(ints));
+        println(sum(dbls));
     }
 }
 ```
@@ -308,6 +320,8 @@ That gives us the mnemonic **PECS**: *Producer `extends`, Consumer `super`*. Her
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     static void addOnes(List<? super Integer> out, int n) {
         for (int i = 0; i < n; i++) out.add(1);
@@ -318,10 +332,10 @@ public class Main {
         List<Object> objs = new ArrayList<>();
         addOnes(nums, 2);
         addOnes(objs, 3);
-        System.out.println(nums);
-        System.out.println(objs);
+        println(nums);
+        println(objs);
         Object first = objs.get(0);
-        System.out.println(first);
+        println(first);
     }
 }
 ```
@@ -364,6 +378,8 @@ Main.java:7: error: incompatible types: int cannot be converted to CAP#1
 import java.util.List;
 import java.util.ArrayList;
 
+import static java.lang.IO.println;
+
 public class Main {
     static double sum(List<Number> nums) {
         double total = 0;
@@ -374,16 +390,16 @@ public class Main {
     public static void main(String[] args) {
         List<Integer> ints = new ArrayList<>();
         ints.add(1);
-        System.out.println(sum(ints));
+        println(sum(ints));
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:14: error: incompatible types: List<Integer> cannot be converted to List<Number>
-        System.out.println(sum(ints));
-                               ^
+Main.java:16: error: incompatible types: List<Integer> cannot be converted to List<Number>
+        println(sum(ints));
+                    ^
 ```
 
 Since `List<Integer>` is not a `List<Number>`, `sum(ints)` won't compile. That's invariance in action, and the `? extends Number` wildcard is the fix.
@@ -406,12 +422,14 @@ Generics exist only at compile time. The compiler checks the types and then **er
 import java.util.List;
 import java.util.ArrayList;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<String> ss = new ArrayList<>();
         List<Integer> is = new ArrayList<>();
-        System.out.println(ss.getClass() == is.getClass());
-        System.out.println(ss.getClass().getSimpleName());
+        println(ss.getClass() == is.getClass());
+        println(ss.getClass().getSimpleName());
     }
 }
 ```
@@ -440,10 +458,12 @@ In the bytecode, `Box.get` returns `Object`, and a `checkcast` to `String` follo
 ```java run
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     static void check(Object obj) {
         if (obj instanceof List<String>) {
-            System.out.println("yes");
+            println("yes");
         }
     }
 
@@ -453,7 +473,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:5: error: Object cannot be safely cast to List<String>
+Main.java:7: error: Object cannot be safely cast to List<String>
         if (obj instanceof List<String>) {
             ^
 ```
@@ -465,12 +485,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Collection<String> c = new ArrayList<>();
-        System.out.println(c instanceof List<String>);
+        println(c instanceof List<String>);
         Object o = c;
-        System.out.println(o instanceof List<?>);
+        println(o instanceof List<?>);
     }
 }
 ```
@@ -577,6 +599,8 @@ One check per objective. Answer before you open anything.
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 class Pair<A, B> {
     private final A first;
     private final B second;
@@ -591,9 +615,9 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        System.out.println(new Pair<String, Integer>("x", 1).second() + 1);
-        System.out.println(firstOrNull(List.of("a", "b")));
-        System.out.println(new ArrayList<String>().getClass() == new ArrayList<Double>().getClass());
+        println(new Pair<String, Integer>("x", 1).second() + 1);
+        println(firstOrNull(List.of("a", "b")));
+        println(new ArrayList<String>().getClass() == new ArrayList<Double>().getClass());
     }
 }
 ```

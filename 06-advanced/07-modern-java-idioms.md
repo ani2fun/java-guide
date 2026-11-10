@@ -133,6 +133,8 @@ The data lives in the records, while the behavior lives in the `switch`, outside
 *Concrete bite.* The payoff is that the compiler becomes your checklist. Add a fourth permitted shape, `Pentagon`, and leave `area` alone:
 
 ```java run
+import static java.lang.IO.println;
+
 sealed interface Shape permits Circle, Rectangle, Triangle, Pentagon {}
 record Circle(double radius) implements Shape {}
 record Rectangle(double width, double height) implements Shape {}
@@ -149,14 +151,14 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        System.out.println(area(new Pentagon(1)));
+        println(area(new Pentagon(1)));
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:9: error: the switch expression does not cover all possible input values
+Main.java:11: error: the switch expression does not cover all possible input values
         return switch (s) {
                ^
 1 error
@@ -168,6 +170,8 @@ Every such `switch` in the program stops compiling until it handles `Pentagon`. 
 
 ```java run
 // ⚠️ ANTI-PATTERN — a default branch over a sealed type.  Do not copy it.
+import static java.lang.IO.println;
+
 sealed interface Shape permits Circle, Rectangle, Triangle, Pentagon {}
 record Circle(double radius) implements Shape {}
 record Rectangle(double width, double height) implements Shape {}
@@ -189,7 +193,7 @@ public class Main {
         for (Shape s : shapes) {
             System.out.printf("%s -> %.2f%n", s.getClass().getSimpleName(), area(s));
         }
-        System.out.println("Pentagon compiled, and its area is silently wrong");
+        println("Pentagon compiled, and its area is silently wrong");
     }
 }
 ```
@@ -230,6 +234,8 @@ Its own inventor, Tony Hoare, called `null` his "billion dollar mistake" <abbr t
 import java.util.Optional;
 import java.util.Map;
 
+import static java.lang.IO.println;
+
 public class Main {
     static Optional<String> lookup(Map<String, String> m, String key) {
         return Optional.ofNullable(m.get(key));
@@ -240,9 +246,9 @@ public class Main {
         String host = lookup(config, "host").map(String::toUpperCase).orElse("UNKNOWN");
         String region = lookup(config, "region").orElse("us-east");
         int port = lookup(config, "port").map(Integer::parseInt).orElse(80);
-        System.out.println(host);
-        System.out.println(region);
-        System.out.println(port);
+        println(host);
+        println(region);
+        println(port);
     }
 }
 ```
@@ -273,6 +279,8 @@ There's no `if (x != null)`, and no `NullPointerException`: the chain handles ab
 // ⚠️ ANTI-PATTERN — an Optional field left null.  Do not copy it.
 import java.util.Optional;
 
+import static java.lang.IO.println;
+
 class User {
     Optional<String> nickname;   // never assigned, so it holds null
 
@@ -283,8 +291,8 @@ class User {
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("display:");
-        System.out.println(new User().display());
+        println("display:");
+        println(new User().display());
     }
 }
 ```
@@ -303,12 +311,14 @@ The code *looks* null-safe, yet it crashed with the very exception that `Optiona
 import java.util.Map;
 import java.util.Optional;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Map<String, String> config = Map.of("port", "abc");
-        System.out.println("parsing...");
+        println("parsing...");
         int port = Optional.ofNullable(config.get("port")).map(Integer::parseInt).orElse(80);
-        System.out.println(port);
+        println(port);
     }
 }
 ```
@@ -339,6 +349,8 @@ Modern Java leans heavily on **immutable** objects: `record`s and `final` fields
 ```java run
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     record Point(int x, int y) {
         Point translate(int dx, int dy) { return new Point(x + dx, y + dy); }
@@ -347,10 +359,10 @@ public class Main {
     public static void main(String[] args) {
         var origin = new Point(0, 0);
         var moved = origin.translate(3, 4);
-        System.out.println(origin);
-        System.out.println(moved);
+        println(origin);
+        println(moved);
         var names = List.of("Ada", "Linus");
-        System.out.println(names.size());
+        println(names.size());
     }
 }
 ```
@@ -382,18 +394,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<String> source = new ArrayList<>(List.of("Ada"));
         List<String> view = Collections.unmodifiableList(source);
         List<String> copy = List.copyOf(source);
         source.add("Linus");
-        System.out.println("view: " + view);
-        System.out.println("copy: " + copy);
+        println("view: " + view);
+        println("copy: " + copy);
         try {
             view.add("Grace");
         } catch (UnsupportedOperationException e) {
-            System.out.println("view.add: " + e.getClass().getSimpleName());
+            println("view.add: " + e.getClass().getSimpleName());
         }
     }
 }
@@ -413,19 +427,21 @@ Nobody can change the list *through* `view` — `add` threw. But `source` still 
 ```java run
 import java.util.ArrayList;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         var names = new ArrayList<>();
         names.add("Ada");
         String first = names.get(0);
-        System.out.println(first);
+        println(first);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:7: error: incompatible types: Object cannot be converted to String
+Main.java:9: error: incompatible types: Object cannot be converted to String
         String first = names.get(0);
                                 ^
 1 error
@@ -457,6 +473,8 @@ The features earn their keep *together*. Here, a small payments domain uses:
 import java.util.List;
 import java.util.Optional;
 
+import static java.lang.IO.println;
+
 public class Main {
     sealed interface Payment permits Cash, Card {}
     record Cash(double amount) implements Payment {}
@@ -482,7 +500,7 @@ public class Main {
         Optional<Payment> biggest = payments.stream()
             .max((a, b) -> Double.compare(amountOf(a), amountOf(b)));
         System.out.printf("total fees: %.2f%n", totalFees);
-        System.out.println("biggest: " + biggest.map(p -> p.getClass().getSimpleName()).orElse("none"));
+        println("biggest: " + biggest.map(p -> p.getClass().getSimpleName()).orElse("none"));
     }
 }
 ```
@@ -590,6 +608,8 @@ Two. Now declare `double amount();` in `Payment`. Each record already has a publ
 ```java run
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     sealed interface Payment permits Cash, Card {
         double amount();
@@ -602,8 +622,8 @@ public class Main {
             new Cash(100), new Card(200, "1234"), new Card(50, "9999"));
         long cards = payments.stream().filter(p -> p instanceof Card).count();
         double total = payments.stream().mapToDouble(Payment::amount).sum();
-        System.out.println("cards: " + cards);
-        System.out.println("total: " + total);
+        println("cards: " + cards);
+        println("total: " + total);
     }
 }
 ```

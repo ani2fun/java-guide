@@ -72,16 +72,18 @@ Unlike an array, it grows as you add.
 import java.util.List;
 import java.util.ArrayList;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> scores = new ArrayList<>();
         scores.add(90);
         scores.add(85);
         scores.add(95);
-        System.out.println(scores.size());
-        System.out.println(scores.get(1));
+        println(scores.size());
+        println(scores.get(1));
         scores.set(1, 100);
-        System.out.println(scores);
+        println(scores);
     }
 }
 ```
@@ -109,10 +111,12 @@ The empty `<>` after `ArrayList` is the **diamond** form <abbr title="The Java L
 ```java run
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<String> fixed = List.of("a", "b");
-        System.out.println(fixed);
+        println(fixed);
         fixed.add("c");
     }
 }
@@ -171,19 +175,21 @@ A list of `Integer` can also hold `null`, which no `int` can. Unbox that `null`,
 import java.util.List;
 import java.util.ArrayList;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> nums = new ArrayList<>();
         nums.add(7);                 // boxing: int 7 becomes an Integer
         int first = nums.get(0);     // unboxing: the Integer becomes an int
-        System.out.println(first + 1);
+        println(first + 1);
         nums.add(null);              // a List<Integer> may hold null
-        System.out.println(nums);
+        println(nums);
         int total = 0;
         for (int n : nums) {
             total += n;
         }
-        System.out.println(total);
+        println(total);
     }
 }
 ```
@@ -206,14 +212,16 @@ Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.l
 import java.util.List;
 import java.util.ArrayList;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> nums = new ArrayList<>();
         nums.add(10); nums.add(20); nums.add(30);
         nums.remove(1);
-        System.out.println(nums);
+        println(nums);
         nums.remove(Integer.valueOf(10));
-        System.out.println(nums);
+        println(nums);
     }
 }
 ```
@@ -245,6 +253,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import static java.lang.IO.println;
+
 public class Main {
     static int sum(List<Integer> nums) {   // accepts ANY List
         int total = 0;
@@ -257,8 +267,8 @@ public class Main {
         a.add(1); a.add(2); a.add(3);
         List<Integer> b = new LinkedList<>();
         b.add(10); b.add(20);
-        System.out.println(sum(a));
-        System.out.println(sum(b));
+        println(sum(a));
+        println(sum(b));
     }
 }
 ```
@@ -310,12 +320,15 @@ An **`Iterator`** walks every collection. It's an object with `hasNext()` and `n
 import java.util.List;
 import java.util.ArrayList;
 
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> nums = new ArrayList<>();
         nums.add(1); nums.add(2); nums.add(3); nums.add(4);
-        for (int n : nums) System.out.print(n + " ");
-        System.out.println();
+        for (int n : nums) print(n + " ");
+        println();
     }
 }
 ```
@@ -338,6 +351,8 @@ Suppose something *other* than the iterator adds or removes an element. The coun
 import java.util.List;
 import java.util.ArrayList;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> nums = new ArrayList<>();
@@ -345,7 +360,7 @@ public class Main {
         for (int n : nums) {
             if (n % 2 == 0) nums.remove(Integer.valueOf(n));
         }
-        System.out.println(nums);
+        println(nums);
     }
 }
 ```
@@ -361,6 +376,8 @@ Exception in thread "main" java.util.ConcurrentModificationException
 import java.util.List;
 import java.util.ArrayList;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> nums = new ArrayList<>();
@@ -368,7 +385,7 @@ public class Main {
         for (int n : nums) {
             if (n == 2) nums.remove(Integer.valueOf(n));
         }
-        System.out.println(nums);
+        println(nums);
     }
 }
 ```
@@ -385,6 +402,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> nums = new ArrayList<>();
@@ -394,7 +413,7 @@ public class Main {
             int n = it.next();
             if (n % 2 == 0) it.remove();
         }
-        System.out.println(nums);
+        println(nums);
     }
 }
 ```
@@ -430,23 +449,25 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<Integer> nums = new ArrayList<>(List.of(30, 10, 20));
         Collections.sort(nums);
-        System.out.println(nums);
+        println(nums);
         nums.sort(Comparator.reverseOrder());
-        System.out.println(nums);
+        println(nums);
 
         List<String> words = new ArrayList<>(List.of("banana", "Cherry", "apple"));
         Collections.sort(words);
-        System.out.println(words);
+        println(words);
         words.sort(String.CASE_INSENSITIVE_ORDER);
-        System.out.println(words);
+        println(words);
 
         int[] arr = {5, 2, 9, 1};
         Arrays.sort(arr);
-        System.out.println(Arrays.toString(arr));
+        println(Arrays.toString(arr));
     }
 }
 ```
@@ -512,6 +533,8 @@ Main.java:20: error: no suitable method found for sort(List<Player>)
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 class Player implements Comparable<Player> {
     String name;
     int score;
@@ -537,7 +560,7 @@ public class Main {
         players.add(new Player("Bo", 70));
         players.add(new Player("Cy", 80));
         players.sort(null);
-        System.out.println(players);
+        println(players);
     }
 }
 ```
@@ -577,23 +600,25 @@ A **`Deque`** ("deck", a double-ended queue) is a sequence you can add to and re
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Deque<String> stack = new ArrayDeque<>();
         stack.push("a");
         stack.push("b");
         stack.push("c");
-        System.out.println(stack.peek());
-        System.out.println(stack.pop());
-        System.out.println(stack);
+        println(stack.peek());
+        println(stack.pop());
+        println(stack);
 
         Deque<String> queue = new ArrayDeque<>();
         queue.offer("a");
         queue.offer("b");
         queue.offer("c");
-        System.out.println(queue.peek());
-        System.out.println(queue.poll());
-        System.out.println(queue);
+        println(queue.peek());
+        println(queue.poll());
+        println(queue);
     }
 }
 ```
@@ -619,11 +644,13 @@ a
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Deque<String> queue = new ArrayDeque<>();
-        System.out.println(queue.poll());
-        System.out.println(queue.peek());
+        println(queue.poll());
+        println(queue.peek());
         queue.pop();
     }
 }
@@ -748,6 +775,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<String> xs = new ArrayList<>(List.of("a", "b", "b", "c"));
@@ -755,7 +784,7 @@ public class Main {
         while (it.hasNext()) {
             if (it.next().equals("b")) it.remove();
         }
-        System.out.println(xs);
+        println(xs);
     }
 }
 ```

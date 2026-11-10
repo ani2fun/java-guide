@@ -58,18 +58,20 @@ Every output below was produced by compiling and running the code on Java 25.
 Wrap risky code in a `try`. If it throws, control jumps to a matching `catch`, which handles the problem — so the program keeps going instead of dying.
 
 ```java run viz=array:inputs
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String[] inputs = { "42", "oops", "7" };
         for (String in : inputs) {
             try {
                 int n = Integer.parseInt(in);
-                System.out.println("parsed: " + n);
+                println("parsed: " + n);
             } catch (NumberFormatException e) {
-                System.out.println("bad input: " + in);
+                println("bad input: " + in);
             }
         }
-        System.out.println("done");
+        println("done");
     }
 }
 ```
@@ -134,13 +136,15 @@ classDiagram
 An **unchecked** exception (a `RuntimeException` such as `ArithmeticException`) needs no declaration. The code compiles, and fails only at run time, if and when it throws:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int divide(int a, int b) {
         return a / b;
     }
     public static void main(String[] args) {
-        System.out.println(divide(10, 2));
-        System.out.println(divide(10, 0));
+        println(divide(10, 2));
+        println(divide(10, 0));
     }
 }
 ```
@@ -198,6 +202,8 @@ The rule cuts the other way, too. A `catch` for a checked exception that its `tr
 A `try` can have several `catch` clauses. The JVM tries them in order, from top to bottom, and runs the first one whose type matches. When two exceptions need the same handling, a single **multi-catch** clause can list both types, separated by `|` <abbr title="The Java Language Specification, Java SE 25, §14.20">[4]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int parseAt(String[] parts, int i) {
         return Integer.parseInt(parts[i]);
@@ -206,9 +212,9 @@ public class Main {
         String[] parts = { "10", "ten" };
         for (int i = 0; i < 3; i++) {
             try {
-                System.out.println("value: " + parseAt(parts, i));
+                println("value: " + parseAt(parts, i));
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                System.out.println("skipped " + i + ": " + e.getClass().getSimpleName());
+                println("skipped " + i + ": " + e.getClass().getSimpleName());
             }
         }
     }
@@ -230,12 +236,14 @@ skipped 2: ArrayIndexOutOfBoundsException
 *Concrete bite.* The alternatives may not be related by subclassing <abbr title="The Java Language Specification, Java SE 25, §14.20">[4]</abbr>. `NumberFormatException` extends `IllegalArgumentException`, so listing both is redundant — and javac tells you so:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         try {
-            System.out.println(Integer.parseInt("ten"));
+            println(Integer.parseInt("ten"));
         } catch (NumberFormatException | IllegalArgumentException e) {
-            System.out.println("bad number");
+            println("bad number");
         }
     }
 }
@@ -243,7 +251,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:5: error: Alternatives in a multi-catch statement cannot be related by subclassing
+Main.java:7: error: Alternatives in a multi-catch statement cannot be related by subclassing
         } catch (NumberFormatException | IllegalArgumentException e) {
                                          ^
   Alternative NumberFormatException is a subclass of alternative IllegalArgumentException
@@ -255,14 +263,16 @@ Keep only `IllegalArgumentException`, since it already catches its subclass.
 *Watch out: a general `catch` before a specific one.* Clauses are tried in order. Put `catch (Exception e)` first, and it catches everything, so a later `catch (NumberFormatException e)` could never run. That's a compile-time error <abbr title="The Java Language Specification, Java SE 25, §11.2.3">[3]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         try {
-            System.out.println(Integer.parseInt("ten"));
+            println(Integer.parseInt("ten"));
         } catch (Exception e) {
-            System.out.println("something failed");
+            println("something failed");
         } catch (NumberFormatException e) {
-            System.out.println("bad number");
+            println("bad number");
         }
     }
 }
@@ -270,7 +280,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:7: error: exception NumberFormatException has already been caught
+Main.java:9: error: exception NumberFormatException has already been caught
         } catch (NumberFormatException e) {
           ^
 1 error
@@ -300,6 +310,8 @@ Three tools let you raise failures and give them names:
 A custom type gives the failure a name, and carries its data along.
 
 ```java run
+import static java.lang.IO.println;
+
 class InsufficientFundsException extends Exception {
     InsufficientFundsException(String msg) { super(msg); }
 }
@@ -319,10 +331,10 @@ public class Main {
         Account acct = new Account();
         try {
             acct.withdraw(50);
-            System.out.println("balance: " + acct.balance);
+            println("balance: " + acct.balance);
             acct.withdraw(100);
         } catch (InsufficientFundsException e) {
-            System.out.println("denied: " + e.getMessage());
+            println("denied: " + e.getMessage());
         }
     }
 }
@@ -348,6 +360,8 @@ The custom type turns the failure into a named, catchable thing with its own dat
 In this example, no method catches the exception, so the trace shows the whole path:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int checkAge(int age) {
         if (age < 0) {
@@ -359,9 +373,9 @@ public class Main {
         return checkAge(age) + 1000;
     }
     public static void main(String[] args) {
-        System.out.println(register(30));
-        System.out.println(register(-5));
-        System.out.println("never printed");
+        println(register(30));
+        println(register(-5));
+        println("never printed");
     }
 }
 ```
@@ -370,12 +384,12 @@ public class Main {
 ```
 1030
 Exception in thread "main" java.lang.IllegalArgumentException: negative age: -5
-	at Main.checkAge(Main.java:4)
-	at Main.register(Main.java:9)
-	at Main.main(Main.java:13)
+	at Main.checkAge(Main.java:6)
+	at Main.register(Main.java:11)
+	at Main.main(Main.java:15)
 ```
 
-Read it from the top down. The first `at` line is where the exception was thrown: `checkAge`, line 4. Each line below it is a caller that was waiting: `register` at line 9, then `main` at line 13. When you're debugging, the first line under the message is the one to open first.
+Read it from the top down. The first `at` line is where the exception was thrown: `checkAge`, line 6. Each line below it is a caller that was waiting: `register` at line 11, then `main` at line 15. When you're debugging, the first line under the message is the one to open first.
 
 *Concrete bite.* A custom exception beats a generic one (`throw new Exception("...")`). Callers can `catch (InsufficientFundsException e)` specifically, and tell it apart from other failures. The type itself documents the condition, and the message (`super(msg)`) and any extra fields travel with it to the handler.
 
@@ -395,16 +409,18 @@ Read it from the top down. The first `at` line is where the exception was thrown
 A `finally` block attached to a `try` runs **no matter how the `try` exits** — normal completion, a caught exception, or even a `return`. That makes it the place for cleanup that must always happen.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static String process() {
         try {
             return "from try";
         } finally {
-            System.out.println("finally ran");
+            println("finally ran");
         }
     }
     public static void main(String[] args) {
-        System.out.println(process());
+        println(process());
     }
 }
 ```
@@ -423,13 +439,15 @@ from try
 *Mechanism.* Whatever ends the `try` — completion, an exception, or a `return` — the `finally` block runs on the way out <abbr title="The Java Language Specification, Java SE 25, §14.20.2">[5]</abbr>. For a `return`, the value is computed first, then `finally` runs, and then control leaves. The only ways to skip it are for the `try` to never end, or for the JVM to stop first — and `System.exit` never returns <abbr title="java.lang.Runtime, Java SE 25 API (exit)">[11]</abbr>.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         try {
-            System.out.println("in try");
+            println("in try");
             System.exit(0);
         } finally {
-            System.out.println("finally ran");
+            println("finally ran");
         }
     }
 }
@@ -447,6 +465,8 @@ The JVM stopped inside the `try`, so there's no `finally ran`.
 *Watch out: a `return` inside `finally`.* If `finally` itself ends abruptly, through a `return` or a `throw`, that outcome replaces the `try`'s, and the original exception is discarded <abbr title="The Java Language Specification, Java SE 25, §14.20.2">[5]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static String process() {
         try {
@@ -456,7 +476,7 @@ public class Main {
         }
     }
     public static void main(String[] args) {
-        System.out.println(process());
+        println(process());
     }
 }
 ```
@@ -484,11 +504,13 @@ The `IllegalStateException` simply vanished: no crash, no trace, just an ordinar
 Closing resources by hand in `finally` is verbose and easy to get wrong. With **`try`-with-resources**, you declare the resource in parentheses right after `try`. Any object that implements `AutoCloseable` is then **closed automatically** when the block exits, in the reverse order of opening <abbr title="The Java Language Specification, Java SE 25, §14.20.3">[6]</abbr>.
 
 ```java run
+import static java.lang.IO.println;
+
 class Resource implements AutoCloseable {
     String name;
-    Resource(String name) { this.name = name; System.out.println("open " + name); }
-    void use() { System.out.println("use " + name); }
-    @Override public void close() { System.out.println("close " + name); }
+    Resource(String name) { this.name = name; println("open " + name); }
+    void use() { println("use " + name); }
+    @Override public void close() { println("close " + name); }
 }
 
 public class Main {
@@ -496,7 +518,7 @@ public class Main {
         try (Resource r = new Resource("file")) {
             r.use();
         }
-        System.out.println("after");
+        println("after");
     }
 }
 ```
@@ -515,11 +537,13 @@ after
 *Mechanism.* The compiler expands `try (R r = ...)` into a `try`/`finally` that calls `r.close()` on exit <abbr title="The Java Language Specification, Java SE 25, §14.20.3.1">[7]</abbr>. It also handles the edge cases: it closes the resource even if the body throws. And if the body threw *and* `close()` throws too, the `close()` exception is **suppressed**: it gets attached to the body's exception, which is the one you catch <abbr title="The Java Language Specification, Java SE 25, §14.20.3">[6]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 class Resource implements AutoCloseable {
     String name;
-    Resource(String name) { this.name = name; System.out.println("open " + name); }
+    Resource(String name) { this.name = name; println("open " + name); }
     @Override public void close() {
-        System.out.println("close " + name);
+        println("close " + name);
         throw new IllegalStateException("close of " + name + " failed");
     }
 }
@@ -529,9 +553,9 @@ public class Main {
         try (Resource r = new Resource("file")) {
             throw new IllegalArgumentException("body failed");
         } catch (IllegalArgumentException e) {
-            System.out.println("caught: " + e.getMessage());
+            println("caught: " + e.getMessage());
             for (Throwable s : e.getSuppressed()) {
-                System.out.println("suppressed: " + s.getMessage());
+                println("suppressed: " + s.getMessage());
             }
         }
     }
@@ -623,26 +647,28 @@ One check per objective. Answer before you open anything.
 <summary>The 🧪 box below: the <code>{"1", "x", "3"}</code> total, <code>read()</code> without a <code>try</code>, and two resources.</summary>
 
 ```java run
+import static java.lang.IO.println;
+
 class Resource implements AutoCloseable {
     String name;
-    Resource(String name) { this.name = name; System.out.println("open " + name); }
-    @Override public void close() { System.out.println("close " + name); }
+    Resource(String name) { this.name = name; println("open " + name); }
+    @Override public void close() { println("close " + name); }
 }
 
 public class Main {
     public static void main(String[] args) {
         try (Resource a = new Resource("A"); Resource b = new Resource("B")) {
-            System.out.println("use both");
+            println("use both");
         }
         int total = 0;
         for (String s : new String[] { "1", "x", "3" }) {
             try {
                 total += Integer.parseInt(s);
             } catch (NumberFormatException e) {
-                System.out.println("skipped " + s);
+                println("skipped " + s);
             }
         }
-        System.out.println("total: " + total);
+        println("total: " + total);
     }
 }
 ```

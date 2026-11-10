@@ -59,19 +59,21 @@ This lesson takes a deeper pass at [happens-before](/synapse/programming-languag
 A field may be declared `volatile`, "in which case the Java Memory Model ensures that all threads see a consistent value for the variable" <abbr title="The Java Language Specification, Java SE 25, §8.3.1.4">[1]</abbr>. A write to it is *visible* to every later read by other threads, which fixes the "a thread never sees the flag change" bug. Here, a worker spins until `main` flips a `volatile` flag — and then it stops.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static volatile boolean running = true;
     public static void main(String[] args) throws InterruptedException {
         Thread worker = new Thread(() -> {
             long count = 0;
             while (running) count++;
-            System.out.println("worker saw running=false and stopped");
+            println("worker saw running=false and stopped");
         });
         worker.start();
         Thread.sleep(100);
         running = false;
         worker.join();
-        System.out.println("done");
+        println("done");
     }
 }
 ```
@@ -88,19 +90,21 @@ Without `volatile`, the worker may read `true` forever, and the program hangs. T
 
 ```java
 // expects-hang: without volatile, the worker may never see running = false
+import static java.lang.IO.println;
+
 public class Main {
     static boolean running = true;   // volatile removed — nothing else changed
     public static void main(String[] args) throws InterruptedException {
         Thread worker = new Thread(() -> {
             long count = 0;
             while (running) count++;
-            System.out.println("worker saw running=false and stopped");
+            println("worker saw running=false and stopped");
         });
         worker.start();
         Thread.sleep(100);
         running = false;
         worker.join();
-        System.out.println("done");
+        println("done");
     }
 }
 ```
@@ -121,6 +125,8 @@ In effect, the worker's loop becomes `if (running) while (true) count++;`. That'
 *Concrete bite.* `volatile` gives you visibility, but **not** atomicity. A `volatile` counter's `++` still races:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static volatile int counter = 0;
     public static void main(String[] args) throws InterruptedException {
@@ -130,7 +136,7 @@ public class Main {
             threads[i].start();
         }
         for (Thread t : threads) t.join();
-        System.out.println(counter);
+        println(counter);
     }
 }
 ```
@@ -197,6 +203,8 @@ Think of each one as a bridge, across which writes are guaranteed to be visible.
 Chain those three together, and `data = 42` happens-before the reader's read of `data`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int data;                     // a plain field
     static String label;                 // another plain field
@@ -205,7 +213,7 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         Thread reader = new Thread(() -> {
             while (!ready) Thread.onSpinWait();
-            System.out.println("reader sees data=" + data + " label=" + label);
+            println("reader sees data=" + data + " label=" + label);
         });
         reader.start();
         data = 42;
@@ -265,12 +273,14 @@ This is the deepest reason [records](/synapse/programming-languages/java/core-li
 The classic place where these tools collide is the **lazily initialized singleton**. The infamous *double-checked locking* pattern (check, lock, check again, construct) is broken when written with a plain field, because the unlocked first check can observe the half-built object. With `volatile`, the pattern is correct — and here it is, running:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static class Config {
         final String value;
         Config() {
             value = "loaded";
-            System.out.println("Config constructed once, by " + Thread.currentThread().getName());
+            println("Config constructed once, by " + Thread.currentThread().getName());
         }
     }
 
@@ -293,7 +303,7 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         Thread[] threads = new Thread[4];
         for (int i = 0; i < 4; i++) {
-            threads[i] = new Thread(() -> System.out.println(
+            threads[i] = new Thread(() -> println(
                 Thread.currentThread().getName() + " got " + getInstance().value));
             threads[i].start();
         }
@@ -316,10 +326,12 @@ Thread-1 got loaded
 **The holder idiom** gets the same laziness and safety from the class loader, with no `volatile` and no lock. A class is initialized "immediately before" its first use, such as the first read of one of its `static` fields <abbr title="The Java Language Specification, Java SE 25, §12.4.1">[6]</abbr>. The JVM synchronizes that initialization, so exactly one thread runs it <abbr title="The Java Language Specification, Java SE 25, §12.4.2">[7]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static class Config {
         final String value = "loaded";
-        Config() { System.out.println("Config constructed"); }
+        Config() { println("Config constructed"); }
     }
 
     private static class Holder {
@@ -331,14 +343,14 @@ public class Main {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        System.out.println("main started; nothing constructed yet");
+        println("main started; nothing constructed yet");
         Thread[] threads = new Thread[4];
         for (int i = 0; i < 4; i++) {
             threads[i] = new Thread(() -> getInstance());
             threads[i].start();
         }
         for (Thread t : threads) t.join();
-        System.out.println("all four got " + getInstance().value);
+        println("all four got " + getInstance().value);
     }
 }
 ```
@@ -372,13 +384,15 @@ The cost is one more thing to check whenever a reference leaves a constructor or
 At first, the JVM runs bytecode by **interpreting** it. Methods that run often ("hot" methods) then get **JIT-compiled**: compiled into optimized native code while the program is running. By default, the JVM uses a "Tiered compiler, using both C1 and C2" <abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 25, &quot;Ergonomics&quot;">[8]</abbr>: C1 compiles quickly, and C2 optimizes fully. This program makes `fib` hot:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int fib(int n) {
         return n < 2 ? n : fib(n - 1) + fib(n - 2);
     }
 
     public static void main(String[] args) {
-        System.out.println("fib(30) = " + fib(30));
+        println("fib(30) = " + fib(30));
     }
 }
 ```
@@ -435,6 +449,8 @@ Java manages memory automatically. A **garbage collector** reclaims objects that
 Modern collectors are **generational**. They rely on "the weak generational hypothesis, which states that most objects survive for only a short period of time" <abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 25, &quot;Garbage Collector Implementation&quot;">[12]</abbr>. So the GC scans a small "young" region often, and cheaply. This program allocates 2000 MB worth of short-lived 1 MB arrays:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         long total = 0;
@@ -442,7 +458,7 @@ public class Main {
             byte[] garbage = new byte[1024 * 1024];   // 1 MB, unreachable after this iteration
             total += garbage.length;
         }
-        System.out.println("allocated " + total / (1024 * 1024) + " MB of garbage");
+        println("allocated " + total / (1024 * 1024) + " MB of garbage");
     }
 }
 ```
@@ -495,6 +511,8 @@ $ java -Xlog:gc -XX:ActiveProcessorCount=1 Main
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     static final List<byte[]> cache = new ArrayList<>();   // lives as long as the class
 
@@ -504,7 +522,7 @@ public class Main {
         } catch (OutOfMemoryError e) {
             int mb = cache.size() / 16;
             cache.clear();                                   // drop the references: now it is garbage
-            System.out.println("OutOfMemoryError: " + e.getMessage() + ", after caching about " + mb + " MB");
+            println("OutOfMemoryError: " + e.getMessage() + ", after caching about " + mb + " MB");
         }
     }
 }

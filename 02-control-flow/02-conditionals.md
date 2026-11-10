@@ -60,13 +60,15 @@ Every output below was produced by compiling and running the code.
 An `if` runs its block only when a `boolean` condition is `true`. An optional `else` runs when it's `false`.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int temp = 5;
         if (temp < 10) {
-            System.out.println("cold");
+            println("cold");
         } else {
-            System.out.println("warm");
+            println("warm");
         }
     }
 }
@@ -82,11 +84,13 @@ cold
 The condition must be a `boolean` <abbr title="The Java Language Specification, Java SE 25, §14.9">[1]</abbr>. [Booleans & Logic](/synapse/programming-languages/java/control-flow/booleans-and-logic) promised that Java refuses a number, and here's the refusal:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int count = 3;
         if (count) {
-            System.out.println("some");
+            println("some");
         }
     }
 }
@@ -94,7 +98,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:4: error: incompatible types: int cannot be converted to boolean
+Main.java:6: error: incompatible types: int cannot be converted to boolean
         if (count) {
             ^
 1 error
@@ -108,11 +112,13 @@ Write the question out: `if (count != 0)`.
 *Concrete bite.* That single-statement rule, combined with misleading indentation, is a classic trap:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         boolean cold = false;
-        if (cold) System.out.println("wear a coat");
-            System.out.println("leave the house");
+        if (cold) println("wear a coat");
+            println("leave the house");
     }
 }
 ```
@@ -127,11 +133,13 @@ leave the house
 *Watch out: a stray semicolon.* A `;` on its own is a statement too. It's the **empty statement**, and it does nothing <abbr title="The Java Language Specification, Java SE 25, §14.6">[3]</abbr>. Put one after the condition, and the `if` guards that nothing:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int temp = 25;
         if (temp < 10); {
-            System.out.println("cold");
+            println("cold");
         }
     }
 }
@@ -147,15 +155,17 @@ cold
 *The dangling `else`.* With two braceless `if`s, an `else` belongs to the **nearest** `if`, whatever the indentation claims <abbr title="The Java Language Specification, Java SE 25, §14.5">[2]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         boolean member = false;
         boolean sale = true;
         if (member)
-            if (sale) System.out.println("member sale price");
+            if (sale) println("member sale price");
         else
-            System.out.println("full price");
-        System.out.println("done");
+            println("full price");
+        println("done");
     }
 }
 ```
@@ -168,14 +178,16 @@ done
 The indentation says a non-member pays `full price`. But the `else` actually belongs to `if (sale)`, and that inner `if` sits inside `if (member)`. `member` is `false`, so neither line ran. Braces put the `else` where the indentation meant it to be:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         boolean member = false;
         boolean sale = true;
         if (member) {
-            if (sale) System.out.println("member sale price");
+            if (sale) println("member sale price");
         } else {
-            System.out.println("full price");
+            println("full price");
         }
     }
 }
@@ -203,13 +215,15 @@ To choose among more than two paths, chain `else if`. Java tests each condition 
 `else if` isn't a keyword of its own. It's an `else` whose one statement happens to be another `if` <abbr title="The Java Language Specification, Java SE 25, §14.9">[1]</abbr>. So a chain is really `if`s nested inside `else`s, written flat.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int score = 85;
-        if (score >= 90) System.out.println("A");
-        else if (score >= 80) System.out.println("B");
-        else if (score >= 70) System.out.println("C");
-        else System.out.println("F");
+        if (score >= 90) println("A");
+        else if (score >= 80) println("B");
+        else if (score >= 70) println("C");
+        else println("F");
     }
 }
 ```
@@ -249,12 +263,14 @@ This chain leaves out the braces so each branch fits on one line. Every branch i
 *Concrete bite.* Put a broad condition before a narrow one, and the narrow one becomes unreachable:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int score = 95;
-        if (score >= 70) System.out.println("C");
-        else if (score >= 90) System.out.println("A");
-        else System.out.println("F");
+        if (score >= 70) println("C");
+        else if (score >= 90) println("A");
+        else println("F");
     }
 }
 ```
@@ -269,6 +285,8 @@ C
 *Watch out: a chain with no final `else`.* A chain often sets a variable. Without an `else`, some values set nothing, and the compiler spots that path <abbr title="The Java Language Specification, Java SE 25, Chapter 16">[10]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int score = 85;
@@ -278,16 +296,16 @@ public class Main {
         } else if (score >= 80) {
             grade = "B";
         }
-        System.out.println(grade);
+        println(grade);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:10: error: variable grade might not have been initialized
-        System.out.println(grade);
-                           ^
+Main.java:12: error: variable grade might not have been initialized
+        println(grade);
+                ^
 1 error
 ```
 
@@ -314,14 +332,16 @@ When you're choosing by matching one value against several constants, a `switch`
 - `default` catches everything else.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int day = 3;
         switch (day) {
-            case 1: System.out.println("Mon"); break;
-            case 2: System.out.println("Tue"); break;
-            case 3: System.out.println("Wed"); break;
-            default: System.out.println("other");
+            case 1: println("Mon"); break;
+            case 2: println("Tue"); break;
+            case 3: println("Wed"); break;
+            default: println("other");
         }
     }
 }
@@ -340,14 +360,16 @@ Wed
 *Concrete bite.* Drop the `break`s, and one match runs several cases:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int day = 1;
         switch (day) {
-            case 1: System.out.println("Mon");
-            case 2: System.out.println("Tue");
-            case 3: System.out.println("Wed"); break;
-            default: System.out.println("other");
+            case 1: println("Mon");
+            case 2: println("Tue");
+            case 3: println("Wed"); break;
+            default: println("other");
         }
     }
 }
@@ -365,19 +387,21 @@ Wed
 **What a `switch` can test.** The value in `switch ( … )` is the **selector**. It can be a `char`, `byte`, `short` or `int`, or an object such as a `String` <abbr title="The Java Language Specification, Java SE 25, §14.11">[4]</abbr>. A `String` case matches with `.equals`, so upper and lower case matter:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String command = "stop";
         switch (command) {
-            case "go": System.out.println("moving"); break;
-            case "stop": System.out.println("halted"); break;
-            default: System.out.println("unknown: " + command);
+            case "go": println("moving"); break;
+            case "stop": println("halted"); break;
+            default: println("unknown: " + command);
         }
         command = "Stop";
         switch (command) {
-            case "go": System.out.println("moving"); break;
-            case "stop": System.out.println("halted"); break;
-            default: System.out.println("unknown: " + command);
+            case "go": println("moving"); break;
+            case "stop": println("halted"); break;
+            default: println("unknown: " + command);
         }
     }
 }
@@ -392,12 +416,14 @@ unknown: Stop
 Java refuses a `long`, `float`, `double` or `boolean` selector:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         long id = 3L;
         switch (id) {
-            case 1: System.out.println("one"); break;
-            default: System.out.println("other");
+            case 1: println("one"); break;
+            default: println("other");
         }
     }
 }
@@ -405,12 +431,12 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:4: error: primitive patterns are a preview feature and are disabled by default.
+Main.java:6: error: primitive patterns are a preview feature and are disabled by default.
         switch (id) {
                ^
   (use --enable-preview to enable primitive patterns)
-Main.java:5: error: constant label of type int is not compatible with switch selector type long
-            case 1: System.out.println("one"); break;
+Main.java:7: error: constant label of type int is not compatible with switch selector type long
+            case 1: println("one"); break;
                  ^
 2 errors
 ```
@@ -434,6 +460,8 @@ This footgun is exactly what the colon-and-`break` form costs you. A forgotten `
 Since JDK 14, a `switch` can be an **expression** that produces a value, using `case … ->` arrows <abbr title="JEP 361: Switch Expressions (JDK 14)">[8]</abbr>. There's no fall-through, and you can assign the whole thing to a variable.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int day = 3;
@@ -443,7 +471,7 @@ public class Main {
             case 3 -> "Wed";
             default -> "other";
         };
-        System.out.println(name);
+        println(name);
     }
 }
 ```
@@ -458,6 +486,8 @@ Wed
 One case can list several values, separated by commas. And the arrow form works in a plain `switch` statement too, one that produces no value:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int day = 6;
@@ -466,10 +496,10 @@ public class Main {
             case 6, 7 -> "weekend";
             default -> "no such day";
         };
-        System.out.println(kind);
+        println(kind);
         switch (day) {
-            case 6, 7 -> System.out.println("sleep in");
-            default -> System.out.println("alarm at 7");
+            case 6, 7 -> println("sleep in");
+            default -> println("alarm at 7");
         }
     }
 }
@@ -484,6 +514,8 @@ sleep in
 When a case needs more than one expression, give it a block in braces. The block hands back its value with **`yield`** <abbr title="The Java Language Specification, Java SE 25, §14.21">[7]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int day = 6;
@@ -494,7 +526,7 @@ public class Main {
             }
             default -> "work";
         };
-        System.out.println(plan);
+        println(plan);
     }
 }
 ```
@@ -507,6 +539,8 @@ rest (weekend)
 Forget the `yield`, and the block ends with no value to hand back:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int day = 6;
@@ -516,14 +550,14 @@ public class Main {
             }
             default -> "work";
         };
-        System.out.println(plan);
+        println(plan);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:7: error: switch rule completes without providing a value
+Main.java:9: error: switch rule completes without providing a value
             }
             ^
   (switch rules in switch expressions must either provide a value or throw)
@@ -536,6 +570,8 @@ Main.java:7: error: switch rule completes without providing a value
 *Concrete bite.* Leave a gap with no `default`, and the compiler refuses:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int day = 3;
@@ -543,14 +579,14 @@ public class Main {
             case 1 -> "Mon";
             case 2 -> "Tue";
         };
-        System.out.println(name);
+        println(name);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:4: error: the switch expression does not cover all possible input values
+Main.java:6: error: the switch expression does not cover all possible input values
         String name = switch (day) {
                       ^
 1 error
@@ -573,13 +609,15 @@ The cost is that you must handle every case (or add a `default`). But that's the
 For the smallest choice, picking one of two *values* based on a condition, use the ternary operator `cond ? a : b`. It's a conditional that is itself an expression: it evaluates to `a` when `cond` is true, and to `b` otherwise <abbr title="The Java Language Specification, Java SE 25, §15.25">[9]</abbr>.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int age = 20;
         String status = age >= 18 ? "adult" : "minor";
-        System.out.println(status);
+        println(status);
         int a = 7, b = 3;
-        System.out.println(a > b ? a : b);
+        println(a > b ? a : b);
     }
 }
 ```
@@ -595,10 +633,12 @@ adult
 When the two values are different numeric types, the result takes the wider type, just as in [arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) <abbr title="The Java Language Specification, Java SE 25, §15.25.2">[9]</abbr>. Even the branch that was chosen changes type:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         boolean whole = true;
-        System.out.println(whole ? 1 : 2.5);
+        println(whole ? 1 : 2.5);
     }
 }
 ```
@@ -616,18 +656,20 @@ The condition chose `1`, and `1` became `1.0`, because the whole expression has 
 *Concrete bite.* Try to use `if` where a value is required, and it fails to compile, because a statement has no value to assign:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         boolean cond = true;
         String s = if (cond) "yes" else "no";
-        System.out.println(s);
+        println(s);
     }
 }
 ```
 
 **Compiler error** *(first of several as the parser recovers):*
 ```
-Main.java:4: error: illegal start of expression
+Main.java:6: error: illegal start of expression
         String s = if (cond) "yes" else "no";
                    ^
 ```
@@ -637,19 +679,21 @@ Main.java:4: error: illegal start of expression
 *Watch out: a ternary inside a `+` chain.* `?:` binds more loosely than `+` and every comparison. Without parentheses, the text joins the number first:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int age = 20;
-        System.out.println("status: " + age >= 18 ? "adult" : "minor");
+        println("status: " + age >= 18 ? "adult" : "minor");
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:4: error: bad operand types for binary operator '>='
-        System.out.println("status: " + age >= 18 ? "adult" : "minor");
-                                            ^
+Main.java:6: error: bad operand types for binary operator '>='
+        println("status: " + age >= 18 ? "adult" : "minor");
+                                 ^
   first type:  String
   second type: int
 1 error

@@ -70,17 +70,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         LocalDate day = LocalDate.of(2024, 3, 15);
         LocalTime time = LocalTime.of(9, 30);
         LocalDateTime meeting = LocalDateTime.of(day, time);
 
-        System.out.println(day);
-        System.out.println(time);
-        System.out.println(meeting);
-        System.out.println(day.getYear() + " " + day.getMonthValue() + " " + day.getDayOfMonth());
-        System.out.println(day.getMonth() + " " + day.getDayOfWeek());
+        println(day);
+        println(time);
+        println(meeting);
+        println(day.getYear() + " " + day.getMonthValue() + " " + day.getDayOfMonth());
+        println(day.getMonth() + " " + day.getDayOfWeek());
     }
 }
 ```
@@ -101,9 +103,11 @@ MARCH FRIDAY
 ```java run
 import java.time.LocalDate;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Today is " + LocalDate.now());
+        println("Today is " + LocalDate.now());
     }
 }
 ```
@@ -121,11 +125,13 @@ Today is 2026-09-30
 ```java run
 import java.time.LocalDate;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("before");
-        System.out.println(LocalDate.of(2023, 2, 29));
-        System.out.println("after");
+        println("before");
+        println(LocalDate.of(2023, 2, 29));
+        println("after");
     }
 }
 ```
@@ -141,15 +147,17 @@ Exception in thread "main" java.time.DateTimeException: Invalid date 'February 2
 ```java run
 import java.time.LocalDate;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         LocalDate due = LocalDate.of(2024, 3, 15);
 
         due.plusDays(7);                 // wrong: the new date is thrown away
-        System.out.println("due " + due);
+        println("due " + due);
 
         due = due.plusDays(7);           // right: keep the new date
-        System.out.println("due " + due);
+        println("due " + due);
     }
 }
 ```
@@ -179,16 +187,18 @@ The cost of immutability is that assignment, every single time. The payoff is th
 ```java run
 import java.time.LocalDate;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         LocalDate start = LocalDate.of(2024, 1, 31);
 
-        System.out.println(start.plusDays(1));
-        System.out.println(start.plusWeeks(2));
-        System.out.println(start.plusMonths(1));
-        System.out.println(start.plusMonths(2));
-        System.out.println(start.plusMonths(1).plusMonths(1));
-        System.out.println(LocalDate.of(2024, 2, 29).plusYears(1));
+        println(start.plusDays(1));
+        println(start.plusWeeks(2));
+        println(start.plusMonths(1));
+        println(start.plusMonths(2));
+        println(start.plusMonths(1).plusMonths(1));
+        println(LocalDate.of(2024, 2, 29).plusYears(1));
     }
 }
 ```
@@ -213,17 +223,19 @@ public class Main {
 ```java run
 import java.time.LocalDate;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         LocalDate signUp = LocalDate.of(2024, 1, 31);
 
         LocalDate bill = signUp;
         for (int i = 0; i < 4; i++) {
-            System.out.println("stepped:    " + bill);
+            println("stepped:    " + bill);
             bill = bill.plusMonths(1);
         }
         for (int i = 0; i < 4; i++) {
-            System.out.println("from start: " + signUp.plusMonths(i));
+            println("from start: " + signUp.plusMonths(i));
         }
     }
 }
@@ -252,22 +264,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         LocalDate a = LocalDate.of(2024, 1, 1);
         LocalDate b = LocalDate.of(2024, 3, 15);
 
-        System.out.println(a.isBefore(b) + " " + a.isAfter(b));
-        System.out.println(a.equals(LocalDate.of(2024, 1, 1)));
-        System.out.println(ChronoUnit.DAYS.between(a, b));
-        System.out.println(ChronoUnit.WEEKS.between(a, b));
-        System.out.println(ChronoUnit.DAYS.between(b, a));
-        System.out.println(a.isLeapYear() + " " + a.lengthOfMonth());
+        println(a.isBefore(b) + " " + a.isAfter(b));
+        println(a.equals(LocalDate.of(2024, 1, 1)));
+        println(ChronoUnit.DAYS.between(a, b));
+        println(ChronoUnit.WEEKS.between(a, b));
+        println(ChronoUnit.DAYS.between(b, a));
+        println(a.isLeapYear() + " " + a.lengthOfMonth());
 
         List<LocalDate> dates = new ArrayList<>(List.of(
                 LocalDate.of(2024, 12, 1), LocalDate.of(2023, 5, 9), LocalDate.of(2024, 1, 20)));
         Collections.sort(dates);
-        System.out.println(dates);
+        println(dates);
     }
 }
 ```
@@ -309,20 +323,22 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         LocalDate start = LocalDate.of(2024, 1, 1);
         LocalDate end = LocalDate.of(2024, 3, 15);
 
         Period gap = Period.between(start, end);
-        System.out.println(gap);
-        System.out.println(gap.getMonths() + " months and " + gap.getDays() + " days");
-        System.out.println("getDays():   " + gap.getDays());
-        System.out.println("total days:  " + ChronoUnit.DAYS.between(start, end));
+        println(gap);
+        println(gap.getMonths() + " months and " + gap.getDays() + " days");
+        println("getDays():   " + gap.getDays());
+        println("total days:  " + ChronoUnit.DAYS.between(start, end));
 
         LocalDate born = LocalDate.of(1990, 8, 20);
-        System.out.println("age: " + Period.between(born, end).getYears());
-        System.out.println(Period.of(1, 2, 3) + " " + Period.ofWeeks(2));
+        println("age: " + Period.between(born, end).getYears());
+        println(Period.of(1, 2, 3) + " " + Period.ofWeeks(2));
     }
 }
 ```
@@ -345,17 +361,19 @@ A `Duration`, by contrast, counts clock time:
 import java.time.Duration;
 import java.time.LocalTime;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Duration shift = Duration.between(LocalTime.of(9, 0), LocalTime.of(17, 45));
-        System.out.println(shift);
-        System.out.println(shift.toMinutes() + " minutes");
-        System.out.println(shift.toHoursPart() + "h " + shift.toMinutesPart() + "m");
+        println(shift);
+        println(shift.toMinutes() + " minutes");
+        println(shift.toHoursPart() + "h " + shift.toMinutesPart() + "m");
 
-        System.out.println(Duration.ofMinutes(90));
-        System.out.println(Duration.ofHours(25));
-        System.out.println(Duration.ofDays(2));
-        System.out.println(Duration.between(LocalTime.of(17, 0), LocalTime.of(9, 0)));
+        println(Duration.ofMinutes(90));
+        println(Duration.ofHours(25));
+        println(Duration.ofDays(2));
+        println(Duration.between(LocalTime.of(17, 0), LocalTime.of(9, 0)));
     }
 }
 ```
@@ -382,11 +400,13 @@ PT-8H
 import java.time.Duration;
 import java.time.LocalDate;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         LocalDate start = LocalDate.of(2024, 1, 1);
         LocalDate end = LocalDate.of(2024, 3, 15);
-        System.out.println(Duration.between(start, end));
+        println(Duration.between(start, end));
     }
 }
 ```
@@ -421,16 +441,18 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         ZoneId newYork = ZoneId.of("America/New_York");
         ZoneId tokyo = ZoneId.of("Asia/Tokyo");
 
         ZonedDateTime call = ZonedDateTime.of(LocalDateTime.of(2024, 6, 3, 9, 0), newYork);
-        System.out.println(call);
-        System.out.println(call.withZoneSameInstant(tokyo));
-        System.out.println(call.withZoneSameLocal(tokyo));
-        System.out.println(call.toInstant());
+        println(call);
+        println(call.withZoneSameInstant(tokyo));
+        println(call.withZoneSameLocal(tokyo));
+        println(call.toInstant());
     }
 }
 ```
@@ -451,16 +473,18 @@ An `Instant` is the form you should store and send between systems. Convert it t
 import java.time.Instant;
 import java.time.ZoneId;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Instant.ofEpochSecond(0));
-        System.out.println(Instant.ofEpochSecond(1_700_000_000L));
+        println(Instant.ofEpochSecond(0));
+        println(Instant.ofEpochSecond(1_700_000_000L));
 
         Instant launch = Instant.parse("2024-06-03T13:00:00Z");
-        System.out.println(launch.getEpochSecond());
-        System.out.println(launch.plusSeconds(90));
-        System.out.println(launch.atZone(ZoneId.of("Europe/Paris")));
-        System.out.println(launch.atZone(ZoneId.of("Asia/Kolkata")));
+        println(launch.getEpochSecond());
+        println(launch.plusSeconds(90));
+        println(launch.atZone(ZoneId.of("Europe/Paris")));
+        println(launch.atZone(ZoneId.of("Asia/Kolkata")));
     }
 }
 ```
@@ -487,14 +511,16 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         ZonedDateTime inNewYork = ZonedDateTime.of(
                 LocalDateTime.of(2024, 6, 3, 9, 0), ZoneId.of("America/New_York"));
         ZonedDateTime inTokyo = inNewYork.withZoneSameInstant(ZoneId.of("Asia/Tokyo"));
 
-        System.out.println("equals:  " + inNewYork.equals(inTokyo));
-        System.out.println("isEqual: " + inNewYork.isEqual(inTokyo));
+        println("equals:  " + inNewYork.equals(inTokyo));
+        println("isEqual: " + inNewYork.isEqual(inTokyo));
     }
 }
 ```
@@ -512,9 +538,11 @@ That's the [equals contract](/synapse/programming-languages/java/core-libraries/
 ```java run
 import java.time.ZoneId;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(ZoneId.of("America/NewYork"));
+        println(ZoneId.of("America/NewYork"));
     }
 }
 ```
@@ -538,16 +566,18 @@ import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Calendar.JANUARY  = " + Calendar.JANUARY);
-        System.out.println("Calendar.DECEMBER = " + Calendar.DECEMBER);
+        println("Calendar.JANUARY  = " + Calendar.JANUARY);
+        println("Calendar.DECEMBER = " + Calendar.DECEMBER);
 
         Date legacy = new Date(0);                 // milliseconds since 1970-01-01T00:00:00Z
         legacy.setTime(86_400_000L);               // a Date can be changed in place
         Instant modern = legacy.toInstant();       // old to new
-        System.out.println(modern);
-        System.out.println(Date.from(modern).getTime());   // new to old
+        println(modern);
+        println(Date.from(modern).getTime());   // new to old
     }
 }
 ```
@@ -584,18 +614,20 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         ZoneId newYork = ZoneId.of("America/New_York");
 
         // 10 March 2024: at 02:00 the clocks jump to 03:00
         ZonedDateTime gap = ZonedDateTime.of(LocalDateTime.of(2024, 3, 10, 2, 30), newYork);
-        System.out.println("gap:     " + gap);
+        println("gap:     " + gap);
 
         // 3 November 2024: at 02:00 the clocks go back to 01:00
         ZonedDateTime overlap = ZonedDateTime.of(LocalDateTime.of(2024, 11, 3, 1, 30), newYork);
-        System.out.println("overlap: " + overlap);
-        System.out.println("later:   " + overlap.withLaterOffsetAtOverlap());
+        println("overlap: " + overlap);
+        println("later:   " + overlap.withLaterOffsetAtOverlap());
     }
 }
 ```
@@ -623,6 +655,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         ZonedDateTime alarm = ZonedDateTime.of(
@@ -630,9 +664,9 @@ public class Main {
 
         ZonedDateTime nextDay = alarm.plusDays(1);
         ZonedDateTime plus24h = alarm.plusHours(24);
-        System.out.println("plusDays(1):   " + nextDay);
-        System.out.println("plusHours(24): " + plus24h);
-        System.out.println("elapsed:       " + Duration.between(alarm, nextDay));
+        println("plusDays(1):   " + nextDay);
+        println("plusHours(24): " + plus24h);
+        println("elapsed:       " + Duration.between(alarm, nextDay));
     }
 }
 ```
@@ -679,19 +713,21 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         LocalDateTime t = LocalDateTime.of(2024, 3, 5, 14, 7);
 
         DateTimeFormatter numeric = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        System.out.println(t.format(numeric));
+        println(t.format(numeric));
 
         DateTimeFormatter words = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy, h:mm a", Locale.US);
-        System.out.println(t.format(words));
+        println(t.format(words));
 
         DateTimeFormatter dayFirst = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate parsed = LocalDate.parse("05/03/2024", dayFirst);
-        System.out.println(parsed + " is a " + parsed.getDayOfWeek());
+        println(parsed + " is a " + parsed.getDayOfWeek());
     }
 }
 ```
@@ -716,15 +752,17 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         LocalDateTime t = LocalDateTime.of(2024, 3, 5, 14, 7);
-        System.out.println("meant dd/MM/yyyy HH:mm, wrote dd/mm/yyyy hh:MM -> "
+        println("meant dd/MM/yyyy HH:mm, wrote dd/mm/yyyy hh:MM -> "
                 + t.format(DateTimeFormatter.ofPattern("dd/mm/yyyy hh:MM")));
 
         LocalDate newYearsWeek = LocalDate.of(2024, 12, 30);
-        System.out.println("yyyy -> " + newYearsWeek.format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)));
-        System.out.println("YYYY -> " + newYearsWeek.format(DateTimeFormatter.ofPattern("YYYY-MM-dd", Locale.US)));
+        println("yyyy -> " + newYearsWeek.format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)));
+        println("YYYY -> " + newYearsWeek.format(DateTimeFormatter.ofPattern("YYYY-MM-dd", Locale.US)));
     }
 }
 ```
@@ -745,10 +783,12 @@ YYYY -> 2025-12-30
 ```java run
 import java.time.LocalDate;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(LocalDate.parse("2024-03-15"));
-        System.out.println(LocalDate.parse("15/03/2024"));
+        println(LocalDate.parse("2024-03-15"));
+        println(LocalDate.parse("15/03/2024"));
     }
 }
 ```
@@ -768,13 +808,15 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         DateTimeFormatter smart = DateTimeFormatter.ofPattern("dd/MM/uuuu");
-        System.out.println("smart:  " + LocalDate.parse("31/02/2024", smart));
+        println("smart:  " + LocalDate.parse("31/02/2024", smart));
 
         DateTimeFormatter strict = smart.withResolverStyle(ResolverStyle.STRICT);
-        System.out.println("strict: " + LocalDate.parse("31/02/2024", strict));
+        println("strict: " + LocalDate.parse("31/02/2024", strict));
     }
 }
 ```

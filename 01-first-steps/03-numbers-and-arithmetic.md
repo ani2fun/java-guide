@@ -66,12 +66,14 @@ Five operators do the everyday arithmetic:
 - `%` gives the **remainder**: what's left over after a division.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(7 + 2);
-        System.out.println(7 - 2);
-        System.out.println(7 * 2);
-        System.out.println(7 % 2);
+        println(7 + 2);
+        println(7 - 2);
+        println(7 * 2);
+        println(7 % 2);
     }
 }
 ```
@@ -92,10 +94,12 @@ public class Main {
 *Concrete bite.* That means it isn't the mathematical "modulo," which is never negative for a positive divisor:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(-7 % 2);
-        System.out.println(7 % -2);
+        println(-7 % 2);
+        println(7 % -2);
     }
 }
 ```
@@ -109,11 +113,13 @@ public class Main {
 `-7 % 2` is `-1`, not `1`, because the result took the sign of `-7`. `7 % -2` is `1`, taking the sign of `7`. The magnitude is the remainder, but the sign comes from the dividend. When you need the never-negative version, `Math.floorMod` gives it to you; its result takes the divisor's sign <abbr title="Java SE 25 API, java.lang.Math">[2]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(-7 % 2);
-        System.out.println(Math.floorMod(-7, 2));
-        System.out.println(-7 / 2);
+        println(-7 % 2);
+        println(Math.floorMod(-7, 2));
+        println(-7 / 2);
     }
 }
 ```
@@ -141,19 +147,21 @@ Programs often change a variable by a step: adding points to a score, or countin
 - `score++;` adds 1, and `score--;` subtracts 1.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int score = 10;
         score = score + 5;   // read score, add 5, store the result back
-        System.out.println(score);
+        println(score);
         score += 5;          // the same, shorter
-        System.out.println(score);
+        println(score);
         score++;             // add 1
-        System.out.println(score);
+        println(score);
         score--;             // subtract 1
-        System.out.println(score);
+        println(score);
         score *= 2;          // also -=, /=, %=
-        System.out.println(score);
+        println(score);
     }
 }
 ```
@@ -170,16 +178,18 @@ public class Main {
 *Watch out: using `a++` as a value.* On a line of its own, `a++` simply adds 1. Inside a larger expression, though, it also hands back a value — and that value is the **old** one <abbr title="The Java Language Specification, Java SE 25, §15.14.2">[3]</abbr>. Written in front, `++a` adds 1 first, and hands back the **new** value:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int a = 5;
         int b = a++;   // b gets the OLD value, then a goes up
-        System.out.println(a);
-        System.out.println(b);
+        println(a);
+        println(b);
         int c = 5;
         int d = ++c;   // c goes up first, then d gets the NEW value
-        System.out.println(c);
-        System.out.println(d);
+        println(c);
+        println(d);
     }
 }
 ```
@@ -201,11 +211,13 @@ Both `a` and `c` ended up at `6`; only the values handed to `b` and `d` differed
 `/` between two integers performs **integer division**: it gives you the whole-number quotient, and throws away the remainder.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(7 / 2);
-        System.out.println(1 / 2);
-        System.out.println(9 / 10);
+        println(7 / 2);
+        println(1 / 2);
+        println(9 / 10);
     }
 }
 ```
@@ -225,11 +237,13 @@ public class Main {
 *Concrete bite.* Here's the classic "average" bug: a `double` result that's produced one step too late. (The first line declares two `int` variables in one statement, separated by a comma.)
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int total = 7, count = 2;
         double average = total / count;   // looks right, isn't
-        System.out.println(average);
+        println(average);
     }
 }
 ```
@@ -258,12 +272,14 @@ Dividing an integer by zero is different, because it isn't silent. `7 / 0` and `
 When operands have different numeric types, Java **promotes** the narrower one to the wider type before computing, so `int / double` becomes `double / double` <abbr title="The Java Language Specification, Java SE 25, §5.6">[5]</abbr>. To force a type yourself, use a **cast**: write the type in parentheses, such as `(double)`, in front of a value.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(7 / 2.0);                  // one double operand → double division
+        println(7 / 2.0);                  // one double operand → double division
         int total = 7, count = 2;
-        System.out.println((double) total / count);   // cast an operand first
-        System.out.println((int) 3.9);                // narrowing cast → truncates
+        println((double) total / count);   // cast an operand first
+        println((int) 3.9);                // narrowing cast → truncates
     }
 }
 ```
@@ -287,9 +303,11 @@ public class Main {
 *Concrete bite.* Cast the *result* instead of an operand, and the bug survives:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println((double) (7 / 2));   // cast too late
+        println((double) (7 / 2));   // cast too late
     }
 }
 ```
@@ -312,19 +330,21 @@ The parentheses force `7 / 2` to happen first (integer division → `3`), and on
 Promotion has a second rule: arithmetic never runs on `byte`, `short` or `char`. Each operand is promoted to at least `int` first <abbr title="The Java Language Specification, Java SE 25, §5.6">[5]</abbr>. So `byte + byte` is an `int`, which doesn't fit back into a `byte`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         byte a = 10;
         byte b = 20;
         byte sum = a + b;
-        System.out.println(sum);
+        println(sum);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:5: error: incompatible types: possible lossy conversion from int to byte
+Main.java:7: error: incompatible types: possible lossy conversion from int to byte
         byte sum = a + b;
                      ^
 1 error
@@ -333,13 +353,15 @@ Main.java:5: error: incompatible types: possible lossy conversion from int to by
 `a + b` is `30`, which fits in a `byte`. But `a` and `b` are variables, not constants, so the compiler checks the *type* of `a + b` — and that's `int`. The same promotion makes a `char` act as its character code: `'A' + 1` is the `int` `66`. Cast it back with `(char) ('A' + 1)`, and you get `B`.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         char c = 'A';
-        System.out.println(c + 1);
-        System.out.println((char) (c + 1));
+        println(c + 1);
+        println((char) (c + 1));
         c++;
-        System.out.println(c);
+        println(c);
     }
 }
 ```
@@ -356,12 +378,14 @@ B
 A narrowing cast between whole-number types keeps only the bits that fit <abbr title="The Java Language Specification, Java SE 25, §5.1.3">[6]</abbr>, so a value outside the target range comes out as a different number. A `double` that's too big for an `int`, meanwhile, stops at the `int` limit:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println((int) 3.9);
-        System.out.println((int) -3.9);
-        System.out.println((byte) 200);
-        System.out.println((int) 3.0e10);
+        println((int) 3.9);
+        println((int) -3.9);
+        println((byte) 200);
+        println((int) 3.0e10);
     }
 }
 ```
@@ -379,14 +403,16 @@ public class Main {
 *Watch out: `+=` hides a cast.* `b = b + 1;` on a `byte` doesn't compile, for the reason above. But `b += 1;` does, because a compound assignment casts its result back to the variable's type <abbr title="The Java Language Specification, Java SE 25, §15.26.2">[7]</abbr>. And that hidden cast wraps, just like any other:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         byte b = 10;
         b += 1;             // compiles: += casts back to byte
-        System.out.println(b);
+        println(b);
         byte big = 120;
         big += 10;          // 130 does not fit: the hidden cast wraps it
-        System.out.println(big);
+        println(big);
     }
 }
 ```
@@ -406,11 +432,13 @@ public class Main {
 An `int` is 32 bits, with a range of −2147483648 to 2147483647. When arithmetic produces a result outside that range, Java does **not** grow the type to fit. Instead, it silently **wraps around** to the opposite end. There's no error at all: the integer operators don't signal overflow in any way <abbr title="The Java Language Specification, Java SE 25, §4.2.2">[8]</abbr>.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int max = Integer.MAX_VALUE;
-        System.out.println(max);
-        System.out.println(max + 1);
+        println(max);
+        println(max + 1);
     }
 }
 ```
@@ -429,11 +457,13 @@ public class Main {
 *Concrete bite.* Overflow hides in ordinary code, such as the product of two modest numbers:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int a = 100000;
         int b = 100000;
-        System.out.println(a * b);     // ten billion — but computed as an int
+        println(a * b);     // ten billion — but computed as an int
     }
 }
 ```
@@ -448,15 +478,17 @@ public class Main {
 *Watch out: a `long` box, too late.* Storing the product in a `long` doesn't help. The multiplication still runs as `int * int`, wraps, and only then widens — just like `average` in §2. Make one operand a `long` *before* the multiplication:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int a = 100000;
         int b = 100000;
         long wrong = a * b;          // int * int wraps first, then widens
         long right = (long) a * b;   // a is a long before the multiply
-        System.out.println(wrong);
-        System.out.println(right);
-        System.out.println(100000L * 100000);
+        println(wrong);
+        println(right);
+        println(100000L * 100000);
     }
 }
 ```
@@ -475,9 +507,11 @@ public class Main {
 </div>
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Math.multiplyExact(100000, 100000));
+        println(Math.multiplyExact(100000, 100000));
     }
 }
 ```
@@ -496,11 +530,13 @@ Swapping a silent wrong answer for a loud `ArithmeticException` is usually the t
 A `double` stores a number in binary, in 64 bits. Most decimal fractions — `0.1` among them — have no exact binary form, so a `double` holds the nearest value it can <abbr title="Java SE 25 API, java.math.BigDecimal, the BigDecimal(double) constructor">[9]</abbr>. That tiny difference shows up in arithmetic:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(0.1 + 0.2);
-        System.out.println(1.0 - 0.9);
-        System.out.println(1.0 / 3);
+        println(0.1 + 0.2);
+        println(1.0 - 0.9);
+        println(1.0 / 3);
     }
 }
 ```
@@ -520,11 +556,13 @@ public class Main {
 *Concrete bite.* Unlike integer division, floating-point division by zero doesn't throw. Instead, it gives a special value: **Infinity**, or **NaN** ("not a number") for `0.0 / 0` <abbr title="The Java Language Specification, Java SE 25, §15.17.2">[4]</abbr>. And the program just carries on with it:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(7.0 / 0);
-        System.out.println(-7.0 / 0);
-        System.out.println(0.0 / 0);
+        println(7.0 / 0);
+        println(-7.0 / 0);
+        println(0.0 / 0);
     }
 }
 ```
@@ -549,13 +587,15 @@ NaN
 When several operators meet in one expression, Java follows **precedence** rules. `*`, `/` and `%` bind tighter than `+` and `-`, and parentheses override that order. Operators at the same level run from left to right, so `10 - 4 - 3` is `(10 - 4) - 3`, which is `3`. For arithmetic beyond the basic operators, the `Math` class supplies `sqrt`, `pow`, `abs`, `max`, `min`, and more <abbr title="Java SE 25 API, java.lang.Math">[2]</abbr>.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(2 + 3 * 4);     // * before + → 14
-        System.out.println((2 + 3) * 4);   // parentheses → 20
-        System.out.println(Math.max(10, 7));
-        System.out.println(Math.sqrt(144.0));
-        System.out.println(Math.pow(2, 10));
+        println(2 + 3 * 4);     // * before + → 14
+        println((2 + 3) * 4);   // parentheses → 20
+        println(Math.max(10, 7));
+        println(Math.sqrt(144.0));
+        println(Math.pow(2, 10));
     }
 }
 ```
@@ -578,12 +618,14 @@ public class Main {
 Left-to-right order matters for `-` and `/`, where the order changes the answer:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(10 - 4 - 3);
-        System.out.println(8 / 4 / 2);
-        System.out.println(2 * 3 % 4);
-        System.out.println(-2 * 3);
+        println(10 - 4 - 3);
+        println(8 / 4 / 2);
+        println(2 * 3 % 4);
+        println(-2 * 3);
     }
 }
 ```
@@ -604,17 +646,19 @@ public class Main {
 *Concrete bite.* Assuming that `Math.pow` produces an integer bites you the moment you store its result in an `int`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int kib = Math.pow(2, 10);
-        System.out.println(kib);
+        println(kib);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:3: error: incompatible types: possible lossy conversion from double to int
+Main.java:5: error: incompatible types: possible lossy conversion from double to int
         int kib = Math.pow(2, 10);
                           ^
 1 error

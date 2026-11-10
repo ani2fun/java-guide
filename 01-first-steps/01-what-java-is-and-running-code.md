@@ -48,7 +48,7 @@ You don't need anything installed. Every block with a ▶ Run button compiles an
 1. [A first Java program](#1-a-first-java-program)
 2. [Compile, then run: `javac`, bytecode, and the JVM](#2-compile-then-run-javac-bytecode-and-the-jvm)
 3. [Reading `public static void main(String[] args)`](#3-reading-public-static-void-mainstring-args)
-4. [`System.out.println` — how a program talks back](#4-systemoutprintln--how-a-program-talks-back)
+4. [`println` — how a program talks back](#4-println--how-a-program-talks-back)
 5. [Comments — notes for humans](#5-comments--notes-for-humans)
 6. [Mental-model summary](#6-mental-model-summary)
 7. [Gotcha checklist](#7-gotcha-checklist)
@@ -61,12 +61,14 @@ You don't need anything installed. Every block with a ▶ Run button compiles an
 
 A **program** is a list of **instructions**, also called **statements**, carried out in order. In Java, every statement has to live inside a **method**, which is a named block of statements. And every method lives inside a **class**, which is a named container.
 
-That's more scaffolding than some languages ask for, and §3 explains every word of it. For now, here's the smallest complete Java program. Go ahead and run it.
+That's more scaffolding than some languages ask for, and §3 explains every word of it. For now, here's a small complete Java program. Go ahead and run it.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello, world!");
+        println("Hello, world!");
     }
 }
 ```
@@ -80,9 +82,11 @@ Hello, world!
 
 - The outer `public class Main { ... }` is the **class**: a container named `Main`.
 - Inside it, `public static void main(String[] args) { ... }` is the **method** named `main`. This is what the JVM runs first.
-- Inside *that* sits a single statement, `System.out.println("Hello, world!");`, which prints a line of text.
+- Inside *that* sits a single statement, `println("Hello, world!");`, which prints a line of text.
 
 The text between the double quotes is shown exactly as written; the quotes themselves aren't printed. The `;` ends the statement, the way a period ends a sentence.
+
+The `import static java.lang.IO.println;` line above the class is what makes the name `println` available. Take it as "print a line" for now; §4 explains where it comes from.
 
 **Intuition.**
 *Mechanism.* Running this happens in two phases, not one. First, the **compiler** (`javac`) reads the entire file and translates it to bytecode. Only if that succeeds does the **JVM** start executing `main`, one statement at a time, from top to bottom. The compiler's job is to check everything *before* anything runs.
@@ -90,31 +94,35 @@ The text between the double quotes is shown exactly as written; the quotes thems
 *Concrete bite.* Because compiling is a gate, a single missing `;` means the program never runs at all. There's no partial output — just a compiler complaint pointing at the spot. Click Run and see for yourself:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello, world!")
+        println("Hello, world!")
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:3: error: ';' expected
-        System.out.println("Hello, world!")
-                                           ^
+Main.java:5: error: ';' expected
+        println("Hello, world!")
+                                ^
 1 error
 ```
 
-The compiler read the whole file and found that the statement on line 3 had no `;`, so it refused to produce bytecode. Nothing ran, which is why `Hello, world!` appears nowhere.
+The compiler read the whole file and found that the statement on line 5 had no `;`, so it refused to produce bytecode. Nothing ran, which is why `Hello, world!` appears nowhere.
 
 *Watch out: a mistake the compiler can't see.* Some mistakes get past the compiler, and fail only while the program runs. Dividing a whole number by zero is one of them: the compiler accepts `10 / 0`, but the JVM refuses to compute it.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("before");
-        System.out.println(10 / 0);
-        System.out.println("after");
+        println("before");
+        println(10 / 0);
+        println("after");
     }
 }
 ```
@@ -182,10 +190,12 @@ Caused by: java.lang.ClassNotFoundException: Main.class
 The Run buttons here do the same two steps for you: they compile your code as `Main.java` with `javac`, then start it with `java`. Since Java 11, there's also a one-step shortcut for a single file: `java Main.java` compiles the file in memory and runs it, leaving no `.class` file behind <abbr title="JEP 330: Launch Single-File Source-Code Programs (JDK 11)">[6]</abbr>. Since JDK 22, that shortcut also finds the other source files your program uses, so a small multi-file program runs without a separate `javac` step <abbr title="JEP 458: Launch Multi-File Source-Code Programs (JDK 22)">[9]</abbr>.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("compiled to bytecode,");
-        System.out.println("then run by the JVM.");
+        println("compiled to bytecode,");
+        println("then run by the JVM.");
     }
 }
 ```
@@ -259,9 +269,11 @@ That line is the one piece of ceremony that nearly every Java program repeats, a
 Read as a whole, the line describes a public, class-level method named `main` that returns nothing and takes a list of text arguments. The JVM is built to find a method named `main` and call it <abbr title="The Java Language Specification, Java SE 25, §12.1.4">[1]</abbr>. This full form is the one every version of Java accepts. Two details are yours to choose: the parameter's name (`args` is just a convention), and whether to write `String... args` instead of `String[] args`.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("The JVM called main.");
+        println("The JVM called main.");
     }
 }
 ```
@@ -279,9 +291,11 @@ The JVM called main.
 *Concrete bite.* Rename `main` to `greet`. The class still **compiles** — it's a perfectly legal class — but at run time, the JVM can't find its entry point:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void greet(String[] args) {
-        System.out.println("never printed");
+        println("never printed");
     }
 }
 ```
@@ -311,9 +325,11 @@ Until JDK 25, the contract was strict: `main` had to be `public`, `static`, retu
 Here's the shortest form, `void main()`, inside a class:
 
 ```java run
+import static java.lang.IO.println;
+
 class Main {
     void main() {
-        System.out.println("No public, no static, no args.");
+        println("No public, no static, no args.");
     }
 }
 ```
@@ -331,11 +347,13 @@ This `main` isn't `static`, so it belongs to an *object*. The JVM made one by ca
 
 </div>
 
-**Compact source files.** JDK 25 goes one step further: you can leave out the class too. A file that holds only methods and fields is a **compact source file**, and the compiler wraps it in a class for you, named after the file <abbr title="JEP 512: Compact Source Files and Instance Main Methods (JDK 25)">[7]</abbr>. The new `IO` class in `java.lang` gives such programs a short way to print:
+**Compact source files.** JDK 25 goes one step further: you can leave out the class too. A file that holds only methods and fields is a **compact source file**, and the compiler wraps it in a class for you, named after the file <abbr title="JEP 512: Compact Source Files and Instance Main Methods (JDK 25)">[7]</abbr>. The new `IO` class in `java.lang` gives such programs a short way to print, and a static import lets you call it by its bare name:
 
 ```java run
+import static java.lang.IO.println;
+
 void main() {
-    IO.println("Hello from a compact source file");
+    println("Hello from a compact source file");
 }
 ```
 
@@ -350,19 +368,21 @@ This book uses the classic `public static void main(String[] args)` inside `clas
 
 ---
 
-## 4. `System.out.println` — how a program talks back
+## 4. `println` — how a program talks back
 
-A program that can't show anything is useless, and `System.out.println` is the statement that prints. Read it piece by piece:
+A program that can't show anything is useless, and `println` is the statement that prints. It is a method of the `IO` class in `java.lang`, new in JDK 25 <abbr title="JEP 512: Compact Source Files and Instance Main Methods (JDK 25)">[7]</abbr>. The `import static java.lang.IO.println;` line at the top of every program in this book is what lets you write the short name `println` instead of `IO.println`. Read the call piece by piece:
 
-- `System.out` is the program's standard text **output**: the console.
-- `println` is an action you ask of it: "print this, then move to the next line."
+- `println` is an action: "print this, then move to the next line."
 - The value you want printed goes inside the parentheses.
+- Behind the scenes, `IO.println` hands the text to `System.out`, the program's standard text **output**: the console. Older code, and most code you'll meet at work, skips `IO` and writes `System.out.println("...")` directly. It does the same job.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("first line");
-        System.out.println("second line");
+        println("first line");
+        println("second line");
     }
 }
 ```
@@ -381,12 +401,15 @@ second line
 *Concrete bite.* Mix the two, and the difference becomes visible — `print` keeps the cursor on the line, while `println` breaks it:
 
 ```java run
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.print("a");
-        System.out.print("b");
-        System.out.println("c");
-        System.out.println("d");
+        print("a");
+        print("b");
+        println("c");
+        println("d");
     }
 }
 ```
@@ -415,13 +438,15 @@ Not every line in a file is meant for the computer. A **comment** is a note for 
 - `/* ... */` ignores everything between the markers, across as many lines as you like.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         // This whole line is a comment — the compiler ignores it
-        System.out.println("code runs");  // an inline comment, ignored too
+        println("code runs");  // an inline comment, ignored too
         /* a block comment
            spanning two lines, also ignored */
-        // System.out.println("this line is commented out, so it never runs");
+        // println("this line is commented out, so it never runs");
     }
 }
 ```
@@ -448,11 +473,13 @@ Putting `//` before a line to disable it is called **commenting out**.
 *Watch out: a block comment inside a block comment.* Comments don't nest <abbr title="The Java Language Specification, Java SE 25, §3.7">[3]</abbr>. A `/* ... */` comment ends at the **first** `*/`, wherever that happens to be. Wrap a line that already carries a block comment, and the outer comment ends too early:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("start");
+        println("start");
         /* switch off the next line:
-        System.out.println("hidden"); /* old note */
+        println("hidden"); /* old note */
         */
     }
 }
@@ -460,12 +487,12 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:6: error: illegal start of expression
+Main.java:8: error: illegal start of expression
         */
         ^
 ```
 
-The comment that opened on line 4 closed at `old note */` on line 5. That left the lone `*/` on line 6 over as code — and `*/` isn't Java. To switch off lines that hold block comments, put `//` in front of each line instead.
+The comment that opened on line 6 closed at `old note */` on line 7. That left the lone `*/` on line 8 over as code — and `*/` isn't Java. To switch off lines that hold block comments, put `//` in front of each line instead.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 

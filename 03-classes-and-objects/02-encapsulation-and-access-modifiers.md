@@ -56,6 +56,8 @@ This builds on [classes and objects](/synapse/programming-languages/java/classes
 Marking a field `private` means only code *inside* its own class can touch it. Code anywhere else has to go through the methods the class chooses to expose — a **getter** to read it, for instance.
 
 ```java run
+import static java.lang.IO.println;
+
 class Account {
     private int balance;
     Account(int initial) { balance = initial; }
@@ -65,7 +67,7 @@ class Account {
 public class Main {
     public static void main(String[] args) {
         Account acct = new Account(100);
-        System.out.println(acct.getBalance());
+        println(acct.getBalance());
     }
 }
 ```
@@ -83,6 +85,8 @@ public class Main {
 *Concrete bite.* Reach for the field directly, and it won't compile:
 
 ```java run
+import static java.lang.IO.println;
+
 class Account {
     private int balance;
     Account(int initial) { balance = initial; }
@@ -91,16 +95,16 @@ class Account {
 public class Main {
     public static void main(String[] args) {
         Account acct = new Account(100);
-        System.out.println(acct.balance);
+        println(acct.balance);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:9: error: balance has private access in Account
-        System.out.println(acct.balance);
-                               ^
+Main.java:11: error: balance has private access in Account
+        println(acct.balance);
+                    ^
 1 error
 ```
 
@@ -121,13 +125,15 @@ The cost is the extra code for accessor methods on the data you *do* want to sha
 Routing access through methods pays off because a method can **check**. A **setter** (a method that changes a field) can reject or adjust bad input, so the object never ends up in an invalid state. A bare field can never do that. This book names a getter `getX` and a setter `setX`.
 
 ```java run
+import static java.lang.IO.println;
+
 class Account {
     private int balance;
     Account(int initial) { balance = initial; }
     int getBalance() { return balance; }
     void deposit(int amount) {
         if (amount <= 0) {
-            System.out.println("ignored invalid deposit: " + amount);
+            println("ignored invalid deposit: " + amount);
             return;
         }
         balance += amount;
@@ -139,7 +145,7 @@ public class Main {
         Account acct = new Account(100);
         acct.deposit(50);
         acct.deposit(-30);
-        System.out.println(acct.getBalance());
+        println(acct.getBalance());
     }
 }
 ```
@@ -160,6 +166,8 @@ The method enforced the invariant "deposits must be positive". The class can gua
 *Concrete bite.* A `public` field has no gate — it accepts anything:
 
 ```java run
+import static java.lang.IO.println;
+
 class Account {
     public int balance;
 }
@@ -168,7 +176,7 @@ public class Main {
     public static void main(String[] args) {
         Account acct = new Account();
         acct.balance = -999;
-        System.out.println(acct.balance);
+        println(acct.balance);
     }
 }
 ```
@@ -183,13 +191,15 @@ With `balance` public, `acct.balance = -999` succeeds. The class never gets a ch
 *Watch out: a guard the constructor skips.* The constructor is a way in too. Here `deposit` has a guard, but the constructor stores whatever it's given:
 
 ```java run
+import static java.lang.IO.println;
+
 class Account {
     private int balance;
     Account(int initial) { balance = initial; }
     int getBalance() { return balance; }
     void deposit(int amount) {
         if (amount <= 0) {
-            System.out.println("ignored invalid deposit: " + amount);
+            println("ignored invalid deposit: " + amount);
             return;
         }
         balance += amount;
@@ -200,7 +210,7 @@ public class Main {
     public static void main(String[] args) {
         Account acct = new Account(-50);
         acct.deposit(-30);
-        System.out.println(acct.getBalance());
+        println(acct.getBalance());
     }
 }
 ```
@@ -270,6 +280,8 @@ Main.java:6: error: balance has private access in Account
 *Concrete bite.* The check works per class, **not per object**. A method of `Account` may read the `private` field of *another* `Account`:
 
 ```java run
+import static java.lang.IO.println;
+
 class Account {
     private int balance;
     Account(int initial) { balance = initial; }
@@ -282,8 +294,8 @@ public class Main {
     public static void main(String[] args) {
         Account ann = new Account(300);
         Account bob = new Account(200);
-        System.out.println(ann.richerThan(bob));
-        System.out.println(bob.richerThan(ann));
+        println(ann.richerThan(bob));
+        println(bob.richerThan(ann));
     }
 }
 ```
@@ -317,6 +329,8 @@ Start narrow, and you may have to widen later. Start `public`, and every member 
 The strongest form of encapsulation allows no changes at all. You can assign a `final` field exactly once, at its declaration or in the constructor, and never again. A class whose fields are all `final`, with no setters, has its state fixed for life. Its objects are **immutable**, as long as the fields hold primitives or other immutable objects (the "Watch out" below shows why).
 
 ```java run
+import static java.lang.IO.println;
+
 class Point {
     final int x;
     final int y;
@@ -326,7 +340,7 @@ class Point {
 public class Main {
     public static void main(String[] args) {
         Point p = new Point(3, 4);
-        System.out.println(p.x + "," + p.y);
+        println(p.x + "," + p.y);
     }
 }
 ```
@@ -342,6 +356,8 @@ public class Main {
 *Mechanism.* `final` on a field is a compile-time guarantee of single assignment. The compiler checks that every constructor assigns the field <abbr title="The Java Language Specification, Java SE 25, §8.3.1.2">[4]</abbr>, and it rejects any later assignment. Forget one, and the error lands on the constructor's closing brace:
 
 ```java run
+import static java.lang.IO.println;
+
 class Point {
     final int x;
     final int y;
@@ -352,14 +368,14 @@ class Point {
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(new Point(3, 4).x);
+        println(new Point(3, 4).x);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:6: error: variable y might not have been initialized
+Main.java:8: error: variable y might not have been initialized
     }
     ^
 1 error
@@ -392,6 +408,8 @@ Main.java:4: error: cannot assign a value to final variable x
 *Watch out: a `final` field that holds an array.* `final` freezes the *reference*, not the object it points to <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[5]</abbr>. This class has only `private final` fields and no setters, yet its data changes twice:
 
 ```java run
+import static java.lang.IO.println;
+
 class Scores {
     private final int[] values;
     Scores(int[] values) { this.values = values; }
@@ -404,9 +422,9 @@ public class Main {
         int[] input = {90, 80, 70};
         Scores s = new Scores(input);
         input[0] = 0;
-        System.out.println(s.first());
+        println(s.first());
         s.getValues()[0] = -1;
-        System.out.println(s.first());
+        println(s.first());
     }
 }
 ```
@@ -425,6 +443,8 @@ public class Main {
 ```java run
 import java.util.Arrays;
 
+import static java.lang.IO.println;
+
 class Scores {
     private final int[] values;
     Scores(int[] values) { this.values = Arrays.copyOf(values, values.length); }
@@ -437,9 +457,9 @@ public class Main {
         int[] input = {90, 80, 70};
         Scores s = new Scores(input);
         input[0] = 0;
-        System.out.println(s.first());
+        println(s.first());
         s.getValues()[0] = -1;
-        System.out.println(s.first());
+        println(s.first());
     }
 }
 ```

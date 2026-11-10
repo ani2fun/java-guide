@@ -70,17 +70,19 @@ So where do they live? Each running method has a **frame** on its thread's **sta
 Assignment copies whatever the variable holds — and that's the whole story:
 
 ```java run viz=array:a
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int x = 5;
         int y = x;       // copies the value 5
         y = 99;
-        System.out.println(x + " " + y);
+        println(x + " " + y);
 
         int[] a = {1, 2, 3};
         int[] b = a;     // copies the reference (the address), not the array
         b[0] = 99;
-        System.out.println(a[0] + " " + b[0]);
+        println(a[0] + " " + b[0]);
     }
 }
 ```
@@ -135,14 +137,16 @@ References cost you the sharing surprise. The payoff is efficiency: passing a mi
 `==` looks at the bits in the two variables. For primitives, those bits are values, so `==` compares values. For references, those bits are *addresses*, so `==` asks "same object?". That's **identity**, not contents <abbr title="The Java Language Specification, Java SE 25, §15.21.3">[5]</abbr>.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] a = {1, 2, 3};
         int[] b = {1, 2, 3};   // same contents, a brand-new object
         int[] c = a;           // the same object as a
-        System.out.println(a == b);
-        System.out.println(a == c);
-        System.out.println(a[0] == b[0]);
+        println(a == b);
+        println(a == c);
+        println(a[0] == b[0]);
     }
 }
 ```
@@ -174,12 +178,14 @@ Same operator, two meanings, and the operands decide which: references or primit
 ```java run
 import java.util.Arrays;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] a = {1, 2, 3};
         int[] b = {1, 2, 3};
-        System.out.println(a.equals(b));
-        System.out.println(Arrays.equals(a, b));
+        println(a.equals(b));
+        println(Arrays.equals(a, b));
     }
 }
 ```
@@ -212,15 +218,17 @@ Every primitive type has a matching **wrapper class**: an object that holds one 
 `.equals` is a *method* that an object defines to compare by **meaning**. For `Integer`, it compares the wrapped numbers. The danger is that boxing small numbers reuses cached objects, so `==` *accidentally* agrees with `.equals` — until it doesn't.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Integer a = 127, b = 127;   // small: from the shared cache
         Integer c = 128, d = 128;   // outside the cache: distinct objects
-        System.out.println(a == b);
-        System.out.println(c == d);
-        System.out.println(c.equals(d));
+        println(a == b);
+        println(c == d);
+        println(c.equals(d));
         int e = 128, f = 128;       // primitives: compared by value
-        System.out.println(e == f);
+        println(e == f);
     }
 }
 ```
@@ -263,14 +271,16 @@ The cost is vigilance. Boxing hides the boundary, so a passing small-value `==` 
 `String` is a reference type too, so `==` on strings means identity. But Java **interns** string *literals*, so identical literals share one pooled object <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[11]</abbr>. That makes `==` *look* right for literals and wrong for everything else.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String a = "hello";
         String b = "hello";
         String c = new String("hello");
-        System.out.println(a == b);
-        System.out.println(a == c);
-        System.out.println(a.equals(c));
+        println(a == b);
+        println(a == c);
+        println(a.equals(c));
     }
 }
 ```
@@ -290,13 +300,15 @@ true
 *Concrete bite.* A string computed from a variable misses the pool, even when its characters match a literal:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String part = "ab";
         String computed = part + "c";
         String literal = "abc";
-        System.out.println(computed == literal);
-        System.out.println(computed.equals(literal));
+        println(computed == literal);
+        println(computed.equals(literal));
     }
 }
 ```
@@ -324,11 +336,13 @@ The pool's cost is that `==` passes in quick literal tests and fails on real str
 A reference can point at *no object*: the value `null` <abbr title="The Java Language Specification, Java SE 25, §4.3.1">[1]</abbr>. You can legally hold it and print it. But the moment you try to *use* the object it points to (call a method, read a field), there's no object, and the JVM throws `NullPointerException`.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String s = null;
-        System.out.println(s);
-        System.out.println(s.length());
+        println(s);
+        println(s.length());
     }
 }
 ```
@@ -351,12 +365,14 @@ Since Java 14, the message names what was null and what you tried to do <abbr ti
 *Watch out: an NPE with no dot in sight.* Unboxing is a hidden method call. Store a `null` `Integer` into an `int`, and the JVM must call `intValue()` on nothing <abbr title="The Java Language Specification, Java SE 25, §5.1.8">[8]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Integer count = null;
-        System.out.println("before");
+        println("before");
         int n = count;
-        System.out.println(n);
+        println(n);
     }
 }
 ```
@@ -367,7 +383,7 @@ before
 Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.lang.Integer.intValue()" because "<local1>" is null
 ```
 
-Line 5, `int n = count;`, has no `.` in it, yet the message names `Integer.intValue()`. When an NPE points at a line with no method call, look for an `Integer`, `Double` or `Boolean` that's being used as a number or a `boolean`.
+Line 7, `int n = count;`, has no `.` in it, yet the message names `Integer.intValue()`. When an NPE points at a line with no method call, look for an `Integer`, `Double` or `Boolean` that's being used as a number or a `boolean`.
 
 Comparing with `.equals` has the same sharp edge. `"hi".equals(s)` returns `false` when `s` is `null`, but `s.equals("hi")` throws. `java.util.Objects.equals(a, b)` is safe on either side <abbr title="java.util.Objects.equals(Object, Object), Java SE 25 API">[13]</abbr>.
 
@@ -392,6 +408,8 @@ An object is **reachable** as long as some running code can still get to it thro
 - the method holding the only local reference returns.
 
 ```java run
+import static java.lang.IO.println;
+
 class Counter {
     int count;
     void increment() { count++; }
@@ -403,7 +421,7 @@ public class Main {
         a.increment();
         Counter keep = a;
         a = new Counter();
-        System.out.println(a.count + " " + keep.count);
+        println(a.count + " " + keep.count);
     }
 }
 ```

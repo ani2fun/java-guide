@@ -59,6 +59,8 @@ Every output below was produced by compiling and running the code on Java 25.
 If a class doesn't define its own `equals`, it inherits the one from `Object`. That version returns `true` only when both references point at *the same object* <abbr title="Java SE 25 API, Object.equals(Object)">[1]</abbr>. So two objects created separately are not equal, even when their fields are identical:
 
 ```java run
+import static java.lang.IO.println;
+
 class Point {
     int x, y;
     Point(int x, int y) { this.x = x; this.y = y; }
@@ -68,8 +70,8 @@ public class Main {
     public static void main(String[] args) {
         Point a = new Point(1, 2);
         Point b = new Point(1, 2);
-        System.out.println(a == b);
-        System.out.println(a.equals(b));
+        println(a == b);
+        println(a.equals(b));
     }
 }
 ```
@@ -107,6 +109,8 @@ To define value equality, override `equals(Object o)`. The recipe has two steps:
 Later, in [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching), you'll meet pattern matching for `instanceof`, which fuses these two steps into one.
 
 ```java run
+import static java.lang.IO.println;
+
 class Point {
     int x, y;
     Point(int x, int y) { this.x = x; this.y = y; }
@@ -123,8 +127,8 @@ public class Main {
     public static void main(String[] args) {
         Point a = new Point(1, 2);
         Point b = new Point(1, 2);
-        System.out.println(a == b);
-        System.out.println(a.equals(b));
+        println(a == b);
+        println(a.equals(b));
     }
 }
 ```
@@ -145,6 +149,8 @@ The `@Override` **annotation** asks the compiler to confirm that this method rea
 *Concrete bite.* Here's a subtle slip: `public boolean equals(Point p)`, with a `Point` parameter instead of `Object`. This does *not* override `Object.equals` — it **overloads** it. The JLS calls out this exact mistake as the classic reason `@Override` exists <abbr title="The Java Language Specification, Java SE 25, §9.6.4.4">[3]</abbr>. Add `@Override`, and javac rejects it:
 
 ```java run
+import static java.lang.IO.println;
+
 class Point {
     int x, y;
     Point(int x, int y) { this.x = x; this.y = y; }
@@ -157,14 +163,14 @@ class Point {
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(new Point(1, 2).equals(new Point(1, 2)));
+        println(new Point(1, 2).equals(new Point(1, 2)));
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:5: error: method does not override or implement a method from a supertype
+Main.java:7: error: method does not override or implement a method from a supertype
     @Override
     ^
 ```
@@ -175,6 +181,8 @@ Leave out `@Override`, though, and the same class compiles — and the bug goes 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+
+import static java.lang.IO.println;
 
 class Point {
     int x, y;
@@ -194,12 +202,12 @@ public class Main {
     public static void main(String[] args) {
         Point a = new Point(1, 2);
         Point b = new Point(1, 2);
-        System.out.println(a.equals(b));
+        println(a.equals(b));
         Object o = b;
-        System.out.println(a.equals(o));
+        println(a.equals(o));
         Set<Point> set = new HashSet<>();
         set.add(a);
-        System.out.println(set.contains(b));
+        println(set.contains(b));
     }
 }
 ```
@@ -241,6 +249,8 @@ The `Object.equals` documentation adds: "It is generally necessary to override t
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.lang.IO.println;
+
 class Point {
     int x, y;
     Point(int x, int y) { this.x = x; this.y = y; }
@@ -258,9 +268,9 @@ public class Main {
     public static void main(String[] args) {
         Set<Point> set = new HashSet<>();
         set.add(new Point(1, 2));
-        System.out.println(set.contains(new Point(1, 2)));
+        println(set.contains(new Point(1, 2)));
         set.add(new Point(1, 2));
-        System.out.println(set.size());
+        println(set.size());
     }
 }
 ```
@@ -328,6 +338,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Objects;
 
+import static java.lang.IO.println;
+
 class Point {
     int x, y;
     Point(int x, int y) { this.x = x; this.y = y; }
@@ -349,9 +361,9 @@ public class Main {
     public static void main(String[] args) {
         Set<Point> set = new HashSet<>();
         set.add(new Point(1, 2));
-        System.out.println(set.contains(new Point(1, 2)));
+        println(set.contains(new Point(1, 2)));
         set.add(new Point(1, 2));
-        System.out.println(set.size());
+        println(set.size());
     }
 }
 ```
@@ -373,6 +385,8 @@ true
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+
+import static java.lang.IO.println;
 
 class Point {
     int x, y;
@@ -397,9 +411,9 @@ public class Main {
         Point p = new Point(1, 2);
         set.add(p);
         p.x = 5;                                   // change a field used by hashCode
-        System.out.println(set.contains(p));
-        System.out.println(set.contains(new Point(1, 2)));
-        System.out.println(set.size());
+        println(set.contains(p));
+        println(set.contains(new Point(1, 2)));
+        println(set.size());
     }
 }
 ```

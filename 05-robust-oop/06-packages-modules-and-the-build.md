@@ -71,9 +71,10 @@ public class Text {
 // src/com/example/Main.java
 package com.example;
 import com.example.util.Text;
+import static java.lang.IO.println;
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Text.shout("hello"));
+        println(Text.shout("hello"));
     }
 }
 ```
@@ -106,7 +107,7 @@ HELLO!
 $ mv out/com/example/util/Text.class out/
 $ java -cp out com.example.Main
 Exception in thread "main" java.lang.NoClassDefFoundError: com/example/util/Text
-	at com.example.Main.main(Main.java:5)
+	at com.example.Main.main(Main.java:6)
 Caused by: java.lang.ClassNotFoundException: com.example.util.Text
 ```
 
@@ -136,9 +137,10 @@ public class Text {
 }
 
 // com.example.Main — a DIFFERENT package — tries to call whisper
+import static java.lang.IO.println;
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Text.whisper("HELLO"));
+        println(Text.whisper("HELLO"));
     }
 }
 ```
@@ -149,9 +151,9 @@ $ javac -d out2 $(find src2 -name '*.java')
 
 **Compiler error:**
 ```
-src2/com/example/Main.java:5: error: whisper(String) is not public in Text; cannot be accessed from outside package
-        System.out.println(Text.whisper("HELLO"));
-                               ^
+src2/com/example/Main.java:6: error: whisper(String) is not public in Text; cannot be accessed from outside package
+        println(Text.whisper("HELLO"));
+                    ^
 ```
 
 **Analysis.** `Text` is `public` (so `Main` can use it), and `shout` is `public` (so `Main` can call it). But `whisper` is package-private, belonging to `com.example.util`, and `Main` lives in `com.example` — a *different* package. So `whisper` is off-limits: "not public … cannot be accessed from outside package." The boundary is the package, and the default (no modifier) stops right at it.
@@ -265,15 +267,17 @@ This is called "strong encapsulation": the classpath's hole (public-but-internal
 ```java run
 import module java.base;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<String> names = new ArrayList<>(List.of("cy", "al", "bo"));  // java.util
         Collections.sort(names);
         Path file = Path.of("notes", "today.txt");                         // java.nio.file
         Duration wait = Duration.ofSeconds(90);                            // java.time
-        System.out.println(names);
-        System.out.println(file.getFileName());
-        System.out.println(wait);
+        println(names);
+        println(file.getFileName());
+        println(wait);
     }
 }
 ```
@@ -291,17 +295,19 @@ One line replaced three package imports. The catch is that two modules can expor
 import module java.base;
 import module java.sql;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Date today = new Date(0);
-        System.out.println(today.getTime());
+        println(today.getTime());
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:6: error: reference to Date is ambiguous
+Main.java:8: error: reference to Date is ambiguous
         Date today = new Date(0);
         ^
   both class java.sql.Date in java.sql and class java.util.Date in java.util match
@@ -334,11 +340,12 @@ public class Secret {
 package com.inspect;
 import java.lang.reflect.Field;
 import com.lib.model.Secret;
+import static java.lang.IO.println;
 public class Peek {
     public static void main(String[] args) throws Exception {
         Field f = Secret.class.getDeclaredField("value");
         f.setAccessible(true);
-        System.out.println("value = " + f.get(new Secret()));
+        println("value = " + f.get(new Secret()));
     }
 }
 ```
@@ -402,14 +409,15 @@ module greet.app {
 package com.greet.app;
 import java.util.ServiceLoader;
 import com.greet.api.Greeter;
+import static java.lang.IO.println;
 public class Main {
     public static void main(String[] args) {
         int found = 0;
         for (Greeter g : ServiceLoader.load(Greeter.class)) {
-            System.out.println(g.greet("Ada"));
+            println(g.greet("Ada"));
             found++;
         }
-        System.out.println(found + " greeter(s) found");
+        println(found + " greeter(s) found");
     }
 }
 ```
@@ -474,12 +482,13 @@ A classpath program can ask which module it's in:
 ```java
 // requires: a package directory, run from the classpath — shown as a terminal session
 package com.example;
+import static java.lang.IO.println;
 public class Where {
     public static void main(String[] args) {
         Module m = Where.class.getModule();
-        System.out.println("named: " + m.isNamed());
-        System.out.println("name: " + m.getName());
-        System.out.println("String is in: " + String.class.getModule().getName());
+        println("named: " + m.isNamed());
+        println("name: " + m.getName());
+        println("String is in: " + String.class.getModule().getName());
     }
 }
 ```

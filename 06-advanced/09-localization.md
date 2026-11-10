@@ -74,17 +74,19 @@ There are three ways to get one:
 ```java run
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Locale france = Locale.of("fr", "FR");
         Locale canadianFrench = Locale.forLanguageTag("fr-CA");
 
-        System.out.println(france + "  " + france.toLanguageTag());
-        System.out.println(canadianFrench.getLanguage() + " " + canadianFrench.getCountry());
-        System.out.println(france.getDisplayName(Locale.US));
-        System.out.println(france.getDisplayName(france));
-        System.out.println(Locale.JAPAN.getDisplayName(france));
-        System.out.println("[" + Locale.ROOT + "] " + Locale.ROOT.toLanguageTag());
+        println(france + "  " + france.toLanguageTag());
+        println(canadianFrench.getLanguage() + " " + canadianFrench.getCountry());
+        println(france.getDisplayName(Locale.US));
+        println(france.getDisplayName(france));
+        println(Locale.JAPAN.getDisplayName(france));
+        println("[" + Locale.ROOT + "] " + Locale.ROOT.toLanguageTag());
     }
 }
 ```
@@ -110,9 +112,11 @@ Every JVM also has a **default locale**, set at startup from the operating syste
 ```java run
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("default locale: " + Locale.getDefault());
+        println("default locale: " + Locale.getDefault());
     }
 }
 ```
@@ -130,13 +134,15 @@ default locale: en_US
 ```java run
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Locale wrong = Locale.forLanguageTag("fr_FR");     // underscore: not a language tag
         Locale right = Locale.forLanguageTag("fr-FR");
 
-        System.out.println("wrong: [" + wrong + "] " + wrong.toLanguageTag());
-        System.out.println("right: [" + right + "] " + right.toLanguageTag());
+        println("wrong: [" + wrong + "] " + wrong.toLanguageTag());
+        println("right: [" + right + "] " + right.toLanguageTag());
     }
 }
 ```
@@ -172,11 +178,13 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         double amount = 1234567.891;
         for (Locale place : List.of(Locale.US, Locale.GERMANY, Locale.of("de", "CH"), Locale.FRANCE)) {
-            System.out.println(place + ": "
+            println(place + ": "
                     + NumberFormat.getInstance(place).format(amount) + " | "
                     + NumberFormat.getCurrencyInstance(place).format(1234.5) + " | "
                     + NumberFormat.getPercentInstance(place).format(0.75));
@@ -210,18 +218,20 @@ These rules come from the **CLDR**, the Unicode Consortium's shared locale data,
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String printed = NumberFormat.getCurrencyInstance(Locale.FRANCE).format(1234.5);
-        System.out.println(printed);
-        System.out.println(printed.equals("1 234,50 €"));
+        println(printed);
+        println(printed.equals("1 234,50 €"));
 
         for (char c : printed.toCharArray()) {
             if (c > 127) {
                 System.out.printf("U+%04X ", (int) c);
             }
         }
-        System.out.println();
+        println();
     }
 }
 ```
@@ -242,15 +252,17 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws ParseException {
         NumberFormat us = NumberFormat.getInstance(Locale.US);
         NumberFormat fr = NumberFormat.getInstance(Locale.FRANCE);
 
-        System.out.println(us.parse("1,234.5"));
-        System.out.println(fr.parse("1,234"));
-        System.out.println(us.parse("12abc"));
-        System.out.println(us.parse("abc"));
+        println(us.parse("1,234.5"));
+        println(fr.parse("1,234"));
+        println(us.parse("12abc"));
+        println(us.parse("abc"));
     }
 }
 ```
@@ -272,13 +284,15 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws ParseException {
         NumberFormat strict = NumberFormat.getInstance(Locale.US);
         strict.setStrict(true);
 
-        System.out.println(strict.parse("1,234.5"));
-        System.out.println(strict.parse("12abc"));
+        println(strict.parse("1,234.5"));
+        println(strict.parse("12abc"));
     }
 }
 ```
@@ -298,24 +312,26 @@ import java.text.NumberFormat;
 import java.util.Currency;
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         double priceInEuros = 1234.5;
 
         NumberFormat usStyle = NumberFormat.getCurrencyInstance(Locale.US);
-        System.out.println("wrong: " + usStyle.format(priceInEuros));   // the locale picked dollars
+        println("wrong: " + usStyle.format(priceInEuros));   // the locale picked dollars
 
         usStyle.setCurrency(Currency.getInstance("EUR"));
-        System.out.println("right: " + usStyle.format(priceInEuros));
+        println("right: " + usStyle.format(priceInEuros));
 
         Currency yen = Currency.getInstance(Locale.JAPAN);
-        System.out.println(yen + " has " + yen.getDefaultFractionDigits() + " decimal places");
+        println(yen + " has " + yen.getDefaultFractionDigits() + " decimal places");
 
         NumberFormat whole = NumberFormat.getIntegerInstance(Locale.US);
-        System.out.println(whole.format(2.5) + " " + whole.format(3.5));
+        println(whole.format(2.5) + " " + whole.format(3.5));
 
         NumberFormat compact = NumberFormat.getCompactNumberInstance(Locale.US, NumberFormat.Style.SHORT);
-        System.out.println(compact.format(1_234_567) + " " + compact.format(2_500));
+        println(compact.format(1_234_567) + " " + compact.format(2_500));
     }
 }
 ```
@@ -354,12 +370,14 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         LocalDate day = LocalDate.of(2024, 3, 5);
         for (FormatStyle style : FormatStyle.values()) {
             DateTimeFormatter f = DateTimeFormatter.ofLocalizedDate(style);
-            System.out.println(style + ": "
+            println(style + ": "
                     + day.format(f.withLocale(Locale.US)) + " | "
                     + day.format(f.withLocale(Locale.GERMANY)) + " | "
                     + day.format(f.withLocale(Locale.FRANCE)));
@@ -389,14 +407,16 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         LocalDateTime meeting = LocalDateTime.of(2024, 3, 5, 15, 30);
         DateTimeFormatter medium = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(Locale.US);
-        System.out.println(meeting.format(medium));
+        println(meeting.format(medium));
 
         DateTimeFormatter full = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL).withLocale(Locale.US);
-        System.out.println(meeting.format(full));
+        println(meeting.format(full));
     }
 }
 ```
@@ -417,16 +437,18 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         DateTimeFormatter shortTime = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.US);
 
         String printed = LocalTime.of(15, 30).format(shortTime);
-        System.out.println(printed);
+        println(printed);
         System.out.printf("the character before PM is U+%04X%n", (int) printed.charAt(4));
 
-        System.out.println(LocalTime.parse(printed, shortTime));
-        System.out.println(LocalTime.parse("3:30 PM", shortTime));     // typed with an ordinary space
+        println(LocalTime.parse(printed, shortTime));
+        println(LocalTime.parse("3:30 PM", shortTime));     // typed with an ordinary space
     }
 }
 ```
@@ -469,6 +491,8 @@ import java.util.ListResourceBundle;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static class Messages extends ListResourceBundle {          // the base bundle
         protected Object[][] getContents() {
@@ -492,7 +516,7 @@ public class Main {
         Locale.setDefault(Locale.US);
         for (String tag : List.of("fr-CA", "fr-FR", "de-DE")) {
             ResourceBundle words = ResourceBundle.getBundle("Main$Messages", Locale.forLanguageTag(tag));
-            System.out.println(tag + ": " + words.getString("greeting") + ", "
+            println(tag + ": " + words.getString("greeting") + ", "
                     + words.getString("farewell") + "   (bundle " + words.getLocale() + ")");
         }
     }
@@ -522,6 +546,8 @@ import java.util.ListResourceBundle;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static class Messages extends ListResourceBundle {
         protected Object[][] getContents() {
@@ -539,12 +565,12 @@ public class Main {
         Locale.setDefault(Locale.FRANCE);                     // a server set up in Paris
 
         ResourceBundle german = ResourceBundle.getBundle("Main$Messages", Locale.GERMANY);
-        System.out.println("asked for de_DE, got: " + german.getString("greeting"));
+        println("asked for de_DE, got: " + german.getString("greeting"));
 
         ResourceBundle.Control noFallback =
                 ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_DEFAULT);
         ResourceBundle base = ResourceBundle.getBundle("Main$Messages", Locale.GERMANY, noFallback);
-        System.out.println("without the fallback: " + base.getString("greeting"));
+        println("without the fallback: " + base.getString("greeting"));
     }
 }
 ```
@@ -564,6 +590,8 @@ import java.util.ListResourceBundle;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static class Messages extends ListResourceBundle {
         protected Object[][] getContents() {
@@ -573,8 +601,8 @@ public class Main {
 
     public static void main(String[] args) {
         ResourceBundle words = ResourceBundle.getBundle("Main$Messages", Locale.US);
-        System.out.println(words.getString("greeting"));
-        System.out.println(words.getString("greting"));
+        println(words.getString("greeting"));
+        println(words.getString("greting"));
     }
 }
 ```
@@ -602,8 +630,8 @@ import java.util.ResourceBundle;
 public class Main {
     public static void main(String[] args) {
         ResourceBundle fr = ResourceBundle.getBundle("Messages", Locale.FRANCE);
-        System.out.println(fr.getString("greeting"));
-        System.out.println(fr.getString("farewell"));
+        println(fr.getString("greeting"));
+        println(fr.getString("farewell"));
     }
 }
 $ javac Main.java
@@ -635,20 +663,22 @@ A translated sentence often has values inside it, and word order differs between
 import java.text.MessageFormat;
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         MessageFormat en = new MessageFormat("{0} has {1} new messages", Locale.US);
-        System.out.println(en.format(new Object[] {"Ada", 1234}));
+        println(en.format(new Object[] {"Ada", 1234}));
 
         MessageFormat de = new MessageFormat("{0} hat {1} neue Nachrichten", Locale.GERMANY);
-        System.out.println(de.format(new Object[] {"Ada", 1234}));
+        println(de.format(new Object[] {"Ada", 1234}));
 
         MessageFormat fr = new MessageFormat("{1} nouveaux messages pour {0}", Locale.FRANCE);
-        System.out.println(fr.format(new Object[] {"Ada", 12}));
+        println(fr.format(new Object[] {"Ada", 12}));
 
         MessageFormat typed = new MessageFormat(
                 "{0,number,percent} done, {1,number,currency} paid, year {2,number,#}", Locale.US);
-        System.out.println(typed.format(new Object[] {0.5, 9.99, 2024}));
+        println(typed.format(new Object[] {0.5, 9.99, 2024}));
     }
 }
 ```
@@ -672,16 +702,18 @@ Ada hat 1.234 neue Nachrichten
 import java.text.MessageFormat;
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         MessageFormat wrong = new MessageFormat("It's {0}'s turn", Locale.US);
-        System.out.println(wrong.format(new Object[] {"Ada"}));
+        println(wrong.format(new Object[] {"Ada"}));
 
         MessageFormat right = new MessageFormat("It''s {0}''s turn", Locale.US);
-        System.out.println(right.format(new Object[] {"Ada"}));
+        println(right.format(new Object[] {"Ada"}));
 
         MessageFormat year = new MessageFormat("Copyright {0}", Locale.US);
-        System.out.println(year.format(new Object[] {2024}));
+        println(year.format(new Object[] {2024}));
     }
 }
 ```
@@ -702,12 +734,14 @@ Copyright 2,024
 import java.text.MessageFormat;
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         MessageFormat files = new MessageFormat(
                 "{0,choice,0#no files|1#one file|1<{0,number,integer} files}", Locale.US);
         for (int n : new int[] {0, 1, 2, 1500}) {
-            System.out.println(n + " -> " + files.format(new Object[] {n}));
+            println(n + " -> " + files.format(new Object[] {n}));
         }
     }
 }
@@ -740,17 +774,19 @@ Many everyday methods are locale-sensitive, yet take no locale: `String.format`,
 ```java run
 import java.util.Locale;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Locale.setDefault(Locale.GERMANY);           // the machine this runs on is set to German
 
         double price = 1234.5;
-        System.out.println("csv, default locale: " + String.format("%.2f,EUR", price));
-        System.out.println("csv, Locale.ROOT:    " + String.format(Locale.ROOT, "%.2f,EUR", price));
+        println("csv, default locale: " + String.format("%.2f,EUR", price));
+        println("csv, Locale.ROOT:    " + String.format(Locale.ROOT, "%.2f,EUR", price));
 
         Locale turkish = Locale.forLanguageTag("tr");
-        System.out.println("title".toUpperCase(turkish) + " " + "title".toUpperCase(Locale.ROOT));
-        System.out.println("TITLE".toLowerCase(turkish).equals("title"));
+        println("title".toUpperCase(turkish) + " " + "title".toUpperCase(Locale.ROOT));
+        println("TITLE".toLowerCase(turkish).equals("title"));
     }
 }
 ```

@@ -61,10 +61,12 @@ That word "directly" will matter later. Java has a second family of variable, th
 You **declare** a variable by writing its type, then its name, then `=` and a starting value. `int age = 25;` reads as "make an `int` named `age`, starting at `25`." The type (`int`, a whole number) comes first, and it isn't optional.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int age = 25;
-        System.out.println(age);
+        println(age);
     }
 }
 ```
@@ -126,11 +128,13 @@ Main.java:3: error: cannot find symbol
 The starting value is optional. `int age;` makes the box and leaves it empty, and a later line **assigns** it a value with `=`. A variable declared inside a method, like every variable in this lesson, is called a **local variable**.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int age;         // declared: a box, no value yet
         age = 25;        // assigned: now it holds 25
-        System.out.println(age);
+        println(age);
     }
 }
 ```
@@ -143,19 +147,21 @@ public class Main {
 *Watch out: reading the box before anything is in it.* The compiler tracks whether each local variable has definitely been given a value before any line reads it — Java calls this **definite assignment** <abbr title="The Java Language Specification, Java SE 25, chapter 16">[1]</abbr>. Read an empty box, and the program doesn't compile:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int x;
-        System.out.println(x);
+        println(x);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:4: error: variable x might not have been initialized
-        System.out.println(x);
-                           ^
+Main.java:6: error: variable x might not have been initialized
+        println(x);
+                ^
 1 error
 ```
 
@@ -200,11 +206,13 @@ A name can't start with a digit, so javac doesn't read `2nd` as a name at all. I
 Once a variable has a type, that type is fixed. You can change its *value* by reassigning it, but the new value must be of the variable's type, or convert to it without losing anything. The compiler checks this on every assignment.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int score = 10;
         score = 25;      // fine: 25 is an int, just like score
-        System.out.println(score);
+        println(score);
     }
 }
 ```
@@ -222,17 +230,19 @@ public class Main {
 *Concrete bite.* Try to put text into an `int`, and the compiler refuses. This is the classic Java type error:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int n = "hello";
-        System.out.println(n);
+        println(n);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:3: error: incompatible types: String cannot be converted to int
+Main.java:5: error: incompatible types: String cannot be converted to int
         int n = "hello";
                 ^
 1 error
@@ -251,11 +261,13 @@ Main.java:3: error: incompatible types: String cannot be converted to int
 Some values should never change once they're set: the number of days in a week, say, or a tax rate. Put `final` before the type, and the compiler allows exactly one assignment <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[4]</abbr>. By convention, a constant's name is written in capitals, with `_` between words.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         final int DAYS_IN_WEEK = 7;
         int weeks = 3;
-        System.out.println(weeks * DAYS_IN_WEEK);
+        println(weeks * DAYS_IN_WEEK);
     }
 }
 ```
@@ -268,18 +280,20 @@ public class Main {
 *Watch out: reassigning a `final` variable.* The type was never the only promise you could make. With `final`, the value is a promise too — and the compiler holds you to it:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         final int DAYS_IN_WEEK = 7;
         DAYS_IN_WEEK = 8;
-        System.out.println(DAYS_IN_WEEK);
+        println(DAYS_IN_WEEK);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:4: error: cannot assign a value to final variable DAYS_IN_WEEK
+Main.java:6: error: cannot assign a value to final variable DAYS_IN_WEEK
         DAYS_IN_WEEK = 8;
         ^
 1 error
@@ -294,6 +308,8 @@ Mark a variable `final` when its value must not change. That way, an accidental 
 Java has exactly eight **primitive** types. You'll use `int`, `double`, `boolean`, and `char` constantly; the other four are size variants you'll reach for only occasionally. Here are six of them at work:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int count = 42;                    // whole number (the default integer type)
@@ -302,12 +318,12 @@ public class Main {
         float ratio = 0.5f;                // smaller decimal; note the f
         boolean ready = true;              // true or false, nothing else
         char grade = 'A';                  // a single character, in single quotes
-        System.out.println(count);
-        System.out.println(population);
-        System.out.println(price);
-        System.out.println(ratio);
-        System.out.println(ready);
-        System.out.println(grade);
+        println(count);
+        println(population);
+        println(price);
+        println(ratio);
+        println(ready);
+        println(grade);
     }
 }
 ```
@@ -344,16 +360,18 @@ Each type's size is counted in **bits**. A bit is one binary digit, a 0 or a 1, 
 The language fixes the whole-number ranges and the `char` range <abbr title="The Java Language Specification, Java SE 25, §4.2.1">[5]</abbr>. `boolean` has exactly two values, and its size in bits isn't defined <abbr title="The Java Tutorials, Primitive Data Types">[6]</abbr>. You don't need to memorize the ranges, either: each whole-number type carries its own limits as `MIN_VALUE` and `MAX_VALUE`.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Byte.MIN_VALUE);
-        System.out.println(Byte.MAX_VALUE);
-        System.out.println(Short.MIN_VALUE);
-        System.out.println(Short.MAX_VALUE);
-        System.out.println(Integer.MIN_VALUE);
-        System.out.println(Integer.MAX_VALUE);
-        System.out.println(Long.MIN_VALUE);
-        System.out.println(Long.MAX_VALUE);
+        println(Byte.MIN_VALUE);
+        println(Byte.MAX_VALUE);
+        println(Short.MIN_VALUE);
+        println(Short.MAX_VALUE);
+        println(Integer.MIN_VALUE);
+        println(Integer.MAX_VALUE);
+        println(Long.MIN_VALUE);
+        println(Long.MAX_VALUE);
     }
 }
 ```
@@ -376,17 +394,19 @@ public class Main {
 *Concrete bite.* Because the size is fixed, a value outside a type's range won't fit — and the compiler tells you so:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         byte b = 200;
-        System.out.println(b);
+        println(b);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:3: error: incompatible types: possible lossy conversion from int to byte
+Main.java:5: error: incompatible types: possible lossy conversion from int to byte
         byte b = 200;
                  ^
 1 error
@@ -397,16 +417,18 @@ Main.java:3: error: incompatible types: possible lossy conversion from int to by
 **Why `byte b = 100;` compiles.** `100` is an `int` literal too, yet this line compiles. That's because Java makes one exception for a fixed value written in the source, called a **constant**. A constant `int` may go into a `byte`, `short` or `char` variable when the value fits within that type's range <abbr title="The Java Language Specification, Java SE 25, §5.2">[7]</abbr>. The compiler checks the value itself, `100`, and it fits.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         byte small = 100;      // 100 is an int literal, but it fits in a byte
         short medium = 30000;  // fits in a short
         char letter = 65;      // fits in a char: code 65 is 'A'
         double wide = 7;       // an int value goes into a double without loss
-        System.out.println(small);
-        System.out.println(medium);
-        System.out.println(letter);
-        System.out.println(wide);
+        println(small);
+        println(medium);
+        println(letter);
+        println(wide);
     }
 }
 ```
@@ -424,18 +446,20 @@ The last line shows the other direction. An `int` goes into a `double` without n
 *Watch out: the same value, in a variable.* The exception applies to constants only. Put `100` into an ordinary `int` variable first, and the compiler no longer checks the value. It checks the type instead — and an `int` doesn't always fit in a `byte`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int n = 100;
         byte b = n;
-        System.out.println(b);
+        println(b);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:4: error: incompatible types: possible lossy conversion from int to byte
+Main.java:6: error: incompatible types: possible lossy conversion from int to byte
         byte b = n;
                  ^
 1 error
@@ -444,11 +468,13 @@ Main.java:4: error: incompatible types: possible lossy conversion from int to by
 Adding `final` brings the exception back. A `final` variable counts as a constant when it's declared with a constant value <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[4]</abbr>, so the compiler can check the value again:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         final int n = 100;   // final, and the value is written right here: a constant
         byte b = n;
-        System.out.println(b);
+        println(b);
     }
 }
 ```
@@ -484,14 +510,16 @@ A **literal** is a value written directly in the source, like `25` or `'A'`. The
 - Single quotes make a `char`; double quotes make a `String`.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(25);      // an int literal
-        System.out.println(25L);     // a long literal (the L)
-        System.out.println(3.14);    // a double literal
-        System.out.println(3.14f);   // a float literal (the f)
-        System.out.println('A');     // a char literal (single quotes)
-        System.out.println("A");     // a String literal (double quotes)
+        println(25);      // an int literal
+        println(25L);     // a long literal (the L)
+        println(3.14);    // a double literal
+        println(3.14f);   // a float literal (the f)
+        println('A');     // a char literal (single quotes)
+        println("A");     // a String literal (double quotes)
     }
 }
 ```
@@ -520,17 +548,19 @@ The type is invisible in the output, but very real to the compiler. A lower-case
 *Concrete bite.* That's why a number too big for an `int` is an error, even when you "meant" a `long`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int big = 3000000000;
-        System.out.println(big);
+        println(big);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:3: error: integer number too large
+Main.java:5: error: integer number too large
         int big = 3000000000;
                   ^
 1 error
@@ -539,10 +569,12 @@ Main.java:3: error: integer number too large
 `3000000000` is past an `int`'s ceiling of 2147483647. The literal is an `int` by default, so the compiler rejects it before it ever reaches the variable. Mark it as a `long` literal by adding `L`, store it in a `long` box, and it fits:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         long big = 3_000_000_000L;
-        System.out.println(big);
+        println(big);
     }
 }
 ```
@@ -555,17 +587,19 @@ public class Main {
 *Watch out: a decimal without its `f`.* The same rule bites `float`. `0.5` is a `double` literal, and a `double` doesn't always fit in a `float`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         float ratio = 0.5;
-        System.out.println(ratio);
+        println(ratio);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:3: error: incompatible types: possible lossy conversion from double to float
+Main.java:5: error: incompatible types: possible lossy conversion from double to float
         float ratio = 0.5;
                       ^
 1 error
@@ -586,14 +620,16 @@ The fix is the suffix: `float ratio = 0.5f;`, as in §3.
 Spelling a type out twice can get tedious. Since Java 10, `var` lets the compiler **infer** a local variable's type from its **initializer** — the value after `=` <abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[10]</abbr>. It's a convenience, not a new kind of typing. The variable still has one fixed type; you just didn't write it out.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         var count = 42;       // compiler infers: int
         var price = 19.99;    // compiler infers: double
         var name = "Ada";     // compiler infers: String
-        System.out.println(count);
-        System.out.println(price);
-        System.out.println(name);
+        println(count);
+        println(price);
+        println(name);
     }
 }
 ```
@@ -613,18 +649,20 @@ Ada
 *Concrete bite.* So `var` isn't dynamic typing. The inferred type is just as fixed as a written one. Try to reassign across types, and it fails exactly as a spelled-out `int` would:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         var x = 42;     // inferred: int
         x = "hello";    // x is an int — it can't hold text
-        System.out.println(x);
+        println(x);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:4: error: incompatible types: String cannot be converted to int
+Main.java:6: error: incompatible types: String cannot be converted to int
         x = "hello";    // x is an int — it can't hold text
             ^
 1 error
@@ -645,18 +683,20 @@ The error names `int`, even though you wrote `var`. That's the proof: `x`'s type
 *Watch out: `var` with no initializer.* Leave out the initializer, and the compiler can't even guess:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         var y;
         y = 42;
-        System.out.println(y);
+        println(y);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:3: error: cannot infer type for local variable y
+Main.java:5: error: cannot infer type for local variable y
         var y;
             ^
   (cannot use 'var' on variable without initializer)

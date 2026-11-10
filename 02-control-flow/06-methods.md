@@ -57,14 +57,16 @@ This pulls together [conditionals](/synapse/programming-languages/java/control-f
 A method declares a return type, a name, and a list of typed parameters in parentheses, followed by a body. `return` hands a value of the declared type back to the caller. Here `square` takes an `int` and returns an `int`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int square(int x) {
         return x * x;
     }
 
     public static void main(String[] args) {
-        System.out.println(square(5));
-        System.out.println(square(square(2)));
+        println(square(5));
+        println(square(square(2)));
     }
 }
 ```
@@ -92,22 +94,24 @@ The `static` keyword, which `main` also has, means the method belongs to the cla
 A call must match the parameter list, with the same number of arguments, each of a fitting type. A mismatch is a compile error:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int square(int x) {
         return x * x;
     }
 
     public static void main(String[] args) {
-        System.out.println(square(2, 3));
+        println(square(2, 3));
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:7: error: method square in class Main cannot be applied to given types;
-        System.out.println(square(2, 3));
-                           ^
+Main.java:9: error: method square in class Main cannot be applied to given types;
+        println(square(2, 3));
+                ^
   required: int
   found:    int,int
   reason: actual and formal argument lists differ in length
@@ -122,6 +126,8 @@ Main.java:7: error: method square in class Main cannot be applied to given types
 *Concrete bite.* A method that declares a non-`void` return type must return a value on every path, or it won't compile <abbr title="The Java Language Specification, Java SE 25, §8.4.7">[1]</abbr>. The compiler proves that you always return:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int sign(int x) {
         if (x > 0) return 1;
@@ -129,14 +135,14 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        System.out.println(sign(5));
+        println(sign(5));
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:5: error: missing return statement
+Main.java:7: error: missing return statement
     }
     ^
 1 error
@@ -159,13 +165,15 @@ The compiler's insistence costs you something: you must handle the cases you'd r
 A method that does something but produces no value declares the return type `void`. Inside any method, a bare `return;` exits early. That's handy for dealing with a special case up front and skipping the rest.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static void greet(String name) {
         if (name.length() == 0) {
-            System.out.println("(no name)");
+            println("(no name)");
             return;
         }
-        System.out.println("Hello, " + name);
+        println("Hello, " + name);
     }
 
     public static void main(String[] args) {
@@ -189,9 +197,11 @@ Hello, Ada
 *Concrete bite.* Because a `void` call has no value, using it as one fails to compile:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static void greet(String name) {
-        System.out.println("Hello, " + name);
+        println("Hello, " + name);
     }
 
     public static void main(String[] args) {
@@ -202,7 +212,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:7: error: incompatible types: void cannot be converted to String
+Main.java:9: error: incompatible types: void cannot be converted to String
         String s = greet("Ada");
                         ^
 1 error
@@ -225,6 +235,8 @@ The catch with early returns is that too many scattered ones can hide a method's
 A parameter, and any variable declared inside a method body, is a **local variable**. It exists only while that call runs, and only inside the block that declares it <abbr title="The Java Language Specification, Java SE 25, §6.3">[3]</abbr>. When the method returns, its locals are gone, and no other method can see them:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static void setUp() {
         int count = 3;
@@ -232,16 +244,16 @@ public class Main {
 
     public static void main(String[] args) {
         setUp();
-        System.out.println(count);
+        println(count);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:8: error: cannot find symbol
-        System.out.println(count);
-                           ^
+Main.java:10: error: cannot find symbol
+        println(count);
+                ^
   symbol:   variable count
   location: class Main
 1 error
@@ -289,15 +301,17 @@ The cost is that nothing leaks out of a method on its own. That's also the payof
 Java lets several methods share a name, as long as their **parameter lists** differ in types or in the number of parameters. That's **overloading** <abbr title="The Java Language Specification, Java SE 25, §8.4.9">[5]</abbr>. The compiler picks the right one from the argument types at the call site.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int triple(int x) { return x * 3; }
     static double triple(double x) { return x * 3; }
     static String triple(String s) { return s + s + s; }
 
     public static void main(String[] args) {
-        System.out.println(triple(5));
-        System.out.println(triple(2.5));
-        System.out.println(triple("ab"));
+        println(triple(5));
+        println(triple(2.5));
+        println(triple("ab"));
     }
 }
 ```
@@ -314,9 +328,11 @@ ababab
 When there's no exact match, the compiler widens the argument and picks the *closest* fit <abbr title="The Java Language Specification, Java SE 25, §15.12.2">[6]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
-    static void show(long v) { System.out.println("long " + v); }
-    static void show(double v) { System.out.println("double " + v); }
+    static void show(long v) { println("long " + v); }
+    static void show(double v) { println("double " + v); }
 
     public static void main(String[] args) {
         show(5);
@@ -339,19 +355,21 @@ The `int` `5` fits both `long` and `double`, and `long` is the closer one. The `
 *Concrete bite.* Because the return type *isn't* part of the signature, two methods that differ only by return type count as a duplicate definition:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int f() { return 1; }
     static double f() { return 2.0; }
 
     public static void main(String[] args) {
-        System.out.println(f());
+        println(f());
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:3: error: method f() is already defined in class Main
+Main.java:5: error: method f() is already defined in class Main
     static double f() { return 2.0; }
                   ^
 1 error
@@ -374,6 +392,8 @@ Overloading costs you resolution surprises. With mixed argument types, the compi
 Some methods make sense for any number of arguments, like a sum or a maximum. A **varargs** parameter, written with `...` after the type, accepts zero or more arguments <abbr title="The Java Language Specification, Java SE 25, §8.4.1">[8]</abbr>. Inside the method, it's an [array](/synapse/programming-languages/java/control-flow/arrays):
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int sum(int... nums) {
         int total = 0;
@@ -384,10 +404,10 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        System.out.println(sum());
-        System.out.println(sum(4));
-        System.out.println(sum(1, 2, 3));
-        System.out.println(sum(new int[] {10, 20}));
+        println(sum());
+        println(sum(4));
+        println(sum(1, 2, 3));
+        println(sum(new int[] {10, 20}));
     }
 }
 ```
@@ -439,16 +459,18 @@ The catch is that overload resolution tries varargs *last* <abbr title="The Java
 When you call a method, each argument is **copied** into the parameter <abbr title="The Java Language Specification, Java SE 25, §8.4.1">[8]</abbr>. For a primitive, that means the method gets its own copy of the number, so changing the parameter can't touch the caller's variable.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static void addOne(int n) {
         n = n + 1;
-        System.out.println("inside: " + n);
+        println("inside: " + n);
     }
 
     public static void main(String[] args) {
         int x = 5;
         addOne(x);
-        System.out.println("outside: " + x);
+        println("outside: " + x);
     }
 }
 ```
@@ -467,6 +489,8 @@ outside: 5
 *Concrete bite.* The classic `swap` shows this. The method swaps its two copies, and the caller's variables never move:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static void swap(int a, int b) {
         int tmp = a;
@@ -477,7 +501,7 @@ public class Main {
     public static void main(String[] args) {
         int x = 1, y = 2;
         swap(x, y);
-        System.out.println(x + " " + y);
+        println(x + " " + y);
     }
 }
 ```
@@ -490,6 +514,8 @@ public class Main {
 To pass a change back, a method must *return* the new value, and the caller must store it. Call a value-returning method and ignore the result, and nothing changes:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int addOne(int n) {
         return n + 1;
@@ -498,9 +524,9 @@ public class Main {
     public static void main(String[] args) {
         int x = 5;
         addOne(x);
-        System.out.println(x);
+        println(x);
         x = addOne(x);
-        System.out.println(x);
+        println(x);
     }
 }
 ```
@@ -531,6 +557,8 @@ Java is pass-by-value *for object references too*. But what gets copied is the *
 - Reassigning the parameter only repoints its own copy.
 
 ```java run viz=array:a
+import static java.lang.IO.println;
+
 public class Main {
     static void mutate(int[] arr) {
         arr[0] = 99;              // changes the shared array — visible to the caller
@@ -543,9 +571,9 @@ public class Main {
     public static void main(String[] args) {
         int[] a = {1, 2, 3};
         mutate(a);
-        System.out.println(a[0]);
+        println(a[0]);
         reassign(a);
-        System.out.println(a[0]);
+        println(a[0]);
     }
 }
 ```
@@ -571,6 +599,8 @@ Mutation reached through to the shared object. Reassignment didn't.
 A `String` parameter behaves like the `reassign` case every time. You can't change [Strings](/synapse/programming-languages/java/first-steps/strings-the-basics), so a method can only point its copy at a new one:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static void shout(String s) {
         s = s.toUpperCase();
@@ -579,7 +609,7 @@ public class Main {
     public static void main(String[] args) {
         String word = "hi";
         shout(word);
-        System.out.println(word);
+        println(word);
     }
 }
 ```

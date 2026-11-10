@@ -66,13 +66,16 @@ A `Path` names the location of a file or directory. The `Files` class holds stat
 import java.nio.file.*;
 import java.io.IOException;
 
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws IOException {
         Path file = Path.of("greeting.txt");
         Files.writeString(file, "Hello, file!\nSecond line.\n");
         String content = Files.readString(file);
-        System.out.print(content);
-        System.out.println("size: " + Files.size(file) + " bytes");
+        print(content);
+        println("size: " + Files.size(file) + " bytes");
     }
 }
 ```
@@ -98,16 +101,18 @@ A `Path` also has operations of its own, and none of them touches the disk <abbr
 ```java run
 import java.nio.file.Path;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Path dir = Path.of("/home/ada/projects");
         Path file = dir.resolve("demo/../notes.txt");
-        System.out.println("resolve:   " + file);
-        System.out.println("normalize: " + file.normalize());
-        System.out.println("fileName:  " + file.normalize().getFileName());
-        System.out.println("parent:    " + file.normalize().getParent());
-        System.out.println("relativize:" + " " + dir.relativize(Path.of("/home/ada/photos/cat.png")));
-        System.out.println("absolute?  " + Path.of("notes.txt").isAbsolute());
+        println("resolve:   " + file);
+        println("normalize: " + file.normalize());
+        println("fileName:  " + file.normalize().getFileName());
+        println("parent:    " + file.normalize().getParent());
+        println("relativize:" + " " + dir.relativize(Path.of("/home/ada/photos/cat.png")));
+        println("absolute?  " + Path.of("notes.txt").isAbsolute());
     }
 }
 ```
@@ -135,10 +140,12 @@ absolute?  false
 import java.nio.file.*;
 import java.io.IOException;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws IOException {
         Path missing = Path.of("does-not-exist.txt");
-        System.out.println(Files.readString(missing));
+        println(Files.readString(missing));
     }
 }
 ```
@@ -169,13 +176,15 @@ import java.nio.file.*;
 import java.io.IOException;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws IOException {
         Path file = Path.of("data.txt");
         Files.write(file, List.of("apple", "banana", "cherry"));
         List<String> lines = Files.readAllLines(file);
-        System.out.println("lines: " + lines.size());
-        System.out.println(lines.get(1));
+        println("lines: " + lines.size());
+        println(lines.get(1));
     }
 }
 ```
@@ -218,6 +227,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws IOException {
         Path file = Path.of("nums.txt");
@@ -226,7 +237,7 @@ public class Main {
         try (Stream<String> lines = Files.lines(file)) {
             count = lines.filter(s -> Integer.parseInt(s) > 2).count();
         }
-        System.out.println("lines > 2: " + count);
+        println("lines > 2: " + count);
     }
 }
 ```
@@ -263,14 +274,16 @@ Underneath all text lie bytes. A `String`'s **characters** become **bytes** thro
 import java.nio.file.*;
 import java.io.IOException;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws IOException {
         Path file = Path.of("bytes.txt");
         Files.writeString(file, "Café");
         byte[] bytes = Files.readAllBytes(file);
         String text = Files.readString(file);
-        System.out.println("bytes: " + bytes.length);
-        System.out.println("chars: " + text.length());
+        println("bytes: " + bytes.length);
+        println("chars: " + text.length());
     }
 }
 ```
@@ -296,16 +309,18 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws IOException {
         Path file = Path.of("cafe.txt");
         Files.writeString(file, "Café", StandardCharsets.UTF_8);
-        System.out.println("read as UTF-8:      " + Files.readString(file, StandardCharsets.UTF_8));
-        System.out.println("read as ISO-8859-1: " + Files.readString(file, StandardCharsets.ISO_8859_1));
+        println("read as UTF-8:      " + Files.readString(file, StandardCharsets.UTF_8));
+        println("read as ISO-8859-1: " + Files.readString(file, StandardCharsets.ISO_8859_1));
 
         Files.writeString(file, "Café", StandardCharsets.ISO_8859_1);
-        System.out.println("written as ISO-8859-1, read as UTF-8:");
-        System.out.println(Files.readString(file));
+        println("written as ISO-8859-1, read as UTF-8:");
+        println(Files.readString(file));
     }
 }
 ```
@@ -350,6 +365,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws IOException {
         Path file = Path.of("log.txt");
@@ -362,7 +379,7 @@ public class Main {
         try (BufferedReader r = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             String line;
             while ((line = r.readLine()) != null) {
-                System.out.println("read: " + line);
+                println("read: " + line);
             }
         }
     }
@@ -383,13 +400,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        System.out.print("Your name: ");
+        print("Your name: ");
         String name = in.readLine();
-        System.out.println("Hello, " + name + "!");
-        System.out.println("next readLine: " + in.readLine());
+        println("Hello, " + name + "!");
+        println("next readLine: " + in.readLine());
     }
 }
 ```
@@ -407,12 +427,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader in = new BufferedReader(new StringReader("Ada\n"));   // a fixed source
         String name = in.readLine();
-        System.out.println("Hello, " + name + "!");
-        System.out.println("next readLine: " + in.readLine());
+        println("Hello, " + name + "!");
+        println("next readLine: " + in.readLine());
     }
 }
 ```
@@ -438,6 +460,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static java.lang.IO.println;
+
 public class Main {
     static long countBytes(InputStream in) throws IOException {
         long n = 0;
@@ -451,12 +475,12 @@ public class Main {
 
         long t0 = System.nanoTime();
         try (InputStream raw = new FileInputStream(file.toFile())) {
-            System.out.println("unbuffered: " + countBytes(raw) + " bytes in "
+            println("unbuffered: " + countBytes(raw) + " bytes in "
                 + (System.nanoTime() - t0) / 1_000_000 + " ms");
         }
         t0 = System.nanoTime();
         try (InputStream buffered = new BufferedInputStream(new FileInputStream(file.toFile()))) {
-            System.out.println("buffered:   " + countBytes(buffered) + " bytes in "
+            println("buffered:   " + countBytes(buffered) + " bytes in "
                 + (System.nanoTime() - t0) / 1_000_000 + " ms");
         }
     }
@@ -548,6 +572,8 @@ This program serializes into a byte array in memory, so it doesn't need a file:
 ```java run
 import java.io.*;
 
+import static java.lang.IO.println;
+
 public class Main {
     static class Account implements Serializable {
         private static final long serialVersionUID = 1L;
@@ -570,13 +596,13 @@ public class Main {
             out.writeObject(before);
         }
         byte[] bytes = buffer.toByteArray();
-        System.out.println("serialized to " + bytes.length + " bytes");
+        println("serialized to " + bytes.length + " bytes");
 
         try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
             Account after = (Account) in.readObject();
-            System.out.println("owner=" + after.owner + " balance=" + after.balance
+            println("owner=" + after.owner + " balance=" + after.balance
                 + " sessionToken=" + after.sessionToken);
-            System.out.println("same object? " + (after == before));
+            println("same object? " + (after == before));
         }
     }
 }
@@ -622,11 +648,13 @@ Exception in thread "main" java.io.NotSerializableException: Main$Point
 ```java run
 import java.io.*;
 
+import static java.lang.IO.println;
+
 public class Main {
     record Point(int x, int y) implements Serializable {
         Point {
             if (x < 0) throw new IllegalArgumentException("x must be >= 0");
-            System.out.println("canonical constructor ran for x=" + x);
+            println("canonical constructor ran for x=" + x);
         }
     }
 
@@ -636,7 +664,7 @@ public class Main {
             out.writeObject(new Point(3, 4));
         }
         try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()))) {
-            System.out.println("read back: " + in.readObject());
+            println("read back: " + in.readObject());
         }
     }
 }
@@ -741,12 +769,14 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws IOException {
         Path euro = Path.of("euro.txt");
         Files.writeString(euro, "a€b");
-        System.out.println("bytes: " + Files.readAllBytes(euro).length);
-        System.out.println("chars: " + Files.readString(euro).length());
+        println("bytes: " + Files.readAllBytes(euro).length);
+        println("chars: " + Files.readString(euro).length());
 
         Path file = Path.of("nums.txt");
         Files.write(file, List.of("3", "1", "4", "1", "5"));
@@ -754,7 +784,7 @@ public class Main {
         try (Stream<String> lines = Files.lines(file)) {
             sum = lines.mapToInt(Integer::parseInt).sum();
         }
-        System.out.println("sum: " + sum);
+        println("sum: " + sum);
     }
 }
 ```

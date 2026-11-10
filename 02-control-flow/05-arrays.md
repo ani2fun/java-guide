@@ -63,16 +63,18 @@ There are two ways to make an array <abbr title="The Java Language Specification
 Either way, `.length` gives the number of slots, whether or not you've assigned them.
 
 ```java run viz=array:scores
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] scores = new int[3];   // three slots, each default 0
         scores[0] = 90;
         scores[1] = 85;
         int[] primes = {2, 3, 5, 7}; // literal: four slots, already filled
-        System.out.println(scores.length);
-        System.out.println(scores[2]);   // never assigned → still 0
-        System.out.println(primes.length);
-        System.out.println(primes[0]);
+        println(scores.length);
+        println(scores[2]);   // never assigned → still 0
+        println(primes.length);
+        println(primes[0]);
     }
 }
 ```
@@ -104,9 +106,11 @@ primes: "int[] primes   (length = 4)" {
 You've actually used an array since your very first program. `main(String[] args)` receives one, holding the words typed after `java Main`. The Run button types none, so it's empty:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(args.length);
+        println(args.length);
     }
 }
 ```
@@ -122,14 +126,16 @@ public class Main {
 The default depends on the type:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         double[] d = new double[2];
         boolean[] flags = new boolean[2];
         String[] names = new String[2];
-        System.out.println(d[0]);
-        System.out.println(flags[0]);
-        System.out.println(names[0]);
+        println(d[0]);
+        println(flags[0]);
+        println(names[0]);
     }
 }
 ```
@@ -148,18 +154,20 @@ A `String[]` slot starts as **`null`**: "no object yet". [References, Equality &
 *Watch out: a literal assigned later.* The `{…}` shorthand works only in a declaration <abbr title="The Java Language Specification, Java SE 25, §10.6">[1]</abbr>. Declare first and assign the braces later, and javac can't parse it:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] a;
         a = {1, 2, 3};
-        System.out.println(a.length);
+        println(a.length);
     }
 }
 ```
 
 **Compiler error** *(the first of three errors on that line):*
 ```
-Main.java:4: error: illegal start of expression
+Main.java:6: error: illegal start of expression
         a = {1, 2, 3};
             ^
 ```
@@ -169,10 +177,12 @@ Name the type in front of the braces: `a = new int[] {1, 2, 3};` compiles and pr
 **Seeing an array.** `println` on an array doesn't print its values. It prints a type code and a number:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] a = {1, 2, 3};
-        System.out.println(a);
+        println(a);
     }
 }
 ```
@@ -187,17 +197,19 @@ public class Main {
 ```java run
 import java.util.Arrays;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] nums = {5, 10, 15};
         for (int n : nums) {
             n = 0;
         }
-        System.out.println(Arrays.toString(nums));
+        println(Arrays.toString(nums));
         for (int i = 0; i < nums.length; i++) {
             nums[i] = 0;
         }
-        System.out.println(Arrays.toString(nums));
+        println(Arrays.toString(nums));
     }
 }
 ```
@@ -225,13 +237,15 @@ The defaults have a cost: a slot you *forgot* to fill is silently `0`, not an er
 `array[i]` is the slot at index `i`. Read it in an expression, or assign to it to change that slot. Indices start at `0`, so a length-3 array has the valid indices `0`, `1`, `2`.
 
 ```java run viz=array:a
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] a = {10, 20, 30};
         a[1] = 99;
-        System.out.println(a[0]);
-        System.out.println(a[1]);
-        System.out.println(a[2]);
+        println(a[0]);
+        println(a[1]);
+        println(a[2]);
     }
 }
 ```
@@ -251,10 +265,12 @@ public class Main {
 *Concrete bite.* Index past the end (or below `0`), and it throws. That happens at run time, because nobody knows the index until then:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] a = {10, 20, 30};
-        System.out.println(a[3]);
+        println(a[3]);
     }
 }
 ```
@@ -284,16 +300,19 @@ Two loops walk an array.
 - The enhanced `for` gives you each **value** directly, for when you'd ignore the index anyway.
 
 ```java run viz=array:nums
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] nums = {5, 10, 15};
         for (int i = 0; i < nums.length; i++) {
-            System.out.println(i + " -> " + nums[i]);
+            println(i + " -> " + nums[i]);
         }
         for (int n : nums) {
-            System.out.print(n + " ");
+            print(n + " ");
         }
-        System.out.println();
+        println();
     }
 }
 ```
@@ -330,22 +349,24 @@ Each choice has a cost. Reach for the index when you don't need it, and you brin
 An array's elements can themselves be arrays. `int[][]` is "an array of `int` arrays", a grid you address as `grid[row][col]`. Iterating over it takes [nested loops](/synapse/programming-languages/java/control-flow/loop-control-and-patterns).
 
 ```java run viz=grid:grid
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[][] grid = {
             {1, 2, 3},
             {4, 5, 6}
         };
-        System.out.println(grid.length);      // number of rows
-        System.out.println(grid[0].length);   // length of row 0
-        System.out.println(grid[1][2]);       // row 1, column 2
+        println(grid.length);      // number of rows
+        println(grid[0].length);   // length of row 0
+        println(grid[1][2]);       // row 1, column 2
         int total = 0;
         for (int[] row : grid) {
             for (int cell : row) {
                 total += cell;
             }
         }
-        System.out.println(total);
+        println(total);
     }
 }
 ```
@@ -363,12 +384,14 @@ public class Main {
 `new int[rows][cols]` makes a rectangle of defaults:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[][] table = new int[3][4];
-        System.out.println(table.length);
-        System.out.println(table[2].length);
-        System.out.println(table[2][3]);
+        println(table.length);
+        println(table[2].length);
+        println(table[2][3]);
     }
 }
 ```
@@ -386,15 +409,17 @@ public class Main {
 *Concrete bite.* So the bounds of one row tell you nothing about another, and if you assume a rectangle, it throws:
 
 ```java run viz=grid:jagged
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[][] jagged = {
             {1, 2, 3, 4},
             {5}
         };
-        System.out.println(jagged[0].length);
-        System.out.println(jagged[1].length);
-        System.out.println(jagged[1][1]);
+        println(jagged[0].length);
+        println(jagged[1].length);
+        println(jagged[1][1]);
     }
 }
 ```
@@ -423,19 +448,21 @@ Assume every row is the same length, and you pay with exactly this per-row `Arra
 Now the defining limit comes back: an array's `length` is fixed forever at creation. You can't append, insert, or remove. There's no `add`, and no `length = …`. To "grow" an array, you allocate a bigger one and copy. That rigidity is exactly what [The Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework) replaces with growable `List`s.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] a = {1, 2, 3};
-        System.out.println(a.length());
+        println(a.length());
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:4: error: cannot find symbol
-        System.out.println(a.length());
-                            ^
+Main.java:6: error: cannot find symbol
+        println(a.length());
+                 ^
   symbol:   method length()
   location: variable a of type int[]
 1 error
@@ -451,13 +478,15 @@ Main.java:4: error: cannot find symbol
 ```java run
 import java.util.Arrays;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] a = {1, 2, 3};
         int[] bigger = Arrays.copyOf(a, 5);
         bigger[3] = 4;
-        System.out.println(Arrays.toString(a));
-        System.out.println(Arrays.toString(bigger));
+        println(Arrays.toString(a));
+        println(Arrays.toString(bigger));
     }
 }
 ```
@@ -473,12 +502,14 @@ public class Main {
 *Watch out: `=` doesn't copy.* Assigning one array variable to another shares the array. It doesn't make a second one:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] a = {1, 2, 3};
         int[] b = a;
         b[0] = 99;
-        System.out.println(a[0]);
+        println(a[0]);
     }
 }
 ```
@@ -495,13 +526,15 @@ The same sharing explains `==` on arrays. It asks "the same array?", not "the sa
 ```java run
 import java.util.Arrays;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] a = {1, 2, 3};
         int[] b = {1, 2, 3};
-        System.out.println(Arrays.toString(a));
-        System.out.println(a == b);
-        System.out.println(Arrays.equals(a, b));
+        println(Arrays.toString(a));
+        println(a == b);
+        println(Arrays.equals(a, b));
     }
 }
 ```

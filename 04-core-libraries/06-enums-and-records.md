@@ -59,19 +59,21 @@ Every output below was produced by compiling and running the code on Java 25.
 An `enum` declares a type whose only values are the named constants you list. Each constant is the one and only object of its kind. That makes the type safe (nobody can pass in a stray string), and it makes it a natural fit for a [`switch`](/synapse/programming-languages/java/control-flow/conditionals).
 
 ```java run
+import static java.lang.IO.println;
+
 enum Day { MON, TUE, WED, THU, FRI, SAT, SUN }
 
 public class Main {
     public static void main(String[] args) {
         Day d = Day.WED;
-        System.out.println(d);
-        System.out.println(d.ordinal());
+        println(d);
+        println(d.ordinal());
         String kind = switch (d) {
             case SAT, SUN -> "weekend";
             default -> "weekday";
         };
-        System.out.println(kind);
-        System.out.println(Day.values().length);
+        println(kind);
+        println(Day.values().length);
     }
 }
 ```
@@ -101,6 +103,8 @@ Since each constant is the only instance of its kind, `==` is safe for enums. In
 *Concrete bite.* Because the set is closed, the compiler can check a `switch` *expression* over an enum for exhaustiveness. Cover some constants but not all, with no `default`, and it won't compile:
 
 ```java run
+import static java.lang.IO.println;
+
 enum Day { MON, TUE, WED, THU, FRI, SAT, SUN }
 
 public class Main {
@@ -110,14 +114,14 @@ public class Main {
             case MON -> "monday";
             case TUE -> "tuesday";
         };
-        System.out.println(s);
+        println(s);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:6: error: the switch expression does not cover all possible input values
+Main.java:8: error: the switch expression does not cover all possible input values
         String s = switch (d) {
                    ^
 ```
@@ -127,13 +131,15 @@ This `switch` handles only two of the seven days, yet it must produce a value, s
 To turn text from outside the program into an enum constant, use `valueOf`. It matches the name exactly, including case:
 
 ```java run
+import static java.lang.IO.println;
+
 enum Day { MON, TUE, WED, THU, FRI, SAT, SUN }
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Day.valueOf("WED"));
-        System.out.println(Day.valueOf("WED") == Day.WED);
-        System.out.println(Day.valueOf("wed"));
+        println(Day.valueOf("WED"));
+        println(Day.valueOf("WED") == Day.WED);
+        println(Day.valueOf("wed"));
     }
 }
 ```
@@ -235,16 +241,18 @@ A **record** is a class whose whole job is to hold data. You declare its **compo
 - `equals`, `hashCode` and `toString` over all the components.
 
 ```java run
+import static java.lang.IO.println;
+
 record Point(int x, int y) {}
 
 public class Main {
     public static void main(String[] args) {
         Point a = new Point(1, 2);
         Point b = new Point(1, 2);
-        System.out.println(a);
-        System.out.println(a.x() + "," + a.y());
-        System.out.println(a.equals(b));
-        System.out.println(a.hashCode() == b.hashCode());
+        println(a);
+        println(a.x() + "," + a.y());
+        println(a.equals(b));
+        println(a.hashCode() == b.hashCode());
     }
 }
 ```
@@ -270,6 +278,8 @@ Remember from [equals & hashCode](/synapse/programming-languages/java/core-libra
 *Mechanism.* A record class is implicitly `final`, and its superclass is always `java.lang.Record`, so it can't `extend` another class <abbr title="The Java Language Specification, Java SE 25, §8.10">[9]</abbr>. The compiler derives the members from the component list. You can still add your own methods, and you can check the values in a **compact constructor** — a constructor with no parameter list that runs before the fields are assigned <abbr title="The Java Language Specification, Java SE 25, §8.10.4.2">[10]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 record Range(int low, int high) {
     Range {                                   // compact constructor: no parameter list
         if (low > high) {
@@ -285,7 +295,7 @@ record Range(int low, int high) {
 public class Main {
     public static void main(String[] args) {
         Range r = new Range(2, 5);
-        System.out.println(r + " has length " + r.length());
+        println(r + " has length " + r.length());
         new Range(5, 2);
     }
 }
@@ -302,20 +312,22 @@ The compact constructor rejected `(5, 2)`, so an invalid `Range` can never exist
 *Concrete bite.* The immutability is real. Record components are `final` and come with no setters, so you can't change one after construction:
 
 ```java run
+import static java.lang.IO.println;
+
 record Point(int x, int y) {}
 
 public class Main {
     public static void main(String[] args) {
         Point p = new Point(1, 2);
         p.x = 5;
-        System.out.println(p);
+        println(p);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:6: error: x has private access in Point
+Main.java:8: error: x has private access in Point
         p.x = 5;
          ^
 1 error
@@ -329,6 +341,8 @@ Main.java:6: error: x has private access in Point
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 record Team(String name, List<String> members) {}
 
 public class Main {
@@ -337,7 +351,7 @@ public class Main {
         Team t = new Team("core", people);
         people.add("Linus");
         t.members().add("Grace");
-        System.out.println(t);
+        println(t);
     }
 }
 ```
@@ -353,6 +367,8 @@ The "immutable" `Team` changed twice: once through the caller's `people` list, a
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 record Team(String name, List<String> members) {
     Team {
         members = List.copyOf(members);       // defensive, unmodifiable copy
@@ -364,7 +380,7 @@ public class Main {
         List<String> people = new ArrayList<>(List.of("Ada"));
         Team t = new Team("core", people);
         people.add("Linus");
-        System.out.println(t);
+        println(t);
         t.members().add("Grace");
     }
 }
@@ -393,6 +409,8 @@ The cost is that a record's fields can't change, and a record can't extend a cla
 A **sealed** interface or class uses a `permits` clause to name exactly which types may implement or extend it. Its set of subtypes is then *closed*: the compiler knows every possible implementation. That's the foundation for the exhaustive pattern matching you'll meet in [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching).
 
 ```java run
+import static java.lang.IO.println;
+
 sealed interface Shape permits Circle, Square {}
 record Circle(double radius) implements Shape {}
 record Square(double side) implements Shape {}
@@ -400,7 +418,7 @@ record Square(double side) implements Shape {}
 public class Main {
     public static void main(String[] args) {
         Shape s = new Circle(2.0);
-        System.out.println(s);
+        println(s);
     }
 }
 ```
@@ -519,6 +537,8 @@ One check per objective. Answer before you open anything.
 <summary>The 🧪 box below: <code>isWeekend()</code>, printing and comparing <code>Money</code>, and <code>Rectangle</code>.</summary>
 
 ```java run
+import static java.lang.IO.println;
+
 enum Day {
     MON, TUE, WED, THU, FRI, SAT, SUN;
 
@@ -531,10 +551,10 @@ record Money(int cents, String currency) {}
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Day.SAT.isWeekend());
-        System.out.println(Day.MON.isWeekend());
-        System.out.println(new Money(100, "USD"));
-        System.out.println(new Money(100, "USD").equals(new Money(100, "USD")));
+        println(Day.SAT.isWeekend());
+        println(Day.MON.isWeekend());
+        println(new Money(100, "USD"));
+        println(new Money(100, "USD").equals(new Money(100, "USD")));
     }
 }
 ```

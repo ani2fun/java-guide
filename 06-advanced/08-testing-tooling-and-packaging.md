@@ -59,11 +59,13 @@ Most examples here use multi-file projects and the `javac`/`mvn`/`gradle`/`jar` 
 At the heart of any test is an **assertion**: a claim that must hold, checked automatically. Java has a built-in `assert` statement, but it's **disabled unless you pass `-ea`** (enable assertions) <abbr title="The java command, JDK 25 documentation (-enableassertions)">[2]</abbr>, which makes it unsuitable as your testing tool.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int add(int a, int b) { return a + b; }
     public static void main(String[] args) {
         assert add(2, 2) == 5 : "add(2,2) should be 5";
-        System.out.println("passed");
+        println("passed");
     }
 }
 ```
@@ -78,7 +80,7 @@ The same program, started with assertions enabled:
 ```
 $ java -ea Main
 Exception in thread "main" java.lang.AssertionError: add(2,2) should be 5
-	at Main.main(Main.java:4)
+	at Main.main(Main.java:6)
 ```
 
 **Analysis.**
@@ -96,6 +98,8 @@ An assertion that the JVM ignores by default is worthless as a test. That's the 
 *Watch out: an assertion with a side effect.* "No effect whatsoever" includes the condition itself: it isn't even evaluated. So if you put work inside an `assert`, that work vanishes along with the assertion:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int checks = 0;
 
@@ -106,7 +110,7 @@ public class Main {
 
     public static void main(String[] args) {
         assert counted(true) : "never fails";
-        System.out.println("checks = " + checks);
+        println("checks = " + checks);
     }
 }
 ```
@@ -445,6 +449,8 @@ In practice, a build tool produces the fat JAR for you, through a plugin such as
 **Documentation ships too.** A library's users read its API documentation, which the `javadoc` tool generates from **documentation comments** in the source <abbr title="The javadoc command, JDK 25 documentation">[16]</abbr>. A traditional doc comment is written in HTML between `/**` and `*/`. Since JDK 23, you can write it in Markdown instead, on lines that each begin with `///` <abbr title="JEP 467: Markdown Documentation Comments (JDK 23)">[14]</abbr> <abbr title="Documentation Comment Specification for the Standard Doclet (JDK 25), &quot;Markdown Documentation Comments&quot;">[15]</abbr>. To the compiler, they're ordinary comments, so the program runs as usual:
 
 ```java run
+import static java.lang.IO.println;
+
 /// Converts temperatures between scales.
 ///
 /// Every method here is **pure**: it never changes any state.
@@ -460,8 +466,8 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        System.out.println(toFahrenheit(100));
-        System.out.println(toFahrenheit(-40));
+        println(toFahrenheit(100));
+        println(toFahrenheit(-40));
     }
 }
 ```
@@ -476,10 +482,10 @@ Run `javadoc` on the same file, and it turns the Markdown into HTML. `-quiet` hi
 
 ```
 $ javadoc -quiet -d docs Main.java
-Main.java:4: warning: use of default constructor, which does not provide a comment
+Main.java:6: warning: use of default constructor, which does not provide a comment
 public class Main {
        ^
-Main.java:15: warning: no comment
+Main.java:17: warning: no comment
     public static void main(String[] args) {
                        ^
 2 warnings
@@ -510,6 +516,8 @@ A stack trace is a map, and you read it from the top:
 ```java run
 import java.util.Map;
 
+import static java.lang.IO.println;
+
 public class Main {
     static int parsePort(String text) {
         return Integer.parseInt(text);
@@ -520,9 +528,9 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        System.out.println("loading config");
+        println("loading config");
         int port = loadPort(Map.of("host", "localhost"));
-        System.out.println("port " + port);
+        println("port " + port);
     }
 }
 ```
@@ -533,16 +541,16 @@ loading config
 Exception in thread "main" java.lang.NumberFormatException: Cannot parse null string
 	at java.base/java.lang.Integer.parseInt(Integer.java:527)
 	at java.base/java.lang.Integer.parseInt(Integer.java:662)
-	at Main.parsePort(Main.java:5)
-	at Main.loadPort(Main.java:9)
-	at Main.main(Main.java:14)
+	at Main.parsePort(Main.java:7)
+	at Main.loadPort(Main.java:11)
+	at Main.main(Main.java:16)
 ```
 
 **Analysis.**
 
 - The first line says *what* happened (`NumberFormatException`) and *why* (`Cannot parse null string`).
 - The frames say *where*, innermost call first. Skip the `java.base` frames, since the bug is rarely in the JDK. (Their line numbers also differ between JDK builds.)
-- The first frame in your own code is `Main.parsePort(Main.java:5)`. But the `null` actually came from further down: `loadPort` asked for a `"port"` key that the map doesn't have.
+- The first frame in your own code is `Main.parsePort(Main.java:7)`. But the `null` actually came from further down: `loadPort` asked for a `"port"` key that the map doesn't have.
 
 The single most effective debugging move is to turn the bug into a **failing test**. It reproduces the problem on demand, tells you the moment you've fixed it, and then stays behind as a regression guard.
 
@@ -554,19 +562,21 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Logger log = Logger.getLogger("orders");
         log.setUseParentHandlers(false);          // no copy on System.err
         log.addHandler(new Handler() {            // print each record to System.out
             @Override public void publish(LogRecord r) {
-                System.out.println(r.getLevel() + " " + r.getLoggerName() + ": " + r.getMessage());
+                println(r.getLevel() + " " + r.getLoggerName() + ": " + r.getMessage());
             }
             @Override public void flush() {}
             @Override public void close() {}
         });
 
-        System.out.println("level: " + log.getLevel() + ", parent: " + log.getParent().getLevel());
+        println("level: " + log.getLevel() + ", parent: " + log.getParent().getLevel());
         log.info("order 42 received");
         log.fine("order 42 has 3 lines");         // below INFO: dropped
         log.warning("order 42 is missing a postcode");

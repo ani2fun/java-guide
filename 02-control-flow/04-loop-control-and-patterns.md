@@ -58,6 +58,8 @@ This builds on [loops](/synapse/programming-languages/java/control-flow/loops) a
 `break` stops a loop immediately and jumps to the code after it <abbr title="The Java Language Specification, Java SE 25, §14.15">[1]</abbr>. It's how you search: scan until you find a match, then stop. There's no point carrying on.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int found = -1;
@@ -67,7 +69,7 @@ public class Main {
                 break;
             }
         }
-        System.out.println(found);
+        println(found);
     }
 }
 ```
@@ -86,13 +88,16 @@ A statement right after `break`, in the same block, can never run, and javac rej
 A loop inside another loop is a **nested loop**. The inner loop runs all of its passes for *each* pass of the outer one:
 
 ```java run
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         for (int i = 1; i <= 2; i++) {
             for (int j = 1; j <= 3; j++) {
-                System.out.print(i + "," + j + "  ");
+                print(i + "," + j + "  ");
             }
-            System.out.println();
+            println();
         }
     }
 }
@@ -112,12 +117,14 @@ Two outer passes times three inner passes make six pairs. The `println` after th
 *Concrete bite.* Put a `break` in an inner loop, and the outer loop keeps right on going:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         for (int i = 1; i <= 3; i++) {
             for (int j = 1; j <= 3; j++) {
                 if (j == 2) break;
-                System.out.println(i + "," + j);
+                println(i + "," + j);
             }
         }
     }
@@ -136,12 +143,14 @@ For each `i`, the inner loop printed `j = 1`, then hit `break` at `j == 2`. But 
 *Watch out: `break` inside a `switch`.* A colon-style `switch` from [Conditionals](/synapse/programming-languages/java/control-flow/conditionals) uses `break` to end each case. Inside a loop, that `break` leaves the `switch`, not the loop:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         for (int i = 1; i <= 4; i++) {
             switch (i) {
-                case 2: System.out.println("found 2"); break;
-                default: System.out.println("checked " + i);
+                case 2: println("found 2"); break;
+                default: println("checked " + i);
             }
         }
     }
@@ -173,13 +182,16 @@ That scoping has a cost. A `break` meant to abandon a *nested* search stops only
 `continue` abandons the *rest of the current pass* and jumps straight to the loop's next step: the update and test <abbr title="The Java Language Specification, Java SE 25, §14.16">[2]</abbr>. It's how you filter: skip the elements that don't qualify, and keep looping for the ones that do.
 
 ```java run
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         for (int i = 0; i < 5; i++) {
             if (i == 2) continue;
-            System.out.print(i + " ");
+            print(i + " ");
         }
-        System.out.println();
+        println();
     }
 }
 ```
@@ -222,12 +234,14 @@ flowchart TD
 *Concrete bite.* "The rest of the body is skipped" is the whole story. The lines after `continue` run only on passes that don't `continue`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         for (int i = 0; i < 4; i++) {
-            System.out.println("checking " + i);
+            println("checking " + i);
             if (i % 2 == 0) continue;
-            System.out.println("  " + i + " is odd");
+            println("  " + i + " is odd");
         }
     }
 }
@@ -249,12 +263,14 @@ checking 3
 
 ```java run
 // expects-hang: continue skips the i++, so i stays 2 and the loop never ends
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int i = 0;
         while (i < 5) {
             if (i == 2) continue;
-            System.out.println(i);
+            println(i);
             i++;
         }
     }
@@ -270,15 +286,18 @@ public class Main {
 At `i == 2`, `continue` jumped back to the test and skipped `i++`. `i` stayed `2`, so the same `continue` ran again, and again, forever. Move the update above the `continue`:
 
 ```java run
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int i = 0;
         while (i < 5) {
             i++;
             if (i == 3) continue;
-            System.out.print(i + " ");
+            print(i + " ");
         }
-        System.out.println();
+        println();
     }
 }
 ```
@@ -305,19 +324,21 @@ The catch is the `for`-vs-`while` asymmetry. A `for` always runs its update. But
 When a `break` needs to leave more than the innermost loop, give the outer loop a **label**: a name followed by `:` <abbr title="The Java Language Specification, Java SE 25, §14.7">[3]</abbr>. Then write `break label`, which exits the named loop and everything inside it.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         outer:
         for (int i = 1; i <= 3; i++) {
             for (int j = 1; j <= 3; j++) {
                 if (i * j == 4) {
-                    System.out.println("stop at " + i + "," + j);
+                    println("stop at " + i + "," + j);
                     break outer;
                 }
-                System.out.println(i + "," + j);
+                println(i + "," + j);
             }
         }
-        System.out.println("done");
+        println("done");
     }
 }
 ```
@@ -337,13 +358,15 @@ done
 The same label fixes the `switch` trap from §1. Name the loop, and `break search` leaves the loop from inside the `switch`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         search:
         for (int i = 1; i <= 4; i++) {
             switch (i) {
-                case 2: System.out.println("found 2"); break search;
-                default: System.out.println("checked " + i);
+                case 2: println("found 2"); break search;
+                default: println("checked " + i);
             }
         }
     }
@@ -359,16 +382,19 @@ found 2
 `continue` takes a label too. `continue rows` ends the current pass of the loop named `rows` and starts its next pass <abbr title="The Java Language Specification, Java SE 25, §14.16">[2]</abbr>. Here each row prints only the pairs where `j` is not bigger than `i`:
 
 ```java run
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         rows:
         for (int i = 1; i <= 3; i++) {
             for (int j = 1; j <= 3; j++) {
                 if (j > i) continue rows;
-                System.out.print(i + "," + j + "  ");
+                print(i + "," + j + "  ");
             }
         }
-        System.out.println();
+        println();
     }
 }
 ```
@@ -423,6 +449,8 @@ The catch is that labels are rare enough to surprise the next reader. Overuse th
 Most loops take one of a few shapes: build up a **sum**, keep a **count**, track a running **max** or **min**, or set a **flag** when something turns up. The skeleton is always the same. Initialize an **accumulator** (the variable that collects the result) before the loop, and update it on each pass.
 
 ```java run viz=array:data
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] data = {4, 8, 15, 16, 23, 42};
@@ -432,7 +460,7 @@ public class Main {
             count++;
             if (x > max) max = x;
         }
-        System.out.println("sum=" + sum + " count=" + count + " max=" + max);
+        println("sum=" + sum + " count=" + count + " max=" + max);
     }
 }
 ```
@@ -453,6 +481,8 @@ Each one starts at a value that's correct for "nothing seen yet". `sum` and `cou
 **An average** is `sum / count`, and both are `int`s. So the division truncates, just as [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) showed. Cast one side to keep the fraction:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] data = {7, 8};
@@ -461,8 +491,8 @@ public class Main {
             sum += x;
             count++;
         }
-        System.out.println(sum / count);
-        System.out.println((double) sum / count);
+        println(sum / count);
+        println((double) sum / count);
     }
 }
 ```
@@ -476,6 +506,8 @@ public class Main {
 **A flag** answers "is there any …?". It starts out `false`, and the first match sets it and stops the scan:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] data = {4, 8, 15, 16, 23, 42};
@@ -486,7 +518,7 @@ public class Main {
                 break;
             }
         }
-        System.out.println(hasOdd);
+        println(hasOdd);
     }
 }
 ```
@@ -504,6 +536,8 @@ true
 *Concrete bite.* Initialize a `max` to `0`, and any all-negative data defeats it:
 
 ```java run viz=array:temps
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] temps = {-5, -2, -9, -1};
@@ -511,7 +545,7 @@ public class Main {
         for (int t : temps) {
             if (t > max) max = t;
         }
-        System.out.println(max);
+        println(max);
     }
 }
 ```
@@ -526,6 +560,8 @@ The real maximum is `-1`, but `0` was never in the data. It was a bad starting v
 *Watch out: no data at all.* An empty list defeats the accumulators in a different way, because the loop body never runs:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] data = {};
@@ -535,8 +571,8 @@ public class Main {
             count++;
             if (x > max) max = x;
         }
-        System.out.println("count=" + count + " max=" + max);
-        System.out.println(sum / count);
+        println("count=" + count + " max=" + max);
+        println(sum / count);
     }
 }
 ```

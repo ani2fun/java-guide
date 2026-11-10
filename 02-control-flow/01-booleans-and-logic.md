@@ -59,12 +59,14 @@ A `boolean` holds exactly one of two values, written `true` and `false` <abbr ti
 They're **boolean literals**: values written straight into the code, like `42` or `'A'`. They aren't text, and they aren't keywords either <abbr title="The Java Language Specification, Java SE 25, §3.9">[2]</abbr>. And that's the whole type.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         boolean isReady = true;
         boolean done = false;
-        System.out.println(isReady);
-        System.out.println(done);
+        println(isReady);
+        println(done);
     }
 }
 ```
@@ -83,17 +85,19 @@ false
 *Concrete bite.* So assigning a number to a `boolean` doesn't mean "0 is false, 1 is true". It doesn't compile:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         boolean b = 1;
-        System.out.println(b);
+        println(b);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:3: error: incompatible types: int cannot be converted to boolean
+Main.java:5: error: incompatible types: int cannot be converted to boolean
         boolean b = 1;
                     ^
 1 error
@@ -104,19 +108,21 @@ Main.java:3: error: incompatible types: int cannot be converted to boolean
 Comparing a `boolean` with a number fails the same way, with a message of its own:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         boolean done = true;
-        System.out.println(done == 1);
+        println(done == 1);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:4: error: incomparable types: boolean and int
-        System.out.println(done == 1);
-                                ^
+Main.java:6: error: incomparable types: boolean and int
+        println(done == 1);
+                     ^
 1 error
 ```
 
@@ -138,14 +144,16 @@ You'll rarely write `true`/`false` literals. Instead, you *compute* booleans by 
 - `==` asks "equal?", and `!=` asks "not equal?".
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(3 < 5);
-        System.out.println(3 == 3);
-        System.out.println(3 != 3);
+        println(3 < 5);
+        println(3 == 3);
+        println(3 != 3);
         int age = 20;
         boolean adult = age >= 18;
-        System.out.println(adult);
+        println(adult);
     }
 }
 ```
@@ -165,11 +173,13 @@ On primitives like these, `==` compares values. On *objects*, it compares identi
 When you compare two different numeric types, Java promotes them first, just the way [arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) does <abbr title="The Java Language Specification, Java SE 25, §15.20.1 and §15.21.1">[3]</abbr>. A `char` compares as its number:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(5 == 5.0);
-        System.out.println('a' < 'b');
-        System.out.println('a' == 97);
+        println(5 == 5.0);
+        println('a' < 'b');
+        println('a' == 97);
     }
 }
 ```
@@ -192,18 +202,20 @@ true
 *Concrete bite.* C accepts `if (x = 5)`, at most with a warning, and treats the `5` as true. It's a classic silent bug. Java catches the slip at compile time, because this assignment's result is an `int`, not a `boolean`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int x = 3;
         boolean ok = (x = 5);
-        System.out.println(ok);
+        println(ok);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:4: error: incompatible types: int cannot be converted to boolean
+Main.java:6: error: incompatible types: int cannot be converted to boolean
         boolean ok = (x = 5);
                         ^
 1 error
@@ -214,12 +226,14 @@ Main.java:4: error: incompatible types: int cannot be converted to boolean
 *Watch out: the slip the compiler can't see.* The protection comes from the types. When the variable is itself a `boolean`, the assignment produces a `boolean`, so the typo compiles:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         boolean done = false;
         boolean finished = (done = true);
-        System.out.println(finished);
-        System.out.println(done);
+        println(finished);
+        println(done);
     }
 }
 ```
@@ -251,12 +265,14 @@ To combine yes/no answers, use the three logical operators:
 - `!` ("not") flips a `boolean`.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         boolean a = true, b = false;
-        System.out.println(a && b);
-        System.out.println(a || b);
-        System.out.println(!a);
+        println(a && b);
+        println(a || b);
+        println(!a);
     }
 }
 ```
@@ -282,19 +298,21 @@ These three build every compound condition you'll ever write. Here are all four 
 *Watch out: a chained comparison.* In maths, you write "x is between 1 and 10" as 1 < x < 10. Java rejects that:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int x = 5;
-        System.out.println(1 < x < 10);
+        println(1 < x < 10);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:4: error: bad operand types for binary operator '<'
-        System.out.println(1 < x < 10);
-                                 ^
+Main.java:6: error: bad operand types for binary operator '<'
+        println(1 < x < 10);
+                      ^
   first type:  boolean
   second type: int
 1 error
@@ -303,12 +321,14 @@ Main.java:4: error: bad operand types for binary operator '<'
 Java reads `1 < x < 10` as `(1 < x) < 10` <abbr title="The Java Language Specification, Java SE 25, §15.20">[5]</abbr>. The first `<` gives a `boolean`, and the second `<` then compares that `boolean` with `10`. The message names the two types it got: `boolean` and `int`. A range takes two comparisons joined by `&&`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int x = 5;
-        System.out.println(1 < x && x < 10);
+        println(1 < x && x < 10);
         x = 42;
-        System.out.println(1 < x && x < 10);
+        println(1 < x && x < 10);
     }
 }
 ```
@@ -325,10 +345,12 @@ false
 *Concrete bite.* The precedence of `!` is where intuition lets you down. "Not (a and b)" is **not** the same as "not-a and not-b":
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(!(true && false));
-        System.out.println(!true && !false);
+        println(!(true && false));
+        println(!true && !false);
     }
 }
 ```
@@ -347,16 +369,18 @@ false
 A working-age check shows the second law in action. You can write "not a child and not retired" either way:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int age = 70;
         boolean working = !(age < 18 || age >= 65);
         boolean same = age >= 18 && age < 65;
-        System.out.println(working + " " + same);
+        println(working + " " + same);
         age = 30;
         working = !(age < 18 || age >= 65);
         same = age >= 18 && age < 65;
-        System.out.println(working + " " + same);
+        println(working + " " + same);
     }
 }
 ```
@@ -389,11 +413,13 @@ Forget De Morgan, and you get a condition that looks negated but tests the wrong
 This isn't just about speed. It's a guard.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int x = 0;
         boolean ok = (x != 0) && (10 / x > 0);
-        System.out.println(ok);
+        println(ok);
     }
 }
 ```
@@ -411,11 +437,13 @@ false
 *Concrete bite.* Swap `&&` for `&` and the guard is gone. Both sides run, and `10 / 0` throws:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int x = 0;
         boolean ok = (x != 0) & (10 / x > 0);
-        System.out.println(ok);
+        println(ok);
     }
 }
 ```
@@ -430,13 +458,15 @@ Exception in thread "main" java.lang.ArithmeticException: / by zero
 When the right side is skipped, *everything* in it is skipped, updates included. Here `++n` sits on the right of each operator:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int n = 0;
         boolean a = (n > 5) && (++n > 0);
-        System.out.println(a + " " + n);
+        println(a + " " + n);
         boolean b = (n > 5) & (++n > 0);
-        System.out.println(b + " " + n);
+        println(b + " " + n);
     }
 }
 ```
@@ -452,11 +482,13 @@ With `&&`, `n > 5` was `false`, so `++n` never ran and `n` stayed `0`. With `&`,
 The third non-short-circuit operator is `^`, "exclusive or", which is `true` when the two sides differ <abbr title="The Java Language Specification, Java SE 25, §15.22.2">[8]</abbr>. On booleans it gives the same answer as `!=`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(true ^ false);
-        System.out.println(true ^ true);
-        System.out.println(true != false);
+        println(true ^ false);
+        println(true ^ true);
+        println(true != false);
     }
 }
 ```
@@ -485,10 +517,12 @@ The catch is that order now matters. Short-circuiting protects the right side on
 When `&&` and `||` mix, `&&` binds tighter than `||`, so `a || b && c` means `a || (b && c)`. One comparison also deserves an early warning: `==` on floating-point numbers is treacherous, because Java stores decimals only approximately.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(true || false && false);
-        System.out.println((true || false) && false);
+        println(true || false && false);
+        println((true || false) && false);
     }
 }
 ```
@@ -521,53 +555,59 @@ The full order, tightest first, for the operators you know so far <abbr title="T
 *Concrete bite.* Two everyday lines run straight into those last two rules. Both look fine, and neither compiles:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int age = 20;
-        System.out.println(!age >= 18);
+        println(!age >= 18);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:4: error: bad operand type int for unary operator '!'
-        System.out.println(!age >= 18);
-                           ^
+Main.java:6: error: bad operand type int for unary operator '!'
+        println(!age >= 18);
+                ^
 1 error
 ```
 
 `!` grabbed `age` before `>=` ran, and `!` works only on a `boolean` <abbr title="The Java Language Specification, Java SE 25, §15.15.6">[10]</abbr>. Write `!(age >= 18)`, or better, `age < 18`.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int age = 20;
-        System.out.println("adult: " + (age >= 18));
-        System.out.println("adult: " + age >= 18);
+        println("adult: " + (age >= 18));
+        println("adult: " + age >= 18);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:5: error: bad operand types for binary operator '>='
-        System.out.println("adult: " + age >= 18);
-                                           ^
+Main.java:7: error: bad operand types for binary operator '>='
+        println("adult: " + age >= 18);
+                                ^
   first type:  String
   second type: int
 1 error
 ```
 
-`+` ran first and built the text `"adult: 20"`. Then `>=` tried to compare that `String` with `18`. Line 4, with its parentheses, is the fix, and it would print `adult: true`.
+`+` ran first and built the text `"adult: 20"`. Then `>=` tried to compare that `String` with `18`. Line 6, with its parentheses, is the fix, and it would print `adult: true`.
 
 *A floating-point caveat.* [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) showed that `0.1 + 0.2` isn't exactly `0.3`. A `==` test turns that tiny error into a wrong answer:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(0.1 + 0.2 == 0.3);
-        System.out.println(0.1 + 0.2);
+        println(0.1 + 0.2 == 0.3);
+        println(0.1 + 0.2);
     }
 }
 ```
@@ -581,11 +621,13 @@ false
 `0.1 + 0.2` is `0.30000000000000004`, not `0.3`, so `== 0.3` is `false`. Nothing is broken. `double` stores approximations, and `==` compares them exactly. The fix is to ask "are these *close*?" instead:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         double sum = 0.1 + 0.2;
-        System.out.println(sum == 0.3);
-        System.out.println(Math.abs(sum - 0.3) < 1e-9);
+        println(sum == 0.3);
+        println(Math.abs(sum - 0.3) < 1e-9);
     }
 }
 ```
@@ -601,11 +643,13 @@ true
 One `double` isn't even equal to itself: **NaN**, the "not a number" that `0.0 / 0` produces. The rule is fixed, and `==` with NaN is always `false` <abbr title="The Java Language Specification, Java SE 25, §15.21.1">[11]</abbr>.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         double bad = 0.0 / 0;
-        System.out.println(bad == bad);
-        System.out.println(Double.isNaN(bad));
+        println(bad == bad);
+        println(Double.isNaN(bad));
     }
 }
 ```

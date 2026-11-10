@@ -62,6 +62,8 @@ This lesson takes a deeper pass at [classes & objects](/synapse/programming-lang
 A subclass declares `extends Superclass`, and it automatically gets the superclass's fields and methods. Its constructor calls the superclass constructor with `super(...)`. On top of that, the subclass can add members of its own.
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal {
     String name;
     Animal(String name) { this.name = name; }
@@ -76,8 +78,8 @@ class Dog extends Animal {
 public class Main {
     public static void main(String[] args) {
         Dog d = new Dog("Rex");
-        System.out.println(d.describe());
-        System.out.println(d.fetch());
+        println(d.describe());
+        println(d.fetch());
     }
 }
 ```
@@ -115,12 +117,14 @@ The superclass part of the object is set up before the subclass part. Before JDK
 What if you don't write `super(...)` at all? Then javac inserts `super();` — a call to the superclass's no-argument constructor — as the first statement <abbr title="The Java Language Specification, Java SE 25, §8.8.7">[3]</abbr>. You can see the order when each constructor prints something:
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal {
-    Animal() { System.out.println("1. Animal's constructor"); }
+    Animal() { println("1. Animal's constructor"); }
 }
 
 class Dog extends Animal {
-    Dog() { System.out.println("2. Dog's constructor"); }
+    Dog() { println("2. Dog's constructor"); }
 }
 
 public class Main {
@@ -141,6 +145,8 @@ public class Main {
 *Concrete bite.* That inserted call only works if the superclass has a no-argument constructor. `Animal` below has only `Animal(String name)`, so the implicit `super();` has nothing to call:
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal {
     String name;
     Animal(String name) { this.name = name; }
@@ -152,14 +158,14 @@ class Dog extends Animal {
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(new Dog("Rex").name);
+        println(new Dog("Rex").name);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:7: error: constructor Animal in class Animal cannot be applied to given types;
+Main.java:9: error: constructor Animal in class Animal cannot be applied to given types;
     Dog(String name) { }
                      ^
   required: String
@@ -172,12 +178,14 @@ The caret points at `Dog`'s body, which is where the invisible `super();` sits. 
 *Watch out: a superclass constructor calls an overridden method.* `Animal`'s constructor calls `describe()`, and `Dog` overrides it. The call runs `Dog`'s version, before `Dog`'s constructor has set `name`:
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal {
     Animal() {
         describe();
     }
 
-    void describe() { System.out.println("an animal"); }
+    void describe() { println("an animal"); }
 }
 
 class Dog extends Animal {
@@ -189,7 +197,7 @@ class Dog extends Animal {
     }
 
     @Override
-    void describe() { System.out.println("a dog named " + name); }
+    void describe() { println("a dog named " + name); }
 }
 
 public class Main {
@@ -209,12 +217,14 @@ The field was still `null`, its default value, even though it's `final` and the 
 Since JDK 25, a constructor may assign its *own* fields before it calls `super(...)` <abbr title="JEP 513: Flexible Constructor Bodies (JDK 25)">[15]</abbr>. Move the assignment up, and the field is ready by the time the superclass needs it:
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal {
     Animal() {
         describe();
     }
 
-    void describe() { System.out.println("an animal"); }
+    void describe() { println("an animal"); }
 }
 
 class Dog extends Animal {
@@ -226,7 +236,7 @@ class Dog extends Animal {
     }
 
     @Override
-    void describe() { System.out.println("a dog named " + name); }
+    void describe() { println("a dog named " + name); }
 }
 
 public class Main {
@@ -252,6 +262,8 @@ The code before `super(...)` can assign fields, check arguments and compute valu
 *Watch out: a `private` field is not inherited.* Members declared `private` are not inherited by subclasses <abbr title="The Java Language Specification, Java SE 25, §8.2">[2]</abbr>. The field still exists inside a `Dog` object, but `Dog`'s code can't refer to it by name:
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal {
     private String secret = "hidden";
 }
@@ -262,14 +274,14 @@ class Dog extends Animal {
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(new Dog().reveal());
+        println(new Dog().reveal());
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:6: error: secret has private access in Animal
+Main.java:8: error: secret has private access in Animal
     String reveal() { return secret; }
                              ^
 1 error
@@ -282,15 +294,17 @@ To fix it, give the superclass a method that returns the value, or mark the fiel
 ```java run
 import java.util.Stack;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Stack<String> stack = new Stack<>();
         stack.push("first");
         stack.push("second");
         stack.add(0, "sneaked in");
-        System.out.println(stack);
-        System.out.println(stack.pop());
-        System.out.println(stack.get(0));
+        println(stack);
+        println(stack.pop());
+        println(stack.get(0));
     }
 }
 ```
@@ -321,6 +335,8 @@ sneaked in
 A subclass **overrides** an inherited method by redeclaring it with the same signature. For objects of that subclass, its version replaces the superclass's. When you need both, `super.method()` still reaches the superclass's version.
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal {
     String speak() { return "..."; }
 }
@@ -334,8 +350,8 @@ class Dog extends Animal {
 public class Main {
     public static void main(String[] args) {
         Dog d = new Dog();
-        System.out.println(d.speak());
-        System.out.println(d.both());
+        println(d.speak());
+        println(d.both());
     }
 }
 ```
@@ -383,6 +399,8 @@ Main.java:4: error: method does not override or implement a method from a supert
 *Watch out: an override that narrows access.* An override must give at least as much access as the method it replaces <abbr title="The Java Language Specification, Java SE 25, §8.4.8.3">[6]</abbr>. `Object.toString()` is `public`. If you leave `public` off, the name and parameters still match, but the override is rejected:
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal {
     @Override
     String toString() { return "an animal"; }
@@ -390,14 +408,14 @@ class Animal {
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(new Animal());
+        println(new Animal());
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:3: error: toString() in Animal cannot override toString() in Object
+Main.java:5: error: toString() in Animal cannot override toString() in Object
     String toString() { return "an animal"; }
            ^
   attempting to assign weaker access privileges; was public
@@ -422,6 +440,8 @@ Now for the payoff. A variable's *declared* type can be a superclass, while the 
 - When you call an overridden method, Java runs the version for the object's **actual runtime type** — not the declared type. This is **dynamic dispatch**.
 
 ```java run viz=array:animals
+import static java.lang.IO.println;
+
 class Animal {
     String name;
     Animal(String name) { this.name = name; }
@@ -440,7 +460,7 @@ public class Main {
     public static void main(String[] args) {
         Animal[] animals = { new Dog("Rex"), new Cat("Felix"), new Animal("Thing") };
         for (Animal a : animals) {
-            System.out.println(a.name + ": " + a.speak());
+            println(a.name + ": " + a.speak());
         }
     }
 }
@@ -464,6 +484,8 @@ Thing: ...
 That's why the loop's `Animal` reference can invoke `Dog.speak()`. But the first rule has a bite of its own: `Dog`'s extra method is out of reach through an `Animal` variable, even when the object really is a `Dog`:
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal {
     String speak() { return "..."; }
 }
@@ -476,17 +498,17 @@ class Dog extends Animal {
 public class Main {
     public static void main(String[] args) {
         Animal a = new Dog();
-        System.out.println(a.speak());
-        System.out.println(a.fetch());
+        println(a.speak());
+        println(a.fetch());
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:14: error: cannot find symbol
-        System.out.println(a.fetch());
-                            ^
+Main.java:16: error: cannot find symbol
+        println(a.fetch());
+                 ^
   symbol:   method fetch()
   location: variable a of type Animal
 1 error
@@ -497,14 +519,16 @@ The compiler looked for `fetch()` in `Animal`, the declared type, and didn't fin
 *Concrete bite.* The dynamic rule applies to **methods**, not **fields**. A field access is resolved by the *declared* type, at compile time:
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal { String kind = "animal"; String speak() { return "generic"; } }
 class Dog extends Animal { String kind = "dog"; @Override String speak() { return "Woof"; } }
 
 public class Main {
     public static void main(String[] args) {
         Animal a = new Dog();
-        System.out.println(a.speak());
-        System.out.println(a.kind);
+        println(a.speak());
+        println(a.kind);
     }
 }
 ```
@@ -522,6 +546,8 @@ animal
 *Watch out: a `static` method does not dispatch.* A `static` method belongs to the class, not to an object. So a subclass's `static` method with the same signature **hides** the parent's, rather than overriding it <abbr title="The Java Language Specification, Java SE 25, §8.4.8.2">[9]</abbr>. Just like a field, it's picked by the declared type:
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal {
     static String kind() { return "animal"; }
     String speak() { return "..."; }
@@ -535,8 +561,8 @@ class Dog extends Animal {
 public class Main {
     public static void main(String[] args) {
         Animal a = new Dog();
-        System.out.println(a.speak());
-        System.out.println(a.kind());
+        println(a.speak());
+        println(a.kind());
     }
 }
 ```
@@ -580,6 +606,8 @@ flowchart LR
 Guard the downcast with `instanceof`, and `fetch()` is back within reach:
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal {
     String speak() { return "..."; }
 }
@@ -599,9 +627,9 @@ public class Main {
         for (Animal a : animals) {
             if (a instanceof Dog) {
                 Dog d = (Dog) a;
-                System.out.println(a.speak() + ", then " + d.fetch());
+                println(a.speak() + ", then " + d.fetch());
             } else {
-                System.out.println(a.speak() + ", and no fetch");
+                println(a.speak() + ", and no fetch");
             }
         }
     }
@@ -622,6 +650,8 @@ Meow, and no fetch
 *Concrete bite.* This cast compiles, because an `Animal` *could* be a `Dog`. But this particular one is a `Cat`:
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal { }
 class Dog extends Animal { }
 class Cat extends Animal { }
@@ -629,9 +659,9 @@ class Cat extends Animal { }
 public class Main {
     public static void main(String[] args) {
         Animal a = new Cat();
-        System.out.println("about to cast");
+        println("about to cast");
         Dog d = (Dog) a;
-        System.out.println("never printed");
+        println("never printed");
     }
 }
 ```
@@ -642,7 +672,7 @@ about to cast
 Exception in thread "main" java.lang.ClassCastException: class Cat cannot be cast to class Dog (Cat and Dog are in unnamed module of loader 'app')
 ```
 
-The message names both classes: the object's actual class (`Cat`) and the cast's target (`Dog`). The failure happens at run time, on line 9 — far from the line that put a `Cat` into `a`.
+The message names both classes: the object's actual class (`Cat`) and the cast's target (`Dog`). The failure happens at run time, on line 11 — far from the line that put a `Cat` into `a`.
 
 *Watch out: a cast between unrelated types.* A `Dog` can never be a `String`. Both are classes, and neither one extends the other, so the compiler refuses the cast outright:
 
@@ -685,6 +715,8 @@ A cast can't turn an object into a different class of object. If you want text f
 Putting `final` on a method forbids overriding it, so no subclass can change that behavior. Meanwhile, every class other than `Object` has a superclass — and if you don't write `extends`, that superclass is `Object` itself <abbr title="The Java Language Specification, Java SE 25, §8.1.4">[1]</abbr>. So every object already comes with methods like `toString`, `equals`, and `hashCode`, which you override to give them meaning.
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal {
     String name;
     Animal(String name) { this.name = name; }
@@ -696,8 +728,8 @@ class Animal {
 public class Main {
     public static void main(String[] args) {
         Animal a = new Animal("Rex");
-        System.out.println(a);
-        System.out.println(a.species());
+        println(a);
+        println(a.species());
     }
 }
 ```
@@ -837,6 +869,8 @@ One check per objective. Answer before you open anything.
 <summary>The 🧪 box below: <code>Bird</code>, the hidden field, and overriding a <code>final</code> method.</summary>
 
 ```java run
+import static java.lang.IO.println;
+
 class Animal {
     String kind = "animal";
     String speak() { return "..."; }
@@ -856,10 +890,10 @@ public class Main {
     public static void main(String[] args) {
         Animal[] animals = { new Dog(), new Cat(), new Bird() };
         for (Animal a : animals) {
-            System.out.println(a.speak());
+            println(a.speak());
         }
         Animal a = new Dog();
-        System.out.println(a.speak() + " / " + a.kind);
+        println(a.speak() + " / " + a.kind);
     }
 }
 ```

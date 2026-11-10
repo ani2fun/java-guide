@@ -56,6 +56,8 @@ This builds directly on [methods](/synapse/programming-languages/java/control-fl
 A class declares **fields** (the data each object holds) and **methods** (what each object can do). `new ClassName()` builds an object, and you reach its fields and methods with a dot.
 
 ```java run
+import static java.lang.IO.println;
+
 class Rectangle {
     int width;
     int height;
@@ -69,7 +71,7 @@ public class Main {
         Rectangle r = new Rectangle();
         r.width = 3;
         r.height = 4;
-        System.out.println(r.area());
+        println(r.area());
     }
 }
 ```
@@ -106,6 +108,8 @@ The fields carry no access modifier, so any class in the same package can reach 
 *Concrete bite.* So you can't call an instance method without an object — there's no implicit receiver to supply the fields:
 
 ```java run
+import static java.lang.IO.println;
+
 class Rectangle {
     int width, height;
     int area() { return width * height; }
@@ -113,16 +117,16 @@ class Rectangle {
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Rectangle.area());
+        println(Rectangle.area());
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:8: error: non-static method area() cannot be referenced from a static context
-        System.out.println(Rectangle.area());
-                                    ^
+Main.java:10: error: non-static method area() cannot be referenced from a static context
+        println(Rectangle.area());
+                         ^
 1 error
 ```
 
@@ -133,6 +137,8 @@ Main.java:8: error: non-static method area() cannot be referenced from a static 
 A field that nothing assigns still holds a value. `new` sets every field to a **default value** that depends on its type <abbr title="The Java Language Specification, Java SE 25, §4.12.5">[2]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 class Sample {
     int count;
     double price;
@@ -145,12 +151,12 @@ class Sample {
 public class Main {
     public static void main(String[] args) {
         Sample s = new Sample();
-        System.out.println(s.count);
-        System.out.println(s.price);
-        System.out.println(s.done);
-        System.out.println((int) s.letter);
-        System.out.println(s.name);
-        System.out.println(s.data);
+        println(s.count);
+        println(s.price);
+        println(s.done);
+        println((int) s.letter);
+        println(s.name);
+        println(s.data);
     }
 }
 ```
@@ -170,6 +176,8 @@ Number fields start at zero, `boolean` at `false`, and `char` at the character w
 *Watch out: a local variable gets no default.* The rule covers fields, not a method's local variables. An object variable declared without `new` isn't a usable object:
 
 ```java run
+import static java.lang.IO.println;
+
 class Rectangle {
     int width, height;
     int area() { return width * height; }
@@ -178,16 +186,16 @@ class Rectangle {
 public class Main {
     public static void main(String[] args) {
         Rectangle r;
-        System.out.println(r.area());
+        println(r.area());
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:9: error: variable r might not have been initialized
-        System.out.println(r.area());
-                           ^
+Main.java:11: error: variable r might not have been initialized
+        println(r.area());
+                ^
 1 error
 ```
 
@@ -196,6 +204,8 @@ Main.java:9: error: variable r might not have been initialized
 **Printing an object.** `println(r)` doesn't print the fields. Unless the class says otherwise, it prints the class name, `@`, and a hexadecimal hash code <abbr title="java.lang.Object.toString(), Java SE 25 API">[4]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 class Rectangle {
     int width, height;
 }
@@ -203,7 +213,7 @@ class Rectangle {
 public class Main {
     public static void main(String[] args) {
         Rectangle r = new Rectangle();
-        System.out.println(r);
+        println(r);
     }
 }
 ```
@@ -230,6 +240,8 @@ This bundling costs you the ceremony of creating objects before you can use thei
 Setting fields one by one after `new` is wordy and easy to forget. A **constructor** runs at creation time to initialize the object, so you can build it fully formed in one step. It looks like a method with the class's name and no return type <abbr title="The Java Language Specification, Java SE 25, §8.8">[5]</abbr>.
 
 ```java run
+import static java.lang.IO.println;
+
 class Rectangle {
     int width;
     int height;
@@ -243,7 +255,7 @@ class Rectangle {
 public class Main {
     public static void main(String[] args) {
         Rectangle r = new Rectangle(3, 4);
-        System.out.println(r.area());
+        println(r.area());
     }
 }
 ```
@@ -269,6 +281,8 @@ If you write **no** constructor, javac adds a **default constructor**: no parame
 *Concrete bite.* So once you add a constructor that takes arguments, you can no longer call `new Rectangle()`:
 
 ```java run
+import static java.lang.IO.println;
+
 class Rectangle {
     int width, height;
     Rectangle(int w, int h) { width = w; height = h; }
@@ -277,14 +291,14 @@ class Rectangle {
 public class Main {
     public static void main(String[] args) {
         Rectangle r = new Rectangle();
-        System.out.println(r.width);
+        println(r.width);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:8: error: constructor Rectangle in class Rectangle cannot be applied to given types;
+Main.java:10: error: constructor Rectangle in class Rectangle cannot be applied to given types;
         Rectangle r = new Rectangle();
                       ^
   required: int,int
@@ -293,6 +307,8 @@ Main.java:8: error: constructor Rectangle in class Rectangle cannot be applied t
 Once `Rectangle(int, int)` exists, the default constructor is gone, so `new Rectangle()` has nothing to match. If you want both, declare both. Constructors overload just like methods <abbr title="The Java Language Specification, Java SE 25, §8.8.8">[8]</abbr>. One constructor can hand its work to another with `this(…)`:
 
 ```java run
+import static java.lang.IO.println;
+
 class Rectangle {
     int width, height;
     Rectangle(int width, int height) {
@@ -307,8 +323,8 @@ class Rectangle {
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(new Rectangle(3, 4).area());
-        System.out.println(new Rectangle(5).area());
+        println(new Rectangle(3, 4).area());
+        println(new Rectangle(5).area());
     }
 }
 ```
@@ -324,6 +340,8 @@ public class Main {
 Before JDK 25, `this(…)` had to be the very first statement of the constructor. JDK 25 relaxed that rule <abbr title="JEP 513: Flexible Constructor Bodies (JDK 25)">[10]</abbr>: statements may now come before `this(…)`, as long as they don't use the object that's being built <abbr title="The Java Language Specification, Java SE 25, §8.8.7">[9]</abbr>. A `println`, a check on a parameter, or a local variable is fine:
 
 ```java run
+import static java.lang.IO.println;
+
 class Rectangle {
     int width, height;
 
@@ -333,7 +351,7 @@ class Rectangle {
     }
 
     Rectangle(int side) {
-        System.out.println("making a square of side " + side);
+        println("making a square of side " + side);
         this(side, side);
     }
 }
@@ -341,7 +359,7 @@ class Rectangle {
 public class Main {
     public static void main(String[] args) {
         Rectangle sq = new Rectangle(5);
-        System.out.println(sq.width + " x " + sq.height);
+        println(sq.width + " x " + sq.height);
     }
 }
 ```
@@ -355,6 +373,8 @@ making a square of side 5
 Reading a field before `this(…)` is still an error, because the fields haven't been set up yet:
 
 ```java run
+import static java.lang.IO.println;
+
 class Rectangle {
     int width, height;
 
@@ -364,7 +384,7 @@ class Rectangle {
     }
 
     Rectangle(int side) {
-        System.out.println("width so far: " + width);
+        println("width so far: " + width);
         this(side, side);
     }
 }
@@ -378,9 +398,9 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:10: error: cannot reference width before supertype constructor has been called
-        System.out.println("width so far: " + width);
-                                              ^
+Main.java:12: error: cannot reference width before supertype constructor has been called
+        println("width so far: " + width);
+                                   ^
 1 error
 ```
 
@@ -389,6 +409,8 @@ The message says "supertype constructor" because `this(5, 5)` will, in turn, cal
 *Watch out: a constructor with a return type.* Write `void` in front of a constructor, and it becomes an ordinary method that happens to share the class's name:
 
 ```java run
+import static java.lang.IO.println;
+
 class Rectangle {
     int width, height;
     void Rectangle(int w, int h) {
@@ -400,14 +422,14 @@ class Rectangle {
 public class Main {
     public static void main(String[] args) {
         Rectangle r = new Rectangle(3, 4);
-        System.out.println(r.width);
+        println(r.width);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:11: error: constructor Rectangle in class Rectangle cannot be applied to given types;
+Main.java:13: error: constructor Rectangle in class Rectangle cannot be applied to given types;
         Rectangle r = new Rectangle(3, 4);
                       ^
   required: no arguments
@@ -433,6 +455,8 @@ The cost is that declaring one constructor removes the default one. If some call
 You'll often want constructor parameters to have the same names as the fields they set (`width`, `height`). When a parameter and a field share a name, the parameter **shadows** the field <abbr title="The Java Language Specification, Java SE 25, §6.4.1">[11]</abbr>. `this.field` says "the field of the current object", not the parameter.
 
 ```java run
+import static java.lang.IO.println;
+
 class Rectangle {
     int width, height;
     Rectangle(int width, int height) {
@@ -445,7 +469,7 @@ class Rectangle {
 public class Main {
     public static void main(String[] args) {
         Rectangle r = new Rectangle(3, 4);
-        System.out.println(r.area());
+        println(r.area());
     }
 }
 ```
@@ -465,6 +489,8 @@ public class Main {
 *Concrete bite.* Forget the `this.`, and the assignment does nothing useful. It assigns the parameter to itself and leaves the field at its default:
 
 ```java run
+import static java.lang.IO.println;
+
 class Rectangle {
     int width, height;
     Rectangle(int width, int height) {
@@ -477,7 +503,7 @@ class Rectangle {
 public class Main {
     public static void main(String[] args) {
         Rectangle r = new Rectangle(3, 4);
-        System.out.println(r.area());
+        println(r.area());
     }
 }
 ```
@@ -504,6 +530,8 @@ Reusing the field's name for the parameter costs you exactly this trap: a self-a
 Every `new` produces a **separate** object with its own fields. Two objects of the same class share their *class* (the blueprint and its methods) but never their *state*.
 
 ```java run
+import static java.lang.IO.println;
+
 class Counter {
     int count;
     void increment() { count++; }
@@ -516,7 +544,7 @@ public class Main {
         a.increment();
         a.increment();
         b.increment();
-        System.out.println("a=" + a.count + " b=" + b.count);
+        println("a=" + a.count + " b=" + b.count);
     }
 }
 ```
@@ -551,6 +579,8 @@ b -> cls: "instance of"
 *Concrete bite.* That's **aliasing**: two variables, one object. A change through either one shows up through both:
 
 ```java run
+import static java.lang.IO.println;
+
 class Counter {
     int count;
     void increment() { count++; }
@@ -562,7 +592,7 @@ public class Main {
         Counter c = a;
         a.increment();
         c.increment();
-        System.out.println(a.count);
+        println(a.count);
     }
 }
 ```
@@ -626,6 +656,8 @@ One check per objective. Answer before you open anything.
 <summary>Write a class <code>Circle</code> with a <code>double radius</code> field, a constructor that sets it, and an <code>area()</code> method that returns <code>3.0 * radius * radius</code>. Build circles of radius <code>1.0</code> and <code>2.0</code>, and print both areas.</summary>
 
 ```java run
+import static java.lang.IO.println;
+
 class Circle {
     double radius;
 
@@ -642,8 +674,8 @@ public class Main {
     public static void main(String[] args) {
         Circle small = new Circle(1.0);
         Circle big = new Circle(2.0);
-        System.out.println(small.area());
-        System.out.println(big.area());
+        println(small.area());
+        println(big.area());
     }
 }
 ```

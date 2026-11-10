@@ -96,6 +96,8 @@ public class Main {
 Don't forget that an abstract class is still a class. Alongside its abstract methods, it can hold fields, constructors and ordinary methods. Its constructor runs whenever a subclass object is created <abbr title="The Java Language Specification, Java SE 25, §8.1.1.1">[1]</abbr>. Below, the concrete `describe()` calls the abstract `area()`, which dispatches to the subclass:
 
 ```java run
+import static java.lang.IO.println;
+
 abstract class Shape {
     private final String name;
     Shape(String name) { this.name = name; }
@@ -117,8 +119,8 @@ class Square extends Shape {
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(new Circle(2.0).describe());
-        System.out.println(new Square(3.0).describe());
+        println(new Circle(2.0).describe());
+        println(new Square(3.0).describe());
     }
 }
 ```
@@ -195,12 +197,14 @@ The message hints at both fixes: override `area()`, or declare `Triangle` `abstr
 An **interface** is a contract: a set of method signatures, with no instance fields to inherit. A class `implements` an interface by providing all of its methods. You can then write code against the interface, and it works with any implementer.
 
 ```java run
+import static java.lang.IO.println;
+
 interface Drawable {
     void draw();
 }
 
 class Circle implements Drawable {
-    @Override public void draw() { System.out.println("drawing a circle"); }
+    @Override public void draw() { println("drawing a circle"); }
 }
 
 public class Main {
@@ -248,10 +252,12 @@ class Circle implements Drawable { }
 *Watch out: an implementation without `public`.* `draw()` in the interface is `public`. If you write the implementation with no modifier, you narrow the access — and an override may not do that <abbr title="The Java Language Specification, Java SE 25, §8.4.8.3">[8]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 interface Drawable { void draw(); }
 
 class Circle implements Drawable {
-    @Override void draw() { System.out.println("drawing a circle"); }
+    @Override void draw() { println("drawing a circle"); }
 }
 
 public class Main {
@@ -263,8 +269,8 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:4: error: draw() in Circle cannot implement draw() in Drawable
-    @Override void draw() { System.out.println("drawing a circle"); }
+Main.java:6: error: draw() in Circle cannot implement draw() in Drawable
+    @Override void draw() { println("drawing a circle"); }
                    ^
   attempting to assign weaker access privileges; was public
 1 error
@@ -288,6 +294,8 @@ The interface never wrote `public`, yet `draw()` is `public` anyway. The fix is 
 Since JDK 8, an interface method can have a body, as long as it's marked `default` <abbr title="JEP 126: Lambda Expressions & Virtual Extension Methods (JDK 8)">[10]</abbr>. Implementers inherit it for free, and may override it if they like. This lets an interface ship actual behavior, not just signatures. It's also how you add a method to an interface without breaking every existing implementer.
 
 ```java run
+import static java.lang.IO.println;
+
 interface Greeter {
     String name();
     default String greet() { return "Hello, " + name(); }
@@ -302,7 +310,7 @@ class Person implements Greeter {
 public class Main {
     public static void main(String[] args) {
         Greeter g = new Person("Ada");
-        System.out.println(g.greet());
+        println(g.greet());
     }
 }
 ```
@@ -338,6 +346,8 @@ An interface can hold two more kinds of method with a body <abbr title="The Java
 - A **`private` method** (JDK 9) is a helper for the interface's own method bodies <abbr title="JEP 213: Milling Project Coin (JDK 9)">[11]</abbr>. Two `default` methods can share its code without making it part of the contract.
 
 ```java run
+import static java.lang.IO.println;
+
 interface Temperature {
     double celsius();
 
@@ -358,9 +368,9 @@ class Kettle implements Temperature {
 public class Main {
     public static void main(String[] args) {
         Temperature k = new Kettle();
-        System.out.println(k.report());
-        System.out.println(k.reportF());
-        System.out.println(Temperature.toFahrenheit(37));
+        println(k.report());
+        println(k.reportF());
+        println(Temperature.toFahrenheit(37));
     }
 }
 ```
@@ -385,6 +395,8 @@ public class Main {
 *Concrete bite.* Call the `static` method through an implementing class, and javac can't find it:
 
 ```java run
+import static java.lang.IO.println;
+
 interface Temperature {
     double celsius();
     static double toFahrenheit(double c) { return c * 9 / 5 + 32; }
@@ -396,16 +408,16 @@ class Kettle implements Temperature {
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Kettle.toFahrenheit(37));
+        println(Kettle.toFahrenheit(37));
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:12: error: cannot find symbol
-        System.out.println(Kettle.toFahrenheit(37));
-                                 ^
+Main.java:14: error: cannot find symbol
+        println(Kettle.toFahrenheit(37));
+                      ^
   symbol:   method toFahrenheit(int)
   location: class Kettle
 1 error
@@ -416,6 +428,8 @@ Main.java:12: error: cannot find symbol
 *Watch out: calling the `private` helper from outside.*
 
 ```java run
+import static java.lang.IO.println;
+
 interface Temperature {
     double celsius();
     private String label(double value, String unit) {
@@ -430,16 +444,16 @@ class Kettle implements Temperature {
 public class Main {
     public static void main(String[] args) {
         Temperature k = new Kettle();
-        System.out.println(k.label(100, "C"));
+        println(k.label(100, "C"));
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:15: error: label(double,String) has private access in Temperature
-        System.out.println(k.label(100, "C"));
-                            ^
+Main.java:17: error: label(double,String) has private access in Temperature
+        println(k.label(100, "C"));
+                 ^
 1 error
 ```
 
@@ -461,6 +475,8 @@ Main.java:15: error: label(double,String) has private access in Temperature
 Here's the defining difference: a class `extends` **one** class, but `implements` **many** interfaces <abbr title="The Java Language Specification, Java SE 25, §8.1.4">[9]</abbr>. That means a type can *be* several things at once. Interfaces give you multiple inheritance of type, which a single superclass can't.
 
 ```java run
+import static java.lang.IO.println;
+
 interface Swimmer { default String move() { return "swimming"; } }
 interface Flyer { default String fly() { return "flying"; } }
 
@@ -471,7 +487,7 @@ class Duck implements Swimmer, Flyer {
 public class Main {
     public static void main(String[] args) {
         Duck d = new Duck();
-        System.out.println(d.describe());
+        println(d.describe());
     }
 }
 ```
@@ -519,6 +535,8 @@ class C extends A, B {}
 *Watch out: two defaults with the same signature.* Give `Swimmer` and a new `Walker` interface each a `default` `move()`. A class that implements both now inherits two bodies for one method, and that's a compile-time error <abbr title="The Java Language Specification, Java SE 25, §8.4.8.4">[6]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 interface Swimmer { default String move() { return "swimming"; } }
 interface Walker { default String move() { return "walking"; } }
 
@@ -526,14 +544,14 @@ class Duck implements Swimmer, Walker { }
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(new Duck().move());
+        println(new Duck().move());
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:4: error: types Swimmer and Walker are incompatible;
+Main.java:6: error: types Swimmer and Walker are incompatible;
 class Duck implements Swimmer, Walker { }
 ^
   class Duck inherits unrelated defaults for move() from types Swimmer and Walker
@@ -543,6 +561,8 @@ class Duck implements Swimmer, Walker { }
 The fix is to override `move()` in `Duck`. Inside the override, `Swimmer.super.move()` calls one specific interface's default by name <abbr title="The Java Language Specification, Java SE 25, §15.12.1">[7]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 interface Swimmer { default String move() { return "swimming"; } }
 interface Walker { default String move() { return "walking"; } }
 
@@ -553,7 +573,7 @@ class Duck implements Swimmer, Walker {
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(new Duck().move());
+        println(new Duck().move());
     }
 }
 ```
@@ -638,6 +658,8 @@ One check per objective. Answer before you open anything.
 <summary>The 🧪 box below: <code>Triangle</code>, <code>loudGreet()</code>, and <code>Robot</code>.</summary>
 
 ```java run
+import static java.lang.IO.println;
+
 abstract class Shape { abstract double area(); }
 
 class Circle extends Shape {
@@ -681,9 +703,9 @@ public class Main {
         for (Shape s : shapes) {
             System.out.printf("%.2f%n", s.area());
         }
-        System.out.println(new Person("Ada").loudGreet());
+        println(new Person("Ada").loudGreet());
         Robot r = new Robot();
-        System.out.println(r.move() + " and " + r.fly());
+        println(r.move() + " and " + r.fly());
     }
 }
 ```

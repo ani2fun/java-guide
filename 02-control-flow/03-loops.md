@@ -59,14 +59,17 @@ This rests on [boolean conditions](/synapse/programming-languages/java/control-f
 A `while` loop checks its condition, and if it's `true`, runs the body. Then it checks again, and again, until the condition becomes `false` <abbr title="The Java Language Specification, Java SE 25, §14.12">[1]</abbr>. Something inside the body has to move toward that end, or the loop never stops.
 
 ```java run
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int i = 0;
         while (i < 5) {
-            System.out.print(i + " ");
+            print(i + " ");
             i++;
         }
-        System.out.println();
+        println();
     }
 }
 ```
@@ -85,15 +88,17 @@ public class Main {
 
 ```java run
 // expects-hang: the body never changes i, so i < 3 stays true forever
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int i = 0;
         int total = 0;
-        System.out.println("before the loop");
+        println("before the loop");
         while (i < 3) {
             total += i;
         }
-        System.out.println("after the loop: " + total);
+        println("after the loop: " + total);
     }
 }
 ```
@@ -108,14 +113,17 @@ There's no error message. The program just keeps running, and `after the loop` n
 *Concrete bite.* The boundary is where loops go wrong. Change `<` to `<=`, and the loop runs one extra time:
 
 ```java run
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int i = 0;
         while (i <= 5) {
-            System.out.print(i + " ");
+            print(i + " ");
             i++;
         }
-        System.out.println();
+        println();
     }
 }
 ```
@@ -142,15 +150,17 @@ A loose boundary costs you an off-by-one: one pass too many or too few. Forgetti
 A `do-while` runs the body **first**, then checks the condition <abbr title="The Java Language Specification, Java SE 25, §14.13">[2]</abbr>. So the body always runs at least once, even when the condition is false from the start.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int n = 10;
-        while (n < 5) { System.out.println("while body"); n++; }
-        System.out.println("while done");
+        while (n < 5) { println("while body"); n++; }
+        println("while done");
 
         int m = 10;
-        do { System.out.println("do body"); m++; } while (m < 5);
-        System.out.println("do done");
+        do { println("do body"); m++; } while (m < 5);
+        println("do done");
     }
 }
 ```
@@ -175,11 +185,13 @@ Notice the `;` after `while (m < 5)`. A `do-while` ends with one, and javac repo
 *Concrete bite.* A variable declared *inside* the `do` body ends at the body's closing brace. The condition sits after that brace, so it can't see the variable:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         do {
             int tries = 1;
-            System.out.println("try " + tries);
+            println("try " + tries);
         } while (tries < 3);
     }
 }
@@ -187,7 +199,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:6: error: cannot find symbol
+Main.java:8: error: cannot find symbol
         } while (tries < 3);
                  ^
   symbol:   variable tries
@@ -212,12 +224,15 @@ Reach for it out of habit, and you pay with a body that runs even when it should
 Counting loops have three moving parts: a starting value, a continue-condition, and a step. The `for` loop puts all three on one line: `for (init; test; update)` <abbr title="The Java Language Specification, Java SE 25, §14.14.1">[3]</abbr>. It's the same logic as the `while` in §1, gathered in one place.
 
 ```java run
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         for (int i = 1; i <= 5; i++) {
-            System.out.print(i + " ");
+            print(i + " ");
         }
-        System.out.println();
+        println();
     }
 }
 ```
@@ -250,10 +265,12 @@ flowchart TD
 Each part can hold more than one thing, separated by commas. Here two counters walk toward each other:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         for (int i = 0, j = 5; i < j; i++, j--) {
-            System.out.println(i + " " + j);
+            println(i + " " + j);
         }
     }
 }
@@ -274,21 +291,23 @@ After the third pass, `i` is `3` and `j` is `2`, so `i < j` fails. Each part is 
 *Concrete bite.* Use the loop variable after the loop, and the compiler can't find it:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         for (int i = 0; i < 3; i++) {
-            System.out.println(i);
+            println(i);
         }
-        System.out.println(i);
+        println(i);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:6: error: cannot find symbol
-        System.out.println(i);
-                           ^
+Main.java:8: error: cannot find symbol
+        println(i);
+                ^
   symbol:   variable i
   location: class Main
 1 error
@@ -297,13 +316,15 @@ Main.java:6: error: cannot find symbol
 `i` exists only within the `for`. After the closing brace it's gone, so referring to it is a compile error. If you need the final value afterward, declare the variable *before* the loop:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int i;
         for (i = 0; i < 3; i++) {
-            System.out.println(i);
+            println(i);
         }
-        System.out.println("after: " + i);
+        println("after: " + i);
     }
 }
 ```
@@ -321,10 +342,12 @@ The last value is `3`, not `2`. The loop stops only when the test fails, and it 
 *Watch out: a stray semicolon.* Just as with `if` in [Conditionals](/synapse/programming-languages/java/control-flow/conditionals), a `;` after the header becomes the whole body:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         for (int i = 0; i < 3; i++); {
-            System.out.println("hi");
+            println("hi");
         }
     }
 }
@@ -340,13 +363,15 @@ The loop ran three times with an empty body. Then the block after it ran once, o
 *Watch out: a `double` counter.* A counter that steps by `0.1` inherits the rounding you saw in [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic):
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int passes = 0;
         for (double x = 0.0; x < 1.0; x += 0.1) {
             passes++;
         }
-        System.out.println(passes);
+        println(passes);
     }
 }
 ```
@@ -359,6 +384,8 @@ public class Main {
 Ten steps of `0.1` should reach `1.0`. But the sum lands a hair below it, at `0.9999999999999999`, so `x < 1.0` passes an eleventh time. Count with an `int` instead, and compute the `double` from it:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int passes = 0;
@@ -366,7 +393,7 @@ public class Main {
             double x = tenths / 10.0;
             passes++;
         }
-        System.out.println(passes);
+        println(passes);
     }
 }
 ```
@@ -393,6 +420,8 @@ When you want *each element* of a collection, use the enhanced `for` <abbr title
 Here we iterate over an **array**, a fixed list of values. Arrays get their full treatment in [Arrays](/synapse/programming-languages/java/control-flow/arrays). For now, read `int[] nums = {2, 4, 6}` as "a list of numbers".
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] nums = {2, 4, 6};
@@ -400,7 +429,7 @@ public class Main {
         for (int n : nums) {
             sum += n;
         }
-        System.out.println(sum);
+        println(sum);
     }
 }
 ```
@@ -415,11 +444,13 @@ public class Main {
 *Watch out: a `String` isn't a list here.* A `String` holds characters, but the enhanced `for` accepts only an array or an `Iterable`, the type behind Java's collections:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String word = "abc";
         for (char c : word) {
-            System.out.println(c);
+            println(c);
         }
     }
 }
@@ -427,7 +458,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:4: error: for-each not applicable to expression type
+Main.java:6: error: for-each not applicable to expression type
         for (char c : word) {
                       ^
   required: array or java.lang.Iterable
@@ -438,13 +469,16 @@ Main.java:4: error: for-each not applicable to expression type
 `word.toCharArray()` gives the characters as an array, and the loop accepts that:
 
 ```java run
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String word = "abc";
         for (char c : word.toCharArray()) {
-            System.out.print(c + "-");
+            print(c + "-");
         }
-        System.out.println();
+        println();
     }
 }
 ```
@@ -460,6 +494,8 @@ a-b-c-
 *Concrete bite.* Try to modify elements through the loop variable, and nothing happens:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         int[] nums = {1, 2, 3};
@@ -470,7 +506,7 @@ public class Main {
         for (int n : nums) {
             sum += n;
         }
-        System.out.println(sum);
+        println(sum);
     }
 }
 ```

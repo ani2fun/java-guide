@@ -55,6 +55,8 @@ This is the deep pass of [the `static` you've used on methods](/synapse/programm
 A `static` field is stored on the **class**, so every object sees the same one. An instance field is stored on each **object**, so each object has its own. Here `count` is shared (how many widgets exist), and `id` belongs to each widget:
 
 ```java run
+import static java.lang.IO.println;
+
 class Widget {
     static int count = 0;   // one copy, shared by all Widgets
     int id;                 // a separate copy in each Widget
@@ -70,8 +72,8 @@ public class Main {
         Widget a = new Widget();
         Widget b = new Widget();
         Widget c = new Widget();
-        System.out.println("ids: " + a.id + " " + b.id + " " + c.id);
-        System.out.println("count: " + Widget.count);
+        println("ids: " + a.id + " " + b.id + " " + c.id);
+        println("count: " + Widget.count);
     }
 }
 ```
@@ -107,6 +109,8 @@ c -> cls
 *Watch out: a `static` field read through an object.* Java lets you write `a.count`, and it looks like `a`'s own field. It isn't:
 
 ```java run
+import static java.lang.IO.println;
+
 class Widget {
     static int count = 0;
     Widget() { count++; }
@@ -116,7 +120,7 @@ public class Main {
     public static void main(String[] args) {
         Widget a = new Widget();
         Widget b = new Widget();
-        System.out.println(a.count + " " + b.count + " " + Widget.count);
+        println(a.count + " " + b.count + " " + Widget.count);
     }
 }
 ```
@@ -143,12 +147,14 @@ public class Main {
 An instance method runs *on an object*, so it reaches that object's fields through the implicit `this`. A `static` method runs *on the class*. There's no object, no `this`, and so no instance fields to reach.
 
 ```java run
+import static java.lang.IO.println;
+
 class Widget {
     static int count = 0;
     int id;
     Widget() { count++; id = count; }
 
-    void describe() { System.out.println("id " + id + " of " + count); }  // instance: sees both
+    void describe() { println("id " + id + " of " + count); }  // instance: sees both
     static int total() { return count; }                                   // static: only static
 }
 
@@ -157,7 +163,7 @@ public class Main {
         new Widget();
         Widget w = new Widget();
         w.describe();
-        System.out.println(Widget.total());
+        println(Widget.total());
     }
 }
 ```
@@ -176,10 +182,12 @@ id 2 of 2
 *Concrete bite.* Reading an instance field from a static method is a compile error:
 
 ```java run
+import static java.lang.IO.println;
+
 class Widget {
     int id = 5;
     static void show() {
-        System.out.println(id);
+        println(id);
     }
 }
 
@@ -192,9 +200,9 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:4: error: non-static variable id cannot be referenced from a static context
-        System.out.println(id);
-                           ^
+Main.java:6: error: non-static variable id cannot be referenced from a static context
+        println(id);
+                ^
 1 error
 ```
 
@@ -215,6 +223,8 @@ Guess wrong, and you get a compile error the moment a static method reaches for 
 Combine `static` (one shared copy) with `final` (assigned once, never changed), and you get a **constant**: a single, unchangeable, class-wide value. By convention, constants are named in `UPPER_SNAKE_CASE`.
 
 ```java run
+import static java.lang.IO.println;
+
 class Circle {
     static final double PI = 3.14159;
     double radius;
@@ -225,8 +235,8 @@ class Circle {
 public class Main {
     public static void main(String[] args) {
         Circle c = new Circle(2.0);
-        System.out.println(c.area());
-        System.out.println(Circle.PI);
+        println(c.area());
+        println(Circle.PI);
     }
 }
 ```
@@ -280,21 +290,23 @@ For values that are truly fixed, this costs you nothing. The discipline is savin
 You can set a field with a simple value inline. When a class's `static` state needs *computation* to set up, a **`static` block**, `static { … }`, does that work once, when the class is initialized <abbr title="The Java Language Specification, Java SE 25, §8.7">[5]</abbr>.
 
 ```java run viz=array:SQUARES
+import static java.lang.IO.println;
+
 class Lookup {
     static final int[] SQUARES = new int[5];
     static {
         for (int i = 0; i < SQUARES.length; i++) {
             SQUARES[i] = i * i;
         }
-        System.out.println("static block ran");
+        println("static block ran");
     }
 }
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("main start");
-        System.out.println(Lookup.SQUARES[3]);
-        System.out.println(Lookup.SQUARES[4]);
+        println("main start");
+        println(Lookup.SQUARES[3]);
+        println(Lookup.SQUARES[4]);
     }
 }
 ```
@@ -326,19 +338,21 @@ Initialization runs the `static` field initializers and `static` blocks in sourc
 The last rule in the list has a visible edge. Reading a constant variable doesn't initialize its class, because javac already copied the value into the reader:
 
 ```java run
+import static java.lang.IO.println;
+
 class Config {
     static final int MAX = 100;
     static int calls = 0;
     static {
-        System.out.println("Config initialized");
+        println("Config initialized");
     }
 }
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Config.MAX);
-        System.out.println("after MAX");
-        System.out.println(Config.calls);
+        println(Config.MAX);
+        println("after MAX");
+        println(Config.calls);
     }
 }
 ```
@@ -356,18 +370,20 @@ Config initialized
 *Watch out: a `static` block that throws.* A `static` block runs where the class is first used, so its failure lands there too, wrapped in a new error:
 
 ```java run
+import static java.lang.IO.println;
+
 class Table {
     static int[] cells = new int[2];
     static {
-        System.out.println("filling");
+        println("filling");
         cells[5] = 1;
     }
 }
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("start");
-        System.out.println(Table.cells.length);
+        println("start");
+        println(Table.cells.length);
     }
 }
 ```
@@ -377,9 +393,9 @@ public class Main {
 start
 filling
 Exception in thread "main" java.lang.ExceptionInInitializerError
-	at Main.main(Main.java:12)
+	at Main.main(Main.java:14)
 Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 5 out of bounds for length 2
-	at Table.<clinit>(Main.java:5)
+	at Table.<clinit>(Main.java:7)
 ```
 
 The real fault is the `Caused by` line: index `5` in an array of length `2`. The JVM reports it as an `ExceptionInInitializerError` at the line in `main` that first used `Table` <abbr title="The Java Language Specification, Java SE 25, §12.4.2">[7]</abbr>. `<clinit>` is the JVM's name for a class's combined static initialization code <abbr title="The Java Virtual Machine Specification, Java SE 25, §2.9.2">[9]</abbr>.
@@ -401,6 +417,8 @@ The catch is that the *moment* it runs is subtle: first use, not program start. 
 The `static` block has a per-object twin. An **instance initializer** is a bare block, `{ … }`, in the class body, and it runs every time an object is created <abbr title="The Java Language Specification, Java SE 25, §8.6">[10]</abbr>. This program logs every step of the class and object setup:
 
 ```java run
+import static java.lang.IO.println;
+
 class Order {
     static int created = log("static field initializer");
     static {
@@ -417,16 +435,16 @@ class Order {
     }
 
     static int log(String step) {
-        System.out.println(step);
+        println(step);
         return 0;
     }
 }
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("-- first new");
+        println("-- first new");
         new Order();
-        System.out.println("-- second new");
+        println("-- second new");
         new Order();
     }
 }
@@ -461,19 +479,21 @@ Both "top to bottom" steps follow **textual order**: the order of the lines in t
 *Watch out: reading a field before its declaration.* Because static initializers run top to bottom, javac rejects an initializer that reads a field declared further down <abbr title="The Java Language Specification, Java SE 25, §8.3.3">[12]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int a = b + 1;
     static int b = 5;
 
     public static void main(String[] args) {
-        System.out.println(a);
+        println(a);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:2: error: illegal forward reference
+Main.java:4: error: illegal forward reference
     static int a = b + 1;
                    ^
 1 error

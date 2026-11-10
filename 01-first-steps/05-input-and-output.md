@@ -8,7 +8,7 @@ prereqs: []
 
 A program gets useful the moment it can take input from a person and respond. Both halves come down to **method calls on stream objects**. A **stream** is a flow of characters in one direction: out to the screen, or in from the keyboard.
 
-- `System.out` is an object you send text to, with `println` and `printf`.
+- `System.out` is the object your text goes out through. `println` is a shortcut for printing to it, and `printf`, for formatted output, is called on it directly.
 - A `Scanner` wraps `System.in`, the keyboard, and turns the characters someone types into typed *values*.
 
 One idea ties this chapter, and First Steps as a whole, together: reading input is **parsing**, which means turning text into a value of a type. `Scanner`'s `nextInt()` hands you a real `int`, ready for the arithmetic of [Numbers and arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic). And when the typed text isn't a number, the parse fails loudly.
@@ -66,13 +66,15 @@ On your own machine, `Scanner(System.in)` pauses and waits for you to type.
 
 ## 1. Building output with `printf`
 
-You already have `println` for plain lines. For *formatted* output, like a number to two decimals or values slotted into a template, Java gives you `printf` and its sibling `String.format`. A **format string** holds placeholders, and the values that fill them follow in order <abbr title="Java SE 25 API, java.util.Formatter">[1]</abbr>:
+You already have `println` for plain lines. For *formatted* output, like a number to two decimals or values slotted into a template, Java gives you `printf` and its sibling `String.format`. `IO` has only `print` and `println`, so you call `printf` on `System.out` itself. A **format string** holds placeholders, and the values that fill them follow in order <abbr title="Java SE 25 API, java.util.Formatter">[1]</abbr>:
 
 - `%s` is any value, as text.
 - `%d` is a whole number, and `%f` a decimal.
 - `%n` is a line break, and `%%` a literal `%` sign.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String name = "Ada";
@@ -81,7 +83,7 @@ public class Main {
         System.out.printf("%s scored %d points%n", name, score);
         System.out.printf("pi to 2 places: %.2f%n", pi);
         String line = String.format("%s = %d", "score", score);
-        System.out.println(line);
+        println(line);
     }
 }
 ```
@@ -157,12 +159,15 @@ To read what a person types, make a `Scanner` over `System.in` (the keyboard) an
 ```java
 import java.util.Scanner;
 
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        System.out.print("What's your name? ");
+        print("What's your name? ");
         String name = sc.nextLine();
-        System.out.println("Hello, " + name + "!");
+        println("Hello, " + name + "!");
     }
 }
 ```
@@ -179,11 +184,13 @@ Here's the **runnable twin**. It's identical, except its Scanner reads a fixed S
 ```java run
 import java.util.Scanner;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner("Ada");   // a fixed source, instead of the keyboard
         String name = sc.nextLine();
-        System.out.println("Hello, " + name + "!");
+        println("Hello, " + name + "!");
     }
 }
 ```
@@ -198,15 +205,17 @@ Hello, Ada!
 ```java run
 import java.util.Scanner;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner("Ada Lovelace\nLondon");
         String first = sc.next();       // one word: stops at the space
         String rest = sc.nextLine();    // the rest of that line
         String city = sc.nextLine();    // the whole next line
-        System.out.println("[" + first + "]");
-        System.out.println("[" + rest + "]");
-        System.out.println("[" + city + "]");
+        println("[" + first + "]");
+        println("[" + rest + "]");
+        println("[" + city + "]");
     }
 }
 ```
@@ -228,11 +237,13 @@ public class Main {
 ```java run
 import java.util.Scanner;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner("");   // empty source — nothing to read
         String line = sc.nextLine();
-        System.out.println(line);
+        println(line);
     }
 }
 ```
@@ -259,12 +270,15 @@ The source is empty, so `nextLine()` has nothing to return, and it throws `NoSuc
 ```java
 import java.util.Scanner;
 
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        System.out.print("Enter your age: ");
+        print("Enter your age: ");
         int age = sc.nextInt();
-        System.out.println("Next year you'll be " + (age + 1));
+        println("Next year you'll be " + (age + 1));
     }
 }
 ```
@@ -279,11 +293,13 @@ Enter your age: Next year you'll be 37
 ```java run
 import java.util.Scanner;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner("36");
         int age = sc.nextInt();
-        System.out.println("Next year you'll be " + (age + 1));
+        println("Next year you'll be " + (age + 1));
     }
 }
 ```
@@ -301,12 +317,14 @@ Next year you'll be 37
 ```java run
 import java.util.Scanner;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner("36\nAda\n");
         int age = sc.nextInt();
         String name = sc.nextLine();   // surprise: the rest of the "36" line — empty
-        System.out.println("age=" + age + " name=[" + name + "]");
+        println("age=" + age + " name=[" + name + "]");
     }
 }
 ```
@@ -323,13 +341,15 @@ The fix is one extra `sc.nextLine()` after the `nextInt()`, which swallows the l
 ```java run
 import java.util.Scanner;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner("36\nAda\n");
         int age = sc.nextInt();
         sc.nextLine();                 // swallow the rest of the "36" line
         String name = sc.nextLine();   // now the next line: Ada
-        System.out.println("age=" + age + " name=[" + name + "]");
+        println("age=" + age + " name=[" + name + "]");
     }
 }
 ```
@@ -354,12 +374,14 @@ Let's put it all together: read two numbers, add them, and report the result. Co
 ```java
 import java.util.Scanner;
 
+import static java.lang.IO.print;
+
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        System.out.print("First number: ");
+        print("First number: ");
         int a = sc.nextInt();
-        System.out.print("Second number: ");
+        print("Second number: ");
         int b = sc.nextInt();
         System.out.printf("%d + %d = %d%n", a, b, a + b);
     }
@@ -397,10 +419,12 @@ public class Main {
 *Concrete bite.* Lose the number-ness, by reading as text and then adding, and `+` flips back to concatenation:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String a = "7", b = "5";   // as text, not numbers
-        System.out.println(a + b);
+        println(a + b);
     }
 }
 ```
@@ -413,14 +437,16 @@ public class Main {
 Joining two strings gives `"75"`, not `12`. When you already hold the text, convert it with `Integer.parseInt`, or `Double.parseDouble` for a decimal <abbr title="Java SE 25 API, java.lang.Integer">[3]</abbr>. That's the deliberate conversion that [Variables and primitive types](/synapse/programming-languages/java/first-steps/variables-and-primitive-types) promised:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String a = "7", b = "5";                  // text, as typed
         int x = Integer.parseInt(a);              // "7" becomes the int 7
         int y = Integer.parseInt(b);
-        System.out.println(x + y);
+        println(x + y);
         double d = Double.parseDouble("2.5");
-        System.out.println(d * 2);
+        println(d * 2);
     }
 }
 ```
@@ -449,11 +475,13 @@ Parsing can fail, and with real input that's not rare:
 ```java run
 import java.util.Scanner;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner("seven");
         int n = sc.nextInt();
-        System.out.println(n);
+        println(n);
     }
 }
 ```
@@ -468,10 +496,12 @@ Exception in thread "main" java.util.InputMismatchException
 A number too big for an `int` fails the same way: `nextInt()` on `3000000000` throws `InputMismatchException: For input string: "3000000000"`. Here's the same failure when you parse a String yourself:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println(Integer.parseInt("42"));
-        System.out.println(Integer.parseInt("3.5"));
+        println(Integer.parseInt("42"));
+        println(Integer.parseInt("3.5"));
     }
 }
 ```

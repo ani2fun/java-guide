@@ -66,15 +66,17 @@ A `Set` holds each element at most once <abbr title="Java SE 25 API, java.util.S
 import java.util.Set;
 import java.util.HashSet;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Set<String> seen = new HashSet<>();
         seen.add("a");
         seen.add("b");
         seen.add("a");
-        System.out.println(seen.size());
-        System.out.println(seen.contains("a"));
-        System.out.println(seen.contains("z"));
+        println(seen.size());
+        println(seen.contains("a"));
+        println(seen.contains("z"));
     }
 }
 ```
@@ -122,10 +124,12 @@ The diagram shows why it's fast. An element's **hash code** is a number computed
 ```java run
 import java.util.Set;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Set<String> fixed = Set.of("a", "b");
-        System.out.println(fixed.contains("a"));
+        println(fixed.contains("a"));
         Set<String> twice = Set.of("a", "a");
     }
 }
@@ -162,6 +166,8 @@ The same `Set` interface has three implementations that differ in **iteration or
 ```java run
 import java.util.*;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Set<Integer> hash = new HashSet<>();
@@ -170,9 +176,9 @@ public class Main {
         for (int x : new int[]{3, 1, 2, 1}) {
             hash.add(x); tree.add(x); linked.add(x);
         }
-        System.out.println("tree:   " + tree);
-        System.out.println("linked: " + linked);
-        System.out.println("hash:   " + hash);
+        println("tree:   " + tree);
+        println("linked: " + linked);
+        println("hash:   " + hash);
     }
 }
 ```
@@ -204,6 +210,8 @@ The `java.util.*` import brings in every class of the package at once.
 ```java run
 import java.util.*;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Set<String> hash = new HashSet<>();
@@ -211,8 +219,8 @@ public class Main {
         for (String s : new String[]{"pear", "fig", "apple", "kiwi"}) {
             hash.add(s); linked.add(s);
         }
-        System.out.println("linked: " + linked);
-        System.out.println("hash:   " + hash);
+        println("linked: " + linked);
+        println("hash:   " + hash);
     }
 }
 ```
@@ -231,6 +239,8 @@ A `TreeSet` has its own trap, because it must compare its elements. A class with
 import java.util.Set;
 import java.util.TreeSet;
 
+import static java.lang.IO.println;
+
 class Player {
     String name;
 
@@ -243,7 +253,7 @@ public class Main {
     public static void main(String[] args) {
         Set<Player> players = new TreeSet<>();
         players.add(new Player("Ada"));
-        System.out.println(players.size());
+        println(players.size());
     }
 }
 ```
@@ -284,15 +294,17 @@ The same hashed, sorted and linked trio applies: `HashMap`, `TreeMap`, `LinkedHa
 import java.util.Map;
 import java.util.HashMap;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Map<String, Integer> ages = new HashMap<>();
         ages.put("Ada", 36);
         ages.put("Linus", 54);
-        System.out.println(ages.get("Ada"));
-        System.out.println(ages.getOrDefault("Zoe", 0));
-        System.out.println(ages.containsKey("Linus"));
-        System.out.println(ages.get("Zoe"));
+        println(ages.get("Ada"));
+        println(ages.getOrDefault("Zoe", 0));
+        println(ages.containsKey("Linus"));
+        println(ages.get("Zoe"));
     }
 }
 ```
@@ -335,19 +347,21 @@ A map can also update, remove, and let you walk its entries. A `Map` isn't itsel
 import java.util.Map;
 import java.util.TreeMap;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Map<String, Integer> stock = new TreeMap<>();
         stock.put("pear", 4);
         stock.put("apple", 7);
-        System.out.println(stock.put("pear", 9));
-        System.out.println(stock.remove("apple"));
+        println(stock.put("pear", 9));
+        println(stock.remove("apple"));
         stock.put("fig", 2);
         for (Map.Entry<String, Integer> e : stock.entrySet()) {
-            System.out.println(e.getKey() + " -> " + e.getValue());
+            println(e.getKey() + " -> " + e.getValue());
         }
-        System.out.println(stock.keySet());
-        System.out.println(stock.values());
+        println(stock.keySet());
+        println(stock.values());
     }
 }
 ```
@@ -377,11 +391,13 @@ pear -> 9
 import java.util.Map;
 import java.util.HashMap;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Map<String, Integer> m = new HashMap<>();
         int age = m.get("missing");
-        System.out.println(age);
+        println(age);
     }
 }
 ```
@@ -411,6 +427,8 @@ The most common `Map` task is counting occurrences, and it takes one line with `
 import java.util.Map;
 import java.util.HashMap;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String text = "a b a c b a";
@@ -418,9 +436,9 @@ public class Main {
         for (String word : text.split(" ")) {
             counts.put(word, counts.getOrDefault(word, 0) + 1);
         }
-        System.out.println(counts.get("a"));
-        System.out.println(counts.get("b"));
-        System.out.println(counts.get("c"));
+        println(counts.get("a"));
+        println(counts.get("b"));
+        println(counts.get("c"));
     }
 }
 ```
@@ -443,13 +461,15 @@ public class Main {
 import java.util.Map;
 import java.util.HashMap;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Map<String, Integer> counts = new HashMap<>();
         for (String word : "a b a".split(" ")) {
             counts.put(word, counts.get(word) + 1);
         }
-        System.out.println(counts);
+        println(counts);
     }
 }
 ```

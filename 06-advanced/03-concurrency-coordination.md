@@ -72,6 +72,8 @@ The monitor from the last lesson has a built-in answer <abbr title="The Java Lan
 The canonical shape checks the condition in a `while` loop, and calls `wait()` as long as it's false. This is called a **guarded block**.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static class BoundedBuffer {
         private final java.util.ArrayDeque<Integer> items = new java.util.ArrayDeque<>();
@@ -80,21 +82,21 @@ public class Main {
 
         synchronized void put(int item) throws InterruptedException {
             while (items.size() == capacity) {
-                System.out.println("    producer waits (buffer full: " + items + ")");
+                println("    producer waits (buffer full: " + items + ")");
                 wait();                       // releases THIS buffer's lock, sleeps
             }
             items.addLast(item);
-            System.out.println("put " + item + "   buffer=" + items);
+            println("put " + item + "   buffer=" + items);
             notifyAll();                      // wake anyone waiting for an item
         }
 
         synchronized int take() throws InterruptedException {
             while (items.isEmpty()) {
-                System.out.println("    consumer waits (buffer empty)");
+                println("    consumer waits (buffer empty)");
                 wait();
             }
             int item = items.removeFirst();
-            System.out.println("        take " + item + "  buffer=" + items);
+            println("        take " + item + "  buffer=" + items);
             notifyAll();                      // wake anyone waiting for space
             return item;
         }
@@ -169,6 +171,8 @@ The program below makes the `if` bug happen on every run. Two consumers wait on 
 // ⚠️ ANTI-PATTERN — the guard is an if, so a woken consumer never re-checks.  Do not copy it.
 import java.util.ArrayDeque;
 
+import static java.lang.IO.println;
+
 public class Main {
     static final ArrayDeque<Integer> items = new ArrayDeque<>();
 
@@ -177,7 +181,7 @@ public class Main {
             Main.class.wait();
         }
         int item = items.removeFirst();
-        System.out.println("took " + item);
+        println("took " + item);
         return item;
     }
 
@@ -191,7 +195,7 @@ public class Main {
             try {
                 take();
             } catch (Exception e) {
-                System.out.println("a consumer failed: " + e);
+                println("a consumer failed: " + e);
             }
         };
         Thread c1 = new Thread(consumer);
@@ -204,7 +208,7 @@ public class Main {
         put(1);
         c1.join();
         c2.join();
-        System.out.println("violation: one item, two woken consumers, and the if did not re-check");
+        println("violation: one item, two woken consumers, and the if did not re-check");
     }
 }
 ```
@@ -221,6 +225,8 @@ violation: one item, two woken consumers, and the if did not re-check
 ```java run
 import java.util.ArrayDeque;
 
+import static java.lang.IO.println;
+
 public class Main {
     static final ArrayDeque<Integer> items = new ArrayDeque<>();
 
@@ -229,7 +235,7 @@ public class Main {
             Main.class.wait();
         }
         int item = items.removeFirst();
-        System.out.println("took " + item);
+        println("took " + item);
         return item;
     }
 
@@ -243,7 +249,7 @@ public class Main {
             try {
                 take();
             } catch (Exception e) {
-                System.out.println("a consumer failed: " + e);
+                println("a consumer failed: " + e);
             }
         };
         Thread c1 = new Thread(consumer);
@@ -255,7 +261,7 @@ public class Main {
         }
         put(1);
         while (c1.isAlive() && c2.isAlive()) Thread.onSpinWait();
-        System.out.println("one consumer took the item; the other went back to waiting");
+        println("one consumer took the item; the other went back to waiting");
         put(2);
         c1.join();
         c2.join();
@@ -288,6 +294,8 @@ This program deadlocked on every run we tried. If you press Run, it prints two l
 
 ```java
 // expects-hang: a deadlock — each thread waits forever for the lock the other holds
+import static java.lang.IO.println;
+
 public class Main {
     static final Object lockA = new Object();
     static final Object lockB = new Object();
@@ -295,17 +303,17 @@ public class Main {
     public static void main(String[] args) {
         new Thread(() -> {
             synchronized (lockA) {
-                System.out.println("t1: holds A, wants B");
+                println("t1: holds A, wants B");
                 pause();
-                synchronized (lockB) { System.out.println("t1: got both"); }
+                synchronized (lockB) { println("t1: got both"); }
             }
         }, "t1").start();
 
         new Thread(() -> {
             synchronized (lockB) {                      // opposite order!
-                System.out.println("t2: holds B, wants A");
+                println("t2: holds B, wants A");
                 pause();
-                synchronized (lockA) { System.out.println("t2: got both"); }
+                synchronized (lockA) { println("t2: got both"); }
             }
         }, "t2").start();
     }
@@ -394,6 +402,8 @@ The price of that power is that *you* must release the lock — always, in `fina
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.lang.IO.println;
+
 public class Main {
     static final ReentrantLock lockA = new ReentrantLock();
     static final ReentrantLock lockB = new ReentrantLock();
@@ -405,10 +415,10 @@ public class Main {
             try {
                 Thread.sleep(100);                       // same timing that deadlocked §2
                 if (second.tryLock(50, TimeUnit.MILLISECONDS)) {
-                    try { System.out.println(name + ": got both locks, working"); return; }
+                    try { println(name + ": got both locks, working"); return; }
                     finally { second.unlock(); }
                 }
-                System.out.println(name + ": couldn't get the second lock, backing off");
+                println(name + ": couldn't get the second lock, backing off");
             } finally { first.unlock(); }
             Thread.sleep((long) (Math.random() * 50));   // jittered retry
         }
@@ -418,7 +428,7 @@ public class Main {
         Thread t1 = new Thread(() -> { try { acquireBoth("t1", lockA, lockB); } catch (InterruptedException e) {} });
         Thread t2 = new Thread(() -> { try { acquireBoth("t2", lockB, lockA); } catch (InterruptedException e) {} });
         t1.start(); t2.start(); t1.join(); t2.join();
-        System.out.println("both finished — no deadlock");
+        println("both finished — no deadlock");
     }
 }
 ```
@@ -450,6 +460,8 @@ The `try`/`finally` shape isn't optional style. `synchronized` releases its moni
 // ⚠️ ANTI-PATTERN — unlock() is not in a finally, so an exception skips it.  Do not copy it.
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.lang.IO.println;
+
 public class Main {
     static final ReentrantLock lock = new ReentrantLock();
 
@@ -464,15 +476,15 @@ public class Main {
             try {
                 update(-1);
             } catch (IllegalArgumentException e) {
-                System.out.println("worker caught: " + e.getMessage());
+                println("worker caught: " + e.getMessage());
             }
         });
         worker.start();
         worker.join();
-        System.out.println("worker state: " + worker.getState());
-        System.out.println("lock still held: " + lock.isLocked());
-        System.out.println("main can lock it: " + lock.tryLock());
-        System.out.println("violation: the lock outlived the thread that took it");
+        println("worker state: " + worker.getState());
+        println("lock still held: " + lock.isLocked());
+        println("main can lock it: " + lock.tryLock());
+        println("violation: the lock outlived the thread that took it");
     }
 }
 ```
@@ -491,6 +503,8 @@ The worker is `TERMINATED`, yet the lock is still held, so every later `lock()` 
 ```java run
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.lang.IO.println;
+
 public class Main {
     static final ReentrantLock lock = new ReentrantLock();
 
@@ -508,14 +522,14 @@ public class Main {
             try {
                 update(-1);
             } catch (IllegalArgumentException e) {
-                System.out.println("worker caught: " + e.getMessage());
+                println("worker caught: " + e.getMessage());
             }
         });
         worker.start();
         worker.join();
-        System.out.println("worker state: " + worker.getState());
-        System.out.println("lock still held: " + lock.isLocked());
-        System.out.println("main can lock it: " + lock.tryLock());
+        println("worker state: " + worker.getState());
+        println("lock still held: " + lock.isLocked());
+        println("main can lock it: " + lock.tryLock());
     }
 }
 ```
@@ -535,23 +549,25 @@ main can lock it: true
 ```java run
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         ReentrantReadWriteLock rw = new ReentrantReadWriteLock();
         rw.readLock().lock();
-        System.out.println("main holds the read lock");
+        println("main holds the read lock");
 
         Thread other = new Thread(() -> {
             boolean read = rw.readLock().tryLock();
-            System.out.println("another reader gets in: " + read);
+            println("another reader gets in: " + read);
             if (read) rw.readLock().unlock();
-            System.out.println("a writer gets in:       " + rw.writeLock().tryLock());
+            println("a writer gets in:       " + rw.writeLock().tryLock());
         });
         other.start();
         other.join();
 
         rw.readLock().unlock();
-        System.out.println("after main unlocks, a writer gets in: " + rw.writeLock().tryLock());
+        println("after main unlocks, a writer gets in: " + rw.writeLock().tryLock());
     }
 }
 ```
@@ -581,6 +597,8 @@ Most coordination needs boil down to a handful of recurring shapes, and `java.ut
 ```java run
 import java.util.concurrent.CountDownLatch;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         int workers = 3;
@@ -592,15 +610,15 @@ public class Main {
             new Thread(() -> {
                 try {
                     start.await();                      // block until the starting gun
-                    System.out.println("worker " + id + " running");
+                    println("worker " + id + " running");
                     done.countDown();
                 } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
             }).start();
         }
-        System.out.println("main: workers created, none has started");
+        println("main: workers created, none has started");
         start.countDown();                              // fire the gun — all three go
         done.await();                                   // wait for all of them
-        System.out.println("main: all workers done");
+        println("main: all workers done");
     }
 }
 ```
@@ -619,6 +637,8 @@ A **`Semaphore`** limits *how many* threads may be inside a region at once. It h
 ```java run
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static java.lang.IO.println;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
@@ -641,7 +661,7 @@ public class Main {
             threads[i].start();
         }
         for (Thread t : threads) t.join();
-        System.out.println("6 threads ran; max inside at once: " + maxSeen.get());
+        println("6 threads ran; max inside at once: " + maxSeen.get());
     }
 }
 ```
@@ -662,11 +682,13 @@ The third synchronizer, **`CyclicBarrier`**, is a reusable meeting point for a *
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         int[] round = {0};
         CyclicBarrier barrier = new CyclicBarrier(3,
-            () -> System.out.println("all 3 arrived: round " + (++round[0]) + " done"));
+            () -> println("all 3 arrived: round " + (++round[0]) + " done"));
 
         Thread[] team = new Thread[3];
         for (int i = 0; i < 3; i++) {
@@ -676,13 +698,13 @@ public class Main {
                         barrier.await();
                     }
                 } catch (InterruptedException | BrokenBarrierException e) {
-                    System.out.println("barrier failed: " + e);
+                    println("barrier failed: " + e);
                 }
             });
             team[i].start();
         }
         for (Thread t : team) t.join();
-        System.out.println("the same barrier served 2 rounds");
+        println("the same barrier served 2 rounds");
     }
 }
 ```
@@ -710,20 +732,22 @@ the same barrier served 2 rounds
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         Semaphore permits = new Semaphore(3);
         permits.acquire();
         permits.release();
         permits.release();
-        System.out.println("permits after one acquire and two releases: " + permits.availablePermits());
+        println("permits after one acquire and two releases: " + permits.availablePermits());
 
         CountDownLatch latch = new CountDownLatch(1);
         latch.countDown();
         latch.await();
-        System.out.println("round 1 passed the latch");
+        println("round 1 passed the latch");
         latch.await();
-        System.out.println("round 2 passed at once: the count is " + latch.getCount());
+        println("round 2 passed at once: the count is " + latch.getCount());
     }
 }
 ```
@@ -759,6 +783,8 @@ Look back at §1: forty lines of careful monitor discipline, just for a bounded 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import static java.lang.IO.println;
+
 public class Main {
     static final int POISON = -1;
 
@@ -769,7 +795,7 @@ public class Main {
             try {
                 for (int i = 1; i <= 5; i++) {
                     queue.put(i);                       // blocks while the queue is full
-                    System.out.println("produced " + i);
+                    println("produced " + i);
                 }
                 queue.put(POISON);                      // "no more items"
             } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
@@ -781,9 +807,9 @@ public class Main {
                     int item = queue.take();            // blocks while the queue is empty
                     if (item == POISON) break;
                     Thread.sleep(50);                   // consume slower than we produce
-                    System.out.println("        consumed " + item);
+                    println("        consumed " + item);
                 }
-                System.out.println("consumer: poison pill — shutting down");
+                println("consumer: poison pill — shutting down");
             } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         });
 

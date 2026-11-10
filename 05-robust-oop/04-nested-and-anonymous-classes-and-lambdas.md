@@ -65,6 +65,8 @@ You can declare a class inside another class. Java has four kinds of nested clas
 - An **anonymous class** has no name at all (§2).
 
 ```java run
+import static java.lang.IO.println;
+
 class Outer {
     private int x = 10;
 
@@ -80,11 +82,11 @@ class Outer {
 public class Main {
     public static void main(String[] args) {
         Outer.StaticNested sn = new Outer.StaticNested();
-        System.out.println(sn.triple(5));
+        println(sn.triple(5));
 
         Outer outer = new Outer();
         Outer.Inner inner = outer.new Inner();
-        System.out.println(inner.addX(5));
+        println(inner.addX(5));
     }
 }
 ```
@@ -107,6 +109,8 @@ The `static` keyword on a nested class means the same thing it means on a field 
 *Mechanism.* Each inner object is tied to exactly one enclosing object, fixed at the moment the inner object is created <abbr title="The Java Language Specification, Java SE 25, §8.1.3">[1]</abbr>. That link is how it reaches `x`. So two inner objects made from two different outer objects read two different sets of fields:
 
 ```java run
+import static java.lang.IO.println;
+
 class Counter {
     private int count;
     Counter(int start) { count = start; }
@@ -123,9 +127,9 @@ public class Main {
         Counter.Step sa = a.new Step();
         Counter.Step sb = b.new Step();
         Counter.Step sa2 = a.new Step();
-        System.out.println(sa.next());
-        System.out.println(sb.next());
-        System.out.println(sa2.next());
+        println(sa.next());
+        println(sb.next());
+        println(sa2.next());
     }
 }
 ```
@@ -142,6 +146,8 @@ public class Main {
 *Concrete bite.* An inner object can't exist without its outer object. `new Outer.Inner()` in `main` names no enclosing instance, so javac refuses:
 
 ```java run
+import static java.lang.IO.println;
+
 class Outer {
     private int x = 10;
 
@@ -153,14 +159,14 @@ class Outer {
 public class Main {
     public static void main(String[] args) {
         Outer.Inner inner = new Outer.Inner();
-        System.out.println(inner.addX(5));
+        println(inner.addX(5));
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:11: error: an enclosing instance that contains Outer.Inner is required
+Main.java:13: error: an enclosing instance that contains Outer.Inner is required
         Outer.Inner inner = new Outer.Inner();
                             ^
 1 error
@@ -184,6 +190,8 @@ Write `outer.new Inner()` instead, or make the class `static` if it never needs 
 When you want to implement an [interface](/synapse/programming-languages/java/robust-oop/abstract-classes-and-interfaces) just once, right where you need it, you can write an **anonymous class**. The expression `new Interface() { ... }` defines an unnamed implementing class and instantiates it, all in one go.
 
 ```java run
+import static java.lang.IO.println;
+
 interface Greeter { String greet(String name); }
 
 public class Main {
@@ -192,7 +200,7 @@ public class Main {
             @Override
             public String greet(String name) { return "Hello, " + name; }
         };
-        System.out.println(g.greet("Ada"));
+        println(g.greet("Ada"));
     }
 }
 ```
@@ -235,14 +243,16 @@ Main.class
 When an interface has exactly **one** abstract method — making it a **functional interface** <abbr title="The Java Language Specification, Java SE 25, §9.8">[4]</abbr> — a **lambda** can express the implementation as `parameters -> body`. It does the same job as the anonymous class from §2, with all the ceremony stripped away, and it makes behavior a value.
 
 ```java run
+import static java.lang.IO.println;
+
 interface Greeter { String greet(String name); }
 
 public class Main {
     public static void main(String[] args) {
         Greeter g = name -> "Hello, " + name;
-        System.out.println(g.greet("Ada"));
+        println(g.greet("Ada"));
 
-        Runnable r = () -> System.out.println("running");
+        Runnable r = () -> println("running");
         r.run();
     }
 }
@@ -263,6 +273,8 @@ running
 A lambda's body can also be a block with a `return`, and its parameters can carry explicit types <abbr title="The Java Language Specification, Java SE 25, §15.27">[5]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 interface IntOp { int apply(int a, int b); }
 
 public class Main {
@@ -274,8 +286,8 @@ public class Main {
             }
             return b;
         };
-        System.out.println(add.apply(3, 4));
-        System.out.println(max.apply(3, 4));
+        println(add.apply(3, 4));
+        println(max.apply(3, 4));
     }
 }
 ```
@@ -296,19 +308,21 @@ A lambda isn't an anonymous class, though. No `Main$2.class` shows up for one. I
 *Concrete bite.* "Exactly one abstract method" is a hard requirement. A lambda can't target an interface with two:
 
 ```java run
+import static java.lang.IO.println;
+
 interface TwoMethods { void a(); void b(); }
 
 public class Main {
     public static void main(String[] args) {
-        TwoMethods t = () -> System.out.println("?");
+        TwoMethods t = () -> println("?");
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:5: error: incompatible types: TwoMethods is not a functional interface
-        TwoMethods t = () -> System.out.println("?");
+Main.java:7: error: incompatible types: TwoMethods is not a functional interface
+        TwoMethods t = () -> println("?");
                        ^
     multiple non-overriding abstract methods found in interface TwoMethods
 ```
@@ -337,6 +351,8 @@ Main.java:1: error: Unexpected @FunctionalInterface annotation
 *Watch out: changing a variable the lambda uses.* A lambda may use one of its method's local variables only if that variable is **effectively final** — meaning it's never assigned again after its initializer <abbr title="The Java Language Specification, Java SE 25, §15.27.2">[6]</abbr>. A single later assignment breaks the rule, even one that comes after the lambda:
 
 ```java run
+import static java.lang.IO.println;
+
 interface Greeter { String greet(String name); }
 
 public class Main {
@@ -344,14 +360,14 @@ public class Main {
         String greeting = "Hello";
         Greeter g = name -> greeting + ", " + name;
         greeting = "Bye";
-        System.out.println(g.greet("Ada"));
+        println(g.greet("Ada"));
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:6: error: local variables referenced from a lambda expression must be final or effectively final
+Main.java:8: error: local variables referenced from a lambda expression must be final or effectively final
         Greeter g = name -> greeting + ", " + name;
                             ^
 1 error
@@ -387,17 +403,19 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.Consumer;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Predicate<String> isLong = s -> s.length() > 4;
         Function<String, Integer> length = s -> s.length();
         Supplier<String> greeting = () -> "hi";
-        Consumer<String> shout = s -> System.out.println(s.toUpperCase());
+        Consumer<String> shout = s -> println(s.toUpperCase());
 
-        System.out.println(isLong.test("Ada"));
-        System.out.println(isLong.test("Grace"));
-        System.out.println(length.apply("Linus"));
-        System.out.println(greeting.get());
+        println(isLong.test("Ada"));
+        println(isLong.test("Grace"));
+        println(length.apply("Linus"));
+        println(greeting.get());
         shout.accept("done");
     }
 }
@@ -440,11 +458,13 @@ When a lambda does nothing but call one existing method, you can write it even m
 import java.util.List;
 import java.util.ArrayList;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         List<String> names = new ArrayList<>(List.of("Charlie", "alice", "Bob"));
         names.sort(String::compareToIgnoreCase);
-        System.out.println(names);
+        println(names);
         names.forEach(System.out::println);
     }
 }
@@ -482,6 +502,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Function<String, Integer> parse = Integer::parseInt;
@@ -491,13 +513,13 @@ public class Main {
         BiFunction<String, String, Boolean> same = String::equalsIgnoreCase;
         Supplier<List<String>> fresh = ArrayList::new;
 
-        System.out.println(parse.apply("42") + 1);
-        System.out.println(title.apply("Ada"));
-        System.out.println(length.apply("Grace"));
-        System.out.println(same.apply("java", "JAVA"));
+        println(parse.apply("42") + 1);
+        println(title.apply("Ada"));
+        println(length.apply("Grace"));
+        println(same.apply("java", "JAVA"));
         List<String> list = fresh.get();
         list.add("new");
-        System.out.println(list);
+        println(list);
     }
 }
 ```
@@ -590,16 +612,18 @@ One check per objective. Answer before you open anything.
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 interface IntOp { int apply(int a, int b); }
 interface Greeter { String greet(String name); }
 
 public class Main {
     public static void main(String[] args) {
         IntOp add = (a, b) -> a + b;
-        System.out.println(add.apply(3, 4));
+        println(add.apply(3, 4));
 
         Greeter g = name -> "Hello, " + name;
-        System.out.println(g.greet("Ada"));
+        println(g.greet("Ada"));
 
         List<String> fruit = new ArrayList<>(List.of("banana", "Apple", "cherry"));
         fruit.sort(String::compareToIgnoreCase);

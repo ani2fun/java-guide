@@ -56,13 +56,15 @@ This is a first pass. The model underneath "object" gets its full treatment in [
 You write a String with **double** quotes. Because it's an object, it carries methods, and you call one with a dot: `name.length()`.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String name = "Ada";
-        System.out.println(name);
-        System.out.println(name.length());
+        println(name);
+        println(name.length());
         char first = name.charAt(0);
-        System.out.println(first);
+        println(first);
     }
 }
 ```
@@ -87,10 +89,12 @@ Remember the two kinds of quote from [Variables and primitive types](/synapse/pr
 *Concrete bite.* Positions run from `0` to `length − 1`, so reaching past the end is a run-time error <abbr title="Java SE 25 API, java.lang.String">[1]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String name = "Ada";
-        System.out.println(name.charAt(3));
+        println(name.charAt(3));
     }
 }
 ```
@@ -117,13 +121,15 @@ A double quote ends a String. So how do you put one *inside* a String? You write
 - `\\` is one backslash.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("She said \"hi\"");
-        System.out.println("line one\nline two");
-        System.out.println("C:\\temp");
-        System.out.println("it's");
-        System.out.println('\'');
+        println("She said \"hi\"");
+        println("line one\nline two");
+        println("C:\\temp");
+        println("it's");
+        println('\'');
     }
 }
 ```
@@ -143,21 +149,23 @@ Each `\"` printed a quote, `\n` split the line in two, and `\\` printed a single
 *Watch out: an unescaped quote.* Leave out the backslashes, and the String ends at the second `"`. javac then reads `hi` as code:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("She said "hi"");
+        println("She said "hi"");
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:3: error: ')' or ',' expected
-        System.out.println("She said "hi"");
-                                      ^
-Main.java:3: error: ';' expected
-        System.out.println("She said "hi"");
-                                        ^
+Main.java:5: error: ')' or ',' expected
+        println("She said "hi"");
+                           ^
+Main.java:5: error: ';' expected
+        println("She said "hi"");
+                             ^
 2 errors
 ```
 
@@ -170,12 +178,14 @@ The caret points at `hi`, the first thing after the String ended. So whenever ja
 A String never changes. Methods that look like they edit it (`toUpperCase`, `replace`, `strip`) actually return a **new** String and leave the original alone. This property is called **immutability**, and the String API puts it plainly: "Strings are constant; their values cannot be changed after they are created" <abbr title="Java SE 25 API, java.lang.String">[1]</abbr>.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String greeting = "hello";
         String shout = greeting.toUpperCase();
-        System.out.println(shout);
-        System.out.println(greeting);
+        println(shout);
+        println(greeting);
     }
 }
 ```
@@ -194,11 +204,13 @@ hello
 *Concrete bite.* That means calling one of these methods and ignoring the result does nothing at all:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String greeting = "hello";
         greeting.toUpperCase();   // result thrown away!
-        System.out.println(greeting);
+        println(greeting);
     }
 }
 ```
@@ -230,15 +242,17 @@ Strings come with a big toolkit <abbr title="Java SE 25 API, java.lang.String">[
 - `strip` removes surrounding **whitespace**: spaces, tabs and line breaks.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String s = "  Hello, World  ";
-        System.out.println(s.strip());
-        System.out.println(s.strip().length());
-        System.out.println("Hello, World".indexOf("World"));
-        System.out.println("Hello, World".substring(7));
-        System.out.println("Hello, World".replace("World", "Java"));
-        System.out.println("Hello, World".contains("ello"));
+        println(s.strip());
+        println(s.strip().length());
+        println("Hello, World".indexOf("World"));
+        println("Hello, World".substring(7));
+        println("Hello, World".replace("World", "Java"));
+        println("Hello, World".contains("ello"));
     }
 }
 ```
@@ -265,12 +279,14 @@ Notice that methods **chain**. `s.strip().length()` runs `strip` first, which ma
 **`substring` with two positions.** `substring(begin, end)` takes the characters from `begin` up to, but **not including**, `end`. So its length is `end - begin`:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String s = "Hello, World";
-        System.out.println(s.substring(0, 5));   // positions 0 to 4: the end is excluded
-        System.out.println(s.substring(7, 12));  // positions 7 to 11
-        System.out.println(s.substring(7, 12).length());
+        println(s.substring(0, 5));   // positions 0 to 4: the end is excluded
+        println(s.substring(7, 12));  // positions 7 to 11
+        println(s.substring(7, 12).length());
     }
 }
 ```
@@ -290,9 +306,11 @@ World
 *Concrete bite.* That `-1` is a value, not an error, and it bites if you assume the search succeeded:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello".indexOf("z"));
+        println("Hello".indexOf("z"));
     }
 }
 ```
@@ -317,13 +335,15 @@ public class Main {
 Put `+` between two strings and it joins them. That's **concatenation**. Put `+` between a string and a number, and it turns the number into text, then joins <abbr title="The Java Language Specification, Java SE 25, §15.18.1">[3]</abbr>. It's the quickest way to build output, but it hides a precedence surprise.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String name = "Ada";
         int age = 36;
-        System.out.println("name: " + name + ", age: " + age);
-        System.out.println("sum: " + 1 + 2);
-        System.out.println(1 + 2 + " = sum");
+        println("name: " + name + ", age: " + age);
+        println("sum: " + 1 + 2);
+        println(1 + 2 + " = sum");
     }
 }
 ```
@@ -346,9 +366,11 @@ sum: 12
 *Concrete bite.* The `"sum: 12"` above is the bite: a "sum" that never added. Parenthesise the arithmetic to fix it:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("sum: " + (1 + 2));
+        println("sum: " + (1 + 2));
     }
 }
 ```
@@ -363,11 +385,13 @@ The parentheses force `1 + 2 = 3` first, then the concatenation.
 *Watch out: two `char`s before any String.* A `char` is a number to `+`, as [Numbers and arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) showed with `'A' + 1`. So `'J' + 'a'` adds character codes, and only then meets the String:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println('J' + 'a' + "va");
-        System.out.println("" + 'J' + 'a' + "va");
-        System.out.println("Ja" + 'v' + 'a');
+        println('J' + 'a' + "va");
+        println("" + 'J' + 'a' + "va");
+        println("Ja" + 'v' + 'a');
     }
 }
 ```
@@ -401,15 +425,17 @@ There's a second cost. Every `+` that executes while the program runs creates a 
 For text you nearly always mean the second. (`new String("hello")` below builds a fresh String object; [Classes and objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects) teaches `new`.)
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String a = "hello";
         String b = "hello";
         String c = new String("hello");
-        System.out.println(a.equals(b));
-        System.out.println(a.equals(c));
-        System.out.println(a == b);
-        System.out.println(a == c);
+        println(a.equals(b));
+        println(a.equals(c));
+        println(a == b);
+        println(a == c);
     }
 }
 ```
@@ -432,11 +458,13 @@ The culprit is the **String pool**. Java stores identical string *literals*, lik
 *Concrete bite.* The coincidence collapses the moment a string comes from anywhere but a literal: a `new String`, typed input, a computation.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String typed = new String("yes");
-        System.out.println(typed == "yes");
-        System.out.println(typed.equals("yes"));
+        println(typed == "yes");
+        println(typed.equals("yes"));
     }
 }
 ```
@@ -452,14 +480,16 @@ The text is `"yes"` both ways. `==` compared object identities, found two differ
 *Watch out: text joined while the program runs.* The same thing happens with no `new` in sight. Strings built by concatenation at run time are new objects, never taken from the pool <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[4]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String a = "hello";
         String part = "hel";
         String b = part + "lo";   // joined while the program runs
-        System.out.println(b);
-        System.out.println(a == b);
-        System.out.println(a.equals(b));
+        println(b);
+        println(a == b);
+        println(a.equals(b));
     }
 }
 ```

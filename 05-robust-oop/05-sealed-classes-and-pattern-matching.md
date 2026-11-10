@@ -59,6 +59,8 @@ Every output below was produced by compiling and running the code on Java 25.
 A **type pattern** — `o instanceof Type var` — tests whether `o` is a `Type`, and if it is, binds it to `var`, already cast. It's been standard since Java 16 <abbr title="JEP 394: Pattern Matching for instanceof (JDK 16)">[1]</abbr>. The binding is in scope wherever the test is known to be true, so test-and-cast becomes a single step.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static String describe(Object o) {
         if (o instanceof String s) {
@@ -69,9 +71,9 @@ public class Main {
         return "unknown";
     }
     public static void main(String[] args) {
-        System.out.println(describe("hello"));
-        System.out.println(describe(21));
-        System.out.println(describe(3.14));
+        println(describe("hello"));
+        println(describe(21));
+        println(describe(3.14));
     }
 }
 ```
@@ -91,6 +93,8 @@ unknown
 "Provably true" also covers the code *after* a negated test that returns. So the early-exit style works too:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static int length(Object o) {
         if (!(o instanceof String s)) {
@@ -99,8 +103,8 @@ public class Main {
         return s.length();
     }
     public static void main(String[] args) {
-        System.out.println(length("hello"));
-        System.out.println(length(42));
+        println(length("hello"));
+        println(length(42));
     }
 }
 ```
@@ -118,11 +122,13 @@ The `if` returns whenever `o` isn't a `String`. So on the line after it, `o` mus
 *Watch out: a binding where the test may have failed.* With `||`, the right side runs only when the left side is `false` — which is exactly when `s` was never bound:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Object o = "hello";
         if (o instanceof String s || s.isEmpty()) {
-            System.out.println("?");
+            println("?");
         }
     }
 }
@@ -130,7 +136,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:4: error: cannot find symbol
+Main.java:6: error: cannot find symbol
         if (o instanceof String s || s.isEmpty()) {
                                      ^
   symbol:   variable s
@@ -156,6 +162,8 @@ With `&&`, the same code compiles, because the right side runs only when the tes
 Since JDK 21, a `switch` can match on **type patterns** <abbr title="JEP 441: Pattern Matching for switch (JDK 21)">[3]</abbr>: each `case Type var ->` handles values of that type and binds the variable. This turns a chain of `instanceof`/`else if` into a clean multi-way dispatch.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static String describe(Object o) {
         return switch (o) {
@@ -165,9 +173,9 @@ public class Main {
         };
     }
     public static void main(String[] args) {
-        System.out.println(describe("hi"));
-        System.out.println(describe(42));
-        System.out.println(describe(3.14));
+        println(describe("hi"));
+        println(describe(42));
+        println(describe(3.14));
     }
 }
 ```
@@ -190,6 +198,8 @@ Two more tools let you refine the cases <abbr title="The Java Language Specifica
 - `case null` handles a `null` selector, which otherwise matches no case.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static String classify(Object o) {
         return switch (o) {
@@ -203,13 +213,13 @@ public class Main {
         };
     }
     public static void main(String[] args) {
-        System.out.println(classify(""));
-        System.out.println(classify("pattern"));
-        System.out.println(classify("hi"));
-        System.out.println(classify(-3));
-        System.out.println(classify(7));
-        System.out.println(classify(null));
-        System.out.println(classify(2.5));
+        println(classify(""));
+        println(classify("pattern"));
+        println(classify("hi"));
+        println(classify(-3));
+        println(classify(7));
+        println(classify(null));
+        println(classify(2.5));
     }
 }
 ```
@@ -232,6 +242,8 @@ other: 2.5
 *Watch out: a `null` selector without `case null`.* `default` doesn't match `null`. Without a `case null`, a `null` selector throws a `NullPointerException` <abbr title="The Java Language Specification, Java SE 25, §14.11.3">[8]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static String describe(Object o) {
         return switch (o) {
@@ -241,8 +253,8 @@ public class Main {
         };
     }
     public static void main(String[] args) {
-        System.out.println(describe("hi"));
-        System.out.println(describe(null));
+        println(describe("hi"));
+        println(describe(null));
     }
 }
 ```
@@ -258,6 +270,8 @@ To fix it, add `case null ->`, or check for `null` before the `switch`.
 *Watch out: a general case before a specific one.* Cases are tried in order. Put `case CharSequence cs` first, and it takes every `String`, so a later `case String s` could never run. javac calls that later case **dominated**, and rejects it <abbr title="The Java Language Specification, Java SE 25, §14.11.1">[6]</abbr>:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static String describe(Object o) {
         return switch (o) {
@@ -267,14 +281,14 @@ public class Main {
         };
     }
     public static void main(String[] args) {
-        System.out.println(describe("hi"));
+        println(describe("hi"));
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:5: error: this case label is dominated by a preceding case label
+Main.java:7: error: this case label is dominated by a preceding case label
             case String s -> "string: " + s;
                  ^
 1 error
@@ -407,6 +421,8 @@ public class Main {
 *Mechanism.* A record pattern matches the record type, then gets each component by invoking its accessor method <abbr title="The Java Language Specification, Java SE 25, §14.30.2">[9]</abbr>. Record patterns can nest, and `var` lets the compiler infer a component's type. So a single case can match and destructure nested data, and a guard can test the parts:
 
 ```java run
+import static java.lang.IO.println;
+
 record Point(int x, int y) {}
 record Line(Point start, Point end) {}
 
@@ -421,9 +437,9 @@ public class Main {
         };
     }
     public static void main(String[] args) {
-        System.out.println(describe(new Line(new Point(2, 0), new Point(2, 9))));
-        System.out.println(describe(new Line(new Point(0, 0), new Point(3, 4))));
-        System.out.println(describe("text"));
+        println(describe(new Line(new Point(2, 0), new Point(2, 9))));
+        println(describe(new Line(new Point(0, 0), new Point(3, 4))));
+        println(describe("text"));
     }
 }
 ```
@@ -442,6 +458,8 @@ not a line
 ```java run
 import java.util.List;
 
+import static java.lang.IO.println;
+
 record Point(int x, int y) {}
 record Line(Point start, Point end) {}
 
@@ -455,18 +473,18 @@ public class Main {
         };
     }
     public static void main(String[] args) {
-        System.out.println(describe(new Line(new Point(2, 0), new Point(2, 9))));
-        System.out.println(describe(new Line(new Point(0, 0), new Point(3, 4))));
-        System.out.println(describe("text"));
+        println(describe(new Line(new Point(2, 0), new Point(2, 9))));
+        println(describe(new Line(new Point(0, 0), new Point(3, 4))));
+        println(describe("text"));
 
         int count = 0;
         for (String _ : List.of("a", "b", "c")) count++;   // only the count matters
-        System.out.println("count = " + count);
+        println("count = " + count);
 
         try {
             Integer.parseInt("twelve");
         } catch (NumberFormatException _) {               // the exception isn't used
-            System.out.println("not a number");
+            println("not a number");
         }
     }
 }
@@ -559,6 +577,8 @@ One check per objective. Answer before you open anything.
 <summary>The 🧪 box below: <code>describe</code> as a <code>switch</code>, the <code>Json</code> switch, and <code>area(new Rect(2, 5))</code>.</summary>
 
 ```java run
+import static java.lang.IO.println;
+
 sealed interface Shape permits Circle, Rect {}
 record Circle(double radius) implements Shape {}
 record Rect(double w, double h) implements Shape {}
@@ -578,9 +598,9 @@ public class Main {
         };
     }
     public static void main(String[] args) {
-        System.out.println(describe("hello"));
-        System.out.println(describe(21));
-        System.out.println(describe(3.14));
+        println(describe("hello"));
+        println(describe(21));
+        println(describe(3.14));
         System.out.printf("%.2f%n", area(new Rect(2, 5)));
     }
 }

@@ -62,13 +62,15 @@ Instead of creating `Thread`s by hand, you **submit** tasks to an `ExecutorServi
 ```java run
 import java.util.concurrent.*;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws Exception {
         ExecutorService pool = Executors.newFixedThreadPool(2);
         Future<Integer> f1 = pool.submit(() -> 6 * 7);
         Future<Integer> f2 = pool.submit(() -> 100 + 1);
-        System.out.println(f1.get());
-        System.out.println(f2.get());
+        println(f1.get());
+        println(f2.get());
         pool.shutdown();
     }
 }
@@ -117,19 +119,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws Exception {
         Callable<Integer> answer = () -> {
             Thread.sleep(10);
             return 42;
         };
-        Runnable greet = () -> System.out.println("runnable ran");
+        Runnable greet = () -> println("runnable ran");
         try (ExecutorService pool = Executors.newFixedThreadPool(2)) {
             Future<Integer> f1 = pool.submit(answer);
             Future<?> f2 = pool.submit(greet);
             Object nothing = f2.get();
-            System.out.println("runnable's future holds: " + nothing);
-            System.out.println("callable returned: " + f1.get());
+            println("runnable's future holds: " + nothing);
+            println("callable returned: " + f1.get());
         }
     }
 }
@@ -145,11 +149,13 @@ callable returned: 42
 The `Callable` called `Thread.sleep`, which throws the checked `InterruptedException`, without any `try`. That's fine, because `call()` is declared `throws Exception`. The same body as a `Runnable` doesn't compile, because `run()` declares no checked exception:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         Runnable r = () -> {
             Thread.sleep(10);
-            System.out.println("slept");
+            println("slept");
         };
         r.run();
     }
@@ -158,7 +164,7 @@ public class Main {
 
 **Compiler error:**
 ```
-Main.java:4: error: unreported exception InterruptedException; must be caught or declared to be thrown
+Main.java:6: error: unreported exception InterruptedException; must be caught or declared to be thrown
             Thread.sleep(10);
                         ^
 1 error
@@ -172,12 +178,14 @@ Main.java:4: error: unreported exception InterruptedException; must be caught or
 ```java run
 import java.util.concurrent.*;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws Exception {
         ExecutorService pool = Executors.newFixedThreadPool(1);
         try {
             Future<Integer> f = pool.submit(() -> 10 / 0);
-            System.out.println(f.get());
+            println(f.get());
         } finally {
             pool.shutdown();   // without this, the idle worker keeps the JVM alive after get() throws
         }
@@ -203,6 +211,8 @@ Note that neither `shutdown()` nor `shutdownNow()` waits by itself <abbr title="
 ```java run
 import java.util.concurrent.*;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         ExecutorService pool = Executors.newFixedThreadPool(2);
@@ -210,14 +220,14 @@ public class Main {
             int id = i;
             pool.submit(() -> {
                 try { Thread.sleep(200); } catch (InterruptedException e) { return; }
-                System.out.println("task " + id + " done");
+                println("task " + id + " done");
             });
         }
         pool.shutdown();                     // stop accepting; queued tasks still run
-        System.out.println("shutdown called: isShutdown=" + pool.isShutdown()
+        println("shutdown called: isShutdown=" + pool.isShutdown()
                 + " isTerminated=" + pool.isTerminated());
         boolean finished = pool.awaitTermination(2, TimeUnit.SECONDS);
-        System.out.println("awaitTermination returned " + finished
+        println("awaitTermination returned " + finished
                 + ": isTerminated=" + pool.isTerminated());
     }
 }
@@ -254,6 +264,8 @@ The [counter race](/synapse/programming-languages/java/advanced/concurrency-the-
 ```java run
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.IO.println;
+
 public class Main {
     static AtomicInteger counter = new AtomicInteger(0);
     public static void main(String[] args) throws InterruptedException {
@@ -265,7 +277,7 @@ public class Main {
             threads[i].start();
         }
         for (Thread t : threads) t.join();
-        System.out.println(counter.get());
+        println(counter.get());
     }
 }
 ```
@@ -286,6 +298,8 @@ public class Main {
 // ⚠️ ANTI-PATTERN — get() and set() are each atomic, but the pair is not.  Do not copy it.
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.IO.println;
+
 public class Main {
     static AtomicInteger counter = new AtomicInteger(0);
 
@@ -298,8 +312,8 @@ public class Main {
             threads[i].start();
         }
         for (Thread t : threads) t.join();
-        System.out.println(counter.get());
-        System.out.println("violation: a read and a write, each atomic, are still a race together");
+        println(counter.get());
+        println("violation: a read and a write, each atomic, are still a race together");
     }
 }
 ```
@@ -318,12 +332,14 @@ For a compound update, use a single atomic method that does the whole thing:
 ```java run
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         AtomicInteger stock = new AtomicInteger(5);
-        System.out.println(stock.compareAndSet(5, 4) + " -> " + stock.get());
-        System.out.println(stock.compareAndSet(5, 3) + " -> " + stock.get());
-        System.out.println(stock.updateAndGet(n -> n * 10));
+        println(stock.compareAndSet(5, 4) + " -> " + stock.get());
+        println(stock.compareAndSet(5, 3) + " -> " + stock.get());
+        println(stock.updateAndGet(n -> n * 10));
     }
 }
 ```
@@ -344,6 +360,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         ConcurrentHashMap<String, Integer> counts = new ConcurrentHashMap<>();
@@ -359,7 +377,7 @@ public class Main {
         }
         for (Thread t : threads) t.join();
         Map<String, Integer> sorted = new TreeMap<>(counts);
-        System.out.println(sorted);
+        println(sorted);
     }
 }
 ```
@@ -388,12 +406,14 @@ A plain `Future` only lets you *block* while waiting for a result. **`Completabl
 ```java run
 import java.util.concurrent.CompletableFuture;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws Exception {
         CompletableFuture<Integer> future = CompletableFuture
             .supplyAsync(() -> 21)
             .thenApply(n -> n * 2);
-        System.out.println(future.get());
+        println(future.get());
     }
 }
 ```
@@ -416,6 +436,8 @@ Here's a full composition in action:
 ```java run
 import java.util.concurrent.CompletableFuture;
 
+import static java.lang.IO.println;
+
 public class Main {
     static CompletableFuture<String> fetchUser(int id) {
         return CompletableFuture.supplyAsync(() -> "user-" + id);
@@ -434,7 +456,7 @@ public class Main {
                 .thenApply(score -> label + " -> score " + score))
             .exceptionally(e -> "fallback: " + e.getCause().getMessage());
 
-        System.out.println(pipeline.get());
+        println(pipeline.get());
     }
 }
 ```
@@ -475,6 +497,8 @@ When a stage fails, the error takes the dotted path instead:
 ```java run
 import java.util.concurrent.CompletableFuture;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws Exception {
         CompletableFuture<String> pipeline = CompletableFuture
@@ -482,7 +506,7 @@ public class Main {
             .thenApply(s -> s + "!")            // skipped — there is no value to transform
             .exceptionally(e -> "fallback: " + e.getCause().getMessage());
 
-        System.out.println(pipeline.get());
+        println(pipeline.get());
     }
 }
 ```
@@ -502,6 +526,8 @@ The `thenApply` stage never ran. A failed stage completes the future *exceptiona
 ```java run
 import java.util.concurrent.CompletableFuture;
 
+import static java.lang.IO.println;
+
 public class Main {
     static CompletableFuture<Integer> fetchScore(String label) {
         return CompletableFuture.supplyAsync(() -> label.length() * 10);
@@ -512,8 +538,8 @@ public class Main {
             .thenApply(label -> fetchScore(label));
         CompletableFuture<Integer> flat = CompletableFuture.supplyAsync(() -> "user-7")
             .thenCompose(label -> fetchScore(label));
-        System.out.println("thenApply:   " + nested.get().getClass().getSimpleName());
-        System.out.println("thenCompose: " + flat.get());
+        println("thenApply:   " + nested.get().getClass().getSimpleName());
+        println("thenCompose: " + flat.get());
     }
 }
 ```
@@ -529,6 +555,8 @@ thenCompose: 60
 ```java run
 import java.util.concurrent.CompletableFuture;
 
+import static java.lang.IO.println;
+
 public class Main {
     static CompletableFuture<Integer> fetchScore(String label) {
         return CompletableFuture.supplyAsync(() -> label.length() * 10);
@@ -537,14 +565,14 @@ public class Main {
     public static void main(String[] args) throws Exception {
         CompletableFuture<Integer> score = CompletableFuture.supplyAsync(() -> "user-7")
             .thenApply(label -> fetchScore(label));
-        System.out.println(score.get());
+        println(score.get());
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:10: error: incompatible types: inference variable U has incompatible bounds
+Main.java:12: error: incompatible types: inference variable U has incompatible bounds
             .thenApply(label -> fetchScore(label));
                       ^
     equality constraints: Integer
@@ -573,6 +601,8 @@ A **virtual thread**, final as of JDK 21 <abbr title="JEP 444: Virtual Threads (
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         AtomicInteger done = new AtomicInteger(0);
@@ -584,7 +614,7 @@ public class Main {
                 });
             }
         }
-        System.out.println("completed: " + done.get());
+        println("completed: " + done.get());
     }
 }
 ```
@@ -606,6 +636,8 @@ Those batches cost real time. Here are the same 10,000 sleeps, timed inside the 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.IO.println;
+
 public class Main {
     static long run(ExecutorService ex) {
         AtomicInteger done = new AtomicInteger();
@@ -619,8 +651,8 @@ public class Main {
         return (System.nanoTime() - t0) / 1_000_000;
     }
     public static void main(String[] args) {
-        System.out.println("virtual:        " + run(Executors.newVirtualThreadPerTaskExecutor()) + " ms");
-        System.out.println("100 platform:   " + run(Executors.newFixedThreadPool(100)) + " ms");
+        println("virtual:        " + run(Executors.newVirtualThreadPerTaskExecutor()) + " ms");
+        println("100 platform:   " + run(Executors.newFixedThreadPool(100)) + " ms");
     }
 }
 ```
@@ -636,13 +668,15 @@ virtual:        64 ms
 A virtual thread is still a `Thread`. `Thread.ofVirtual()` builds one, and `isVirtual()` tells the two kinds apart. But one difference can bite: "Virtual threads are daemon threads" <abbr title="Java SE 25 API, java.lang.Thread, &quot;Virtual threads&quot;">[9]</abbr>, so they don't keep the JVM alive. Always `join` them, or close their executor:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         Thread vt = Thread.ofVirtual().name("vt-1").unstarted(() ->
-            System.out.println("inside: isVirtual=" + Thread.currentThread().isVirtual()));
+            println("inside: isVirtual=" + Thread.currentThread().isVirtual()));
         Thread pt = new Thread(() -> {});
-        System.out.println("vt-1: isVirtual=" + vt.isVirtual() + " isDaemon=" + vt.isDaemon());
-        System.out.println("platform: isVirtual=" + pt.isVirtual() + " isDaemon=" + pt.isDaemon());
+        println("vt-1: isVirtual=" + vt.isVirtual() + " isDaemon=" + vt.isDaemon());
+        println("platform: isVirtual=" + pt.isVirtual() + " isDaemon=" + pt.isDaemon());
         vt.start();
         vt.join();
     }
@@ -663,6 +697,8 @@ In JDK 21, the common cause was `synchronized`: a virtual thread was pinned "whe
 ```java run
 import java.util.concurrent.Executors;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         // one carrier thread, so a pinned virtual thread blocks everyone else
@@ -681,8 +717,8 @@ public class Main {
             }
         }
         long ms = (System.nanoTime() - start) / 1_000_000;
-        System.out.println("100 sleeps of 50 ms on 1 carrier");
-        System.out.println("overlapped (under 1 s): " + (ms < 1000));
+        println("100 sleeps of 50 ms on 1 carrier");
+        println("overlapped (under 1 s): " + (ms < 1000));
     }
 }
 ```
@@ -713,6 +749,8 @@ The cost: they don't help CPU-bound work, and on JDK 21, blocking inside a monit
 **Scoped values: context without parameters.** A request handler often needs some context, such as the current user, deep inside the code it calls. Passing it as a parameter through every method is noisy. A **scoped value**, final as of JDK 25, binds a value for the duration of one call <abbr title="JEP 506: Scoped Values (JDK 25)">[12]</abbr>. Every method that call reaches can read it, and nothing outside it can:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static final ScopedValue<String> USER = ScopedValue.newInstance();
 
@@ -721,13 +759,13 @@ public class Main {
     }
 
     static void audit(String action) {
-        System.out.println(USER.get() + " did: " + action);
+        println(USER.get() + " did: " + action);
     }
 
     public static void main(String[] args) {
         ScopedValue.where(USER, "alice").run(() -> handleRequest("read report"));
         ScopedValue.where(USER, "bob").run(() -> handleRequest("delete report"));
-        System.out.println("after run, bound: " + USER.isBound());
+        println("after run, bound: " + USER.isBound());
         audit("sneak in");
     }
 }
@@ -747,11 +785,13 @@ Exception in thread "main" java.util.NoSuchElementException: ScopedValue not bou
 
 ```java
 // requires: --enable-preview (a preview API in JDK 25), and fetchUser/fetchScore from your code
+import static java.lang.IO.println;
+
 try (var scope = StructuredTaskScope.open()) {
     var user  = scope.fork(() -> fetchUser());     // both run concurrently,
     var score = scope.fork(() -> fetchScore());    // on virtual threads
     scope.join();                                  // wait; throws if either failed
-    System.out.println(user.get() + ": " + score.get());
+    println(user.get() + ": " + score.get());
 }
 ```
 
@@ -828,11 +868,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) throws Exception {
         try (ExecutorService pool = Executors.newFixedThreadPool(2)) {
-            System.out.println(pool.submit(() -> "a".repeat(3)).get());
-            System.out.println(pool.submit(() -> 2 + 2).get());
+            println(pool.submit(() -> "a".repeat(3)).get());
+            println(pool.submit(() -> 2 + 2).get());
         }
         AtomicInteger counter = new AtomicInteger();
         Thread[] threads = new Thread[5];
@@ -843,7 +885,7 @@ public class Main {
             threads[i].start();
         }
         for (Thread t : threads) t.join();
-        System.out.println(counter.get());
+        println(counter.get());
     }
 }
 ```

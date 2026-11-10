@@ -60,14 +60,16 @@ A `String` never changes, so `s = s + "b"` does **not** extend `s`. It builds a 
 You can see the new object with `System.identityHashCode`. It returns a number for an object, and the same object always gives the same number <abbr title="Java SE 25 API, Object.hashCode and System.identityHashCode">[2]</abbr>. So two different numbers mean two different objects:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String s = "a";
         int h1 = System.identityHashCode(s);
         s = s + "b";
         int h2 = System.identityHashCode(s);
-        System.out.println(s);
-        System.out.println(h1 == h2);
+        println(s);
+        println(h1 == h2);
     }
 }
 ```
@@ -93,6 +95,8 @@ The numbers themselves vary from run to run, which is why we compare them instea
 The result is correct, so nothing warns you. Only the time grows. Doubling `N` should roughly quadruple the `+=` time. Your times will differ from these:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     static long plusEquals(int n) {
         long t0 = System.nanoTime();
@@ -115,7 +119,7 @@ public class Main {
 
     public static void main(String[] args) {
         for (int n = 50_000; n <= 200_000; n *= 2) {
-            System.out.println(n + " pieces: += " + plusEquals(n) + " ms, StringBuilder " + builder(n) + " ms");
+            println(n + " pieces: += " + plusEquals(n) + " ms, StringBuilder " + builder(n) + " ms");
         }
     }
 }
@@ -145,6 +149,8 @@ Ignore this rule, and you get a program that works in tests and crawls on large 
 `StringBuilder` is a *mutable* sequence of characters <abbr title="Java SE 25 API, java.lang.StringBuilder">[4]</abbr>. `append` adds to it **in place**, with no new object per step. `toString()` produces the final `String` once, at the end. So the total work is linear.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         StringBuilder sb = new StringBuilder();
@@ -152,8 +158,8 @@ public class Main {
             sb.append(i);
         }
         String result = sb.toString();
-        System.out.println(result);
-        System.out.println(result.length());
+        println(result);
+        println(result.length());
     }
 }
 ```
@@ -169,20 +175,22 @@ public class Main {
 A builder can do more than append. Because it's mutable, its methods change it in place, and most of them return the same builder, so you can chain calls:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         StringBuilder sb = new StringBuilder("stressed");
         sb.reverse();
-        System.out.println(sb);
+        println(sb);
         sb.insert(0, "[").append("]");
-        System.out.println(sb);
+        println(sb);
         sb.deleteCharAt(0).setLength(sb.length() - 1);
-        System.out.println(sb);
+        println(sb);
         sb.setCharAt(0, 'D');
-        System.out.println(sb);
+        println(sb);
         StringBuilder same = sb.append("!");
-        System.out.println(same == sb);
-        System.out.println(new StringBuilder().capacity());
+        println(same == sb);
+        println(new StringBuilder().capacity());
     }
 }
 ```
@@ -212,12 +220,14 @@ When the room runs out, the builder "is automatically made larger" <abbr title="
 *Concrete bite.* `StringBuilder` does **not** override `equals` <abbr title="Java SE 25 API, StringBuilder.compareTo, API Note">[6]</abbr>. It inherits `Object`'s `equals`, which is identity, the same trap as arrays in [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model):
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         StringBuilder a = new StringBuilder("hi");
         StringBuilder b = new StringBuilder("hi");
-        System.out.println(a.equals(b));
-        System.out.println(a.toString().equals(b.toString()));
+        println(a.equals(b));
+        println(a.toString().equals(b.toString()));
     }
 }
 ```
@@ -252,14 +262,16 @@ You may run into `StringBuffer` in older code. It has the same methods, but they
 Recall from [References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model): string literals and constant expressions are **interned**, so equal ones are the same object <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[8]</abbr>. A string computed at run time is a fresh object. `intern()` takes a runtime string and hands back the shared instance from the pool.
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String a = "he";
         String b = a + "llo";   // built at run time from a variable — not pooled
         String c = "hello";
-        System.out.println(b == c);
-        System.out.println(b.intern() == c);
-        System.out.println(b.equals(c));
+        println(b == c);
+        println(b.intern() == c);
+        println(b.equals(c));
     }
 }
 ```
@@ -305,15 +317,17 @@ Two methods move between one string and many:
 import java.util.Arrays;
 import java.util.List;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String csv = "red,green,blue";
         String[] parts = csv.split(",");
-        System.out.println(parts.length);
-        System.out.println(Arrays.toString(parts));
-        System.out.println(String.join(" | ", parts));
-        System.out.println(String.join("-", List.of("2026", "09", "28")));
-        System.out.println("ab".repeat(3));
+        println(parts.length);
+        println(Arrays.toString(parts));
+        println(String.join(" | ", parts));
+        println(String.join("-", List.of("2026", "09", "28")));
+        println("ab".repeat(3));
     }
 }
 ```
@@ -337,13 +351,15 @@ ababab
 ```java run
 import java.util.Arrays;
 
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String version = "21.0.4";
-        System.out.println(version.split(".").length);
-        System.out.println(Arrays.toString(version.split("\\.")));
-        System.out.println(Arrays.toString("a,b,,".split(",")));
-        System.out.println(Arrays.toString("a,b,,".split(",", -1)));
+        println(version.split(".").length);
+        println(Arrays.toString(version.split("\\.")));
+        println(Arrays.toString("a,b,,".split(",")));
+        println(Arrays.toString("a,b,,".split(",", -1)));
     }
 }
 ```
@@ -380,6 +396,9 @@ Two modern tools make assembling readable text easier:
 - A **text block** (`"""…"""`, Java 15) is a multi-line string literal. It keeps line breaks and strips the common leading indentation <abbr title="JEP 378: Text Blocks">[13]</abbr>.
 
 ```java run
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String name = "Ada";
@@ -388,8 +407,8 @@ public class Main {
             Name:  %s
             Score: %d
             """.formatted(name, score);
-        System.out.print(report);
-        System.out.println("[end]");
+        print(report);
+        println("[end]");
     }
 }
 ```
@@ -420,17 +439,19 @@ Text blocks spare you the old pain of `"line1\n" + "line2\n"` for multi-line tex
 The opening `"""` must end its line <abbr title="The Java Language Specification, Java SE 25, §3.10.6">[14]</abbr>. A one-line text block doesn't compile:
 
 ```java run
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String s = """hello""";
-        System.out.println(s);
+        println(s);
     }
 }
 ```
 
 **Compiler error:**
 ```
-Main.java:3: error: illegal text block open delimiter sequence, missing line terminator
+Main.java:5: error: illegal text block open delimiter sequence, missing line terminator
         String s = """hello""";
                       ^
 ```
@@ -438,6 +459,9 @@ Main.java:3: error: illegal text block open delimiter sequence, missing line ter
 *Concrete bite.* The compiler strips the *common minimum* indentation, and the closing `"""` counts when it sits on its own line. Move it to the far left, and nothing gets stripped:
 
 ```java run
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String json = """
@@ -445,8 +469,8 @@ public class Main {
               "key": 1
             }
 """;
-        System.out.print(json);
-        System.out.println("[end]");
+        print(json);
+        println("[end]");
     }
 }
 ```
@@ -462,21 +486,24 @@ public class Main {
 The closing `"""` sat at column 0, so the common indentation was zero, and every line kept its 12 leading spaces. Two escapes give finer control <abbr title="The Java Language Specification, Java SE 25, §3.10.7">[15]</abbr>:
 
 ```java run
+import static java.lang.IO.print;
+import static java.lang.IO.println;
+
 public class Main {
     public static void main(String[] args) {
         String noNewline = """
             one
             two""";
-        System.out.println("[" + noNewline + "]");
+        println("[" + noNewline + "]");
         String joined = """
             one \
             two
             """;
-        System.out.print("[" + joined);
+        print("[" + joined);
         String kept = """
             tab\s
             """;
-        System.out.println(kept.length());
+        println(kept.length());
     }
 }
 ```
@@ -569,6 +596,8 @@ One check per objective. Answer before you open anything.
 - Put the closing `"""` on its own line, in the same column as `{` and `}`. The common indentation is then the indentation of `{`, so `{` and `}` print at the left margin, and `"key"` keeps its 2 extra spaces:
 
 ```java run
+import static java.lang.IO.print;
+
 public class Main {
     public static void main(String[] args) {
         String json = """
@@ -576,7 +605,7 @@ public class Main {
               "key": 1
             }
             """;
-        System.out.print(json);
+        print(json);
     }
 }
 ```
