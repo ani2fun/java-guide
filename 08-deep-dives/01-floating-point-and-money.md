@@ -22,7 +22,7 @@ This deep dive assumes [Numbers & Arithmetic](/synapse/programming-languages/jav
 3. [Inside the 64-bit double suitcase: why 0.1 + 0.2 overshoots](#chapter-3-inside-the-64-bit-double-suitcase-why-01--02-overshoots)
 4. [How big banks actually count money](#chapter-4-how-big-banks-actually-count-money)
 5. [The golden cheat sheet and production Java code](#chapter-5-the-golden-cheat-sheet-and-production-java-code)
-6. [Check yourself](#check-yourself)
+6. [Check yourself](#-check-yourself)
 
 ---
 

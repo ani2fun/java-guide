@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 1: The 8-Bit Light Switch and Complement Explorer</title>
+<link rel="stylesheet" href="../kit/lab.css">
+<script src="../kit/lab.js"></script>
+<script src="../kit/bits.js"></script>
+<style>
+  .modes { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 14px; }
+  .modes button { flex: 1 1 180px; text-align: left; }
+  .modes button small { display: block; font-weight: 500; color: var(--muted); margin-top: 2px; }
+  .modes button.on small { color: inherit; opacity: 0.85; }
+
+  .switches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+  @media (max-width: 520px) { .switches { grid-template-columns: repeat(4, 1fr); } }
+  .sw {
+    --c: var(--bit);
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 8px 2px 10px; border-width: 2px; min-width: 0;
+  }
+  .sw.sign { --c: var(--bad); }
+  .sw .pos { font: 600 0.66rem var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .sw .track { width: 22px; height: 38px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); position: relative; transition: background 140ms ease, box-shadow 140ms ease; }
+  .sw .knob { position: absolute; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--ghost); bottom: 2px; transition: bottom 140ms ease, background 140ms ease; }
+  .sw .digit { font: 700 1.25rem var(--mono); color: var(--muted); }
+  .sw .weight { font: 600 0.74rem var(--mono); color: var(--muted); white-space: nowrap; }
+  .sw[aria-pressed="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, var(--panel-2)); }
+  .sw[aria-pressed="true"] .track { background: color-mix(in srgb, var(--c) 30%, transparent); box-shadow: 0 0 12px color-mix(in srgb, var(--c) 70%, transparent); }
+  .sw[aria-pressed="true"] .knob { bottom: 18px; background: var(--c); }
+  .sw[aria-pressed="true"] .digit, .sw[aria-pressed="true"] .weight { color: var(--c); }
+
+  .readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin: 12px 0 8px; }
+  .readouts .panel { padding: 8px 10px; }
+  .decimal { font: 700 2rem/1.1 var(--mono); }
+
+  .formula { font: 600 0.92rem/1.7 var(--mono); padding: 10px 12px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); margin-bottom: 10px; }
+  .formula .t { padding: 1px 4px; border-radius: 4px; }
+  .formula .t.on { background: var(--bit-bg); color: var(--bit); }
+  .formula .t.neg { background: var(--bad-bg); color: var(--bad); }
+  .formula .t.off { color: var(--ghost); }
+  .formula .eq { font-weight: 800; }
+
+  .gauge { position: relative; height: 34px; margin: 4px 6px 2px; }
+  .gauge .line { position: absolute; left: 0; right: 0; top: 15px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--bad) 0 var(--zero), var(--good) var(--zero) 100%); opacity: 0.55; }
+  .gauge .zero { position: absolute; top: 6px; width: 2px; height: 22px; background: var(--ink); opacity: 0.5; transform: translateX(-1px); }
+  .gauge .mark { position: absolute; top: 3px; transform: translateX(-50%); font: 700 0.95rem var(--mono); transition: left 160ms ease; }
+  .gauge .mark::after { content: ""; display: block; margin: 0 auto; width: 12px; height: 12px; border-radius: 50%; background: var(--ink); border: 2px solid var(--bg); }
+  .ends { display: flex; justify-content: space-between; font: 0.7rem var(--mono); color: var(--muted); margin: 0 0 10px; }
+
+  .compare { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 10px 0; }
+  @media (max-width: 420px) { .compare { grid-template-columns: 1fr; } }
+  .compare .panel { padding: 6px 10px; }
+  .compare .panel.active { border-color: var(--info); background: var(--info-bg); }
+  .compare .value { font-weight: 700; }
+
+  .story { font-size: 0.9rem; margin: 6px 0 10px; }
+</style>
+</head>
+<body>
+<h2>Lab 1 · The 8-Bit Light Switch and Complement Explorer</h2>
+<p class="sub">Eight switches, 256 possible patterns. Pick a way of <em>reading</em> them, then flip switches or use the guided buttons. The switches never change meaning on their own: only the rule for reading them does.</p>
+
+<div class="modes" id="modes" role="group" aria-label="How to read the 8 bits">
+  <button data-mode="two">2's complement<small>Java's byte: −128 to 127</small></button>
+  <button data-mode="one">1's complement<small>−127 to 127, with a −0</small></button>
+  <button data-mode="unsigned">Unsigned<small>0 to 255</small></button>
+</div>
+
+<div class="switches" id="switches"></div>
+
+<div class="readouts">
+  <div class="panel"><div class="label">Decimal value</div><div class="decimal" id="dec"></div></div>
+  <div class="panel"><div class="label">Binary</div><div class="value big" id="bin"></div></div>
+  <div class="panel"><div class="label">Hex</div><div class="value big" id="hex"></div></div>
+</div>
+
+<div class="label">Live math</div>
+<div class="formula" id="formula" aria-live="polite"></div>
+
+<div class="gauge" id="gauge"><div class="line"></div><div class="zero" id="zero"></div><div class="mark" id="mark"></div></div>
+<div class="ends"><span id="lo"></span><span>0</span><span id="hi"></span></div>
+<p class="story" id="story"></p>
+
+<div class="row" id="presets">
+  <button data-act="five">Load +5</button>
+  <button data-act="flip">1's complement (flip all bits)</button>
+  <button data-act="plus">Add +1 (complete 2's complement)</button>
+  <button data-act="negzero" class="bad">Test 1's comp "−0" bug (1111 1111)</button>
+  <button data-act="mystery" class="good">Load 120 + 10 (1000 0010)</button>
+</div>
+
+<div class="label" style="margin-top:12px">The same 8 switches, read three ways</div>
+<div class="compare" id="compare"></div>
+<div class="status info" id="status"></div>
+
+<script>
+(function () {
+  "use strict";
+  const B = window.Bits;
+  const MODES = {
+    two: { name: "2's complement", top: -128, lo: -128, hi: 127 },
+    one: { name: "1's complement", top: -127, lo: -127, hi: 127 },
+    unsigned: { name: "Unsigned", top: 128, lo: 0, hi: 255 },
+  };
+  let pattern = 0x05;
+  let mode = "two";
+  let note = "";
+
+  function weight(i, m) { return i === 7 ? MODES[m].top : 2 ** i; }
+  function valueOf(p, m) {
+    let v = 0;
+    for (let i = 0; i < 8; i++) if ((p >> i) & 1) v += weight(i, m);
+    return v;
+  }
+  function isNegZero(p, m) { return m === "one" && p === 0xff; }
+  function show(p, m) { return isNegZero(p, m) ? "−0" : B.num(valueOf(p, m)); }
+
+  const swEl = document.getElementById("switches");
+  const switches = [];
+  for (let i = 7; i >= 0; i--) {
+    const b = document.createElement("button");
+    b.className = "sw";
+    b.innerHTML = `<span class="pos">bit ${i}</span><span class="track"><span class="knob"></span></span><span class="digit">0</span><span class="weight"></span>`;
+    b.addEventListener("click", () => {
+      pattern ^= 1 << i;
+      note = "";
+      render();
+    });
+    swEl.appendChild(b);
+    switches.push({ i, b });
+  }
+
+  function formula() {
+    const terms = [];
+    for (let i = 7; i >= 0; i--) {
+      const on = (pattern >> i) & 1;
+      const w = weight(i, mode);
+      if (!on) terms.push(`<span class="t off">0</span>`);
+      else terms.push(`<span class="t ${w < 0 ? "neg" : "on"}">${B.num(w)}</span>`);
+    }
+    let html = terms.join(" + ") + ` <span class="eq">= ${show(pattern, mode)}</span>`;
+    if (isNegZero(pattern, mode)) html += ` <span class="bad-text">(minus zero!)</span>`;
+    return html;
+  }
+
+  function story() {
+    const v = valueOf(pattern, mode);
+    const top = (pattern >> 7) & 1;
+    const balloons = pattern & 0x7f;
+    if (mode === "unsigned") {
+      return top
+        ? `No anchors here: switch 7 is worth <b>+128</b>, so every switch pushes the total up. 128 + ${balloons} = <b>${v}</b>.`
+        : `Unsigned reading: every switch adds its weight. Total <b>${v}</b>.`;
+    }
+    const anchor = MODES[mode].top;
+    if (!top) return `⚓ The anchor switch (bit 7) is off. 🎈 The seven balloon switches lift the total to <b>+${balloons}</b>.`;
+    return `⚓ The anchor switch is on and drags the total down to <b>${B.num(anchor)}</b>. 🎈 The balloons lift it back up by <b>+${balloons}</b>. ${B.num(anchor)} + ${balloons} = <b>${show(pattern, mode)}</b>.`;
+  }
+
+  function render() {
+    document.querySelectorAll("#modes button").forEach((b) => {
+      b.classList.toggle("on", b.dataset.mode === mode);
+      b.setAttribute("aria-pressed", String(b.dataset.mode === mode));
+    });
+    switches.forEach(({ i, b }) => {
+      const on = (pattern >> i) & 1;
+      const w = weight(i, mode);
+      b.classList.toggle("sign", i === 7 && w < 0);
+      b.setAttribute("aria-pressed", String(!!on));
+      b.setAttribute("aria-label", `bit ${i}, weight ${w}, ${on ? "on" : "off"}`);
+      b.querySelector(".digit").textContent = on ? "1" : "0";
+      b.querySelector(".weight").textContent = w > 0 && i === 7 ? "+" + w : B.num(w);
+    });
+
+    const v = valueOf(pattern, mode);
+    const dec = document.getElementById("dec");
+    dec.textContent = show(pattern, mode);
+    dec.className = "decimal " + (isNegZero(pattern, mode) || v < 0 ? "bad-text" : v > 0 ? "good-text" : "");
+    document.getElementById("bin").textContent = B.bitText(pattern, 8, 4);
+    document.getElementById("hex").textContent = "0x" + B.hex8(pattern);
+    document.getElementById("formula").innerHTML = formula();
+
+    const { lo, hi } = MODES[mode];
+    const pct = (x) => ((x - lo) / (hi - lo)) * 100;
+    const gauge = document.getElementById("gauge");
+    gauge.style.setProperty("--zero", pct(0) + "%");
+    document.getElementById("zero").style.left = pct(0) + "%";
+    const mark = document.getElementById("mark");
+    mark.style.left = pct(v) + "%";
+    mark.textContent = show(pattern, mode);
+    document.getElementById("lo").textContent = B.num(lo);
+    document.getElementById("hi").textContent = "+" + hi;
+    document.getElementById("story").innerHTML = story();
+
+    document.getElementById("compare").innerHTML = Object.keys(MODES)
+      .map((m) => `<div class="panel${m === mode ? " active" : ""}"><div class="label">${MODES[m].name}</div><div class="value">${show(pattern, m)}</div></div>`)
+      .join("");
+
+    const status = document.getElementById("status");
+    status.innerHTML = note || defaultNote();
+    status.className = "status " + (note.startsWith("🐞") ? "bad" : note.startsWith("🎯") ? "good" : "info");
+  }
+
+  function defaultNote() {
+    if (mode === "two") return "Java reads every <code>byte</code> this way: bit 7 is a <b>−128</b> anchor, so the range is −128 to +127. Click any switch, or try the guided buttons from left to right.";
+    if (mode === "one") return "Old computers like the CDC 6600 read bits this way: to make a number negative, flip every switch. Bit 7 then weighs −127.";
+    return "Unsigned: all 8 switches count up. That is how a pixel's brightness or a byte in a file is meant, but Java has no unsigned <code>byte</code> type.";
+  }
+
+  document.querySelectorAll("#modes button").forEach((b) =>
+    b.addEventListener("click", () => { mode = b.dataset.mode; note = ""; render(); }));
+
+  const actions = {
+    five() {
+      pattern = 0x05;
+      mode = "two";
+      note = "+5 is <b>0000 0101</b>: the 4-switch and the 1-switch. Now press <b>1's complement</b> to try making it negative.";
+    },
+    flip() {
+      const was = pattern;
+      pattern = ~pattern & 0xff;
+      mode = "one";
+      const one = show(pattern, "one");
+      const two = show(pattern, "two");
+      note = `Every switch flipped: ${B.bitText(was, 8, 4)} became <b>${B.bitText(pattern, 8, 4)}</b>. Read as 1's complement it is <b>${one}</b>.`;
+      if (valueOf(pattern, "two") !== valueOf(pattern, "one") || pattern === 0xff) {
+        note += ` But Java's 2's complement reads the same switches as <b>${two}</b>: one short of the 1's complement value. Press <b>Add +1</b>.`;
+      }
+    },
+    plus() {
+      const was = pattern;
+      const sum = was + 1;
+      pattern = sum & 0xff;
+      mode = "two";
+      let ripple = 0;
+      while (ripple < 8 && ((was >> ripple) & 1)) ripple++;
+      if (sum > 0xff) {
+        note = "🎯 1111 1111 + 1 = <b>1</b> 0000 0000, and a byte has no ninth switch, so that carry falls off the end. The result is 0000 0000: the flip-and-add-1 of zero is zero again. 2's complement has <b>one</b> zero.";
+      } else {
+        note = `🎯 Added 1${ripple ? `: the carry rippled through ${ripple} switch${ripple > 1 ? "es" : ""}` : ""}. <b>${B.bitText(pattern, 8, 4)}</b> is <b>${show(pattern, "two")}</b> in 2's complement. Flip all bits, then add 1: that is how Java negates a number.`;
+      }
+    },
+    negzero() {
+      pattern = 0xff;
+      mode = "one";
+      note = "🐞 <b>The twin-zero bug.</b> In 1's complement, 1111 1111 is −127 + 127 = <b>−0</b>, and 0000 0000 is +0. Two patterns for one number, so every \"is it zero?\" test must check both. Now click <b>2's complement</b>: the same switches read −1, and zero has only one pattern.";
+    },
+    mystery() {
+      pattern = 0x82;
+      mode = "two";
+      note = "🎯 <b>1000 0010</b> is the byte Java gets for 120 + 10. Unsigned it is 130. But Java reads bit 7 as the −128 anchor: −128 + 2 = <b>−126</b>. Mystery solved!";
+    },
+  };
+  document.querySelectorAll("#presets button").forEach((b) =>
+    b.addEventListener("click", () => { actions[b.dataset.act](); render(); }));
+
+  render();
+})();
+</script>
+</body>
+</html>

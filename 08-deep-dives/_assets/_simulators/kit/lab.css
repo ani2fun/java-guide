@@ -23,6 +23,8 @@
   --man: #0f766e;
   --man-bg: rgba(15, 118, 110, 0.14);
   --ghost: hsl(221 8% 70%);
+  --bit: #4f46e5;
+  --bit-bg: rgba(79, 70, 229, 0.14);
   --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Monaco, monospace;
   --sans: "Noto Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color-scheme: light;
@@ -49,6 +51,8 @@
   --man: #5eead4;
   --man-bg: rgba(94, 234, 212, 0.14);
   --ghost: hsl(220 7% 42%);
+  --bit: #a5b4fc;
+  --bit-bg: rgba(165, 180, 252, 0.16);
   color-scheme: dark;
 }
 

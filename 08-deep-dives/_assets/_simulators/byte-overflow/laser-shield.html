@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 3: The Sign Extension and &amp; 0xFF Laser Shield Visualizer</title>
+<link rel="stylesheet" href="../kit/lab.css">
+<script src="../kit/lab.js"></script>
+<script src="../kit/bits.js"></script>
+<style>
+  .controls { display: grid; gap: 8px; margin: 8px 0 12px; }
+  .slider-row { display: flex; align-items: center; gap: 10px; }
+  .slider-row input { flex: 1; }
+  .slider-row output { font: 700 0.95rem var(--mono); min-width: 3.5em; text-align: right; }
+
+  .shield { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; font: 700 0.9rem var(--mono); padding: 6px 12px 6px 6px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2); }
+  .shield .track { width: 44px; height: 24px; border-radius: 12px; background: var(--ghost); position: relative; transition: background 160ms ease, box-shadow 160ms ease; }
+  .shield .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--bg); transition: left 160ms ease; }
+  .shield[aria-checked="true"] { border-color: var(--good); color: var(--good); }
+  .shield[aria-checked="true"] .track { background: var(--good); box-shadow: 0 0 12px color-mix(in srgb, var(--good) 70%, transparent); }
+  .shield[aria-checked="true"] .track::after { left: 23px; }
+
+  .rows { display: grid; gap: 10px; }
+  .bitrow { display: grid; grid-template-columns: 12.5em 1fr 6.5em; gap: 10px; align-items: center; }
+  @media (max-width: 640px) { .bitrow { grid-template-columns: 1fr auto; } .bitrow .cells { grid-column: 1 / -1; grid-row: 2; } }
+  .bitrow .name { font-size: 0.82rem; font-weight: 600; }
+  .bitrow .name code { display: block; font-weight: 500; color: var(--muted); }
+  .bitrow .val { font: 700 1rem var(--mono); text-align: right; }
+  .bitrow .val small { display: block; font-weight: 500; font-size: 0.72rem; color: var(--muted); }
+  .cells { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .byte { display: grid; grid-template-columns: repeat(8, 1fr); gap: 1px; }
+  .cell { font: 700 0.72rem/1.7 var(--mono); text-align: center; border-radius: 3px; background: var(--panel-2); color: var(--muted); }
+  .cell.blank { visibility: hidden; }
+  .cell.low { background: var(--bit-bg); color: var(--bit); }
+  .cell.copy { background: var(--bad-bg); color: var(--bad); }
+  .cell.mask1 { background: var(--good-bg); color: var(--good); }
+  .cell.wall { background: color-mix(in srgb, var(--ink) 14%, transparent); color: var(--muted); }
+  .cell.res { background: var(--good-bg); color: var(--good); box-shadow: 0 0 6px color-mix(in srgb, var(--good) 45%, transparent); }
+  .cell.blocked { background: var(--panel-2); color: var(--ghost); }
+  .row-off { opacity: 0.35; }
+  .sweep .cell { animation: sweep 360ms ease-out both; animation-delay: calc(var(--i) * 14ms); }
+  @keyframes sweep { from { opacity: 0.15; transform: translateY(-4px); box-shadow: 0 0 14px var(--good); } to { opacity: 1; transform: none; } }
+  .op { font: 800 0.95rem var(--mono); color: var(--muted); text-align: center; margin: -4px 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.78rem; color: var(--muted); margin: 10px 0; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; }
+  .readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin: 10px 0; }
+  .readouts .panel { padding: 8px 10px; }
+  .readouts .panel.wide { grid-column: 1 / -1; }
+  .readouts .label { overflow-wrap: normal; text-transform: none; letter-spacing: 0; font-family: var(--mono); }
+</style>
+</head>
+<body>
+<h2>Lab 3 · The Sign Extension and <code>&amp; 0xFF</code> Laser Shield</h2>
+<p class="sub">When Java widens a <code>byte</code> to a 32-bit <code>int</code>, bit 7 copies itself into all 24 new bits. The <code>0xFF</code> mask is a shield that blocks those copycats and lets the bottom 8 bits through untouched.</p>
+
+<div class="controls">
+  <div class="row" id="presets">
+    <button data-v="-126">−126 (1000 0010)</button>
+    <button data-v="-1">−1 (1111 1111)</button>
+    <button data-v="-128">−128 (1000 0000)</button>
+    <button data-v="120">+120 (0111 1000)</button>
+  </div>
+  <div class="slider-row">
+    <span class="label">byte big</span>
+    <input type="range" id="slider" min="-128" max="127" value="-126" aria-label="The byte value">
+    <output id="sliderOut">−126</output>
+  </div>
+  <div><span class="shield" id="shield" role="switch" tabindex="0" aria-checked="true"><span class="track"></span><span id="shieldText">&amp; 0xFF laser shield: ON</span></span></div>
+</div>
+
+<div class="rows" id="rows"></div>
+<div class="legend">
+  <span><i style="background:var(--bit-bg);border:1px solid var(--bit)"></i>the byte's own 8 bits</span>
+  <span><i style="background:var(--bad-bg);border:1px solid var(--bad)"></i>copycat sign bits</span>
+  <span><i style="background:var(--good-bg);border:1px solid var(--good)"></i>let through by the mask</span>
+</div>
+
+<div class="readouts">
+  <div class="panel wide"><div class="label">Java code</div><div class="value" id="code"></div></div>
+  <div class="panel"><div class="label">Integer.toHexString(x)</div><div class="value big" id="hex"></div></div>
+  <div class="panel"><div class="label">Byte.toUnsignedInt(big)</div><div class="value big good-text" id="unsigned"></div></div>
+</div>
+<div class="status" id="status"></div>
+
+<script>
+(function () {
+  "use strict";
+  const B = window.Bits;
+  let big = -126;
+  let shieldOn = true;
+  let sweep = false;     // true for the one render right after the shield is toggled
+
+  // kind: which colouring rule to use for this row's 32 cells.
+  function cells(value, kind) {
+    const bits = B.bitsOf(value, 32);
+    let html = "";
+    for (let g = 0; g < 4; g++) {
+      html += `<div class="byte">`;
+      for (let k = 0; k < 8; k++) {
+        const idx = g * 8 + k;
+        const low = idx >= 24;
+        const bit = bits[idx];
+        let cls = "cell";
+        if (kind === "byte" && !low) cls += " blank";
+        else if (kind === "byte" || kind === "int") cls += low ? (bit ? " low" : "") : (bit ? " copy" : "");
+        else if (kind === "mask") cls += low ? " mask1" : " wall";
+        else if (kind === "result") cls += low ? (bit ? " res" : "") : " blocked";
+        else if (kind === "noshield") cls += low ? (bit ? " low" : "") : (bit ? " copy" : "");
+        // --i staggers the sweep animation from left to right, like a beam crossing the row.
+        html += `<div class="${cls}" style="--i:${idx}">${kind === "byte" && !low ? "·" : bit}</div>`;
+      }
+      html += `</div>`;
+    }
+    return `<div class="cells">${html}</div>`;
+  }
+
+  function row(name, code, value, kind, val, sub, extra) {
+    return `<div class="bitrow ${extra || ""}"><div class="name">${name}<code>${code}</code></div>${cells(value, kind)}<div class="val">${val}<small>${sub}</small></div></div>`;
+  }
+
+  function render() {
+    const asInt = big | 0;               // int x = big;  (sign extension)
+    const masked = big & 0xff;           // big & 0xFF
+    const result = shieldOn ? masked : asInt;
+    const neg = big < 0;
+
+    document.getElementById("slider").value = String(big);
+    document.getElementById("sliderOut").textContent = B.num(big);
+    const sh = document.getElementById("shield");
+    sh.setAttribute("aria-checked", String(shieldOn));
+    document.getElementById("shieldText").innerHTML = `&amp; 0xFF laser shield: ${shieldOn ? "ON" : "OFF"}`;
+
+    document.getElementById("rows").innerHTML =
+      row("1 · Original byte", `byte big = ${B.num(big)};`, big, "byte", B.num(big), "8 bits") +
+      row("2 · Promoted to int", "int x = big;", asInt, "int", B.num(asInt), neg ? "24 copycats!" : "24 zero copies") +
+      `<div class="op">${shieldOn ? "&amp;  (AND: 1 only where both are 1)" : "shield off: nothing is masked"}</div>` +
+      row("3 · The 0xFF mask", "0x000000FF", 0xff, "mask", "255", "the shield", shieldOn ? "" : "row-off") +
+      row("4 · Result", shieldOn ? "big & 0xFF" : "int x = big", result, shieldOn ? "result" : "noshield",
+        `<span class="${result < 0 ? "bad-text" : "good-text"}">${B.num(result)}</span>`, shieldOn ? "unsigned view" : "still negative", sweep ? "sweep" : "");
+    sweep = false;
+
+    document.getElementById("code").textContent = shieldOn ? `int x = big & 0xFF; // ${masked}` : `int x = big;        // ${B.num(asInt)}`;
+    document.getElementById("hex").textContent = `"${B.hexInt(result)}"`;
+    document.getElementById("unsigned").textContent = String(masked);
+
+    const status = document.getElementById("status");
+    if (!neg) {
+      status.className = "status info";
+      status.innerHTML = `Bit 7 is <b>0</b>, so the 24 copies are all zeros and the shield changes nothing: <b>${big}</b> either way. Masking only matters for the bytes that Java reads as negative, the ones whose pattern is 128 to 255.`;
+    } else if (shieldOn) {
+      status.className = "status good";
+      status.innerHTML = `🛡 The shield's 24 zeros block every copycat 1. The bottom 8 bits pass through untouched, and in a 32-bit <code>int</code> bit 7 is worth a plain <b>+128</b>, no longer an anchor. ${B.num(big)} becomes <b>${masked}</b> (${B.num(big)} + 256).`;
+    } else {
+      status.className = "status bad";
+      status.innerHTML = `⚠ With no shield, the 24 copycat 1s stay. In 32 bits they carry the minus sign along, so <code>x</code> is still <b>${B.num(asInt)}</b>, and <code>Integer.toHexString</code> prints all eight hex digits, <b>"${B.hexInt(asInt)}"</b>.`;
+    }
+  }
+
+  document.querySelectorAll("#presets button").forEach((b) =>
+    b.addEventListener("click", () => { big = Number(b.dataset.v); render(); }));
+  document.getElementById("slider").addEventListener("input", (e) => { big = Number(e.target.value); render(); });
+  const sh = document.getElementById("shield");
+  const toggle = () => { shieldOn = !shieldOn; sweep = true; render(); };
+  sh.addEventListener("click", toggle);
+  sh.addEventListener("keydown", (e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(); } });
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 2: The Java Byte Clock and the Hidden Cast Guillotine</title>
+<link rel="stylesheet" href="../kit/lab.css">
+<script src="../kit/lab.js"></script>
+<script src="../kit/bits.js"></script>
+<style>
+  .layout { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 600px) { .layout { grid-template-columns: 1fr; } .clock { max-width: 300px; margin: 0 auto; } }
+  .layout > * { min-width: 0; }
+  .clock svg { width: 100%; height: auto; display: block; }
+  .clock .tick { stroke: var(--line); }
+  .clock .num { font: 600 11px var(--mono); fill: var(--muted); }
+  .clock .num.pos { fill: var(--good); }
+  .clock .num.neg { fill: var(--bad); }
+  .clock .cliff { font: 800 11px var(--sans); fill: var(--bad); }
+
+  .big-readout { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 10px; }
+  .big-readout .panel { padding: 8px 10px; }
+  .big-readout .value { font-size: 1.5rem; font-weight: 700; }
+
+  .code { font: 600 0.82rem/1.6 var(--mono); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin: 8px 0; overflow-x: auto; white-space: pre; }
+
+  .slider-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+  .slider-row input { flex: 1; }
+  .slider-row output { font: 700 0.95rem var(--mono); min-width: 3.5em; text-align: right; }
+
+  .rows { display: grid; gap: 4px; margin-top: 8px; }
+  .bitrow { display: grid; grid-template-columns: 8.5em 1fr; gap: 8px; align-items: center; }
+  @media (max-width: 520px) { .bitrow { grid-template-columns: 1fr; gap: 2px; } }
+  .bitrow .lbl { font: 600 0.78rem var(--mono); color: var(--muted); }
+  .cells { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .byte { display: grid; grid-template-columns: repeat(8, 1fr); gap: 1px; position: relative; }
+  .cell { font: 700 0.72rem/1.6 var(--mono); text-align: center; border-radius: 3px; background: var(--panel-2); color: var(--muted); transition: background 160ms ease, color 160ms ease, opacity 160ms ease; }
+  .cell.one { background: var(--bit-bg); color: var(--bit); }
+  .cell.sign { background: var(--bad-bg); color: var(--bad); }
+  .byte.chopped .cell { opacity: 0.35; text-decoration: line-through; }
+  .byte.kept .cell { outline: 1px solid color-mix(in srgb, var(--good) 60%, transparent); }
+  .blade { position: relative; height: 18px; margin: 2px 0; }
+  .blade::before { content: ""; position: absolute; left: 0; right: 25%; top: 8px; border-top: 2px dashed var(--bad); }
+  .blade span { position: absolute; right: 25%; top: 0; transform: translateX(50%); font: 700 0.72rem var(--mono); color: var(--bad); background: var(--bg); padding: 0 4px; white-space: nowrap; }
+  /* On a phone the centred label is wider than the space right of the cut, so pin it to the left. */
+  @media (max-width: 480px) { .blade span { left: 0; right: auto; transform: none; } }
+  .log { font: 0.8rem/1.6 var(--mono); color: var(--muted); min-height: 1.6em; margin-top: 6px; }
+  .log b.wrap { color: var(--bad); }
+</style>
+</head>
+<body>
+<h2>Lab 2 · The Java Byte Clock and the Hidden Cast Guillotine</h2>
+<p class="sub">A <code>byte</code> has 256 patterns arranged in a ring. Positives run clockwise down the right side, negatives come back up the left, and at the bottom +127 sits right beside −128. Java does the math in a 32-bit <code>int</code>, then the hidden <code>(byte)</code> cast chops it back to 8 bits.</p>
+
+<div class="row">
+  <button id="run" class="good">▶ Run big += 10 (120 → 130)</button>
+  <button id="minus">−1</button>
+  <button id="plus">+1</button>
+  <button id="plus10">+10</button>
+  <button id="reset">Reset to 120</button>
+</div>
+<div class="slider-row">
+  <span class="label">int result</span>
+  <input type="range" id="slider" min="-128" max="255" value="120" aria-label="The int result of the math, before the cast">
+  <output id="sliderOut">120</output>
+</div>
+
+<div class="layout" style="margin-top:8px">
+  <div class="clock"><svg id="clock" viewBox="-130 -130 260 260" role="img" aria-label="Byte clock dial from −128 to +127"></svg></div>
+  <div>
+    <div class="big-readout">
+      <div class="panel"><div class="label">int math says</div><div class="value" id="intVal"></div></div>
+      <div class="panel"><div class="label">byte after the cast</div><div class="value" id="byteVal"></div></div>
+    </div>
+    <div class="code" id="code"></div>
+    <div class="status" id="status"></div>
+    <div class="log" id="log" aria-live="polite"></div>
+  </div>
+</div>
+
+<h3 style="margin-top:14px">The 32-bit view: what the cast keeps and what it chops</h3>
+<div class="rows" id="rows"></div>
+
+<script>
+(function () {
+  "use strict";
+  const B = window.Bits;
+  const svgNS = "http://www.w3.org/2000/svg";
+  let n = 120;          // the int result of the math, before the cast
+  let running = false;
+
+  const R = 104;
+  // A byte pattern u (0..255) sits at angle u/256 of a turn, clockwise from the top.
+  function at(u, r) {
+    const a = (u / 256) * 2 * Math.PI;
+    return [r * Math.sin(a), -r * Math.cos(a)];
+  }
+
+  function buildDial() {
+    const svg = document.getElementById("clock");
+    let s = "";
+    // Right half (patterns 0..127) is positive, left half (128..255) negative.
+    s += `<path d="M0,${-R} A${R},${R} 0 0 1 ${at(127.5, R)[0].toFixed(2)},${at(127.5, R)[1].toFixed(2)}" fill="none" stroke="var(--good)" stroke-width="8" stroke-opacity="0.35"/>`;
+    s += `<path d="M${at(128.5, R)[0].toFixed(2)},${at(128.5, R)[1].toFixed(2)} A${R},${R} 0 0 1 0,${-R}" fill="none" stroke="var(--bad)" stroke-width="8" stroke-opacity="0.35"/>`;
+    for (let u = 0; u < 256; u += 4) {
+      const big = u % 32 === 0;
+      const [x1, y1] = at(u, R - (big ? 12 : 7));
+      const [x2, y2] = at(u, R - 2);
+      s += `<line class="tick" x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke-width="${big ? 2 : 1}"/>`;
+    }
+    const labels = [[32, "+32"], [64, "+64"], [96, "+96"], [160, "−96"], [192, "−64"], [224, "−32"]];
+    labels.forEach(([u, t]) => {
+      const [x, y] = at(u, R - 24);
+      s += `<text class="num ${t.startsWith("+") ? "pos" : "neg"}" x="${x.toFixed(2)}" y="${(y + 4).toFixed(2)}" text-anchor="middle">${t}</text>`;
+    });
+    // The neighbours on each side of the two seams get fixed spots, so their labels never collide.
+    s += `<text class="num" x="9" y="${-R + 30}" text-anchor="start">0</text>`;
+    s += `<text class="num neg" x="-5" y="${-R + 30}" text-anchor="end">−1</text>`;
+    s += `<text class="num pos" x="7" y="${R - 24}" text-anchor="start">+127</text>`;
+    s += `<text class="num neg" x="-7" y="${R - 24}" text-anchor="end">−128</text>`;
+    // The overflow cliff, at the bottom between +127 and −128.
+    s += `<line x1="0" y1="${R - 16}" x2="0" y2="${R + 10}" stroke="var(--bad)" stroke-width="2.5" stroke-dasharray="3 2"/>`;
+    s += `<text class="cliff" x="0" y="${R + 22}" text-anchor="middle">⚠ overflow cliff</text>`;
+    s += `<path id="trail" fill="none" stroke="var(--warn)" stroke-width="6" stroke-linecap="round"/>`;
+    s += `<line id="needle" x1="0" y1="0" x2="0" y2="${-R + 18}" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>`;
+    s += `<circle r="6" fill="var(--ink)"/>`;
+    s += `<text id="hub" x="0" y="34" text-anchor="middle" style="font:700 22px var(--mono);stroke:var(--bg);stroke-width:5px;paint-order:stroke"></text>`;
+    s += `<text x="0" y="52" text-anchor="middle" class="num" style="stroke:var(--bg);stroke-width:4px;paint-order:stroke">byte</text>`;
+    svg.innerHTML = s;
+  }
+
+  function setTrail(fromU, toU) {
+    const trail = document.getElementById("trail");
+    if (fromU === null || fromU === toU) { trail.setAttribute("d", ""); return; }
+    const [x0, y0] = at(fromU, R - 4);
+    const [x1, y1] = at(toU, R - 4);
+    const span = (toU - fromU + 256) % 256;
+    trail.setAttribute("d", `M${x0.toFixed(2)},${y0.toFixed(2)} A${R - 4},${R - 4} 0 ${span > 128 ? 1 : 0} 1 ${x1.toFixed(2)},${y1.toFixed(2)}`);
+  }
+
+  function cellRow(value, width, kind) {
+    const bits = B.bitsOf(value, 32);
+    let html = "";
+    for (let g = 0; g < 4; g++) {
+      const lowByte = g === 3;
+      let cls = "byte";
+      if (kind === "int") cls += lowByte ? " kept" : " chopped";
+      html += `<div class="${cls}">`;
+      for (let k = 0; k < 8; k++) {
+        const idx = g * 8 + k;
+        const bit = bits[idx];
+        if (width === 8 && !lowByte) { html += `<div class="cell" style="visibility:hidden">·</div>`; continue; }
+        const signCell = bit && (width === 8 ? k === 0 : idx === 0 || (!lowByte && bit));
+        html += `<div class="cell${bit ? (signCell ? " sign" : " one") : ""}">${bit}</div>`;
+      }
+      html += `</div>`;
+    }
+    return `<div class="cells">${html}</div>`;
+  }
+
+  function render(fromU) {
+    const b = B.toByte(n);
+    const u = B.u8(n);
+    const angle = (u / 256) * 360;
+    document.getElementById("needle").setAttribute("transform", `rotate(${angle.toFixed(2)})`);
+    const hub = document.getElementById("hub");
+    hub.textContent = B.num(b);
+    hub.setAttribute("fill", b < 0 ? "var(--bad)" : "var(--good)");
+    setTrail(fromU === undefined ? null : fromU, u);
+
+    document.getElementById("slider").value = String(n);
+    document.getElementById("sliderOut").textContent = B.num(n);
+    const iv = document.getElementById("intVal");
+    iv.textContent = B.num(n);
+    const bv = document.getElementById("byteVal");
+    bv.textContent = B.num(b);
+    bv.className = "value " + (b !== n ? "bad-text" : "good-text");
+
+    const fits = b === n;
+    document.getElementById("code").textContent =
+      `int  sum = ${n};  // 32-bit math\nbyte big = (byte) sum; // ${b}`;
+
+    const status = document.getElementById("status");
+    if (fits) {
+      status.className = "status good";
+      status.innerHTML = `✓ <b>${B.num(n)}</b> fits in a byte (−128 to 127). The cast chops off 24 bits that were only copies of the sign bit, so nothing is lost.`;
+    } else {
+      status.className = "status bad";
+      status.innerHTML = `✂ <b>${B.num(n)}</b> does not fit. The cast keeps only the low 8 bits, <b>${B.bitText(u, 8, 4)}</b>, and bit 7 is the −128 anchor: ${B.num(n)} − 256 = <b>${B.num(b)}</b>. One lap around the clock.`;
+    }
+
+    document.getElementById("rows").innerHTML =
+      `<div class="bitrow"><div class="lbl">int ${B.num(n)}</div>${cellRow(n, 32, "int")}</div>` +
+      `<div class="blade"><span>✂ (byte) cast: only the last 8 bits survive</span></div>` +
+      `<div class="bitrow"><div class="lbl">byte ${B.num(b)}</div>${cellRow(b, 8, "byte")}</div>`;
+  }
+
+  function setN(v, fromU) {
+    if (running) return;
+    n = Math.max(-128, Math.min(255, v));
+    document.getElementById("log").innerHTML = "";
+    render(fromU);
+  }
+
+  document.getElementById("slider").addEventListener("input", (e) => setN(Number(e.target.value)));
+  document.getElementById("minus").addEventListener("click", () => setN(n - 1));
+  document.getElementById("plus").addEventListener("click", () => setN(n + 1, B.u8(n)));
+  document.getElementById("plus10").addEventListener("click", () => setN(n + 10, B.u8(n)));
+  document.getElementById("reset").addEventListener("click", () => setN(120));
+
+  document.getElementById("run").addEventListener("click", () => {
+    if (running) return;
+    n = 120;
+    const startU = B.u8(n);
+    const log = document.getElementById("log");
+    const steps = [];
+    const runBtn = document.getElementById("run");
+    function tick(k) {
+      n = 120 + k;
+      const b = B.toByte(n);
+      steps.push(b === n ? B.num(b) : `<b class="wrap">${B.num(b)}</b>`);
+      log.innerHTML = "byte ticks: " + steps.join(" → ");
+      render(startU);
+    }
+    if (B.reducedMotion()) {
+      for (let k = 0; k <= 10; k++) tick(k);
+      return;
+    }
+    running = true;
+    runBtn.disabled = true;
+    let k = 0;
+    tick(0);
+    const timer = setInterval(() => {
+      k += 1;
+      tick(k);
+      if (k === 10) {
+        clearInterval(timer);
+        running = false;
+        runBtn.disabled = false;
+      }
+    }, 260);
+  });
+
+  buildDial();
+  render();
+})();
+</script>
+</body>
+</html>
