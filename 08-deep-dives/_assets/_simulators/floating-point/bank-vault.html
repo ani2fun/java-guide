@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 3: The Big Bank Vault Simulator</title>
+<link rel="stylesheet" href="../kit/lab.css">
+<script src="../kit/lab.js"></script>
+<style>
+  .monitor { display: flex; flex-direction: column; gap: 6px; border-top: 4px solid var(--line); }
+  .monitor.bad { border-top-color: var(--bad); }
+  .monitor.good { border-top-color: var(--good); }
+  .monitor .code { font: 0.74rem/1.45 var(--mono); background: var(--panel-2); border-radius: 6px; padding: 6px 8px; white-space: pre; overflow-x: auto; }
+  .monitor .total { font: 700 1.05rem/1.3 var(--mono); word-break: break-all; }
+  .monitor .junk { color: var(--bad); }
+  .check { font-size: 0.84rem; }
+  .count { font: 700 1.4rem var(--mono); }
+  .rounding { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 8px 0; }
+  .case { text-align: left; display: flex; flex-direction: column; gap: 3px; padding: 10px; border-width: 2px; }
+  .case .amt { font: 700 1.1rem var(--mono); }
+  .case .r { font: 500 0.78rem var(--mono); color: var(--muted); }
+  .case[aria-pressed="true"] { border-color: var(--info); background: var(--info-bg); }
+  .case[aria-pressed="true"] .r { color: var(--ink); }
+  .case .up { color: var(--bad); }
+  .case .even { color: var(--good); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin-top: 6px; }
+  th, td { text-align: left; padding: 5px 6px; border-top: 1px solid var(--line); }
+  th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+  td.num { font-family: var(--mono); }
+  hr { border: 0; border-top: 1px dashed var(--line); margin: 18px 0; }
+</style>
+</head>
+<body>
+<h2>Lab 3 · The Big Bank Vault Simulator</h2>
+<p class="sub">Every customer deposits a dime and then two more dimes: <code>$0.10 + $0.20</code>. Run the same deposits through three different vaults and watch which one keeps perfect books.</p>
+
+<h3>Part A · High-volume ledger stress test</h3>
+<div class="row" id="counts">
+  <button data-n="1">1 transaction</button>
+  <button data-n="1000">1,000</button>
+  <button data-n="100000">100,000</button>
+  <button data-n="1000000">1,000,000</button>
+</div>
+<div class="row" style="margin-top:8px">
+  <span class="label">Or slide</span>
+  <input type="range" id="slider" min="0" max="6" step="0.01" value="0" style="flex:1" aria-label="Number of transactions, on a logarithmic scale">
+  <span class="count" id="n">1</span>
+</div>
+<p class="sub" style="margin-top:6px">Expected vault total: <b class="mono" id="expected">$0.30</b></p>
+
+<div class="grid three">
+  <div class="panel monitor bad" id="mDouble">
+    <h3>1 · Broken <code>double</code> ledger</h3>
+    <div class="code">double total = 0;
+total += 0.1;
+total += 0.2;</div>
+    <div class="label">System.out.println(total)</div>
+    <div class="total" id="dTotal"></div>
+    <div class="check" id="dDrift"></div>
+    <div class="check" id="dCheck"></div>
+  </div>
+  <div class="panel monitor good">
+    <h3>2 · <code>long</code> integer cents</h3>
+    <div class="code">long cents = 0;
+cents += 10;  // 10¢
+cents += 20;  // 20¢</div>
+    <div class="label">cents, then as dollars</div>
+    <div class="total" id="lTotal"></div>
+    <div class="check" id="lDollars"></div>
+    <div class="check good-text">✓ Books balance to the cent</div>
+  </div>
+  <div class="panel monitor good" id="mBig">
+    <h3>3 · <code>BigDecimal</code> vault</h3>
+    <div class="code" id="bCode"></div>
+    <div class="label">System.out.println(total)</div>
+    <div class="total" id="bTotal"></div>
+    <div class="check" id="bCheck"></div>
+    <label class="switch"><input type="checkbox" id="trap"> Trigger the constructor trap</label>
+  </div>
+</div>
+<div class="status info" id="lesson" style="margin-top:10px"></div>
+
+<hr>
+
+<h3>Part B · Banker's rounding tester</h3>
+<p class="sub">Interest often lands exactly halfway. Click amounts to put them on the bank's books, then compare school rounding (<code>HALF_UP</code>: .5 always goes up) with banker's rounding (<code>HALF_EVEN</code>: .5 goes to the nearest even number).</p>
+<div class="rounding" id="cases"></div>
+<div class="row"><button id="all">Select all four</button><button id="none">Clear</button></div>
+<table>
+  <thead><tr><th>Rule</th><th>Rounded total</th><th>Real total</th><th>Bias</th></tr></thead>
+  <tbody>
+    <tr><td><code>HALF_UP</code> (school)</td><td class="num" id="upSum"></td><td class="num realSum"></td><td class="num" id="upBias"></td></tr>
+    <tr><td><code>HALF_EVEN</code> (banker's)</td><td class="num" id="evenSum"></td><td class="num realSum"></td><td class="num" id="evenBias"></td></tr>
+  </tbody>
+</table>
+<div class="row" style="margin-top:12px">
+  <button id="stress" class="good">Round 10,000 half-cent interest payments</button>
+  <span class="sub" style="margin:0">Each payment ends in exactly half a cent, like $12.345, and is rounded to cents.</span>
+</div>
+<div class="status info" id="stressOut" style="margin-top:8px">Press the button to run the stress test.</div>
+
+<script>
+(function () {
+  "use strict";
+  const L = window.Lab;
+
+  // ── Part A ───────────────────────────────────────────────────────────────────────────────
+  const A = L.exact(0.1);   // what new BigDecimal(0.1) stores
+  const B = L.exact(0.2);   // what new BigDecimal(0.2) stores
+  let n = 1;
+
+  function dollars(cents) {
+    const s = String(cents).padStart(3, "0");
+    return "$" + L.thousands(s.slice(0, -2)) + "." + s.slice(-2);
+  }
+
+  function run() {
+    document.getElementById("n").textContent = L.thousands(n);
+    document.querySelectorAll("#counts button").forEach((b) => b.classList.toggle("on", Number(b.dataset.n) === n));
+    const expected = { n: BigInt(n) * 30n, s: 2 }; // exactly n × 0.30
+    document.getElementById("expected").textContent = dollars(n * 30);
+
+    // 1 · double: the same two additions per transaction, in the same order, as Java.
+    let total = 0;
+    for (let i = 0; i < n; i++) {
+      total += 0.1;
+      total += 0.2;
+    }
+    const drift = L.sub(L.exact(total), expected);
+    document.getElementById("dTotal").textContent = L.javaDouble(total);
+    const sign = drift.n > 0n ? "+" : drift.n < 0n ? "−" : "";
+    const mag = L.plain(L.strip(drift.n < 0n ? { n: -drift.n, s: drift.s } : drift));
+    document.getElementById("dDrift").innerHTML = drift.n === 0n
+      ? `<span class="good-text">drift: none</span>`
+      : `<span class="bad-text">drift: ${sign}$${mag} ${drift.n > 0n ? "(phantom money)" : "(missing money)"}</span>`;
+    const balanced = L.cmp(L.exact(total), expected) === 0;
+    document.getElementById("dCheck").innerHTML = balanced
+      ? `<span class="good-text">✓ total == ${L.plain(expected)} is true</span>`
+      : `<span class="bad-text">✗ total == ${L.plain(expected)} is false: the books do not balance</span>`;
+    document.getElementById("mDouble").className = "panel monitor " + (balanced ? "good" : "bad");
+
+    // 2 · long cents: whole numbers only.
+    const cents = n * 10 + n * 20;
+    document.getElementById("lTotal").textContent = L.thousands(cents) + "¢";
+    document.getElementById("lDollars").textContent = "= " + dollars(cents);
+
+    // 3 · BigDecimal: exact decimal arithmetic. Adding the same exact value n times equals
+    // multiplying it by n, so the vault multiplies instead of looping a million BigInt adds.
+    const trap = document.getElementById("trap").checked;
+    document.getElementById("bCode").textContent = trap
+      ? "BigDecimal total = BigDecimal.ZERO;\ntotal = total.add(new BigDecimal(0.1));\ntotal = total.add(new BigDecimal(0.2));"
+      : 'BigDecimal total = BigDecimal.ZERO;\ntotal = total.add(new BigDecimal("0.10"));\ntotal = total.add(new BigDecimal("0.20"));';
+    const big = trap ? L.mul(L.add(A, B), n) : { n: BigInt(n) * 30n, s: 2 };
+    const text = L.plain(big);
+    const bTotal = document.getElementById("bTotal");
+    if (trap) {
+      const dot = text.indexOf(".");
+      bTotal.innerHTML = text.slice(0, dot + 3) + `<span class="junk">${text.slice(dot + 3)}</span>`;
+    } else {
+      bTotal.textContent = text;
+    }
+    const exactOk = L.cmp(big, expected) === 0;
+    document.getElementById("bCheck").innerHTML = exactOk
+      ? `<span class="good-text">✓ total.compareTo(${L.plain(expected)}) == 0: exact</span>`
+      : `<span class="bad-text">✗ ${text.length - text.indexOf(".") - 1} decimal places of double crumbs copied in</span>`;
+    document.getElementById("mBig").className = "panel monitor " + (exactOk ? "good" : "bad");
+
+    document.getElementById("lesson").innerHTML = balanced
+      ? "This time the double's errors happened to cancel out exactly. Try another count: they rarely do."
+      : `The drift is tiny, a fraction of a cent, yet <b>the books do not balance</b>: an auditor's check <code>total == ${L.plain(expected)}</code> fails, and the error changes direction as it grows (try 1,000 and then 1,000,000). The integer and <code>BigDecimal</code> vaults are exact at every size.`;
+  }
+
+  document.querySelectorAll("#counts button").forEach((b) => b.addEventListener("click", () => {
+    n = Number(b.dataset.n);
+    document.getElementById("slider").value = Math.log10(n);
+    run();
+  }));
+  document.getElementById("slider").addEventListener("input", (e) => {
+    n = Math.max(1, Math.round(10 ** Number(e.target.value)));
+    run();
+  });
+  document.getElementById("trap").addEventListener("change", run);
+
+  // ── Part B ───────────────────────────────────────────────────────────────────────────────
+  // Amounts are in cents, so rounding to whole dollars is exact integer work.
+  const CASES = [250, 350, 450, 550];
+  const picked = new Set();
+
+  // Round a non-negative amount in units of `step` (e.g. 100 cents → dollars).
+  function halfUp(v, step) { return Math.floor((v + step / 2) / step) * step; }
+  function halfEven(v, step) {
+    const q = Math.floor(v / step);
+    const r = v - q * step;
+    if (r * 2 < step) return q * step;
+    if (r * 2 > step) return (q + 1) * step;
+    return (q % 2 === 0 ? q : q + 1) * step; // exactly halfway: go to the even neighbour
+  }
+
+  const casesEl = document.getElementById("cases");
+  CASES.forEach((c) => {
+    const b = document.createElement("button");
+    b.className = "case";
+    b.setAttribute("aria-pressed", "false");
+    b.innerHTML = `<span class="amt">${dollars(c)}</span>
+      <span class="r">HALF_UP → <b class="up">${dollars(halfUp(c, 100))}</b></span>
+      <span class="r">HALF_EVEN → <b class="even">${dollars(halfEven(c, 100))}</b></span>`;
+    b.addEventListener("click", () => {
+      if (picked.has(c)) picked.delete(c); else picked.add(c);
+      b.setAttribute("aria-pressed", String(picked.has(c)));
+      totals();
+    });
+    casesEl.appendChild(b);
+  });
+
+  function signed(cents) {
+    return (cents > 0 ? "+" : cents < 0 ? "−" : "") + dollars(Math.abs(cents));
+  }
+
+  function totals() {
+    let real = 0, up = 0, even = 0;
+    picked.forEach((c) => { real += c; up += halfUp(c, 100); even += halfEven(c, 100); });
+    document.querySelectorAll(".realSum").forEach((td) => (td.textContent = dollars(real)));
+    document.getElementById("upSum").textContent = dollars(up);
+    document.getElementById("evenSum").textContent = dollars(even);
+    const ub = document.getElementById("upBias");
+    const eb = document.getElementById("evenBias");
+    ub.textContent = signed(up - real);
+    eb.textContent = signed(even - real);
+    ub.className = "num " + (up - real === 0 ? "good-text" : "bad-text");
+    eb.className = "num " + (even - real === 0 ? "good-text" : "bad-text");
+  }
+
+  document.getElementById("all").addEventListener("click", () => {
+    CASES.forEach((c) => picked.add(c));
+    casesEl.querySelectorAll(".case").forEach((b) => b.setAttribute("aria-pressed", "true"));
+    totals();
+  });
+  document.getElementById("none").addEventListener("click", () => {
+    picked.clear();
+    casesEl.querySelectorAll(".case").forEach((b) => b.setAttribute("aria-pressed", "false"));
+    totals();
+  });
+
+  // The stress test works in tenths of a cent ("mills"), so $12.345 is 12345 and every value
+  // ends in 5: exactly halfway between two cents. A fixed seed makes every run identical.
+  document.getElementById("stress").addEventListener("click", () => {
+    let seed = 20261111;
+    const next = () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0);
+    let real = 0, up = 0, even = 0, ups = 0, downs = 0;
+    for (let i = 0; i < 10000; i++) {
+      const mills = ((next() >>> 8) % 100000) * 10 + 5; // $0.005 … $999.995 (high bits: an LCG's low bit just alternates)
+      real += mills;
+      up += halfUp(mills, 10);
+      const e = halfEven(mills, 10);
+      even += e;
+      if (e > mills) ups++; else downs++;
+    }
+    const fmt = (m) => {
+      const neg = m < 0;
+      const s = String(Math.abs(m)).padStart(4, "0");
+      return (m === 0 ? "" : neg ? "−" : "+") + "$" + L.thousands(s.slice(0, -3)) + "." + s.slice(-3);
+    };
+    document.getElementById("stressOut").className = "status good";
+    document.getElementById("stressOut").innerHTML =
+      `<b>HALF_UP</b> rounded all 10,000 payments up and created <b class="bad-text">${fmt(up - real)}</b> out of thin air.<br>` +
+      `<b>HALF_EVEN</b> rounded ${L.thousands(ups)} up and ${L.thousands(downs)} down, so its error is only <b class="good-text">${fmt(even - real)}</b>.`;
+  });
+
+  run();
+  totals();
+})();
+</script>
+</body>
+</html>

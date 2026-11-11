@@ -1,0 +1,154 @@
+/* Shared look for the Deep Dives labs. Each lab page is framed by Synapse's ```simulator fence;
+   lab.js copies the reader's light/dark choice (the parent page's <html class="dark">) onto this
+   document, so these tokens follow the reader's theme. Colours mirror the book's callout palette. */
+
+:root {
+  --bg: hsl(0 0% 100%);
+  --panel: hsl(45 44% 97%);
+  --panel-2: hsl(45 35% 93%);
+  --ink: hsl(224 14% 16%);
+  --muted: hsl(221 8% 42%);
+  --line: hsl(43 26% 84%);
+  --good: #0f8a68;
+  --good-bg: rgba(15, 138, 104, 0.12);
+  --bad: #c9472b;
+  --bad-bg: rgba(218, 82, 51, 0.12);
+  --info: #15448e;
+  --info-bg: rgba(21, 68, 142, 0.1);
+  --warn: #a8670a;
+  --sign: #7c3aed;
+  --sign-bg: rgba(124, 58, 237, 0.16);
+  --exp: #b7791f;
+  --exp-bg: rgba(214, 158, 46, 0.2);
+  --man: #0f766e;
+  --man-bg: rgba(15, 118, 110, 0.14);
+  --ghost: hsl(221 8% 70%);
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Monaco, monospace;
+  --sans: "Noto Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+
+:root.dark {
+  --bg: hsl(222 15% 13%);
+  --panel: hsl(222 15% 16%);
+  --panel-2: hsl(220 15% 20%);
+  --ink: hsl(60 6% 90%);
+  --muted: hsl(220 7% 66%);
+  --line: hsl(220 15% 26%);
+  --good: #34d399;
+  --good-bg: rgba(52, 211, 153, 0.14);
+  --bad: #fb8566;
+  --bad-bg: rgba(251, 133, 102, 0.14);
+  --info: #7aa7f0;
+  --info-bg: rgba(122, 167, 240, 0.12);
+  --warn: #f6c35b;
+  --sign: #c4a1ff;
+  --sign-bg: rgba(167, 139, 250, 0.2);
+  --exp: #f6c35b;
+  --exp-bg: rgba(246, 195, 91, 0.18);
+  --man: #5eead4;
+  --man-bg: rgba(94, 234, 212, 0.14);
+  --ghost: hsl(220 7% 42%);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; background: var(--bg); color: var(--ink); }
+
+body {
+  font: 15px/1.5 var(--sans);
+  padding: 16px;
+  -webkit-text-size-adjust: 100%;
+  /* The labs print 55-digit exact values; let them break anywhere so a phone never scrolls sideways. */
+  overflow-wrap: anywhere;
+}
+
+h2 { font-size: 1.05rem; margin: 0 0 4px; letter-spacing: 0.01em; }
+h3 { font-size: 0.92rem; margin: 0 0 6px; }
+p { margin: 0 0 8px; }
+.sub { color: var(--muted); font-size: 0.86rem; margin-bottom: 12px; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.grid { display: grid; gap: 12px; }
+/* A grid item's min-width defaults to its content, so one long number or a pre block would widen
+   the whole column past the grid. Zero lets the item shrink and its contents wrap or scroll. */
+.grid > * { min-width: 0; overflow-wrap: anywhere; }
+.grid.two { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.grid.three { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.value { font-family: var(--mono); font-size: 1rem; word-break: break-all; }
+.big { font-size: 1.25rem; font-weight: 600; }
+
+button {
+  font: 600 0.82rem/1.2 var(--sans);
+  color: var(--ink);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 11px;
+  cursor: pointer;
+  transition: transform 80ms ease, background 120ms ease, border-color 120ms ease;
+}
+button:hover { border-color: var(--info); }
+button:active { transform: translateY(1px); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+button.on { background: var(--info-bg); border-color: var(--info); color: var(--info); }
+button.good { border-color: var(--good); color: var(--good); }
+button.bad { border-color: var(--bad); color: var(--bad); }
+
+input[type="text"] {
+  font: 0.95rem var(--mono);
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 8px;
+  width: 7.5em;
+}
+input[type="range"] { width: 100%; accent-color: var(--info); }
+
+.pill {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+.pill.good, .good-text { color: var(--good); }
+.pill.bad, .bad-text { color: var(--bad); }
+.pill.good { background: var(--good-bg); }
+.pill.bad { background: var(--bad-bg); }
+.pill.info { background: var(--info-bg); color: var(--info); }
+
+.status { border-radius: 10px; padding: 10px 12px; font-size: 0.9rem; }
+.status.good { background: var(--good-bg); border-left: 4px solid var(--good); }
+.status.bad { background: var(--bad-bg); border-left: 4px solid var(--bad); }
+.status.info { background: var(--info-bg); border-left: 4px solid var(--info); }
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.86rem;
+}
+.switch input { width: 34px; height: 18px; accent-color: var(--bad); }
+
+.hl { background: var(--bad-bg); color: var(--bad); border-radius: 3px; padding: 0 1px; font-weight: 700; }
+.hl-good { background: var(--good-bg); color: var(--good); border-radius: 3px; padding: 0 1px; font-weight: 700; }
+.dim { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

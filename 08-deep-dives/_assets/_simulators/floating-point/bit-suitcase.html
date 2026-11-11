@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 2: The 64-Bit Suitcase X-Ray</title>
+<link rel="stylesheet" href="../kit/lab.css">
+<script src="../kit/lab.js"></script>
+<style>
+  .java { font: 0.88rem/1.5 var(--mono); background: var(--panel-2); border-radius: 8px; padding: 8px 10px; margin: 10px 0; overflow-x: auto; white-space: pre; }
+  .java .out { color: var(--bad); font-weight: 700; }
+  .java .out.good { color: var(--good); }
+  .custom { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 0.86rem; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.78rem; margin: 8px 0 4px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; }
+  .strip-row { margin: 10px 0 2px; }
+  .strip-head { display: flex; justify-content: space-between; gap: 8px; font-size: 0.82rem; margin-bottom: 3px; flex-wrap: wrap; }
+  .strip { display: grid; grid-template-columns: repeat(64, minmax(0, 1fr)); gap: 1px; }
+  .cell { font: 600 clamp(6px, 1.45vw, 11px)/1 var(--mono); text-align: center; padding: 4px 0; border-radius: 2px; }
+  .cell.s { background: var(--sign-bg); color: var(--sign); }
+  .cell.e { background: var(--exp-bg); color: var(--exp); }
+  .cell.m { background: var(--man-bg); color: var(--man); }
+  .cell.cut { outline: 2px solid var(--bad); outline-offset: -1px; color: var(--bad); }
+  .cell.gap-l { margin-left: 3px; }
+  .decode { font: 0.76rem/1.45 var(--mono); color: var(--muted); margin-top: 3px; word-break: break-all; }
+  .tail { color: var(--ghost); }
+  .verdict { font-weight: 700; }
+  .scope { margin-top: 14px; }
+  .scope-row { display: grid; grid-template-columns: 190px 1fr; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line); align-items: baseline; }
+  @media (max-width: 560px) { .scope-row { grid-template-columns: 1fr; gap: 2px; } }
+  .scope-row .name { font-size: 0.82rem; }
+  .scope-row .name small { display: block; color: var(--muted); font-size: 0.74rem; }
+  .digits { font: 0.8rem/1.5 var(--mono); word-break: break-all; }
+  .shown { font-weight: 700; }
+  .d17 { background: var(--bad); color: var(--bg); border-radius: 3px; padding: 0 2px; font-weight: 700; }
+  .err { font: 0.74rem var(--mono); }
+  .err.up { color: var(--bad); }
+  .err.down { color: var(--info); }
+  .err.zero { color: var(--good); }
+</style>
+</head>
+<body>
+<h2>Lab 2 · The 64-Bit <code>double</code> Suitcase X-Ray</h2>
+<p class="sub">Every Java <code>double</code> is packed into a 64-bit suitcase: 1 sign bit, 11 exponent bits (the magnifier) and 52 mantissa bits (the digits). Pick an expression and X-ray what really gets stored.</p>
+
+<div class="row" id="presets">
+  <button data-a="0.1" data-b="0.2">0.1 + 0.2 (The Classic Bug)</button>
+  <button data-a="0.1" data-b="0.7">0.1 + 0.7 (Prints 0.7999999999999999!)</button>
+  <button data-a="0.25" data-b="0.50">0.25 + 0.50 (Clean Powers of 2)</button>
+  <button data-a="0.1" data-b="0.1">0.1 + 0.1 (Cleanly Rounds to 0.2)</button>
+</div>
+<div class="custom">
+  <span class="label">Try your own</span>
+  <input type="text" id="ina" value="0.1" aria-label="First number" inputmode="decimal">
+  <span>+</span>
+  <input type="text" id="inb" value="0.2" aria-label="Second number" inputmode="decimal">
+  <button id="go">X-ray it</button>
+  <span id="inputError" class="bad-text"></span>
+</div>
+
+<div class="java" id="java"></div>
+
+<h3>Visual 1 · The bit strips</h3>
+<div class="legend">
+  <span><i style="background:var(--sign)"></i>Sign (1 bit)</span>
+  <span><i style="background:var(--exp)"></i>Exponent (11 bits)</span>
+  <span><i style="background:var(--man)"></i>Mantissa (52 bits)</span>
+  <span><i style="background:transparent;outline:2px solid var(--bad)"></i>Bit 52: where the scissors cut</span>
+  <span class="tail">grey digits: what would not fit</span>
+</div>
+<div id="strips"></div>
+
+<div class="scope">
+  <h3>Visual 2 · The 55-digit microscope</h3>
+  <p class="sub">The exact decimal value hiding in each suitcase, the same digits <code>new BigDecimal(d)</code> prints. <b>Bold</b> digits are what <code>System.out.println</code> shows. The <span class="d17">red</span> digit is the first one that differs from the number you meant.</p>
+  <div id="scope"></div>
+  <div class="status" id="status" style="margin-top:10px"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  const L = window.Lab;
+
+  // The ideal (infinitely precise) bits of a positive exact value, from its leading 1.
+  function idealBits(x) {
+    const { num, den } = L.ratio(x);
+    return L.binary(num, den, 53 + 16);
+  }
+
+  function errorBadge(stored, wanted) {
+    const diff = L.sub(stored, wanted);
+    if (diff.n === 0n) return `<span class="err zero">exact: no error</span>`;
+    const up = diff.n > 0n;
+    return `<span class="err ${up ? "up" : "down"}">${up ? "rounded UP by +" : "rounded DOWN by −"}${L.plain(L.strip(up ? diff : { n: -diff.n, s: diff.s }))}</span>`;
+  }
+
+  // One strip: the 64 stored bits, then the bits that did not fit.
+  function strip(title, d, ideal, wantedLabel) {
+    const f = L.fields(d);
+    let cells = "";
+    for (let i = 0; i < 64; i++) {
+      const kind = i === 0 ? "s" : i <= 11 ? "e" : "m";
+      const extra = (i === 1 || i === 12 ? " gap-l" : "") + (i === 63 && !ideal.ended53 ? " cut" : "");
+      cells += `<div class="cell ${kind}${extra}">${f.text[i]}</div>`;
+    }
+    const E = f.exponent - 1023;
+    const sup = (n) => String(n).replace(/-/g, "⁻").replace(/\d/g, (c) => "⁰¹²³⁴⁵⁶⁷⁸⁹"[c]);
+    const tailText = ideal.ended53
+      ? `<span class="verdict good-text">fits completely: nothing to chop</span>`
+      : `✂ next bits that did not fit: <span class="tail">${ideal.tail}</span> → ${ideal.direction}`;
+    return `<div class="strip-row">
+      <div class="strip-head"><b>${title}</b><span class="mono dim">0x${f.hex} · ${wantedLabel}</span></div>
+      <div class="strip">${cells}</div>
+      <div class="decode">sign ${f.sign} (${f.sign ? "−" : "+"}) · exponent ${f.text.slice(1, 12)} = ${f.exponent} − 1023 = ${E} → × 2${sup(E)} · mantissa 1.${f.text.slice(12, 24)}…<br>${tailText}</div>
+    </div>`;
+  }
+
+  // Where did bit 52 cut, and which way did the rounding go?
+  function cutInfo(d, wanted) {
+    const bits = idealBits(wanted);
+    const ended53 = bits.ended && bits.bits.length <= 53;
+    const tail = bits.bits.slice(53, 53 + 12);
+    const c = L.cmp(L.exact(d), wanted);
+    // A tail of exactly 1000… (and then nothing) is a perfect tie: IEEE 754 sends it to the
+    // neighbour whose last bit is 0, the same rule as banker's rounding (HALF_EVEN).
+    const tie = bits.ended && /^10*$/.test(bits.bits.slice(53));
+    const tieNote = tie ? `<span class="verdict" style="color:var(--warn)">exactly halfway! The tie goes to the neighbour ending in 0 (round half to even)</span> → ` : "";
+    const direction = c === 0 ? "exact" : tieNote + (c > 0
+      ? `<span class="verdict bad-text">rounded UP</span>`
+      : `<span class="verdict" style="color:var(--info)">rounded DOWN</span>`);
+    const more = !bits.ended || bits.bits.length > 53 + 12;
+    return { ended53, tail: tail.replace(/(.{4})/g, "$1 ").trim() + (more ? " …" : " (then it ends)"), direction };
+  }
+
+  // The digits of a value with println's shortest digits in bold and the first wrong digit red.
+  function microscope(value, wanted, printed) {
+    const text = L.plain(value);
+    const want = L.plain(L.rescale(wanted, Math.max(wanted.s, value.s)));
+    let firstDiff = -1;
+    for (let i = 0; i < text.length; i++) {
+      if (text[i] !== want[i]) { firstDiff = i; break; }
+    }
+    const dot = text.indexOf(".");
+    const shownLen = printed.replace(/^-/, "").length;
+    let html = "";
+    for (let i = 0; i < text.length; i++) {
+      let ch = text[i];
+      if (i === firstDiff) ch = `<span class="d17" title="decimal digit ${i - dot}">${ch}</span>`;
+      else if (i < shownLen && printed[i] === text[i]) ch = `<span class="shown">${ch}</span>`;
+      html += ch;
+    }
+    return { html, firstDecimal: firstDiff < 0 ? -1 : firstDiff - dot };
+  }
+
+  function row(name, note, value, wanted, printed, badge) {
+    const m = microscope(value, wanted, printed);
+    return `<div class="scope-row"><div class="name">${name}<small>${note}</small></div>
+      <div><div class="digits">${m.html}</div>${badge || ""}</div></div>`;
+  }
+
+  // Significant digits of a printed double: no sign, no point, no leading zeros, no exponent.
+  function sig(printed) {
+    return printed.replace(/^-/, "").split("E")[0].replace(".", "").replace(/^0+/, "").length;
+  }
+
+  function ulpsApart(x, y) {
+    const a = L.fields(x).bits;
+    const b = L.fields(y).bits;
+    return a > b ? Number(a - b) : -Number(b - a);
+  }
+
+  function xray(aText, bText) {
+    const wa = L.parse(aText);
+    const wb = L.parse(bText);
+    const err = document.getElementById("inputError");
+    const a = Number(aText);
+    const b = Number(bText);
+    if (!wa || !wb || !(a > 0) || !(b > 0) || a >= 1e6 || b >= 1e6) {
+      err.textContent = "Use two positive decimals below 1,000,000, such as 0.1 and 0.2.";
+      return;
+    }
+    err.textContent = "";
+    const sum = a + b; // a real IEEE 754 addition, exactly what Java's + does
+    const wantSum = L.add(wa, wb);
+    const meant = Number(L.plain(wantSum)); // the double you get by typing the answer as a literal
+    const ea = L.exact(a);
+    const eb = L.exact(b);
+    const trueSum = L.add(ea, eb); // the stored values added with infinite precision
+    const ps = L.javaDouble(sum);
+    const pa = L.javaDouble(a);
+    const pb = L.javaDouble(b);
+    const clean = ps === L.plain(L.strip(wantSum)) || ps === L.plain(L.strip(wantSum)) + ".0";
+
+    document.getElementById("java").innerHTML =
+      `double a = ${aText};      <span class="dim">// stored as ${L.plain(ea).slice(0, 24)}…</span>\n` +
+      `double b = ${bText};      <span class="dim">// stored as ${L.plain(eb).slice(0, 24)}…</span>\n` +
+      `System.out.println(a + b); <span class="dim">// prints</span> <span class="out${clean ? " good" : ""}">${ps}</span>`;
+
+    const ia = cutInfo(a, wa);
+    const ib = cutInfo(b, wb);
+    const isum = cutInfo(sum, trueSum);
+    document.getElementById("strips").innerHTML =
+      strip(`A = ${aText}`, a, ia, `println shows ${pa}`) +
+      strip(`B = ${bText}`, b, ib, `println shows ${pb}`) +
+      strip(`A + B`, sum, isum, `println shows ${ps}`);
+
+    document.getElementById("scope").innerHTML =
+      row(`A as stored`, `you typed ${aText}`, ea, wa, pa, errorBadge(ea, wa)) +
+      row(`B as stored`, `you typed ${bText}`, eb, wb, pb, errorBadge(eb, wb)) +
+      row(`A + B, perfect math`, `before the addition rounds`, trueSum, wantSum, "", errorBadge(trueSum, wantSum)) +
+      row(`A + B, as stored`, `after rounding to 52 bits`, L.exact(sum), wantSum, ps, errorBadge(L.exact(sum), wantSum)) +
+      row(`The double you meant`, `typing ${L.plain(L.strip(wantSum))} directly`, L.exact(meant), wantSum, L.javaDouble(meant), errorBadge(L.exact(meant), wantSum));
+
+    const steps = ulpsApart(sum, meant);
+    const status = document.getElementById("status");
+    if (steps === 0) {
+      status.className = "status good";
+      status.innerHTML = `✅ <b>Same suitcase.</b> <code>a + b</code> landed on exactly the double you get by typing ${L.plain(L.strip(wantSum))}, so <code>==</code> is true and <code>println</code> shows <code>${ps}</code>.` +
+        (L.cmp(L.exact(sum), wantSum) === 0 ? " Every value here is made of halves, so nothing was ever rounded." : " The values were rounded, but the errors stayed hidden below what println shows.");
+    } else {
+      status.className = "status bad";
+      status.innerHTML = `🐞 <b>${Math.abs(steps)} step${Math.abs(steps) === 1 ? "" : "s"} off.</b> <code>a + b</code> is the double just ${steps > 0 ? "above" : "below"} the one for ${L.plain(L.strip(wantSum))}. They are different suitcases, so <code>println</code> must print ${sig(ps)} significant digits, <code>${ps}</code>, to name the one it has. The red digit in the microscope is where it parts from ${L.plain(L.strip(wantSum))}, and <code>a + b == ${L.plain(L.strip(wantSum))}</code> is <b>false</b>.`;
+    }
+  }
+
+  document.querySelectorAll("#presets button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#presets button").forEach((x) => x.classList.toggle("on", x === btn));
+      document.getElementById("ina").value = btn.dataset.a;
+      document.getElementById("inb").value = btn.dataset.b;
+      xray(btn.dataset.a, btn.dataset.b);
+    });
+  });
+  document.getElementById("go").addEventListener("click", () => {
+    document.querySelectorAll("#presets button").forEach((x) => x.classList.remove("on"));
+    xray(document.getElementById("ina").value, document.getElementById("inb").value);
+  });
+  document.querySelector("#presets button").click();
+})();
+</script>
+</body>
+</html>

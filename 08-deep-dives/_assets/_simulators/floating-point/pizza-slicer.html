@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 1: The 8-Bit Binary Pizza Slicer</title>
+<link rel="stylesheet" href="../kit/lab.css">
+<script src="../kit/lab.js"></script>
+<style>
+  .layout { display: grid; grid-template-columns: 220px 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 560px) { .layout { grid-template-columns: 1fr; } .pizza-wrap { max-width: 220px; margin: 0 auto; } }
+  .pizza-wrap svg { width: 100%; height: auto; display: block; }
+  .bits { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  @media (max-width: 380px) { .bits { grid-template-columns: repeat(2, 1fr); } }
+  .bit { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-width: 2px; }
+  .bit .frac { font-size: 1rem; }
+  .bit .dec { font: 500 0.72rem var(--mono); color: var(--muted); }
+  .bit .state { font: 700 0.72rem var(--mono); color: var(--muted); }
+  .bit[aria-pressed="true"] { border-color: var(--slice); background: color-mix(in srgb, var(--slice) 18%, transparent); }
+  .bit[aria-pressed="true"] .state { color: var(--slice); }
+  .bar { position: relative; height: 26px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--line); overflow: visible; margin: 22px 0 6px; }
+  .bar .seg { position: absolute; top: 0; bottom: 0; }
+  .bar .target { position: absolute; top: -18px; bottom: -4px; width: 0; border-left: 2px dashed var(--bad); }
+  .bar .target span { position: absolute; top: -2px; left: 4px; font: 700 0.7rem var(--mono); color: var(--bad); white-space: nowrap; }
+  .bar .target.right span { left: auto; right: 4px; }
+  .ticks { display: flex; justify-content: space-between; font: 0.68rem var(--mono); color: var(--muted); }
+  .readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 10px 0; }
+  .readouts .panel { padding: 8px 10px; }
+  .cycle { background: var(--bad-bg); color: var(--bad); border-radius: 3px; padding: 0 2px; }
+  .cents { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .cents input { flex: 1; }
+  .cents output { font: 700 0.9rem var(--mono); min-width: 4.5em; text-align: right; }
+</style>
+</head>
+<body>
+<h2>Lab 1 · The 8-Bit Binary Pizza Slicer</h2>
+<p class="sub">A computer can only cut its pizza in halves, then halves of halves. Flip the slice switches to build a price, or pick a target and see if 8 binary slices can hit it exactly.</p>
+
+<div class="row" id="presets">
+  <button data-target="0.75">Target: $0.75 (Exact!)</button>
+  <button data-target="0.625">Target: $0.625 (Exact!)</button>
+  <button data-target="0.10">Target: $0.10 (Impossible Dime!)</button>
+  <button data-target="0.20">Target: $0.20 (Impossible 20¢!)</button>
+  <button id="autofill" class="good">Auto-Fill Closest 8-Bit Match</button>
+  <button id="clear">Clear slices</button>
+</div>
+<div class="cents">
+  <span class="label">Any price</span>
+  <input type="range" id="cents" min="0" max="99" value="10" aria-label="Pick any price in cents">
+  <output id="centsOut">$0.10</output>
+</div>
+
+<div class="layout" style="margin-top:12px">
+  <div class="pizza-wrap"><svg id="pizza" viewBox="0 0 220 220" role="img" aria-label="Pizza made of binary slices"></svg></div>
+  <div>
+    <div class="bits" id="bits"></div>
+    <div class="bar" id="bar"></div>
+    <div class="ticks"><span>$0</span><span>$0.25</span><span>$0.50</span><span>$0.75</span><span>$1</span></div>
+  </div>
+</div>
+
+<div class="readouts">
+  <div class="panel"><div class="label">Binary fraction</div><div class="value big" id="bin"></div></div>
+  <div class="panel"><div class="label">Current sum</div><div class="value" id="sum"></div></div>
+  <div class="panel"><div class="label">Target value</div><div class="value" id="tgt"></div></div>
+  <div class="panel"><div class="label">Error gap</div><div class="value" id="gap"></div></div>
+</div>
+<div class="status" id="status"></div>
+<p class="sub" style="margin-top:8px" id="forever"></p>
+
+<script>
+(function () {
+  "use strict";
+  const L = window.Lab;
+  // One colour per slice size; 1/2 is the biggest slice.
+  const COLORS = ["#e4572e", "#f3a712", "#29a36a", "#2e86de", "#8e44ad", "#d6336c", "#16a2b8", "#6c757d"];
+  const N = 8;
+  let on = new Array(N).fill(false);
+  let target = L.parse("0.10");
+
+  const bitsEl = document.getElementById("bits");
+  const buttons = [];
+  for (let i = 0; i < N; i++) {
+    const den = 2 ** (i + 1);
+    const b = document.createElement("button");
+    b.className = "bit";
+    b.style.setProperty("--slice", COLORS[i]);
+    b.setAttribute("aria-pressed", "false");
+    b.innerHTML = `<span class="frac">1/${den}</span><span class="dec">${L.plain(L.strip({ n: BigInt(5 ** (i + 1)), s: i + 1 }))}</span><span class="state">0</span>`;
+    b.addEventListener("click", () => { on[i] = !on[i]; render(); });
+    bitsEl.appendChild(b);
+    buttons.push(b);
+  }
+
+  // The sum is k/256, an exact decimal: k · 390625 / 10^8.
+  function sumK() { return on.reduce((k, v, i) => k + (v ? 2 ** (N - 1 - i) : 0), 0); }
+  function asDec(k) { return L.strip({ n: BigInt(k) * 390625n, s: 8 }); }
+  function abs(x) { return x.n < 0n ? { n: -x.n, s: x.s } : x; }
+  function money(x) { const t = L.plain(x); return "$" + (x.s < 2 ? L.plain(L.rescale(x, 2)) : t); }
+
+  // Nearest k in 0..255 to target·256, ties to the even k (the same rule IEEE 754 uses).
+  function closestK(t) {
+    const num = t.n * 256n;
+    const den = 10n ** BigInt(t.s);
+    let q = num / den;
+    const r2 = (num % den) * 2n;
+    if (r2 > den || (r2 === den && q % 2n === 1n)) q += 1n;
+    return Math.min(Number(q), 255);
+  }
+
+  // The never-ending binary of a fraction num/den: digits before the repeat, and the repeat.
+  function binaryOf(t) {
+    let num = t.n;
+    const den = 10n ** BigInt(t.s);
+    num %= den;
+    const seen = new Map();
+    let digits = "";
+    while (num !== 0n && !seen.has(num.toString()) && digits.length < 200) {
+      seen.set(num.toString(), digits.length);
+      num *= 2n;
+      if (num >= den) { digits += "1"; num -= den; } else { digits += "0"; }
+    }
+    if (num === 0n) return { head: digits, cycle: "" };
+    const start = seen.get(num.toString());
+    return { head: digits.slice(0, start), cycle: digits.slice(start) };
+  }
+
+  function wedge(cx, cy, r, a0, a1, color) {
+    const p = (a) => [cx + r * Math.sin(a * 2 * Math.PI), cy - r * Math.cos(a * 2 * Math.PI)];
+    const [x0, y0] = p(a0);
+    const [x1, y1] = p(a1);
+    const large = a1 - a0 > 0.5 ? 1 : 0;
+    return `<path d="M${cx},${cy} L${x0.toFixed(2)},${y0.toFixed(2)} A${r},${r} 0 ${large} 1 ${x1.toFixed(2)},${y1.toFixed(2)} Z" fill="${color}" stroke="var(--bg)" stroke-width="1.5"/>`;
+  }
+
+  function render() {
+    const k = sumK();
+    const sum = asDec(k);
+    const tFloat = Number(L.plain(target));
+
+    // Pizza: crust, slices clockwise from the top, then the target as a dashed cut.
+    let svg = `<circle cx="110" cy="110" r="100" fill="var(--panel-2)" stroke="var(--line)" stroke-width="2"/>`;
+    let a = 0;
+    on.forEach((v, i) => {
+      if (!v) return;
+      const w = 1 / 2 ** (i + 1);
+      svg += wedge(110, 110, 96, a, a + w, COLORS[i]);
+      a += w;
+    });
+    const ta = tFloat * 2 * Math.PI;
+    svg += `<line x1="110" y1="110" x2="${(110 + 104 * Math.sin(ta)).toFixed(2)}" y2="${(110 - 104 * Math.cos(ta)).toFixed(2)}" stroke="var(--bad)" stroke-width="2.5" stroke-dasharray="5 4"/>`;
+    svg += `<circle cx="110" cy="110" r="4" fill="var(--ink)"/>`;
+    document.getElementById("pizza").innerHTML = svg;
+
+    // Bar: the same slices laid end to end.
+    const bar = document.getElementById("bar");
+    let html = "";
+    let x = 0;
+    on.forEach((v, i) => {
+      if (!v) return;
+      const w = 100 / 2 ** (i + 1);
+      html += `<div class="seg" style="left:${x}%;width:${w}%;background:${COLORS[i]}"></div>`;
+      x += w;
+    });
+    html += `<div class="target${tFloat > 0.8 ? " right" : ""}" style="left:${tFloat * 100}%"><span>target ${money(target)}</span></div>`;
+    bar.innerHTML = html;
+
+    buttons.forEach((b, i) => {
+      b.setAttribute("aria-pressed", String(on[i]));
+      b.querySelector(".state").textContent = on[i] ? "1" : "0";
+    });
+
+    const gap = abs(L.sub(target, sum));
+    const exactNow = gap.n === 0n;
+    document.getElementById("bin").textContent = "0." + on.map((v) => (v ? "1" : "0")).join("");
+    document.getElementById("sum").textContent = money(sum) + `  (${k}/256)`;
+    document.getElementById("tgt").textContent = money(target);
+    const gapEl = document.getElementById("gap");
+    gapEl.textContent = exactNow ? "0  ✓ exact" : L.plain(gap);
+    gapEl.className = "value " + (exactNow ? "good-text" : "bad-text");
+
+    const best = closestK(target);
+    const bestGap = abs(L.sub(target, asDec(best)));
+    const reachable = bestGap.n === 0n;
+    const { head, cycle } = binaryOf(target);
+    const status = document.getElementById("status");
+    if (exactNow) {
+      status.className = "status good";
+      const parts = on.map((v, i) => (v ? `1/${2 ** (i + 1)}` : null)).filter(Boolean);
+      status.innerHTML = `🎯 <b>Exact!</b> ${money(target)} = ${parts.length ? parts.join(" + ") : "nothing at all"}. It is made only of halves, so binary stores it perfectly.`;
+    } else if (reachable) {
+      status.className = "status info";
+      status.innerHTML = `🍕 Keep slicing: ${money(target)} <b>can</b> be built exactly from these slices. Try the Auto-Fill button if you get stuck.`;
+    } else {
+      status.className = "status bad";
+      const doubleGap = abs(L.sub(L.exact(tFloat), target));
+      status.innerHTML = `🚫 <b>Impossible in binary.</b> The closest 8 slices can get is ${money(asDec(best))} (${best}/256), still ${L.plain(bestGap)} away. More slices only shrink the gap: a Java <code>double</code> uses 53 binary digits and still misses by ${L.plain(doubleGap)}. Never zero.`;
+    }
+    const pretty = cycle
+      ? `0.${head}<span class="cycle">${cycle}</span><span class="cycle">${cycle}</span><span class="cycle">${cycle}</span>… <b>forever</b> (the red block repeats)`
+      : `0.${head || "0"} <b>(it ends, so it fits)</b>`;
+    document.getElementById("forever").innerHTML = `${money(target)} written in binary: <span class="mono">${pretty}</span>. Of the 100 prices from $0.00 to $0.99, only 4 ever end in binary: $0.00, $0.25, $0.50 and $0.75.`;
+  }
+
+  function setTarget(text) {
+    target = L.parse(text);
+    if (target.s <= 2) document.getElementById("cents").value = Number(L.rescale(target, 2).n);
+    document.getElementById("centsOut").textContent = money(target);
+    render();
+  }
+
+  document.querySelectorAll("#presets button[data-target]").forEach((b) => {
+    b.addEventListener("click", () => {
+      on = new Array(N).fill(false);
+      setTarget(b.dataset.target);
+    });
+  });
+  document.getElementById("autofill").addEventListener("click", () => {
+    const k = closestK(target);
+    on = Array.from({ length: N }, (_, i) => ((k >> (N - 1 - i)) & 1) === 1);
+    render();
+  });
+  document.getElementById("clear").addEventListener("click", () => { on = new Array(N).fill(false); render(); });
+  document.getElementById("cents").addEventListener("input", (e) => {
+    const c = Number(e.target.value);
+    setTarget("0." + String(c).padStart(2, "0"));
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
