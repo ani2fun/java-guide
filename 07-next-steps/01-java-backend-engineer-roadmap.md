@@ -1,10 +1,10 @@
 ---
-title: "Java Backend to Staff Engineer Roadmap"
+title: "Java Backend Engineer Roadmap"
 summary: "A Java-only version of the boot.dev backend path, from first program to job-ready backend developer, then on to senior, staff and principal engineer. Every course maps to a Java equivalent, and each module lists topics, resources, a project and a 'done when' test. A self-assessment shows where to start."
 essential: false
 ---
 
-# Java Backend to Staff Engineer Roadmap
+# Java Backend Engineer Roadmap
 
 **Last updated:** 9 Nov 2026 · **Links checked:** 8 Nov 2026
 
