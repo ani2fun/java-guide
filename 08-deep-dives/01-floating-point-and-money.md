@@ -78,31 +78,138 @@ Why does `1/3` go on forever, while `1/4 = 0.25` stops? Our number system is **b
 
 ### Computers only have halves
 
-A computer doesn't count in tens. Deep down it is billions of tiny switches, each one either off or on: `0` or `1`. That's **base 2**, also called **binary**. In binary, every place after the point is a *half* of the one before.
+A computer doesn't count in tens. Deep down it is billions of tiny switches, each one either off or on: `0` or `1`. That's **base 2**, also called **binary**.
 
-Think of it as a pizza slicer that can only cut in half. It can make a half, then half of that (a quarter), then half of *that* (an eighth), and so on. To make an amount, the computer picks which slices to put on the plate:
+Think of it as a pizza slicer that can only cut in half. It can make a half, then half of that (a quarter), then half of *that* (an eighth), and so on. To make an amount, the computer picks which slices to put on the plate. Binary writes those choices down as digits after a point, and each digit's position is called a **binary place**.
 
-| Slice | As a fraction | As a decimal | Binary place |
+### What a binary place is
+
+A *place* is a digit's position after the point: the 1st digit, the 2nd digit, and so on. You already know places from ordinary decimals. In **base 10**, every step to the right divides the value by **10**:
+
+| Place after the point | Written as | Power of 10 | Fraction | Name |
+| --- | --- | --- | --- | --- |
+| 1st | `0.1` | 10⁻¹ | 1/10 | one-tenth |
+| 2nd | `0.01` | 10⁻² | 1/100 | one-hundredth |
+| 3rd | `0.001` | 10⁻³ | 1/1000 | one-thousandth |
+
+Binary has only two digits, so every step to the right divides the value by **2**: the slicer cuts the slice in half again. Here are the first 8 binary places, the same 8 you'll switch on and off in Lab 1:
+
+| Place after the point | Written as | Power of 2 | Slice | Decimal value |
+| --- | --- | --- | --- | --- |
+| 1st | `0.1` | 2⁻¹ | 1/2 | 0.5 |
+| 2nd | `0.01` | 2⁻² | 1/4 | 0.25 |
+| 3rd | `0.001` | 2⁻³ | 1/8 | 0.125 |
+| 4th | `0.0001` | 2⁻⁴ | 1/16 | 0.0625 |
+| 5th | `0.00001` | 2⁻⁵ | 1/32 | 0.03125 |
+| 6th | `0.000001` | 2⁻⁶ | 1/64 | 0.015625 |
+| 7th | `0.0000001` | 2⁻⁷ | 1/128 | 0.0078125 |
+| 8th | `0.00000001` | 2⁻⁸ | 1/256 | 0.00390625 |
+
+<div style="border-left:4px solid #da5233;background:rgba(218,82,51,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
+
+⚠️ **The brain trap.** In binary, `0.01` does **not** mean one-hundredth. It means "no half, and one quarter": 1/4, which is 0.25. The digits look the same as in decimal, but every place is worth a different amount. Each binary place is just an on/off switch for one slice.
+
+</div>
+
+### Reading a binary fraction
+
+To turn a binary fraction into a normal number, look at each place. A `1` means "put this slice on the plate", and a `0` means "skip it". Then add up the slices on the plate.
+
+**`0.11` is 0.75:**
+
+| Place | Digit | Slice | Added |
 | --- | --- | --- | --- |
-| a half | 1/2 | 0.5 | `0.1` |
-| a quarter | 1/4 | 0.25 | `0.01` |
-| an eighth | 1/8 | 0.125 | `0.001` |
-| a sixteenth | 1/16 | 0.0625 | `0.0001` |
-| a thirty-second | 1/32 | 0.03125 | `0.00001` |
+| 1st | `1` | 1/2 | 0.5 |
+| 2nd | `1` | 1/4 | 0.25 |
+| | | **Total** | **0.75** |
 
-Some amounts are easy. `0.75` is a half plus a quarter: binary `0.11`. `0.625` is a half plus an eighth: binary `0.101`. These are **exact**: the slices add up perfectly.
+**`0.101` is 0.625:**
 
-But now try to make **one-tenth**. Ten is 2 × 5, and the pizza slicer has no way to cut fifths. A half is too big. A sixteenth (0.0625) fits, and leaves 0.0375. A thirty-second (0.03125) fits, and leaves 0.00625. You keep adding smaller and smaller slices, and there is **always** a little gap left. In binary, one-tenth is:
+| Place | Digit | Slice | Added |
+| --- | --- | --- | --- |
+| 1st | `1` | 1/2 | 0.5 |
+| 2nd | `0` | 1/4 | skipped |
+| 3rd | `1` | 1/8 | 0.125 |
+| | | **Total** | **0.625** |
+
+Both are **exact**: the slices add up perfectly. Here is the same reading done by Java. It starts with a slice worth a half and halves it at every place:
+
+```java run
+import static java.lang.IO.println;
+
+class Main {
+    // Adds up the slice for every binary place that holds a 1.
+    static void read(String binary) {
+        String places = binary.substring(2); // the digits after "0."
+        double slice = 0.5;                  // the 1st place is worth a half
+        double total = 0;
+        println("binary " + binary + ":");
+        for (int i = 0; i < places.length(); i++) {
+            if (places.charAt(i) == '1') {
+                total += slice;
+                println("  place " + (i + 1) + " is on: add 1/" + (int) (1 / slice) + " = " + slice);
+            }
+            slice = slice / 2;               // each place is worth half the one before
+        }
+        println("  total = " + total);
+    }
+
+    public static void main(String[] args) {
+        read("0.11");
+        read("0.101");
+        read("0.00011001");
+    }
+}
+```
+
+**Output:**
+```
+binary 0.11:
+  place 1 is on: add 1/2 = 0.5
+  place 2 is on: add 1/4 = 0.25
+  total = 0.75
+binary 0.101:
+  place 1 is on: add 1/2 = 0.5
+  place 3 is on: add 1/8 = 0.125
+  total = 0.625
+binary 0.00011001:
+  place 4 is on: add 1/16 = 0.0625
+  place 5 is on: add 1/32 = 0.03125
+  place 8 is on: add 1/256 = 0.00390625
+  total = 0.09765625
+```
+
+That last one is suspiciously close to 0.1, but not equal. Let's see where it came from.
+
+### Building one-tenth, place by place
+
+Now try to make **one-tenth** (0.1) from slices. Go through the places from biggest to smallest. If a slice fits inside the amount still left to make, put it on the plate (`1`) and subtract it. If it's too big, skip it (`0`):
+
+| Place | Slice | Fits in what's left? | Digit | Left to make |
+| --- | --- | --- | --- | --- |
+| start | | | | 0.1 |
+| 1st | 0.5 | no, too big | `0` | 0.1 |
+| 2nd | 0.25 | no, too big | `0` | 0.1 |
+| 3rd | 0.125 | no, still too big | `0` | 0.1 |
+| 4th | 0.0625 | **yes** | `1` | 0.0375 |
+| 5th | 0.03125 | **yes** | `1` | 0.00625 |
+| 6th | 0.015625 | no | `0` | 0.00625 |
+| 7th | 0.0078125 | no | `0` | 0.00625 |
+| 8th | 0.00390625 | **yes** | `1` | 0.00234375 |
+
+After 8 places the plate holds `0.00011001`, which is 0.09765625: the number the Java program printed. There's still 0.00234375 left to make.
+
+Look closely at what's left. After the 4th place it was 0.0375. After the 8th place it is 0.00234375, which is exactly 0.0375 ÷ 16. It's the *same problem*, just 16 times smaller, so the next four places repeat the last four (`1001`), then again, and again, forever. In binary, one-tenth is:
 
 ```text
 0.0001100110011001100110011001100110011…   (the 0011 repeats forever)
 ```
 
-It's exactly like `1/3 = 0.333…` for us. The number is perfectly ordinary, but this way of writing it never ends.
+It's exactly like `1/3 = 0.333…` for us. The number is perfectly ordinary, but this way of writing it never ends. The reason is the bottom of the fraction. Any pile of slices adds up to something over 2, 4, 8, 16, …, a number made only of 2s. One-tenth is 1/10, and 10 = 2 × 5. No pile of halves can ever build that 5.
 
 ### The doubling game: watch the pattern repeat
 
-There's a neat trick for finding a fraction's binary digits: keep **doubling** it. Each time the result reaches 1 or more, write down a `1` and keep only the part after the point. Otherwise write a `0`. To keep the game itself exact, this program counts in whole tenths, so `1` means `0.1`:
+Testing slices by hand gets slow. There's a neater trick that finds the same digits: keep **doubling** the fraction. Each time the result reaches 1 or more, write down a `1` and keep only the part after the point. Otherwise write a `0`. To keep the game itself exact, this program counts in whole tenths, so `1` means `0.1`:
 
 ```java run
 import static java.lang.IO.println;
