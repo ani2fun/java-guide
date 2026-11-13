@@ -28,9 +28,9 @@ Every output below was produced by compiling and running the code on Java 25.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -90,8 +90,8 @@ done
 - It skipped the `println("parsed: ...")` for that iteration.
 - One bad input no longer sinks the whole program.
 
-**Intuition.**
-*Mechanism.* When code in a `try` throws, the JVM abandons the rest of the `try` block. It looks for a `catch` whose type matches the exception (here, `NumberFormatException`). If one matches, its body runs, and execution continues after the whole `try`/`catch`. The thrown object (`e`) carries the details: a message and a stack trace.
+**Why it works.**
+*How it works.* When code in a `try` throws, the JVM abandons the rest of the `try` block. It looks for a `catch` whose type matches the exception (here, `NumberFormatException`). If one matches, its body runs, and execution continues after the whole `try`/`catch`. The thrown object (`e`) carries the details: a message and a stack trace.
 
 *Concrete bite.* The win here is targeted recovery. You guard only the operations that can fail, and the handler decides what "recover" means (skip, retry, use a default). Catch too broadly (`catch (Exception e)`), and you may swallow bugs you need to see. Catch the *specific* type, and unexpected exceptions still propagate.
 
@@ -157,8 +157,8 @@ Exception in thread "main" java.lang.ArithmeticException: / by zero
 
 **Analysis.** `divide` can throw `ArithmeticException`. Since that's an *unchecked* exception, it needed no `throws` and no `try`. The code compiled without complaint, ran `divide(10, 2)` just fine (`5`), and then threw on `divide(10, 0)`. Unchecked exceptions represent bugs (a zero divisor, a null dereference, a bad index) that the compiler doesn't force you to anticipate everywhere.
 
-**Intuition.**
-*Mechanism.* The compiler keeps track of *checked* exceptions: any code that can throw one must either `catch` it or declare it with `throws` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-11.html#jls-11.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §11.2">[2]</abbr></a>. `RuntimeException`s and `Error`s are exempt. They could happen almost anywhere, so requiring declarations for them would be unbearable.
+**Why it works.**
+*How it works.* The compiler keeps track of *checked* exceptions: any code that can throw one must either `catch` it or declare it with `throws` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-11.html#jls-11.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §11.2">[2]</abbr></a>. `RuntimeException`s and `Error`s are exempt. They could happen almost anywhere, so requiring declarations for them would be unbearable.
 
 *Concrete bite.* Call something that throws a *checked* exception without handling it, and the compiler refuses:
 
@@ -230,8 +230,8 @@ skipped 2: ArrayIndexOutOfBoundsException
 
 **Analysis.** Index 1 held `"ten"`, so `parseInt` threw a `NumberFormatException`. Index 2 is past the end of the two-element array, so `parts[i]` threw an `ArrayIndexOutOfBoundsException`. One clause caught both, and `e.getClass()` reported which one had arrived.
 
-**Intuition.**
-*Mechanism.* In a multi-catch, `e` has the closest common supertype of the listed types, so you can call only the methods they share. `e` is also implicitly `final`, which means the handler can't assign to it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20">[4]</abbr></a>.
+**Why it works.**
+*How it works.* In a multi-catch, `e` has the closest common supertype of the listed types, so you can call only the methods they share. `e` is also implicitly `final`, which means the handler can't assign to it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20">[4]</abbr></a>.
 
 *Concrete bite.* The alternatives may not be related by subclassing <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20">[4]</abbr></a>. `NumberFormatException` extends `IllegalArgumentException`, so listing both is redundant — and javac tells you so:
 
@@ -354,8 +354,8 @@ denied: need 100, have 50
 
 The custom type turns the failure into a named, catchable thing with its own data.
 
-**Intuition.**
-*Mechanism.* `throw` stops the current method and propagates the exception up the call stack. Each caller in turn is abandoned, until a matching `catch` turns up. If none does, the thread ends, and by default a **stack trace** is printed: first the exception, then one `at` line per method it passed through, innermost first. `throws` declares that propagation in the method's signature.
+**Why it works.**
+*How it works.* `throw` stops the current method and propagates the exception up the call stack. Each caller in turn is abandoned, until a matching `catch` turns up. If none does, the thread ends, and by default a **stack trace** is printed: first the exception, then one `at` line per method it passed through, innermost first. `throws` declares that propagation in the method's signature.
 
 In this example, no method catches the exception, so the trace shows the whole path:
 
@@ -435,8 +435,8 @@ from try
 
 `finally` intercepts every exit path, including a `return` in the middle of the `try`. That's what makes it reliable for cleanup.
 
-**Intuition.**
-*Mechanism.* Whatever ends the `try` — completion, an exception, or a `return` — the `finally` block runs on the way out <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20.2">[5]</abbr></a>. For a `return`, the value is computed first, then `finally` runs, and then control leaves. The only ways to skip it are for the `try` to never end, or for the JVM to stop first — and `System.exit` never returns <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runtime.html" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.Runtime, Java SE 25 API (exit)">[11]</abbr></a>.
+**Why it works.**
+*How it works.* Whatever ends the `try` — completion, an exception, or a `return` — the `finally` block runs on the way out <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20.2">[5]</abbr></a>. For a `return`, the value is computed first, then `finally` runs, and then control leaves. The only ways to skip it are for the `try` to never end, or for the JVM to stop first — and `System.exit` never returns <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runtime.html" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.Runtime, Java SE 25 API (exit)">[11]</abbr></a>.
 
 ```java run
 import static java.lang.IO.println;
@@ -533,8 +533,8 @@ after
 
 **Analysis.** The resource opened and got used. Then `close()` ran *automatically* as the `try` block exited — before `after` printed, and with no explicit `finally`. Had `use()` thrown, `close()` would still have run. Think of `try`-with-resources as `finally`-based cleanup, specialized for anything `AutoCloseable` (files, streams, connections, locks), and generated correctly for you.
 
-**Intuition.**
-*Mechanism.* The compiler expands `try (R r = ...)` into a `try`/`finally` that calls `r.close()` on exit <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.3.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20.3.1">[7]</abbr></a>. It also handles the edge cases: it closes the resource even if the body throws. And if the body threw *and* `close()` throws too, the `close()` exception is **suppressed**: it gets attached to the body's exception, which is the one you catch <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20.3">[6]</abbr></a>:
+**Why it works.**
+*How it works.* The compiler expands `try (R r = ...)` into a `try`/`finally` that calls `r.close()` on exit <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.3.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20.3.1">[7]</abbr></a>. It also handles the edge cases: it closes the resource even if the body throws. And if the body threw *and* `close()` throws too, the `close()` exception is **suppressed**: it gets attached to the body's exception, which is the one you catch <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20.3">[6]</abbr></a>:
 
 ```java run
 import static java.lang.IO.println;

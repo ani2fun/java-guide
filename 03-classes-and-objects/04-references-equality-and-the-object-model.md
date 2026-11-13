@@ -36,9 +36,9 @@ This is the deep pass of [primitives](/synapse/programming-languages/java/first-
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -117,8 +117,8 @@ stack.b -> heap.arr
 
 The diagram is the model. These local variables sit on the stack. The primitives hold values, and the references hold addresses that point into the heap. Two references can point at the same object. (A primitive *field* is different: it sits inside its object, on the heap.)
 
-**Intuition.**
-*Mechanism.* A variable stores a fixed-size slot of bits. For a primitive, those bits are the value. For a reference type (arrays, `String`, every class), they are the *address* of a heap object. `=` copies the slot (the value, or the address), never the heap object itself.
+**Why it works.**
+*How it works.* A variable stores a fixed-size slot of bits. For a primitive, those bits are the value. For a reference type (arrays, `String`, every class), they are the *address* of a heap object. `=` copies the slot (the value, or the address), never the heap object itself.
 
 *Concrete bite.* The two output lines show the contrast. Copy a primitive, and the copies are independent (`5 99`). Copy a reference, and both names share one object (`99 99`). The same fact explains [pass-by-value of references](/synapse/programming-languages/java/control-flow/methods): a method gets a copy of the *reference*, so it can change the shared object.
 
@@ -166,8 +166,8 @@ true
 
 Same operator, two meanings, and the operands decide which: references or primitives.
 
-**Intuition.**
-*Mechanism.* `==` always asks "are the stored bits equal?". A primitive's bits are its value, and a reference's bits are an address. So `==` is value equality for primitives and identity (same object) for references. There's no third behavior.
+**Why it works.**
+*How it works.* `==` always asks "are the stored bits equal?". A primitive's bits are its value, and a reference's bits are an address. So `==` is value equality for primitives and identity (same object) for references. There's no third behavior.
 
 `==` between types that can never be the same object doesn't compile: `Integer == String` gives `incomparable types: Integer and String`.
 
@@ -249,8 +249,8 @@ true
 
 The `Integer` `==` flipped from `true` to `false` between `127` and `128`.
 
-**Intuition.**
-*Mechanism.* `Integer` is a reference type, so `==` compares object identity. Boxing a value in −128..127 always gives the same object <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §5.1.7">[7]</abbr></a> <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html#valueOf(int)" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.Integer.valueOf(int), Java SE 25 API">[9]</abbr></a>. Beyond that range, the JVM *may* reuse objects, but by default it doesn't <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html#valueOf(int)" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.Integer.valueOf(int), Java SE 25 API">[9]</abbr></a>. So `==` is *coincidentally* true for small values, and false for larger ones on this JVM.
+**Why it works.**
+*How it works.* `Integer` is a reference type, so `==` compares object identity. Boxing a value in −128..127 always gives the same object <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §5.1.7">[7]</abbr></a> <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html#valueOf(int)" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.Integer.valueOf(int), Java SE 25 API">[9]</abbr></a>. Beyond that range, the JVM *may* reuse objects, but by default it doesn't <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html#valueOf(int)" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.Integer.valueOf(int), Java SE 25 API">[9]</abbr></a>. So `==` is *coincidentally* true for small values, and false for larger ones on this JVM.
 
 Mix an `Integer` with an `int`, and `==` unboxes the `Integer` and compares numbers <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.21.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.21.1">[10]</abbr></a>: `Integer c = 128; int e = 128; c == e` is `true`.
 
@@ -294,8 +294,8 @@ true
 
 **Analysis.** `a` and `b` are the same literal `"hello"`, which the pool stores once. So `a == b` is `true`, *by interning, not by content comparison*. `new String("hello")` forces a separate object, so `a == c` is `false`, even though `a.equals(c)` (comparing characters) is `true`. That's the mechanism behind the [Strings](/synapse/programming-languages/java/first-steps/strings-the-basics) teaser: `==` on strings is identity, and the pool makes literals share it.
 
-**Intuition.**
-*Mechanism.* Literals, and more generally the values of compile-time **constant expressions**, are interned into a shared pool, so equal ones are the same object <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.5">[11]</abbr></a>. A string built at run time is a fresh object: `new String(…)`, user input, or `+` with a variable.
+**Why it works.**
+*How it works.* Literals, and more generally the values of compile-time **constant expressions**, are interned into a shared pool, so equal ones are the same object <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.5">[11]</abbr></a>. A string built at run time is a fresh object: `new String(…)`, user input, or `+` with a variable.
 
 *Concrete bite.* A string computed from a variable misses the pool, even when its characters match a literal:
 
@@ -357,8 +357,8 @@ Exception in thread "main" java.lang.NullPointerException: Cannot invoke "String
 
 Since Java 14, the message names what was null and what you tried to do <a href="https://openjdk.org/jeps/358" target="_blank" rel="noopener noreferrer"><abbr title="JEP 358: Helpful NullPointerExceptions (JDK 14)">[12]</abbr></a>. The variable shows as `<local1>` because the Run button compiles without local-variable names. Compile with `javac -g`, and the message says `because "s" is null`.
 
-**Intuition.**
-*Mechanism.* `null` is the absence of an object: a reference holding no address. Reading or printing the *reference* is fine. **Dereferencing** it (`.method()`, `.field`) needs an object that isn't there, and that's the `NullPointerException`.
+**Why it works.**
+*How it works.* `null` is the absence of an object: a reference holding no address. Reading or printing the *reference* is fine. **Dereferencing** it (`.method()`, `.field`) needs an object that isn't there, and that's the `NullPointerException`.
 
 *Concrete bite.* The `null` line works, and the `s.length()` line throws. The boundary is *use*. Fields of a reference type start as `null`, and so do the slots of a new object array and many "not found" results. So any object you didn't definitely set could be `null`, and the first method call on it crashes.
 
@@ -450,8 +450,8 @@ stack.keep -> heap.first
 
 **Analysis.** `a = new Counter()` pointed `a` at a second object, with `count` `0`. The first object survived, because `keep` still refers to it (`count` `1`). Delete the line `Counter keep = a;`, and after the reassignment nothing refers to the first counter. It becomes unreachable, and the program can never read it again.
 
-**Intuition.**
-*Mechanism.* Reachability is about references, not about variables going quiet. As long as one live reference leads to an object, the object stays. When none does, the garbage collector *may* reclaim it. The specification sets no moment for that, and a small program may end before any collection runs <a href="https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-2.html#jvms-2.5.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Virtual Machine Specification, Java SE 25, §2.5.3">[3]</abbr></a>.
+**Why it works.**
+*How it works.* Reachability is about references, not about variables going quiet. As long as one live reference leads to an object, the object stays. When none does, the garbage collector *may* reclaim it. The specification sets no moment for that, and a small program may end before any collection runs <a href="https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-2.html#jvms-2.5.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Virtual Machine Specification, Java SE 25, §2.5.3">[3]</abbr></a>.
 
 *Concrete bite.* The reverse is the real-world bug. An object stays alive as long as *anything* refers to it, such as a forgotten entry in a long-lived `static` list. That object is never collected, however useless it has become. It's a memory leak, in a language with a garbage collector.
 

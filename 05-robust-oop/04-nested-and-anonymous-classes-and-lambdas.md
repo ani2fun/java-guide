@@ -31,9 +31,9 @@ This lesson builds on [methods](/synapse/programming-languages/java/control-flow
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -105,8 +105,8 @@ public class Main {
 
 The `static` keyword on a nested class means the same thing it means on a field or method: `static` means "no enclosing instance," and non-static means "tied to one."
 
-**Intuition.**
-*Mechanism.* Each inner object is tied to exactly one enclosing object, fixed at the moment the inner object is created <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.1.3">[1]</abbr></a>. That link is how it reaches `x`. So two inner objects made from two different outer objects read two different sets of fields:
+**Why it works.**
+*How it works.* Each inner object is tied to exactly one enclosing object, fixed at the moment the inner object is created <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.1.3">[1]</abbr></a>. That link is how it reaches `x`. So two inner objects made from two different outer objects read two different sets of fields:
 
 ```java run
 import static java.lang.IO.println;
@@ -212,8 +212,8 @@ Hello, Ada
 
 **Analysis.** `new Greeter() { ... }` created an object of an unnamed class that implements `Greeter`, supplying `greet` inline. We never declared a named `class`: the implementation exists only as this one object. Before lambdas, this was how Java passed behavior around — you wrapped it in an anonymous class that implemented an interface.
 
-**Intuition.**
-*Mechanism.* Behind the scenes, the compiler generates a real class with a made-up name, and instantiates it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.9.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.9.5">[3]</abbr></a>. Compile the program above in a terminal, and list the class files:
+**Why it works.**
+*How it works.* Behind the scenes, the compiler generates a real class with a made-up name, and instantiates it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.9.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.9.5">[3]</abbr></a>. Compile the program above in a terminal, and list the class files:
 
 ```text
 $ javac Main.java
@@ -300,8 +300,8 @@ public class Main {
 
 With two parameters, you need parentheses. An expression body returns its value automatically, while a block body needs an explicit `return`.
 
-**Intuition.**
-*Mechanism.* A lambda implements a functional interface. Because there's only one abstract method, the compiler knows exactly which method the lambda body defines, and it infers the parameter types and return type from that method's signature.
+**Why it works.**
+*How it works.* A lambda implements a functional interface. Because there's only one abstract method, the compiler knows exactly which method the lambda body defines, and it infers the parameter types and return type from that method's signature.
 
 A lambda isn't an anonymous class, though. No `Main$2.class` shows up for one. Inside a lambda, `this` and every other name mean exactly what they mean in the surrounding code <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.27.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.27.2">[6]</abbr></a>. Inside an anonymous class, by contrast, `this` is the anonymous object.
 
@@ -485,8 +485,8 @@ Charlie
 
 Both are just shorter spellings of lambdas that delegate to a single method.
 
-**Intuition.**
-*Mechanism.* A method reference refers to a method without calling it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.13" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.13">[9]</abbr></a>. The compiler matches the referenced method's shape against the functional interface's method. There are four forms:
+**Why it works.**
+*How it works.* A method reference refers to a method without calling it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.13" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.13">[9]</abbr></a>. The compiler matches the referenced method's shape against the functional interface's method. There are four forms:
 
 | Form | Example | The lambda it stands for |
 |---|---|---|

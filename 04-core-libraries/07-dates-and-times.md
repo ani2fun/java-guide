@@ -30,9 +30,9 @@ This lesson builds on [sorting a `List`](/synapse/programming-languages/java/cor
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the library and the JVM *do*.
+1. **How it works** — what the library and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure, shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -117,8 +117,8 @@ public class Main {
 Today is 2026-09-30
 ```
 
-**Intuition.**
-*Mechanism.* Before it builds anything, `LocalDate.of` checks its arguments against the calendar. The month must be 1 to 12, and the day must actually exist in that month of that year <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/LocalDate.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.LocalDate.of">[2]</abbr></a>.
+**Why it works.**
+*How it works.* Before it builds anything, `LocalDate.of` checks its arguments against the calendar. The month must be 1 to 12, and the day must actually exist in that month of that year <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/LocalDate.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.LocalDate.of">[2]</abbr></a>.
 
 *Concrete bite.* 2023 wasn't a leap year, so it had no 29 February. This program compiles fine, then stops at run time:
 
@@ -215,8 +215,8 @@ public class Main {
 
 **Analysis.** 31 January plus one month would be 31 February, which doesn't exist. So `plusMonths` picks the **last valid day** of February instead: the 29th, since 2024 is a leap year. Adding two months at once gives 31 March. But adding one month, then another, gives 29 March, because the first step already lost the 31st.
 
-**Intuition.**
-*Mechanism.* `plusMonths` works in three steps. It adds to the month, checks whether the day exists in the new month, and if it doesn't, moves the day back to that month's last day <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/LocalDate.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.LocalDate.plusMonths">[2]</abbr></a>. A missing day never makes it throw, and never spills over into the following month. `plusYears` does the same thing for 29 February.
+**Why it works.**
+*How it works.* `plusMonths` works in three steps. It adds to the month, checks whether the day exists in the new month, and if it doesn't, moves the day back to that month's last day <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/LocalDate.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.LocalDate.plusMonths">[2]</abbr></a>. A missing day never makes it throw, and never spills over into the following month. `plusYears` does the same thing for 29 February.
 
 *Concrete bite: a billing date that drifts.* Say a customer signs up on 31 January and is billed monthly. If you step the date forward one month at a time, you lose the 31st for good. If you count each bill from the sign-up date, you keep it:
 
@@ -391,8 +391,8 @@ PT-8H
 
 **Analysis.** A `Duration` never rolls over into days: 25 hours prints as `PT25H`, and `ofDays(2)` becomes `PT48H`, exactly 48 hours. `toMinutes()` gives you the total, while `toHoursPart()` and `toMinutesPart()` give you the pieces for display. And since a `LocalTime` has no date, 17:00 to 9:00 is 8 hours *backwards*, not an overnight shift.
 
-**Intuition.**
-*Mechanism.* `Duration.between` measures in seconds, so both ends need a time of day <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Duration.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.Duration.between">[4]</abbr></a>. A `LocalDate` simply has no seconds to measure.
+**Why it works.**
+*How it works.* `Duration.between` measures in seconds, so both ends need a time of day <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/Duration.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.Duration.between">[4]</abbr></a>. A `LocalDate` simply has no seconds to measure.
 
 *Concrete bite.* Ask for the `Duration` between two dates, and the program compiles fine, then fails at run time:
 
@@ -501,8 +501,8 @@ public class Main {
 
 One instant, three clock readings. Notice that offsets aren't always whole hours: India is 5 hours 30 minutes ahead of UTC.
 
-**Intuition.**
-*Mechanism.* A `ZonedDateTime` holds three things: the local date-time, the offset and the zone. Its `equals` compares all three <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/chrono/ChronoZonedDateTime.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.chrono.ChronoZonedDateTime.equals and isEqual">[8]</abbr></a>, while its `isEqual` compares only the instant.
+**Why it works.**
+*How it works.* A `ZonedDateTime` holds three things: the local date-time, the offset and the zone. Its `equals` compares all three <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/chrono/ChronoZonedDateTime.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.chrono.ChronoZonedDateTime.equals and isEqual">[8]</abbr></a>, while its `isEqual` compares only the instant.
 
 *Watch out: `equals` to ask "same moment?"* Take two objects for the same call, one per city. They describe the same moment, yet they aren't `equals`:
 
@@ -641,8 +641,8 @@ later:   2024-11-03T01:30-05:00[America/New_York]
 
 **Analysis.** In the gap, 02:30 moved **forward by the length of the gap**, landing on 03:30. In the overlap, 01:30 took the **earlier** offset, `-04:00` (summer time). If you want the second 01:30, `withLaterOffsetAtOverlap()` picks it: `-05:00`, one hour later in real time.
 
-**Intuition.**
-*Mechanism.* `ZonedDateTime` has two kinds of addition <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/ZonedDateTime.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.ZonedDateTime.plusDays and plusHours">[7]</abbr></a>:
+**Why it works.**
+*How it works.* `ZonedDateTime` has two kinds of addition <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/ZonedDateTime.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.ZonedDateTime.plusDays and plusHours">[7]</abbr></a>:
 
 - `plusDays`, `plusMonths` and `plusYears` work on the **local** time-line. They change the calendar, keep the clock reading, and then look up the offset again.
 - `plusHours`, `plusMinutes` and `plusSeconds` work on the **instant** time-line. They add exact elapsed time.
@@ -741,8 +741,8 @@ Tuesday, 5 March 2024, 2:07 PM
 
 **Analysis.** One formatter handles both formatting and parsing. The second formatter also takes a **`Locale`**, `Locale.US`, which fixes the language of `Tuesday`, `March` and `PM`. Without one, a formatter falls back on the machine's default locale <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/format/DateTimeFormatter.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, DateTimeFormatter.ofPattern(String)">[9]</abbr></a>, and month names change from machine to machine. Since a formatter is immutable, you can safely share one instance.
 
-**Intuition.**
-*Mechanism.* The formatter reads each letter as a field, without checking whether the combination makes sense. It has no way of knowing you meant the month when you wrote the minute.
+**Why it works.**
+*How it works.* The formatter reads each letter as a field, without checking whether the combination makes sense. It has no way of knowing you meant the month when you wrote the minute.
 
 *Concrete bite: three wrong letters, no error.* Every line below compiles and runs, yet two of them print a wrong date without any warning:
 

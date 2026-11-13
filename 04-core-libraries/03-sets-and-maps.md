@@ -35,9 +35,9 @@ This builds on [the Collections Framework](/synapse/programming-languages/java/c
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -113,8 +113,8 @@ hashfn -> buckets.b1: "97 % 4 = 1"
 
 The diagram shows why it's fast. An element's **hash code** is a number computed from its contents: `"a"` gives `97`, and `"b"` gives `98`. The hash code picks a **bucket**, so a membership check looks in one bucket, not at every element. (The diagram is simplified to 4 buckets. A new `HashSet` starts with 16 <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashSet.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.HashSet">[2]</abbr></a>.)
 
-**Intuition.**
-*Mechanism.* A `HashSet` keeps an array of buckets <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashSet.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.HashSet">[2]</abbr></a>. To add or look up an element, it computes the element's `hashCode`, maps that to a bucket index, and checks only that bucket.
+**Why it works.**
+*How it works.* A `HashSet` keeps an array of buckets <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashSet.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.HashSet">[2]</abbr></a>. To add or look up an element, it computes the element's `hashCode`, maps that to a bucket index, and checks only that bucket.
 
 - So `add` and `contains` take constant time, "assuming the hash function disperses the elements properly among the buckets" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashSet.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.HashSet">[2]</abbr></a>. A `List.contains` scans every element: O(n).
 - Uniqueness comes for free: an element that lands in an occupied bucket is compared with `.equals`, and dropped if an equal one is already there.
@@ -198,8 +198,8 @@ hash:   [1, 2, 3]
 
 The `java.util.*` import brings in every class of the package at once.
 
-**Intuition.**
-*Mechanism.* Each implementation stores its elements differently:
+**Why it works.**
+*How it works.* Each implementation stores its elements differently:
 
 - `TreeSet` keeps elements in a sorted tree, with "guaranteed log(n) time cost" for `add`, `remove` and `contains` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/TreeSet.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.TreeSet">[4]</abbr></a>.
 - `LinkedHashSet` is a `HashSet` plus "a doubly-linked list running through all of its entries" in insertion order <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/LinkedHashSet.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.LinkedHashSet">[5]</abbr></a>. It stays constant time.
@@ -382,8 +382,8 @@ pear -> 9
 - `remove("apple")` deleted the entry and returned its value, `7`.
 - The for-each over `entrySet()` visited every pair. A `TreeMap` visits keys in sorted order <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/TreeMap.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.TreeMap">[8]</abbr></a>, so `fig` came before `pear`.
 
-**Intuition.**
-*Mechanism.* `get` returns the value for the key, or `null` when the key is absent. A `HashMap` may also store `null` as a value, so "a return value of null does not necessarily indicate that the map contains no mapping for the key" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html#get(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Map.get">[9]</abbr></a>. `getOrDefault` and `containsKey` exist to handle absence explicitly.
+**Why it works.**
+*How it works.* `get` returns the value for the key, or `null` when the key is absent. A `HashMap` may also store `null` as a value, so "a return value of null does not necessarily indicate that the map contains no mapping for the key" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html#get(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Map.get">[9]</abbr></a>. `getOrDefault` and `containsKey` exist to handle absence explicitly.
 
 *Concrete bite.* Because a missing key gives `null`, assigning `get`'s result straight into a primitive unboxes `null` and throws:
 
@@ -452,8 +452,8 @@ public class Main {
 
 **Analysis.** For each word, `getOrDefault(word, 0)` returned the running count (`0` the first time a word appeared). `+ 1` incremented it, and `put` stored it back over the old value. The result is a frequency table: `a` three times, `b` twice, and `c` once.
 
-**Intuition.**
-*Mechanism.* `getOrDefault(k, d)` returns the mapped value, or `d` if `k` is absent <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Map">[6]</abbr></a>. So the first occurrence reads `0`, and every later one reads the count so far. The idiom folds "start at zero on first sight" and "add one on later sights" into one expression.
+**Why it works.**
+*How it works.* `getOrDefault(k, d)` returns the mapped value, or `d` if `k` is absent <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Map">[6]</abbr></a>. So the first occurrence reads `0`, and every later one reads the count so far. The idiom folds "start at zero on first sight" and "add one on later sights" into one expression.
 
 *Concrete bite.* Drop the default and use `get`, and the *first* occurrence of each word reads `null`, unboxes it, and throws:
 

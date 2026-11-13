@@ -30,9 +30,9 @@ This lesson ties together [shared references](/synapse/programming-languages/jav
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -118,8 +118,8 @@ main thread: main
 
 **Analysis.** `t.start()` ran `task` on a new thread named `worker-1`. `t.join()` made `main` wait until that thread finished, so the two lines printed in a fixed order. Without `join`, `main` could print first — the lines could come out in either order.
 
-**Intuition.**
-*Mechanism.* `start()` asks the JVM to schedule a new thread that runs the `Runnable`'s `run()`. The scheduler decides when each thread runs, and interleaves them however it likes. So *the order between threads isn't guaranteed* unless you coordinate them — for example, with `join`.
+**Why it works.**
+*How it works.* `start()` asks the JVM to schedule a new thread that runs the `Runnable`'s `run()`. The scheduler decides when each thread runs, and interleaves them however it likes. So *the order between threads isn't guaranteed* unless you coordinate them — for example, with `join`.
 
 *Concrete bite.* `start()` and `run()` are different methods. `t.run()` is just an ordinary method call on the *current* thread: no new thread, no concurrency.
 
@@ -351,8 +351,8 @@ sequenceDiagram
 - The scheduler can pause a thread *between any two of those steps* — that's exactly what preemptive scheduling ([§1](#1-threads-and-runnable)) means.
 - Out of 400,000 increments, most were lost. Yet nothing threw: the program "succeeded" and printed a wrong number.
 
-**Intuition.**
-*Mechanism.* `counter++` is a read-modify-write. With no coordination, the steps of different threads interleave in any order. One thread's write gets overwritten by another thread that read the old value: a **lost update**. The same lack of coordination also allows a **stale read**, where a thread doesn't see another thread's recent write at all ([§5](#5-the-java-memory-model-and-happens-before)).
+**Why it works.**
+*How it works.* `counter++` is a read-modify-write. With no coordination, the steps of different threads interleave in any order. One thread's write gets overwritten by another thread that read the old value: a **lost update**. The same lack of coordination also allows a **stale read**, where a thread doesn't see another thread's recent write at all ([§5](#5-the-java-memory-model-and-happens-before)).
 
 *Concrete bite.* Those varying, sub-400,000 outputs are the race made visible. It's the [parallel-stream data race](/synapse/programming-languages/java/advanced/functional-java-and-streams) from the last lesson, now in raw threads. It's also why "it passed in testing" means little for concurrent code. A race might show up once in a thousand runs, then constantly under production load.
 
@@ -398,8 +398,8 @@ public class Main {
 
 **Analysis.** Now the total is **always** exactly 400,000, run after run. `synchronized` lets only one thread execute `increment()` at a time, so each read-modify-write completes before the next one begins. No two threads interleave inside it, so no update is lost. A single keyword turned random wrong answers into a correct, deterministic result.
 
-**Intuition.**
-*Mechanism.* "Each object in Java is associated with a monitor, which a thread can lock or unlock. Only one thread at a time may hold a lock on a monitor" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.1">[5]</abbr></a>. A monitor is also called an object's intrinsic **lock**.
+**Why it works.**
+*How it works.* "Each object in Java is associated with a monitor, which a thread can lock or unlock. Only one thread at a time may hold a lock on a monitor" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.1">[5]</abbr></a>. A monitor is also called an object's intrinsic **lock**.
 
 - A `synchronized` method locks a monitor on entry and unlocks it on exit. A `static` method uses the monitor of its class's `Class` object, while an instance method uses `this` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.3.6" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.4.3.6">[6]</abbr></a>.
 - A `synchronized (obj) { … }` **block** locks the monitor of whichever object you name <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.19" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.19">[7]</abbr></a>.
@@ -513,8 +513,8 @@ sequenceDiagram
 
 That's why each `increment()` sees the running total: the lock both serializes the updates *and* publishes them. Without a happens-before edge, as in the [§3](#3-race-conditions) race, the JMM allows B to read an older value of `counter`.
 
-**Intuition.**
-*Mechanism.* For the sake of speed, the JMM lets compilers and processors reorder and cache memory operations, so a write by one thread isn't automatically visible to another. Happens-before edges are the guarantees you get. The four this book uses most are in JLS §17.4.5 <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.4.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.4.5">[8]</abbr></a>:
+**Why it works.**
+*How it works.* For the sake of speed, the JMM lets compilers and processors reorder and cache memory operations, so a write by one thread isn't automatically visible to another. Happens-before edges are the guarantees you get. The four this book uses most are in JLS §17.4.5 <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.4.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.4.5">[8]</abbr></a>:
 
 1. An unlock of a monitor happens-before every later lock of that monitor.
 2. A write to a `volatile` field happens-before every later read of that field.

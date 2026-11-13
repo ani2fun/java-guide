@@ -31,9 +31,9 @@ This rests on [boolean conditions](/synapse/programming-languages/java/control-f
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -81,8 +81,8 @@ public class Main {
 
 **Analysis.** `i` starts at `0`. The loop printed `0`, incremented to `1`, checked `1 < 5` (true), and so on, printing `0 1 2 3 4`. When `i` reached `5`, the test `5 < 5` was `false`, so the loop stopped *before* printing `5`. The `i++` is what moved the counter toward the exit.
 
-**Intuition.**
-*Mechanism.* `while (cond)` evaluates `cond` *before* each pass, and the body runs only while it's true. If the body never changes what `cond` depends on, the condition stays true forever. That's an **infinite loop**.
+**Why it works.**
+*How it works.* `while (cond)` evaluates `cond` *before* each pass, and the body runs only while it's true. If the body never changes what `cond` depends on, the condition stays true forever. That's an **infinite loop**.
 
 *Watch out: the missing update.* Leave out the `i++`, and nothing ever makes `i < 3` false:
 
@@ -179,8 +179,8 @@ do done
 
 Notice the `;` after `while (m < 5)`. A `do-while` ends with one, and javac reports `';' expected` if you leave it out.
 
-**Intuition.**
-*Mechanism.* The only difference is the order of test and body. `while` is test-then-body (zero or more passes), and `do-while` is body-then-test (one or more passes).
+**Why it works.**
+*How it works.* The only difference is the order of test and body. `while` is test-then-body (zero or more passes), and `do-while` is body-then-test (one or more passes).
 
 *Concrete bite.* A variable declared *inside* the `do` body ends at the body's closing brace. The condition sits after that brace, so it can't see the variable:
 
@@ -285,8 +285,8 @@ public class Main {
 
 After the third pass, `i` is `3` and `j` is `2`, so `i < j` fails. Each part is optional, too. `for (;;)` has no test at all, and it runs until something inside it leaves the loop. [Loop Control & Patterns](/synapse/programming-languages/java/control-flow/loop-control-and-patterns) shows how.
 
-**Intuition.**
-*Mechanism.* The `init` runs once. Then comes `test`, `body`, `update`, `test`, … until `test` is false. The loop variable declared in `init` lives **only inside the loop**: its scope is the `for` and its body, and nothing after <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.3">[5]</abbr></a>.
+**Why it works.**
+*How it works.* The `init` runs once. Then comes `test`, `body`, `update`, `test`, … until `test` is false. The loop variable declared in `init` lives **only inside the loop**: its scope is the `for` and its body, and nothing after <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.3">[5]</abbr></a>.
 
 *Concrete bite.* Use the loop variable after the loop, and the compiler can't find it:
 
@@ -488,8 +488,8 @@ public class Main {
 a-b-c-
 ```
 
-**Intuition.**
-*Mechanism.* Each pass copies the next element into the loop variable <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.14.2">[4]</abbr></a>. That variable is a **copy** of the element, not the slot it came from. So assigning to it changes the copy, never the array.
+**Why it works.**
+*How it works.* Each pass copies the next element into the loop variable <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.14.2">[4]</abbr></a>. That variable is a **copy** of the element, not the slot it came from. So assigning to it changes the copy, never the array.
 
 *Concrete bite.* Try to modify elements through the loop variable, and nothing happens:
 

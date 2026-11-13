@@ -29,9 +29,9 @@ This is the deep pass of [Strings, the Basics](/synapse/programming-languages/ja
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -84,8 +84,8 @@ false
 
 The numbers themselves vary from run to run, which is why we compare them instead of printing them. (The reverse doesn't hold. Distinct numbers for distinct objects are promised only "as far as is reasonably practical" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/System.html#identityHashCode(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Object.hashCode and System.identityHashCode">[2]</abbr></a>, so equal numbers prove nothing.)
 
-**Intuition.**
-*Mechanism.* The JLS says the result of `+` on strings is a **newly created** String, unless the whole expression is a constant <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.18.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.18.1">[1]</abbr></a>.
+**Why it works.**
+*How it works.* The JLS says the result of `+` on strings is a **newly created** String, unless the whole expression is a constant <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.18.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.18.1">[1]</abbr></a>.
 
 - Inside one expression such as `a + b + c`, Java may skip the in-between Strings and build the result in one step. Since JDK 9, javac hands that step to a library method chosen at run time <a href="https://openjdk.org/jeps/280" target="_blank" rel="noopener noreferrer"><abbr title="JEP 280: Indify String Concatenation">[3]</abbr></a>.
 - A *loop* is different. Each pass runs the expression again, and each new String copies every character built so far.
@@ -212,8 +212,8 @@ true
 - `println(sb)` printed the text. `println` turns any object into text with `String.valueOf`, which calls its `toString()` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/PrintStream.html#println(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, PrintStream.println(Object)">[17]</abbr></a>.
 - A new, empty builder has room for 16 characters before it must grow <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.lang.StringBuilder">[4]</abbr></a>.
 
-**Intuition.**
-*Mechanism.* A `StringBuilder` keeps its characters in an internal array with spare room, its **capacity**. `append` writes into that room.
+**Why it works.**
+*How it works.* A `StringBuilder` keeps its characters in an internal array with spare room, its **capacity**. `append` writes into that room.
 
 When the room runs out, the builder "is automatically made larger" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.lang.StringBuilder">[4]</abbr></a>. OpenJDK grows it to twice its size plus 2 (16, 34, 70, 142 in a run), so the copies stay rare, and N appends cost O(N) in total. (Since JDK 9, that array holds bytes, not `char`s, to save memory on Latin-1 text <a href="https://openjdk.org/jeps/254" target="_blank" rel="noopener noreferrer"><abbr title="JEP 254: Compact Strings">[5]</abbr></a>. The API is the same.)
 
@@ -291,8 +291,8 @@ true
 
 Written as two literals, `"he" + "llo"` is a constant expression, so it's pooled. The variable `a` is what makes `b` a runtime string.
 
-**Intuition.**
-*Mechanism.* The class `String` keeps a private pool, "initially empty" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#intern()" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, String.intern()">[9]</abbr></a>. `intern()` looks for an equal string there. If it finds one, it returns that one. Otherwise, it adds this string and returns it. Literals are interned "as if by execution of the method `String.intern`" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.5">[8]</abbr></a>.
+**Why it works.**
+*How it works.* The class `String` keeps a private pool, "initially empty" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#intern()" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, String.intern()">[9]</abbr></a>. `intern()` looks for an equal string there. If it finds one, it returns that one. Otherwise, it adds this string and returns it. Literals are interned "as if by execution of the method `String.intern`" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.5">[8]</abbr></a>.
 
 *Concrete bite.* `b == c` coming out `false` is the identity trap again. Only pooled strings share identity, and a variable-built string isn't pooled. `intern()` *can* make `==` work, but if you need it to compare strings, that's a sign you should use `.equals`.
 
@@ -343,8 +343,8 @@ ababab
 
 **Analysis.** `split(",")` produced three parts, and `Arrays.toString` printed the array (a plain `println` of an array prints only its type and hash). `String.join` accepts an array or a `List`. `repeat(3)` (Java 11) joins three copies <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#join(java.lang.CharSequence,java.lang.CharSequence...)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, String.join and String.repeat">[11]</abbr></a>.
 
-**Intuition.**
-*Mechanism.* The argument to `split` isn't plain text. It's a **regular expression**, a small pattern language in which some characters have special meanings <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/regex/Pattern.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.regex.Pattern">[18]</abbr></a>. Letters and `,` match themselves. `.` means "any character", and `|` means "or".
+**Why it works.**
+*How it works.* The argument to `split` isn't plain text. It's a **regular expression**, a small pattern language in which some characters have special meanings <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/regex/Pattern.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.regex.Pattern">[18]</abbr></a>. Letters and `,` match themselves. `.` means "any character", and `|` means "or".
 
 *Concrete bite.* Split a version number on `.`, and every character is a separator:
 
@@ -429,8 +429,8 @@ Score: 95
 
 Text blocks spare you the old pain of `"line1\n" + "line2\n"` for multi-line text such as SQL, JSON and HTML.
 
-**Intuition.**
-*Mechanism.* A text block is an ordinary `String` with friendlier syntax <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.6" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.6">[14]</abbr></a>. The compiler processes its content in three steps:
+**Why it works.**
+*How it works.* A text block is an ordinary `String` with friendlier syntax <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.6" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.6">[14]</abbr></a>. The compiler processes its content in three steps:
 
 1. It turns every line ending into `\n`.
 2. It removes **incidental white space**: the common leading indentation, and the trailing spaces on every line.

@@ -30,9 +30,9 @@ These examples span *multiple files* and use the `javac`, `jar`, `java` and `jli
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -98,8 +98,8 @@ HELLO!
 - `java -cp out com.example.Main` set the **classpath** to `out`, and ran the class by its full name, `com.example.Main`.
 - The `import` let `Main` write `Text` instead of `com.example.util.Text`. It's a compile-time shorthand, nothing more <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.5">[2]</abbr></a>.
 
-**Intuition.**
-*Mechanism.* A package is a namespace. The classpath is the list of root locations where the JVM looks for `.class` files. So `java com.example.Main` means "find `com/example/Main.class` under one of the classpath roots." The JLS leaves this file-system mapping up to the host system <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.2">[1]</abbr></a>, and the JDK tools use directories.
+**Why it works.**
+*How it works.* A package is a namespace. The classpath is the list of root locations where the JVM looks for `.class` files. So `java com.example.Main` means "find `com/example/Main.class` under one of the classpath roots." The JLS leaves this file-system mapping up to the host system <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.2">[1]</abbr></a>, and the JDK tools use directories.
 
 *Concrete bite.* The directory rule applies to the *class files*, not the sources. Even if `javac` compiled both files from a single `src/anywhere/` folder, `-d out` would still write `out/com/example/util/Text.class`. Move that class file out of its package directory, and the JVM can't find it when `Main` first needs it:
 
@@ -158,8 +158,8 @@ src2/com/example/Main.java:6: error: whisper(String) is not public in Text; cann
 
 **Analysis.** `Text` is `public` (so `Main` can use it), and `shout` is `public` (so `Main` can call it). But `whisper` is package-private, belonging to `com.example.util`, and `Main` lives in `com.example` — a *different* package. So `whisper` is off-limits: "not public … cannot be accessed from outside package." The boundary is the package, and the default (no modifier) stops right at it.
 
-**Intuition.**
-*Mechanism.* The compiler checks each access against both the member's modifier *and* the package of the code doing the accessing <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.6.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.6.1">[3]</abbr></a>. Package-private grants access only to code in the same package. Crossing a package boundary requires `public` (or `protected`, for subclasses).
+**Why it works.**
+*How it works.* The compiler checks each access against both the member's modifier *and* the package of the code doing the accessing <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.6.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.6.1">[3]</abbr></a>. Package-private grants access only to code in the same package. Crossing a package boundary requires `public` (or `protected`, for subclasses).
 
 *Concrete bite.* This is real encapsulation, not just a convention. A package can expose a `public` API while keeping helper classes and methods package-private, and no outside code can reach them, because the compiler enforces it. That's how libraries hide their internals from the code that uses them.
 
@@ -225,8 +225,8 @@ client -> mod.internal: "cannot access"
 
 The diagram shows the boundary: a module that requires this one can reach the exported package, but is blocked from the internal one.
 
-**Intuition.**
-*Mechanism.* A module is a named set of packages, plus a `module-info` that declares `exports` (its API to other modules) and `requires` (its dependencies). The module system enforces both, at compile time *and* at run time.
+**Why it works.**
+*How it works.* A module is a named set of packages, plus a `module-info` that declares `exports` (its API to other modules) and `requires` (its dependencies). The module system enforces both, at compile time *and* at run time.
 
 *Concrete bite.* Here's the diagram as javac sees it. A second module, `com.example.client`, declares `requires com.example.app;` and imports `com.example.util.Text`:
 
@@ -357,8 +357,8 @@ Exception in thread "main" java.lang.reflect.InaccessibleObjectException: Unable
 
 **Analysis.** It compiled, because reflection names the field as a string. It failed at run time instead, at `setAccessible(true)` — and the message even names the missing line. Add `opens com.lib.model;` to `com.lib`'s `module-info.java`, recompile, and the same command prints `value = hidden`.
 
-**Intuition.**
-*Mechanism.* `exports` and `opens` grant different things <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.7.2">[5]</abbr></a>:
+**Why it works.**
+*How it works.* `exports` and `opens` grant different things <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.7.2">[5]</abbr></a>:
 
 - `exports` grants compile-time and run-time access to the package's `public` and `protected` types and members.
 - `opens` grants run-time access only, but to *all* members — `private` ones included — through reflection.
@@ -450,8 +450,8 @@ $ java --module-path out-noeng -m greet.app/com.greet.app.Main
 0 greeter(s) found
 ```
 
-**Intuition.**
-*Mechanism.* `provides` registers an implementation in the module's descriptor, and `uses` tells the module system that this module will look one up. At run time, `ServiceLoader` searches the resolved modules for providers of that interface. The consumer depends only on the interface itself.
+**Why it works.**
+*How it works.* `provides` registers an implementation in the module's descriptor, and `uses` tells the module system that this module will look one up. At run time, `ServiceLoader` searches the resolved modules for providers of that interface. The consumer depends only on the interface itself.
 
 *Concrete bite.* Forget the `uses` in `greet.app`, and it still compiles. The lookup fails at run time instead:
 
@@ -526,8 +526,8 @@ com.example.auto
 
 `Main` printed `Text.shout("automatic")`, then the module that `Text` lives in, then its own module.
 
-**Intuition.**
-*Mechanism.* Automatic modules are the bridge for migration. By putting a library's JAR on the module path, a modular application can depend on that library even before it's been modularized.
+**Why it works.**
+*How it works.* Automatic modules are the bridge for migration. By putting a library's JAR on the module path, a modular application can depend on that library even before it's been modularized.
 
 *Concrete bite.* An automatic name taken from a file name is fragile: rename the JAR, and every `requires` breaks. That's why libraries set `Automatic-Module-Name` in their manifest before they add a real `module-info`.
 
@@ -595,8 +595,8 @@ java.base@25.0.5
 
 Note that `jlink` needs modules: a classpath-only application has no module graph to link.
 
-**Intuition.**
-*Mechanism.* **Maven** and **Gradle** are build tools. Working from a project descriptor, they download your declared dependencies (from repositories such as Maven Central), compile, test, and package everything into a JAR. They turn the manual `javac`/`jar` dance into a single command (`mvn package`, `gradle build`), and they define the project's coordinates, dependencies, and lifecycle.
+**Why it works.**
+*How it works.* **Maven** and **Gradle** are build tools. Working from a project descriptor, they download your declared dependencies (from repositories such as Maven Central), compile, test, and package everything into a JAR. They turn the manual `javac`/`jar` dance into a single command (`mvn package`, `gradle build`), and they define the project's coordinates, dependencies, and lifecycle.
 
 *Concrete bite.* The descriptor is the project's source of truth. A Maven `pom.xml` dependency —
 ```

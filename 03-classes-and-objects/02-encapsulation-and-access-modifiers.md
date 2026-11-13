@@ -28,9 +28,9 @@ This builds on [classes and objects](/synapse/programming-languages/java/classes
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -79,8 +79,8 @@ public class Main {
 
 **Analysis.** `balance` is `private`, so `main` can't read it directly. Instead, it asks through `getBalance()`, a method the `Account` class deliberately provides. The class now stands between its data and the outside world, and every access goes through code the class controls.
 
-**Intuition.**
-*Mechanism.* The **compiler** enforces `private`. A `private` member can be used only inside the class that declares it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.6.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.6.1">[1]</abbr></a>. The compiler rejects any use from elsewhere before the program ever runs.
+**Why it works.**
+*How it works.* The **compiler** enforces `private`. A `private` member can be used only inside the class that declares it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.6.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.6.1">[1]</abbr></a>. The compiler rejects any use from elsewhere before the program ever runs.
 
 *Concrete bite.* Reach for the field directly, and it won't compile:
 
@@ -160,8 +160,8 @@ ignored invalid deposit: -30
 
 The method enforced the invariant "deposits must be positive". The class can guarantee it because `balance` is `private`, and `deposit` is the only way in. (Real code usually *throws an exception* here instead of printing. [Exceptions](/synapse/programming-languages/java/robust-oop/exceptions) shows how.)
 
-**Intuition.**
-*Mechanism.* A mutating method is a gate. It validates before changing state, so the invariants hold after every call. With a `private` field, the class's own methods are the only paths to it. Guard every one of them, and no path leads to an invalid value.
+**Why it works.**
+*How it works.* A mutating method is a gate. It validates before changing state, so the invariants hold after every call. With a `private` field, the class's own methods are the only paths to it. Guard every one of them, and no path leads to an invalid value.
 
 *Concrete bite.* A `public` field has no gate — it accepts anything:
 
@@ -274,8 +274,8 @@ Main.java:6: error: balance has private access in Account
 
 **Analysis.** `Auditor` is a *different class*, so it can't read `Account`'s `private` `balance`, even from the same file. Privacy is scoped to the declaring class, and sitting nearby in the file grants no access.
 
-**Intuition.**
-*Mechanism.* For each access, the compiler checks the member's modifier against where the access sits: the same class, the same package, or a subclass. `protected` adds subclass access, which only matters once classes inherit from each other.
+**Why it works.**
+*How it works.* For each access, the compiler checks the member's modifier against where the access sits: the same class, the same package, or a subclass. `protected` adds subclass access, which only matters once classes inherit from each other.
 
 *Concrete bite.* The check works per class, **not per object**. A method of `Account` may read the `private` field of *another* `Account`:
 
@@ -352,8 +352,8 @@ public class Main {
 
 **Analysis.** `x` and `y` are `final`, set once in the constructor. After that, you can read a `Point` but never change it. There's no setter, and the `final` fields can't be reassigned. The object is frozen the moment construction finishes.
 
-**Intuition.**
-*Mechanism.* `final` on a field is a compile-time guarantee of single assignment. The compiler checks that every constructor assigns the field <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.1.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.3.1.2">[4]</abbr></a>, and it rejects any later assignment. Forget one, and the error lands on the constructor's closing brace:
+**Why it works.**
+*How it works.* `final` on a field is a compile-time guarantee of single assignment. The compiler checks that every constructor assigns the field <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.1.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.3.1.2">[4]</abbr></a>, and it rejects any later assignment. Forget one, and the error lands on the constructor's closing brace:
 
 ```java run
 import static java.lang.IO.println;

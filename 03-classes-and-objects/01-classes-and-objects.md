@@ -28,9 +28,9 @@ This builds directly on [methods](/synapse/programming-languages/java/control-fl
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -102,8 +102,8 @@ The fields carry no access modifier, so any class in the same package can reach 
 - `javac` still writes one bytecode file per class: `Main.class` and `Rectangle.class`.
 - Mark `Rectangle` `public` too, and javac says `class Rectangle is public, should be declared in a file named Rectangle.java`.
 
-**Intuition.**
-*Mechanism.* An instance method has an implicit **receiver**: the object before the dot. Its unqualified field names (`width`, `height`) refer to *that object's* fields. A `static` method (like `main`) has no receiver. It belongs to the class, not to any object.
+**Why it works.**
+*How it works.* An instance method has an implicit **receiver**: the object before the dot. Its unqualified field names (`width`, `height`) refer to *that object's* fields. A `static` method (like `main`) has no receiver. It belongs to the class, not to any object.
 
 *Concrete bite.* So you can't call an instance method without an object — there's no implicit receiver to supply the fields:
 
@@ -269,8 +269,8 @@ public class Main {
 
 A constructor has no return type, not even `void`. Its job is to initialize, and `new` is what returns the object. A constructor isn't a method, so you can't call it by name. `new` runs it, and so can another constructor, as you'll see below.
 
-**Intuition.**
-*Mechanism.* `new` works in a fixed order <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.5">[6]</abbr></a>:
+**Why it works.**
+*How it works.* `new` works in a fixed order <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.5">[6]</abbr></a>:
 
 1. It allocates the object and sets every field to its default ([§1](#1-a-class-bundles-fields-and-methods)).
 2. It runs the field initializers, such as `int width = 1;`, and then the constructor body.
@@ -483,8 +483,8 @@ public class Main {
 
 `this` is the current object <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.8.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.8.3">[12]</abbr></a>. In a constructor, it's the object being built. In an instance method, it's the object the method was called on.
 
-**Intuition.**
-*Mechanism.* `this` is an implicit reference to the receiver object. When a local variable or parameter shares a field's name, the nearer (local) name wins whenever you write the name on its own. `this.name` selects the field.
+**Why it works.**
+*How it works.* `this` is an implicit reference to the receiver object. When a local variable or parameter shares a field's name, the nearer (local) name wins whenever you write the name on its own. `this.name` selects the field.
 
 *Concrete bite.* Forget the `this.`, and the assignment does nothing useful. It assigns the parameter to itself and leaves the field at its default:
 
@@ -573,8 +573,8 @@ b -> cls: "instance of"
 
 **Analysis.** `a` and `b` are two distinct `Counter` objects. Incrementing `a` twice and `b` once left `a.count` at `2` and `b.count` at `1`. They never got in each other's way, because each one holds its own `count`. The diagram shows two separate objects, both described by the one `Counter` class.
 
-**Intuition.**
-*Mechanism.* `new` allocates a fresh object with its own fields. An object variable holds a **reference** to one such object. Assigning one object variable to another (`c = a`) copies the *reference*, not the object, so both names point at the **same** object.
+**Why it works.**
+*How it works.* `new` allocates a fresh object with its own fields. An object variable holds a **reference** to one such object. Assigning one object variable to another (`c = a`) copies the *reference*, not the object, so both names point at the **same** object.
 
 *Concrete bite.* That's **aliasing**: two variables, one object. A change through either one shows up through both:
 

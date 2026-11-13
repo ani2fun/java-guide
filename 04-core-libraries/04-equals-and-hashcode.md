@@ -31,9 +31,9 @@ Every output below was produced by compiling and running the code on Java 25.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -84,8 +84,8 @@ false
 
 **Analysis.** `a == b` is `false` — no surprise, since these are two distinct objects. But `a.equals(b)` is `false` *too*. The inherited `equals` is an identity check, so by default `.equals` and `==` give the same answer. The class never said what it means for two points to be "equal", so Java falls back on the safest default: a thing equals only itself.
 
-**Intuition.**
-*Mechanism.* For non-`null` `x` and `y`, `Object.equals` returns `true` "if and only if `x` and `y` refer to the same object" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Object.equals(Object)">[1]</abbr></a>. So unless a class overrides it, "equal" simply means "the same object".
+**Why it works.**
+*How it works.* For non-`null` `x` and `y`, `Object.equals` returns `true` "if and only if `x` and `y` refer to the same object" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Object.equals(Object)">[1]</abbr></a>. So unless a class overrides it, "equal" simply means "the same object".
 
 *Concrete bite.* That second `false` is the surprise, because most people expect `.equals` to compare contents. And it matters beyond your own calls, because the collections use `.equals` too. `List.contains` looks for an element `e` "such that `Objects.equals(o, e)`" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html#contains(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, List.contains(Object)">[2]</abbr></a>, and `Set` membership and `Map` key lookups work the same way. So every one of them treats your two equal points as different.
 
@@ -143,8 +143,8 @@ true
 
 The `@Override` **annotation** asks the compiler to confirm that this method really does override one from a supertype <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.6.4.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §9.6.4.4">[3]</abbr></a>. For `equals`, that means the parameter type must be `Object`.
 
-**Intuition.**
-*Mechanism.* Once you override `equals`, your comparison replaces the identity check everywhere `.equals(Object)` is called — including deep inside the collections. The `instanceof` guard returns `false` for `null` and for the wrong type. That satisfies the contract's rule that `x.equals(null)` returns `false` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Object.equals(Object)">[1]</abbr></a>. The contract also asks for a relation that is *reflexive*, *symmetric*, *transitive* and *consistent*. Comparing the same fields on both sides gives you all four.
+**Why it works.**
+*How it works.* Once you override `equals`, your comparison replaces the identity check everywhere `.equals(Object)` is called — including deep inside the collections. The `instanceof` guard returns `false` for `null` and for the wrong type. That satisfies the contract's rule that `x.equals(null)` returns `false` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Object.equals(Object)">[1]</abbr></a>. The contract also asks for a relation that is *reflexive*, *symmetric*, *transitive* and *consistent*. Comparing the same fields on both sides gives you all four.
 
 *Concrete bite.* Here's a subtle slip: `public boolean equals(Point p)`, with a `Point` parameter instead of `Object`. This does *not* override `Object.equals` — it **overloads** it. The JLS calls out this exact mistake as the classic reason `@Override` exists <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.6.4.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §9.6.4.4">[3]</abbr></a>. Add `@Override`, and javac rejects it:
 
@@ -309,8 +309,8 @@ p2 -> buckets.b2: "42 % 4 = 2"
 
 The diagram shows why, using example numbers. Identity hash codes ignore the fields entirely, so value-equal points scatter into different buckets. Your `equals` never even gets consulted, because the set never looks in the right bucket.
 
-**Intuition.**
-*Mechanism.* A hash collection finds an object in two steps: first it hashes to a bucket, then it calls `.equals` within that bucket. If equal objects have unequal hash codes, step one sends them to different buckets, and step two never runs. Your `equals` is correct — it's just unreachable.
+**Why it works.**
+*How it works.* A hash collection finds an object in two steps: first it hashes to a bucket, then it calls `.equals` within that bucket. If equal objects have unequal hash codes, step one sends them to different buckets, and step two never runs. Your `equals` is correct — it's just unreachable.
 
 *Concrete bite.* That `false` and that `2` are the breakage: an element that is present reports as absent, and a duplicate slips in. Worse, the class *looks* right, because `equals` works fine on its own. It fails only inside hash collections, which makes this one of the hardest Java bugs to spot.
 
@@ -376,8 +376,8 @@ true
 
 **Analysis.** Now that `hashCode` is computed from `x` and `y`, two equal points hash to the *same* bucket. So `contains` finds the stored point (`true`), and the duplicate is recognized and dropped (`size` stays `1`). Every link in the chain holds: equal points produce equal hashes, equal hashes lead to the same bucket, and `equals` confirms the match.
 
-**Intuition.**
-*Mechanism.* `Objects.hash(x, y)` turns the same field values into the same `int`, every time. `equals` then confirms the match within the bucket. The key is that both methods use the *same fields*. A field in `hashCode` but not in `equals` breaks the contract all over again: two objects can be equal, yet hash to different buckets. The reverse is safe but costly. A field in `equals` but not in `hashCode` keeps the contract, but it weakens the hash, so more unequal objects share a bucket.
+**Why it works.**
+*How it works.* `Objects.hash(x, y)` turns the same field values into the same `int`, every time. `equals` then confirms the match within the bucket. The key is that both methods use the *same fields*. A field in `hashCode` but not in `equals` breaks the contract all over again: two objects can be equal, yet hash to different buckets. The reverse is safe but costly. A field in `equals` but not in `hashCode` keeps the contract, but it weakens the hash, so more unequal objects share a bucket.
 
 *Concrete bite.* The contract also asks that a hash code stay put while the object is in use. Change a field that `hashCode` depends on after the object is already in a `HashSet`, and the set loses track of it <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Set">[6]</abbr></a>:
 

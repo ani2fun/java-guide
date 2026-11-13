@@ -31,9 +31,9 @@ Every output below was produced by compiling and running the code on Java 25.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -87,8 +87,8 @@ unknown
 
 **Analysis.** `o instanceof String s` did three things at once: it checked the type, cast the value, and bound `s`. That's why the branch could call `s.length()` without an explicit `(String) o`. Likewise, `i` was a ready-to-use `Integer`. Compare that with the old style from [`equals`](/synapse/programming-languages/java/core-libraries/equals-and-hashcode): `if (!(o instanceof Point)) return false; Point p = (Point) o;` The pattern collapses the redundant cast away.
 
-**Intuition.**
-*Mechanism.* The compiler introduces the binding variable only where the pattern is provably true <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.3.1">[5]</abbr></a>. The cast is implicit and guaranteed safe, so you can't get a `ClassCastException` from a mismatched manual cast.
+**Why it works.**
+*How it works.* The compiler introduces the binding variable only where the pattern is provably true <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.3.1">[5]</abbr></a>. The cast is implicit and guaranteed safe, so you can't get a `ClassCastException` from a mismatched manual cast.
 
 "Provably true" also covers the code *after* a negated test that returns. So the early-exit style works too:
 
@@ -189,8 +189,8 @@ other
 
 **Analysis.** The `switch` matched each value against the type patterns: a `String` took the first case (binding `s`), an `Integer` took the second, and the `Double` fell through to `default`. This is the [arrow `switch` expression](/synapse/programming-languages/java/control-flow/conditionals), generalized from constants to *types*. Each case both tests the type and binds a usable variable, and the whole thing produces a value.
 
-**Intuition.**
-*Mechanism.* The `switch` evaluates the selector once, then tries each `case` pattern from top to bottom, running the first one that matches and binding its variable. A pattern `switch` must be **exhaustive**: some case has to match every possible value <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[7]</abbr></a>. That's true for a `switch` *statement* with patterns too, not just for an expression. With `Object` as the selector type, there are unboundedly many possible types, so you need a `default`.
+**Why it works.**
+*How it works.* The `switch` evaluates the selector once, then tries each `case` pattern from top to bottom, running the first one that matches and binding its variable. A pattern `switch` must be **exhaustive**: some case has to match every possible value <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[7]</abbr></a>. That's true for a `switch` *statement* with patterns too, not just for an expression. With `Object` as the selector type, there are unboundedly many possible types, so you need a `default`.
 
 Two more tools let you refine the cases <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.1">[6]</abbr></a>:
 
@@ -347,8 +347,8 @@ classDiagram
 
 **Analysis.** `Shape` permits exactly `Circle` and `Square`, so a `switch` that handles both is *complete*. No `default` was needed, and the compiler accepted it. Each case bound the matched shape and computed its area. This is the payoff of the whole design: the type system guarantees that the `switch` covers every case.
 
-**Intuition.**
-*Mechanism.* Because `sealed` closes the subtype set <a href="https://openjdk.org/jeps/409" target="_blank" rel="noopener noreferrer"><abbr title="JEP 409: Sealed Classes (JDK 17)">[4]</abbr></a>, the compiler can verify that a `switch` handles every one of them <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[7]</abbr></a>. Exhaustiveness is checked at compile time, so completeness is *proven*, not assumed.
+**Why it works.**
+*How it works.* Because `sealed` closes the subtype set <a href="https://openjdk.org/jeps/409" target="_blank" rel="noopener noreferrer"><abbr title="JEP 409: Sealed Classes (JDK 17)">[4]</abbr></a>, the compiler can verify that a `switch` handles every one of them <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[7]</abbr></a>. Exhaustiveness is checked at compile time, so completeness is *proven*, not assumed.
 
 *Concrete bite.* Leave out a permitted case, and it won't compile:
 
@@ -417,8 +417,8 @@ public class Main {
 
 **Analysis.** `case Circle(double r)` matched a `Circle` and bound its `radius` component to `r` in one step, with no `c.radius()` call. `Rect(double w, double h)` bound both components at once. The pattern mirrors the record's *shape*: you read its data by destructuring it, which is the inverse of constructing it.
 
-**Intuition.**
-*Mechanism.* A record pattern matches the record type, then gets each component by invoking its accessor method <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.30.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.30.2">[9]</abbr></a>. Record patterns can nest, and `var` lets the compiler infer a component's type. So a single case can match and destructure nested data, and a guard can test the parts:
+**Why it works.**
+*How it works.* A record pattern matches the record type, then gets each component by invoking its accessor method <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.30.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.30.2">[9]</abbr></a>. Record patterns can nest, and `var` lets the compiler infer a component's type. So a single case can match and destructure nested data, and a guard can test the parts:
 
 ```java run
 import static java.lang.IO.println;

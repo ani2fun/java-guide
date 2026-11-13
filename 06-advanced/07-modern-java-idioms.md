@@ -37,9 +37,9 @@ This lesson draws on the chapters [Core Libraries](/synapse/programming-language
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -127,8 +127,8 @@ dop -> exhaustive: "guarantees"
 
 The data lives in the records, while the behavior lives in the `switch`, outside the data. And the type system guarantees that every case is handled. That's data-oriented programming: a closed algebra of data, with operations added from outside.
 
-**Intuition.**
-*Mechanism.* `sealed` gives the compiler the full list of subtypes. A `switch` whose cases cover every permitted subtype is **exhaustive** <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[3]</abbr></a>, and a `switch` *expression* that isn't exhaustive is a compile-time error <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.28.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.28.1">[4]</abbr></a>.
+**Why it works.**
+*How it works.* `sealed` gives the compiler the full list of subtypes. A `switch` whose cases cover every permitted subtype is **exhaustive** <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[3]</abbr></a>, and a `switch` *expression* that isn't exhaustive is a compile-time error <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.28.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.28.1">[4]</abbr></a>.
 
 *Concrete bite.* The payoff is that the compiler becomes your checklist. Add a fourth permitted shape, `Pentagon`, and leave `area` alone:
 
@@ -268,8 +268,8 @@ us-east
 
 There's no `if (x != null)`, and no `NullPointerException`: the chain handles absence for you.
 
-**Intuition.**
-*Mechanism.* `Optional` makes "might be absent" part of the *type*. An `Optional<String>` isn't a `String`, so the compiler makes you unwrap it before use. `map` transforms the value only if one is present, and `orElse`/`orElseGet` supply defaults. The unsafe unwrap — `get()` on an empty `Optional` — throws `NoSuchElementException` (as [Functional Java & the Streams API](/synapse/programming-languages/java/advanced/functional-java-and-streams) shows).
+**Why it works.**
+*How it works.* `Optional` makes "might be absent" part of the *type*. An `Optional<String>` isn't a `String`, so the compiler makes you unwrap it before use. `map` transforms the value only if one is present, and `orElse`/`orElseGet` supply defaults. The unsafe unwrap — `get()` on an empty `Optional` — throws `NoSuchElementException` (as [Functional Java & the Streams API](/synapse/programming-languages/java/advanced/functional-java-and-streams) shows).
 
 *Concrete bite.* `Optional` is meant as a return type. Its API says it's "primarily intended for use as a method return type where there is a clear need to represent 'no result'" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Optional">[7]</abbr></a>. The same note adds that a variable of type `Optional` "should never itself be `null`".
 
@@ -382,8 +382,8 @@ Point[x=3, y=4]
 
 `var` changes nothing about scope. A `var` local lives in its block like any other local ([Methods](/synapse/programming-languages/java/control-flow/methods), [§3](/synapse/programming-languages/java/control-flow/methods#3-scope-where-parameters-and-local-variables-live)), and it shadows a field by the same rules ([Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects)).
 
-**Intuition.**
-*Mechanism.* An immutable object's state is fixed at construction, and "changes" allocate a new object. Since nothing can change it behind your back, aliases are harmless. A record's fields are `private final` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.10.3">[1]</abbr></a>, and `final` fields are what make an object safe to hand between threads <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.5">[13]</abbr></a> ([The Java Memory Model & Performance](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance)). `var` is compile-time inference: the variable has a concrete type, which you simply didn't spell out <a href="https://openjdk.org/jeps/286" target="_blank" rel="noopener noreferrer"><abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[11]</abbr></a>.
+**Why it works.**
+*How it works.* An immutable object's state is fixed at construction, and "changes" allocate a new object. Since nothing can change it behind your back, aliases are harmless. A record's fields are `private final` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.10.3">[1]</abbr></a>, and `final` fields are what make an object safe to hand between threads <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.5">[13]</abbr></a> ([The Java Memory Model & Performance](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance)). `var` is compile-time inference: the variable has a concrete type, which you simply didn't spell out <a href="https://openjdk.org/jeps/286" target="_blank" rel="noopener noreferrer"><abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[11]</abbr></a>.
 
 *Concrete bite: `final` is shallow.* A record's `final` field fixes the *reference*, not the object it points to. So a record holding a caller's `ArrayList` changes whenever the caller changes the list. [Enums & Records](/synapse/programming-languages/java/core-libraries/enums-and-records) shows this, along with the fix: `List.copyOf` in a compact constructor.
 
@@ -520,8 +520,8 @@ biggest: Card
 
 The compiler checks that both switches are exhaustive, and `null` is nowhere in sight. `amountOf` exists only because `Payment` declares no methods; the ✅ section shows how a record's accessor can replace it.
 
-**Intuition.**
-*Mechanism.* The composition works because the features share a common philosophy:
+**Why it works.**
+*How it works.* The composition works because the features share a common philosophy:
 
 - make data explicit and immutable (records);
 - make the set of cases closed and checkable (sealed);

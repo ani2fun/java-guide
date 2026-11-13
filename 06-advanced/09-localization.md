@@ -31,9 +31,9 @@ This lesson uses [nested classes](/synapse/programming-languages/java/robust-oop
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the library and the JVM *do*.
+1. **How it works** — what the library and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure, shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -126,8 +126,8 @@ public class Main {
 default locale: en_US
 ```
 
-**Intuition.**
-*Mechanism.* `forLanguageTag` reads a **BCP 47** language tag — the web standard — which separates its parts with hyphens. It skips the first part it can't read, along with every part after it <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Locale.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Locale.forLanguageTag">[1]</abbr></a>. A bad tag never makes it throw.
+**Why it works.**
+*How it works.* `forLanguageTag` reads a **BCP 47** language tag — the web standard — which separates its parts with hyphens. It skips the first part it can't read, along with every part after it <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Locale.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Locale.forLanguageTag">[1]</abbr></a>. A bad tag never makes it throw.
 
 *Watch out: an underscore in a tag.* `fr_FR` is how a locale *prints*, not how a tag is written. As a tag, that whole string is one unreadable part:
 
@@ -209,8 +209,8 @@ fr_FR: 1 234 567,891 | 1 234,50 € | 75 %
 
 These rules come from the **CLDR**, the Unicode Consortium's shared locale data, which the JDK has used by default since Java 9 <a href="https://openjdk.org/jeps/252" target="_blank" rel="noopener noreferrer"><abbr title="JEP 252: Use CLDR Locale Data by Default">[9]</abbr></a>.
 
-**Intuition.**
-*Mechanism.* The "spaces" in the French line aren't the ordinary space character. CLDR uses a **no-break space** there, so that a line break can't split `1 234` in two. France groups digits with U+202F, the *narrow* no-break space.
+**Why it works.**
+*How it works.* The "spaces" in the French line aren't the ordinary space character. CLDR uses a **no-break space** there, so that a line break can't split `1 234` in two. France groups digits with U+202F, the *narrow* no-break space.
 
 *Concrete bite: a string that looks equal, but isn't.* Compare the French output with the same text typed on a keyboard:
 
@@ -396,8 +396,8 @@ SHORT: 3/5/24 | 05.03.24 | 05/03/2024
 
 **Analysis.** The same date in `SHORT` style is `3/5/24` in the United States, and `05/03/2024` in France. Read with the wrong convention, that's 3 May. The day and month names get translated too: `Dienstag, 5. März` in German, `mardi 5 mars` in French.
 
-**Intuition.**
-*Mechanism.* A localized style is a pattern that the locale's data chooses for you. The `FULL` and `LONG` date-time styles "typically require a time-zone" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/format/DateTimeFormatter.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.format.DateTimeFormatter.ofLocalizedDateTime">[4]</abbr></a>, and a `LocalDateTime` has no zone to print.
+**Why it works.**
+*How it works.* A localized style is a pattern that the locale's data chooses for you. The `FULL` and `LONG` date-time styles "typically require a time-zone" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/format/DateTimeFormatter.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.format.DateTimeFormatter.ofLocalizedDateTime">[4]</abbr></a>, and a `LocalDateTime` has no zone to print.
 
 *Concrete bite.* `MEDIUM` works fine with a `LocalDateTime`, but `FULL` stops the program (and `LONG` fails the same way):
 
@@ -536,8 +536,8 @@ de-DE: Hello, Goodbye   (bundle )
 - `fr-FR` found no `Messages_fr_FR`, so it started at `Messages_fr`.
 - `de-DE` found no German bundle at all, and fell back to the base bundle.
 
-**Intuition.**
-*Mechanism.* `getBundle` builds a list of candidate names from the requested locale: `Messages_de_DE`, then `Messages_de`. If none of them exists, it doesn't go to the base bundle just yet. Instead, it builds a second list from the **default locale**, and searches again. Only after that does it take the base bundle <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ResourceBundle.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, ResourceBundle.getBundle, the lookup algorithm">[5]</abbr></a>.
+**Why it works.**
+*How it works.* `getBundle` builds a list of candidate names from the requested locale: `Messages_de_DE`, then `Messages_de`. If none of them exists, it doesn't go to the base bundle just yet. Instead, it builds a second list from the **default locale**, and searches again. Only after that does it take the base bundle <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ResourceBundle.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, ResourceBundle.getBundle, the lookup algorithm">[5]</abbr></a>.
 
 *Concrete bite: the server's locale leaks into the reply.* Here, a German user asks a server whose default locale is French:
 
@@ -693,8 +693,8 @@ Ada hat 1.234 neue Nachrichten
 
 **Analysis.** The arguments are the same in every language, and each pattern places them wherever its grammar wants them. A number with no type is formatted by the pattern's locale, so `1234` became `1,234` in English and `1.234` in German. The style `#` means "digits only", with no grouping.
 
-**Intuition.**
-*Mechanism.* In a pattern, the single quote `'` starts and ends a **quoted** section, whose text is copied as-is. To print a single apostrophe, you write two: `''` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/MessageFormat.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.text.MessageFormat, Patterns and Their Interpretation">[8]</abbr></a>.
+**Why it works.**
+*How it works.* In a pattern, the single quote `'` starts and ends a **quoted** section, whose text is copied as-is. To print a single apostrophe, you write two: `''` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/MessageFormat.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.text.MessageFormat, Patterns and Their Interpretation">[8]</abbr></a>.
 
 *Concrete bite: the apostrophe trap.* English is full of apostrophes, and each one opens a quote:
 

@@ -32,9 +32,9 @@ This lesson takes a deeper pass at [concurrency basics](/synapse/programming-lan
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -170,8 +170,8 @@ Main.java:6: error: unreported exception InterruptedException; must be caught or
 1 error
 ```
 
-**Intuition.**
-*Mechanism.* An `ExecutorService` holds a queue, plus a set of worker threads that loop, pulling tasks off it. `submit` enqueues a task and returns a `Future`. A worker runs the task and stores the result in the `Future`, and `get()` blocks to retrieve it. This separates thread *creation* (expensive) from task *submission* (cheap).
+**Why it works.**
+*How it works.* An `ExecutorService` holds a queue, plus a set of worker threads that loop, pulling tasks off it. `submit` enqueues a task and returns a `Future`. A worker runs the task and stores the result in the `Future`, and `get()` blocks to retrieve it. This separates thread *creation* (expensive) from task *submission* (cheap).
 
 *Concrete bite.* A task's exception doesn't get lost. The `Future` captures it, and `get()` re-throws it, wrapped in an `ExecutionException`:
 
@@ -289,8 +289,8 @@ public class Main {
 
 **Analysis.** It's always exactly 400,000 — the same workload that gave random, too-small totals with a plain `int++` in [the basics lesson](/synapse/programming-languages/java/advanced/concurrency-the-basics). `incrementAndGet()` is atomic, so no two threads interleave inside it, and no update is lost. No thread blocks, either: the package describes itself as "a small toolkit of classes that support lock-free thread-safe programming on single variables" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/package-summary.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.concurrent.atomic package summary">[3]</abbr></a>.
 
-**Intuition.**
-*Mechanism.* An `AtomicInteger` holds a value that it updates using the processor's atomic instructions, so each operation is all-or-nothing. Each one also has the memory effects of a `volatile` read or write <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/AtomicInteger.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.concurrent.atomic.AtomicInteger">[4]</abbr></a>, so it's both atomic *and* visible, without a lock.
+**Why it works.**
+*How it works.* An `AtomicInteger` holds a value that it updates using the processor's atomic instructions, so each operation is all-or-nothing. Each one also has the memory effects of a `volatile` read or write <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/AtomicInteger.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.concurrent.atomic.AtomicInteger">[4]</abbr></a>, so it's both atomic *and* visible, without a lock.
 
 *Concrete bite.* Atomicity applies per *operation*. `get()` is atomic, and `set()` is atomic, but the pair `counter.set(counter.get() + 1)` isn't. Another thread can change the value between the `get` and the `set`:
 
@@ -518,8 +518,8 @@ fallback: service down
 
 The `thenApply` stage never ran. A failed stage completes the future *exceptionally*, later value stages get skipped, and the exception travels down the chain until `exceptionally` turns it back into a value. The handler receives it wrapped in a `CompletionException`, which is why the code calls `getCause()`. Without the handler, the exception would surface at `get()`, wrapped in `ExecutionException`, just as in [§1](#1-executorservice-and-future).
 
-**Intuition.**
-*Mechanism.* A `CompletableFuture` represents a value that will be ready later, plus a graph of continuations. `thenApply`, `thenCompose` and `thenCombine` register callbacks that fire on completion. So instead of blocking thread by thread, you build a dependency graph that the executor drives. Failures travel through the same graph as values do: every stage completes either *normally* or *exceptionally*.
+**Why it works.**
+*How it works.* A `CompletableFuture` represents a value that will be ready later, plus a graph of continuations. `thenApply`, `thenCompose` and `thenCombine` register callbacks that fire on completion. So instead of blocking thread by thread, you build a dependency graph that the executor drives. Failures travel through the same graph as values do: every stage completes either *normally* or *exceptionally*.
 
 *Concrete bite.* Here's the classic type error: `thenApply` where you meant `thenCompose`. When the function you apply itself returns a `CompletableFuture`, `thenApply` wraps it again, giving you a future *of a future*:
 
@@ -733,8 +733,8 @@ On JDK 25, each virtual thread unmounted while it slept, even inside `synchroniz
 
 Pinning hasn't gone away entirely. A virtual thread is still pinned when it blocks inside native code that calls back into Java, and in a few cases during class loading and initialization <a href="https://openjdk.org/jeps/491" target="_blank" rel="noopener noreferrer"><abbr title="JEP 491: Synchronize Virtual Threads without Pinning (JDK 24)">[10]</abbr></a>. These are rare in application code. To find them, record a JDK Flight Recorder (JFR) session and look for `jdk.VirtualThreadPinned` events. The JDK 21 flag `-Djdk.tracePinnedThreads` no longer does anything.
 
-**Intuition.**
-*Mechanism.* A virtual thread occupies a carrier OS thread only while it's executing. The moment it blocks (on I/O, `sleep`, or a lock), the JVM *unmounts* it and frees the carrier for another virtual thread. Blocking parks a cheap object rather than an expensive OS thread, so the thread count is limited by memory, not by the OS. A native frame on the stack prevents the unmount; on JDK 21, so did a held monitor.
+**Why it works.**
+*How it works.* A virtual thread occupies a carrier OS thread only while it's executing. The moment it blocks (on I/O, `sleep`, or a lock), the JVM *unmounts* it and frees the carrier for another virtual thread. Blocking parks a cheap object rather than an expensive OS thread, so the thread count is limited by memory, not by the OS. A native frame on the stack prevents the unmount; on JDK 21, so did a held monitor.
 
 *Concrete bite.* Virtual threads speed up **I/O-bound** and blocking workloads, where each thread spends most of its time waiting. They don't speed up **CPU-bound** ones: a million threads doing pure computation still share the same few cores. Pinning is the second bite. If your code runs on JDK 21, a library that blocks inside `synchronized` can silently turn your million-thread design back into a handful of pinned carriers.
 

@@ -27,9 +27,9 @@ This is a first pass. The model underneath "object" gets its full treatment in [
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -83,8 +83,8 @@ A
 
 Remember the two kinds of quote from [Variables and primitive types](/synapse/programming-languages/java/first-steps/variables-and-primitive-types). `charAt` returns a `char` (`'A'`, single quotes, one character), not a one-character String (`"A"`, double quotes).
 
-**Intuition.**
-*Mechanism.* A String variable is a **reference type**. `name` holds a reference to a String object stored elsewhere; it doesn't hold the characters directly, the way an `int` holds its number. For now, it's enough to know that a String is an object you send method calls to.
+**Why it works.**
+*How it works.* A String variable is a **reference type**. `name` holds a reference to a String object stored elsewhere; it doesn't hold the characters directly, the way an `int` holds its number. For now, it's enough to know that a String is an object you send method calls to.
 
 *Concrete bite.* Positions run from `0` to `length − 1`, so reaching past the end is a run-time error <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.lang.String">[1]</abbr></a>:
 
@@ -198,8 +198,8 @@ hello
 
 **Analysis.** `toUpperCase()` produced a *new* String, `"HELLO"`, and we stored it in `shout`. The original `greeting` is still `"hello"`. The method didn't edit the string in place. It built a new one and handed it back.
 
-**Intuition.**
-*Mechanism.* Every String operation that "transforms" text returns a brand-new String object. The original keeps the same characters for its whole life. No String method changes a String in place.
+**Why it works.**
+*How it works.* Every String operation that "transforms" text returns a brand-new String object. The original keeps the same characters for its whole life. No String method changes a String in place.
 
 *Concrete bite.* That means calling one of these methods and ignoring the result does nothing at all:
 
@@ -300,8 +300,8 @@ World
 
 `substring(0, 5)` covers positions 0 to 4, giving `"Hello"` without the comma at position 5. Because the end is excluded, `substring(7, 12)` is exactly `12 - 7 = 5` characters long.
 
-**Intuition.**
-*Mechanism.* Each method reads the String and returns a result: a new String, an `int` position, or a `boolean`. The original never changes (immutability again). `indexOf` returns the position, or `-1` when it can't find the text.
+**Why it works.**
+*How it works.* Each method reads the String and returns a result: a new String, an `int` position, or a `boolean`. The original never changes (immutability again). `indexOf` returns the position, or `-1` when it can't find the text.
 
 *Concrete bite.* That `-1` is a value, not an error, and it bites if you assume the search succeeded:
 
@@ -360,8 +360,8 @@ sum: 12
 - In `"sum: " + 1 + 2`, the first `+` joins `"sum: "` and `1` into `"sum: 1"`. Then `+ 2` joins again, into `"sum: 12"`. The numbers were never added.
 - In `1 + 2 + " = sum"`, the first `+` is `int + int = 3`, with no String yet. Only then does `3 + " = sum"` join into `"3 = sum"`.
 
-**Intuition.**
-*Mechanism.* Each `+` looks only at its immediate left and right. If either side is a String, it concatenates, converting the other side to text. Only when both sides are numbers does it add.
+**Why it works.**
+*How it works.* Each `+` looks only at its immediate left and right. If either side is a String, it concatenates, converting the other side to text. Only when both sides are numbers does it add.
 
 *Concrete bite.* The `"sum: 12"` above is the bite: a "sum" that never added. Parenthesise the arithmetic to fix it:
 
@@ -452,8 +452,8 @@ false
 
 The culprit is the **String pool**. Java stores identical string *literals*, like the `"hello"` written for `a` and `b`, once and shares them <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.5">[4]</abbr></a>. So `a` and `b` are the *same* object, and `==` happens to be true. `new String("hello")` builds a *separate* object on purpose, so `a == c` is false even though the characters match.
 
-**Intuition.**
-*Mechanism.* A String variable holds a reference. `==` compares the two references (same object?), while `.equals` compares the characters. The pool reuses literal strings, so `==` is *coincidentally* true for literals. That's the most dangerous kind of "it works."
+**Why it works.**
+*How it works.* A String variable holds a reference. `==` compares the two references (same object?), while `.equals` compares the characters. The pool reuses literal strings, so `==` is *coincidentally* true for literals. That's the most dangerous kind of "it works."
 
 *Concrete bite.* The coincidence collapses the moment a string comes from anywhere but a literal: a `new String`, typed input, a computation.
 

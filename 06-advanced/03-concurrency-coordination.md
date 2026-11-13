@@ -33,9 +33,9 @@ Thread scheduling is nondeterministic, so several outputs below vary from run to
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -141,8 +141,8 @@ put 5   buffer=[4, 5]
 - The buffer never exceeds its capacity, and no thread spins burning CPU: waiting threads stay parked until they're notified.
 - Both methods synchronize on the *same* object, the buffer. Its lock is both the mutual-exclusion guard *and* the place where waiters sleep.
 
-**Intuition.**
-*Mechanism.* Think of every monitor as having two rooms. The **entry queue** holds threads that are `BLOCKED`, trying to acquire the lock. The **wait set** holds threads that held the lock and then called `wait()`.
+**Why it works.**
+*How it works.* Think of every monitor as having two rooms. The **entry queue** holds threads that are `BLOCKED`, trying to acquire the lock. The **wait set** holds threads that held the lock and then called `wait()`.
 
 - `wait()` releases the lock and moves the thread into the wait set, in a single step.
 - `notifyAll()` moves everyone in the wait set back toward the lock. They re-acquire it one at a time, and — thanks to the `while` loop — re-check the condition before going on.
@@ -368,8 +368,8 @@ flowchart LR
 
 Break *any one* of them, and you prevent deadlock. The two practical breaks are **order** (both threads take A before B, so no cycle can form) and **timeout** (give up waiting and release what you hold, as [§3](#3-reentrantlock-a-lock-as-an-object) shows). And notice what the output *doesn't* show: no exception, no stack trace. A deadlocked server simply stops answering.
 
-**Intuition.**
-*Mechanism.* Each `synchronized (x)` blocks until `x`'s monitor is free, while *keeping* every monitor it already holds. The scheduler has no insight into your intent: it just parks t1 on B's entry queue, and t2 on A's.
+**Why it works.**
+*How it works.* Each `synchronized (x)` blocks until `x`'s monitor is free, while *keeping* every monitor it already holds. The scheduler has no insight into your intent: it just parks t1 on B's entry queue, and t2 on A's.
 
 A parked thread releases nothing, so the cycle is permanent. The JVM can *detect* the cycle after the fact (that's what `jstack` does), but it won't break it.
 
@@ -451,8 +451,8 @@ both finished — no deadlock
 
 The `try`/`finally` shape isn't optional style. `synchronized` releases its monitor on *any* exit, whether normal or through an exception <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.19" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.19">[6]</abbr></a>. `ReentrantLock` doesn't.
 
-**Intuition.**
-*Mechanism.* **Reentrant** means the thread holding the lock may acquire it again, just as with nested `synchronized` blocks on one object. `tryLock(timeout)` parks the thread with a deadline, and returns `false` when the deadline expires. `newCondition()` gives you `await`/`signal`/`signalAll` — [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks)'s wait set as a named object. A lock can have several conditions, such as one for "not full" and one for "not empty", so you wake only the threads whose condition changed.
+**Why it works.**
+*How it works.* **Reentrant** means the thread holding the lock may acquire it again, just as with nested `synchronized` blocks on one object. `tryLock(timeout)` parks the thread with a deadline, and returns `false` when the deadline expires. `newCondition()` gives you `await`/`signal`/`signalAll` — [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks)'s wait set as a named object. A lock can have several conditions, such as one for "not full" and one for "not empty", so you wake only the threads whose condition changed.
 
 *Concrete bite: `unlock()` outside `finally`.* An exception between `lock()` and `unlock()` skips the unlock, and the lock then outlives the thread that took it:
 
@@ -716,8 +716,8 @@ all 3 arrived: round 2 done
 the same barrier served 2 rounds
 ```
 
-**Intuition.**
-*Mechanism.* All three are [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks)'s pattern (state + lock + wait-until-condition), packaged with the loops and notifications already written for you:
+**Why it works.**
+*How it works.* All three are [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks)'s pattern (state + lock + wait-until-condition), packaged with the loops and notifications already written for you:
 
 - A latch's condition is `count == 0`, and it never resets.
 - A semaphore's condition is `permits > 0`, which `release()` restores.
@@ -868,8 +868,8 @@ queue -> c2
 
 The diagram is the shape to remember: the queue is the *only* shared state, and the library owns it.
 
-**Intuition.**
-*Mechanism.* In OpenJDK 25, `ArrayBlockingQueue` is a fixed ring buffer guarded by one `ReentrantLock` with two `Condition`s, `notEmpty` and `notFull` <a href="https://github.com/openjdk/jdk25u/blob/master/src/java.base/share/classes/java/util/concurrent/ArrayBlockingQueue.java" target="_blank" rel="noopener noreferrer"><abbr title="OpenJDK 25 source, java/util/concurrent/ArrayBlockingQueue.java">[13]</abbr></a>. That's [§3](#3-reentrantlock-a-lock-as-an-object)'s tools arranged into [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks)'s design, waking only the side whose condition changed. Two relatives keep the same contract, with different trade-offs <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/BlockingQueue.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.concurrent.LinkedBlockingQueue and SynchronousQueue">[12]</abbr></a>:
+**Why it works.**
+*How it works.* In OpenJDK 25, `ArrayBlockingQueue` is a fixed ring buffer guarded by one `ReentrantLock` with two `Condition`s, `notEmpty` and `notFull` <a href="https://github.com/openjdk/jdk25u/blob/master/src/java.base/share/classes/java/util/concurrent/ArrayBlockingQueue.java" target="_blank" rel="noopener noreferrer"><abbr title="OpenJDK 25 source, java/util/concurrent/ArrayBlockingQueue.java">[13]</abbr></a>. That's [§3](#3-reentrantlock-a-lock-as-an-object)'s tools arranged into [§1](#1-waiting-for-a-condition-wait-notify-and-guarded-blocks)'s design, waking only the side whose condition changed. Two relatives keep the same contract, with different trade-offs <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/BlockingQueue.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.concurrent.LinkedBlockingQueue and SynchronousQueue">[12]</abbr></a>:
 
 - `LinkedBlockingQueue` is optionally bounded. Its source uses separate locks for the head and the tail, so a producer and a consumer don't contend with each other.
 - `SynchronousQueue` has no capacity at all: "each insert operation must wait for a corresponding remove operation by another thread". It's a direct hand-off.

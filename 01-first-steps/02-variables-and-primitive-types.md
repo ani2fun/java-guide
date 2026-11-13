@@ -32,9 +32,9 @@ That word "directly" will matter later. Java has a second family of variable, th
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -92,8 +92,8 @@ value: "int 25  (the value, held directly in the box)" {
 name -> value: "labels a box holding"
 ```
 
-**Intuition.**
-*Mechanism.* A declaration does two things at once. It tells the compiler the variable's **type**, so the compiler can check every later use. And it reserves a **box** that holds the value directly. The type is decided right here, in the source, before the program runs.
+**Why it works.**
+*How it works.* A declaration does two things at once. It tells the compiler the variable's **type**, so the compiler can check every later use. And it reserves a **box** that holds the value directly. The type is decided right here, in the source, before the program runs.
 
 *Concrete bite.* Leave out the type, and the compiler has no idea what `age` is. There's no box, and no permission to make one:
 
@@ -224,8 +224,8 @@ public class Main {
 
 **Analysis.** `score` started at `10`, and then we reassigned it to `25`. Both are `int`s, so the compiler allowed it, and the box's content changed from `10` to `25`. Reassignment changes the value, but never the type. Notice that the second line has no `int`: writing `int score = 25;` again would declare a second `score`, and javac rejects that with `variable score is already defined`.
 
-**Intuition.**
-*Mechanism.* The type lives with the variable, not with whatever value you assign to it. On every assignment, the compiler checks the new value's type against the variable's declared type, and rejects any mismatch before the program runs.
+**Why it works.**
+*How it works.* The type lives with the variable, not with whatever value you assign to it. On every assignment, the compiler checks the new value's type against the variable's declared type, and rejects any mismatch before the program runs.
 
 *Concrete bite.* Try to put text into an `int`, and the compiler refuses. This is the classic Java type error:
 
@@ -388,8 +388,8 @@ public class Main {
 9223372036854775807
 ```
 
-**Intuition.**
-*Mechanism.* Each primitive reserves a fixed number of bits, so it can represent only a fixed range of values. A `byte` has 8 bits, an `int` has 32, and a `long` has 64. The type isn't just a label; it decides how many bits the box has.
+**Why it works.**
+*How it works.* Each primitive reserves a fixed number of bits, so it can represent only a fixed range of values. A `byte` has 8 bits, an `int` has 32, and a `long` has 64. The type isn't just a label; it decides how many bits the box has.
 
 *Concrete bite.* Because the size is fixed, a value outside a type's range won't fit — and the compiler tells you so:
 
@@ -542,8 +542,8 @@ A
 
 The type is invisible in the output, but very real to the compiler. A lower-case `l` also makes a `long`, but it looks like the digit `1`, which is why the language specification itself prefers `L` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.1">[8]</abbr></a>.
 
-**Intuition.**
-*Mechanism.* The compiler gives every literal a type based on how it's written, before considering where it goes. A bare integer literal is always an `int`, even when the variable next to it is a `long`.
+**Why it works.**
+*How it works.* The compiler gives every literal a type based on how it's written, before considering where it goes. A bare integer literal is always an `int`, even when the variable next to it is a `long`.
 
 *Concrete bite.* That's why a number too big for an `int` is an error, even when you "meant" a `long`:
 
@@ -643,8 +643,8 @@ Ada
 
 **Analysis.** `var count = 42` is exactly the same as `int count = 42`. The compiler reads the initializer `42`, an `int` literal, and fixes `count`'s type to `int`. Likewise, `price` becomes a `double` (from `19.99`), and `name` becomes a `String` (from `"Ada"`). `var` copied the type from the value on the right; it didn't make the variable typeless.
 
-**Intuition.**
-*Mechanism.* `var` is resolved at **compile time**. The compiler looks at the initializer, works out its type, and writes that type into the variable as if you'd typed it yourself. The compiled bytecode is identical to the spelled-out version: no `var` is left at run time.
+**Why it works.**
+*How it works.* `var` is resolved at **compile time**. The compiler looks at the initializer, works out its type, and writes that type into the variable as if you'd typed it yourself. The compiled bytecode is identical to the spelled-out version: no `var` is left at run time.
 
 *Concrete bite.* So `var` isn't dynamic typing. The inferred type is just as fixed as a written one. Try to reassign across types, and it fails exactly as a spelled-out `int` would:
 

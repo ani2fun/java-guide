@@ -31,9 +31,9 @@ This is the deep pass of [arrays](/synapse/programming-languages/java/control-fl
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the Intuition boxes.** Each one is built in three moves:
+📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
 
-1. **The mechanism** — what the compiler and the JVM *do*.
+1. **How it works** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -103,8 +103,8 @@ public class Main {
 
 The empty `<>` after `ArrayList` is the **diamond** form <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.9" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.9">[19]</abbr></a>, and the compiler fills in `Integer` from the variable's type.
 
-**Intuition.**
-*Mechanism.* `ArrayList` keeps its elements in an array. When the array fills, it allocates a bigger one and copies the elements over. The API leaves the growth policy unspecified "beyond the fact that adding an element has constant amortized time cost" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ArrayList.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.ArrayList">[2]</abbr></a>. Underneath, `get` and `set` are direct array indexing.
+**Why it works.**
+*How it works.* `ArrayList` keeps its elements in an array. When the array fills, it allocates a bigger one and copies the elements over. The API leaves the growth policy unspecified "beyond the fact that adding an element has constant amortized time cost" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ArrayList.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.ArrayList">[2]</abbr></a>. Underneath, `get` and `set` are direct array indexing.
 
 *Concrete bite.* Not every `List` grows. `List.of(...)` builds an **unmodifiable** list, and any `add`, `remove` or `set` throws <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.List, Unmodifiable Lists">[1]</abbr></a>:
 
@@ -203,8 +203,8 @@ Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.l
 
 **Analysis.** `add(7)` boxed and `get(0)` unboxed, so `first + 1` is `8`. The list printed `null` without complaint. The crash came in the loop, because `for (int n : nums)` unboxes each element into `int n`, and the second element was `null`. The message names `Iterator.next()`, your first glimpse of the machinery in [§4](#4-iteration-the-iterator-and-the-modification-trap).
 
-**Intuition.**
-*Mechanism.* Boxing is automatic, and so is its failure. A `List` method may take either an index (`int`) or an element (`Object`), and `List` declares both versions: `remove(int index)` and `remove(Object o)` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.List">[1]</abbr></a>. The compiler first looks for a method that fits *without* boxing <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.12.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.12.2">[6]</abbr></a>. With an `int` argument, `remove(int)` fits, so it wins.
+**Why it works.**
+*How it works.* Boxing is automatic, and so is its failure. A `List` method may take either an index (`int`) or an element (`Object`), and `List` declares both versions: `remove(int index)` and `remove(Object o)` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.List">[1]</abbr></a>. The compiler first looks for a method that fits *without* boxing <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.12.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.12.2">[6]</abbr></a>. With an `int` argument, `remove(int)` fits, so it wins.
 
 *Concrete bite.* `remove(1)` on a `List<Integer>` removes the element at **index** 1, not the value `1`:
 
@@ -297,8 +297,8 @@ classDiagram
 
 The variable type (`List`) is the contract, and the `new` type is the implementation.
 
-**Intuition.**
-*Mechanism.* The compiler checks a call on a `List` variable against `List`'s declared methods only. So any object whose class implements `List` will do. At run time, the actual implementation's methods run. [Inheritance & Polymorphism](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism) calls this dynamic dispatch. Your code depends on the interface, not the class.
+**Why it works.**
+*How it works.* The compiler checks a call on a `List` variable against `List`'s declared methods only. So any object whose class implements `List` will do. At run time, the actual implementation's methods run. [Inheritance & Polymorphism](/synapse/programming-languages/java/robust-oop/inheritance-and-polymorphism) calls this dynamic dispatch. Your code depends on the interface, not the class.
 
 *Concrete bite.* The payoff is swap-ability. Change `new ArrayList<>()` to `new LinkedList<>()`, and nothing else breaks, because every caller spoke to `List`. Declare the variable as `ArrayList` instead, and the choice is welded in. Callers can now use `ArrayList`-only methods, and swapping becomes a refactor.
 
@@ -340,8 +340,8 @@ public class Main {
 
 **Analysis.** The for-each obtained an `Iterator` from `nums` and called `hasNext()` and `next()` under the hood to visit each element. There's no index. The iterator tracks the position.
 
-**Intuition.**
-*Mechanism.* The list counts its structural changes. The iterator remembers the count it started with and checks it on each `next()`.
+**Why it works.**
+*How it works.* The list counts its structural changes. The iterator remembers the count it started with and checks it on each `next()`.
 
 Suppose something *other* than the iterator adds or removes an element. The counts then differ, and `next()` throws `ConcurrentModificationException`. This is called **fail-fast**, because it catches the bug instead of silently skipping or repeating elements <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ArrayList.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.ArrayList">[2]</abbr></a>.
 
@@ -488,8 +488,8 @@ public class Main {
 - `CASE_INSENSITIVE_ORDER` ignored case and gave dictionary order.
 - `Arrays.sort` sorted the `int[]` in place.
 
-**Intuition.**
-*Mechanism.* Natural ordering comes from the **`Comparable`** interface. A class that implements it has a `compareTo` method. It returns a negative number, zero, or a positive number, meaning `this` is less than, equal to, or greater than the other object <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Comparable.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.lang.Comparable">[10]</abbr></a>.
+**Why it works.**
+*How it works.* Natural ordering comes from the **`Comparable`** interface. A class that implements it has a `compareTo` method. It returns a negative number, zero, or a positive number, meaning `this` is less than, equal to, or greater than the other object <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Comparable.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.lang.Comparable">[10]</abbr></a>.
 
 `Integer` and `String` implement it. A class you write doesn't, until you say so.
 
@@ -635,8 +635,8 @@ a
 
 **Analysis.** The stack gave back `c`, the last element pushed. The queue gave back `a`, the first element offered. Printing a deque lists it from the front.
 
-**Intuition.**
-*Mechanism.* Each end has two families of methods <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Deque.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Deque">[15]</abbr></a>. One family throws an exception when the deque is empty: `pop`, `removeFirst`, `getFirst`. The other returns `null`: `poll`, `peek`. `ArrayDeque` also rejects `null` elements, so a `null` from `poll` always means "empty" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ArrayDeque.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.ArrayDeque">[16]</abbr></a>.
+**Why it works.**
+*How it works.* Each end has two families of methods <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Deque.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Deque">[15]</abbr></a>. One family throws an exception when the deque is empty: `pop`, `removeFirst`, `getFirst`. The other returns `null`: `poll`, `peek`. `ArrayDeque` also rejects `null` elements, so a `null` from `poll` always means "empty" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ArrayDeque.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.ArrayDeque">[16]</abbr></a>.
 
 *Concrete bite.* On an empty deque, `poll` and `peek` do no harm, but `pop` throws:
 
