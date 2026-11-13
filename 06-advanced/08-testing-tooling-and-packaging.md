@@ -56,7 +56,7 @@ Most examples here use multi-file projects and the `javac`/`mvn`/`gradle`/`jar` 
 
 ## 1. Testing with assertions
 
-At the heart of any test is an **assertion**: a claim that must hold, checked automatically. Java has a built-in `assert` statement, but it's **disabled unless you pass `-ea`** (enable assertions) <abbr title="The java command, JDK 25 documentation (-enableassertions)">[2]</abbr>, which makes it unsuitable as your testing tool.
+At the heart of any test is an **assertion**: a claim that must hold, checked automatically. Java has a built-in `assert` statement, but it's **disabled unless you pass `-ea`** (enable assertions) <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html" target="_blank" rel="noopener noreferrer"><abbr title="The java command, JDK 25 documentation (-enableassertions)">[2]</abbr></a>, which makes it unsuitable as your testing tool.
 
 ```java run
 import static java.lang.IO.println;
@@ -91,7 +91,7 @@ Exception in thread "main" java.lang.AssertionError: add(2,2) should be 5
 An assertion that the JVM ignores by default is worthless as a test. That's the motivation for a testing framework whose checks *always* run.
 
 **Intuition.**
-*Mechanism.* `assert cond : msg` throws `AssertionError` if `cond` is false — but only when assertions are enabled. When they're disabled, the JLS says the statement "has no effect whatsoever" <abbr title="The Java Language Specification, Java SE 25, §14.10">[1]</abbr>. Assertions were designed for internal sanity checks during development, not as a testing mechanism.
+*Mechanism.* `assert cond : msg` throws `AssertionError` if `cond` is false — but only when assertions are enabled. When they're disabled, the JLS says the statement "has no effect whatsoever" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.10" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.10">[1]</abbr></a>. Assertions were designed for internal sanity checks during development, not as a testing mechanism.
 
 *Concrete bite.* The first run is the trap: `java Main` printed `passed` for code that's wrong.
 
@@ -146,7 +146,7 @@ The same program behaves differently depending on a launch flag. So keep every `
 - Each test asserts the expected behavior with `assertEquals`, `assertThrows`, and friends.
 - The framework discovers and runs all of them, every time.
 
-Here's a class and its test, written against JUnit 5's Jupiter API. JUnit 6 (6.1.3 at the time of writing) keeps that API and requires Java 17 <abbr title="JUnit User Guide, current (6.1.3)">[5]</abbr>, and this same test class passes unchanged against 6.1.3.
+Here's a class and its test, written against JUnit 5's Jupiter API. JUnit 6 (6.1.3 at the time of writing) keeps that API and requires Java 17 <a href="https://docs.junit.org/current/user-guide/" target="_blank" rel="noopener noreferrer"><abbr title="JUnit User Guide, current (6.1.3)">[5]</abbr></a>, and this same test class passes unchanged against 6.1.3.
 
 <div style="border-left:4px solid #da5233;background:rgba(218,82,51,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -202,7 +202,7 @@ $ mvn test
 Both passed: `Tests run: 2, Failures: 0`. Unlike `assert`, these checks *always* run.
 
 **Intuition.**
-*Mechanism.* JUnit finds every method marked `@Test`. Test classes and methods don't need to be `public`, but they must not be `private` <abbr title="JUnit 5.10.2 User Guide, §2.3 Test Classes and Methods">[4]</abbr>. JUnit creates a fresh instance of the test class before each test method, so one test's fields can't leak into the next <abbr title="JUnit 5.10.2 User Guide, §2.11 Test Instance Lifecycle">[4]</abbr>. A failed assertion throws, and JUnit records that test as failed.
+*Mechanism.* JUnit finds every method marked `@Test`. Test classes and methods don't need to be `public`, but they must not be `private` <a href="https://docs.junit.org/5.10.2/user-guide/index.html" target="_blank" rel="noopener noreferrer"><abbr title="JUnit 5.10.2 User Guide, §2.3 Test Classes and Methods">[4]</abbr></a>. JUnit creates a fresh instance of the test class before each test method, so one test's fields can't leak into the next <a href="https://docs.junit.org/5.10.2/user-guide/index.html" target="_blank" rel="noopener noreferrer"><abbr title="JUnit 5.10.2 User Guide, §2.11 Test Instance Lifecycle">[4]</abbr></a>. A failed assertion throws, and JUnit records that test as failed.
 
 *Concrete bite: a failing test.* Change the expected value to `4` — a wrong expectation — and run again. The report names the test, the line, and both values, and Maven then fails the build (output trimmed at `…`):
 
@@ -260,7 +260,7 @@ Maven's `pom.xml` declares the project and its dependencies by **coordinates** (
 </project>
 ```
 
-`mvn package` runs the lifecycle's phases in order, one after another: compile, test, then package <abbr title="Apache Maven, Introduction to the Build Lifecycle">[6]</abbr>. A real run, filtered down to its plugin lines and results, shows that order:
+`mvn package` runs the lifecycle's phases in order, one after another: compile, test, then package <a href="https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html" target="_blank" rel="noopener noreferrer"><abbr title="Apache Maven, Introduction to the Build Lifecycle">[6]</abbr></a>. A real run, filtered down to its plugin lines and results, shows that order:
 
 ```
 $ mvn package
@@ -287,7 +287,7 @@ $ mvn dependency:tree
 [INFO]       \- org.junit.platform:junit-platform-engine:jar:1.10.2:test
 ```
 
-`<scope>test</scope>` makes a dependency "only available for the test compilation and execution phases" <abbr title="Apache Maven, Introduction to the Dependency Mechanism">[7]</abbr>. So the JAR that `mvn package` built holds `Calculator.class`, and not a single JUnit class:
+`<scope>test</scope>` makes a dependency "only available for the test compilation and execution phases" <a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html" target="_blank" rel="noopener noreferrer"><abbr title="Apache Maven, Introduction to the Dependency Mechanism">[7]</abbr></a>. So the JAR that `mvn package` built holds `Calculator.class`, and not a single JUnit class:
 
 ```
 $ jar --list --file target/calc-1.0.jar
@@ -301,7 +301,7 @@ META-INF/maven/com.example/calc/pom.xml
 META-INF/maven/com.example/calc/pom.properties
 ```
 
-**Gradle.** The same project in Gradle's Kotlin DSL (`build.gradle.kts`) needs three pieces, not one <abbr title="Gradle User Guide, Testing in Java & JVM projects">[8]</abbr>:
+**Gradle.** The same project in Gradle's Kotlin DSL (`build.gradle.kts`) needs three pieces, not one <a href="https://docs.gradle.org/current/userguide/java_testing.html" target="_blank" rel="noopener noreferrer"><abbr title="Gradle User Guide, Testing in Java & JVM projects">[8]</abbr></a>:
 
 ```kotlin
 plugins {
@@ -327,7 +327,7 @@ With this file, `gradle test` ran both tests, and they passed. Leave out `useJUn
 **Intuition.**
 *Mechanism.* A build tool models the project as a descriptor (`pom.xml` or `build.gradle.kts`) plus a fixed sequence of steps. It resolves the dependency graph from repositories such as Maven Central, caches the artifacts locally, compiles, runs the tests, and packages — the same way on every machine.
 
-*Concrete bite.* Transitive resolution is the real value here: declaring one dependency pulled in seven more. When two paths bring in different versions of the same library, Maven picks the "nearest definition", meaning the version closest to your project in the tree <abbr title="Apache Maven, Introduction to the Dependency Mechanism">[7]</abbr>. Doing all this by hand — tracking which JAR needs which other JAR — is the "JAR hell" that build tools were invented to end.
+*Concrete bite.* Transitive resolution is the real value here: declaring one dependency pulled in seven more. When two paths bring in different versions of the same library, Maven picks the "nearest definition", meaning the version closest to your project in the tree <a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html" target="_blank" rel="noopener noreferrer"><abbr title="Apache Maven, Introduction to the Dependency Mechanism">[7]</abbr></a>. Doing all this by hand — tracking which JAR needs which other JAR — is the "JAR hell" that build tools were invented to end.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -342,7 +342,7 @@ With this file, `gradle test` ran both tests, and they passed. Leave out `useJUn
 
 ## 4. Shipping an executable JAR
 
-A **JAR** (Java ARchive) is a ZIP file of classes, plus a manifest at `META-INF/MANIFEST.MF` <abbr title="JAR File Specification, JDK 25">[9]</abbr>. To hand someone a runnable program, package it as an **executable JAR**: its manifest names the `Main-Class`, so `java -jar` can launch it directly.
+A **JAR** (Java ARchive) is a ZIP file of classes, plus a manifest at `META-INF/MANIFEST.MF` <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/jar/jar.html" target="_blank" rel="noopener noreferrer"><abbr title="JAR File Specification, JDK 25">[9]</abbr></a>. To hand someone a runnable program, package it as an **executable JAR**: its manifest names the `Main-Class`, so `java -jar` can launch it directly.
 
 ```
 $ javac Greeting.java
@@ -382,7 +382,7 @@ Hello from an executable JAR!
 Naming the class on the command line, with the JAR on the classpath, still works.
 
 **Intuition.**
-*Mechanism.* With `-jar`, "the specified JAR file is the source of all user classes, and other class path settings are ignored" <abbr title="The java command, JDK 25 documentation (-jar)">[2]</abbr>. A JAR contains only *your* classes, so any library your code uses has to come from somewhere else.
+*Mechanism.* With `-jar`, "the specified JAR file is the source of all user classes, and other class path settings are ignored" <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html" target="_blank" rel="noopener noreferrer"><abbr title="The java command, JDK 25 documentation (-jar)">[2]</abbr></a>. A JAR contains only *your* classes, so any library your code uses has to come from somewhere else.
 
 *Concrete bite.* Here, `com.example.App` calls `Shout.loud` from a library, `acme.jar`. The app was compiled against the library, but the executable JAR holds only `App` (output trimmed at `…`):
 
@@ -406,9 +406,9 @@ Caused by: java.lang.ClassNotFoundException: com.acme.Shout
 
 Here are three fixes, each one tested.
 
-**Fix 1: name the classpath yourself.** `java -cp app.jar:acme.jar com.example.App` printed `starting`, then `HELLO!`. (On Windows, separate the entries with `;` instead <abbr title="The java command, JDK 25 documentation (-cp)">[2]</abbr>.)
+**Fix 1: name the classpath yourself.** `java -cp app.jar:acme.jar com.example.App` printed `starting`, then `HELLO!`. (On Windows, separate the entries with `;` instead <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html" target="_blank" rel="noopener noreferrer"><abbr title="The java command, JDK 25 documentation (-cp)">[2]</abbr></a>.)
 
-**Fix 2: a `Class-Path` manifest line.** This line lists the library by a URL relative to the JAR's own location <abbr title="JAR File Specification, JDK 25 (Class-Path Attribute)">[9]</abbr>. Here, `cp.txt` held the line `Class-Path: acme.jar`, and `--manifest` merged it in <abbr title="The jar command, JDK 25 documentation">[3]</abbr>:
+**Fix 2: a `Class-Path` manifest line.** This line lists the library by a URL relative to the JAR's own location <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/jar/jar.html" target="_blank" rel="noopener noreferrer"><abbr title="JAR File Specification, JDK 25 (Class-Path Attribute)">[9]</abbr></a>. Here, `cp.txt` held the line `Class-Path: acme.jar`, and `--manifest` merged it in <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/jar.html" target="_blank" rel="noopener noreferrer"><abbr title="The jar command, JDK 25 documentation">[3]</abbr></a>:
 
 ```
 $ jar --create --file app2.jar --main-class com.example.App --manifest cp.txt -C app-classes .
@@ -435,7 +435,7 @@ com/acme/Shout.class
 
 Copied on its own to another directory, `java -jar fat.jar` printed `starting`, then `HELLO!`.
 
-In practice, a build tool produces the fat JAR for you, through a plugin such as Maven's Shade plugin, which packages "the artifact in an uber-jar, including its dependencies" <abbr title="Apache Maven Shade Plugin">[13]</abbr>.
+In practice, a build tool produces the fat JAR for you, through a plugin such as Maven's Shade plugin, which packages "the artifact in an uber-jar, including its dependencies" <a href="https://maven.apache.org/plugins/maven-shade-plugin/" target="_blank" rel="noopener noreferrer"><abbr title="Apache Maven Shade Plugin">[13]</abbr></a>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -446,7 +446,7 @@ In practice, a build tool produces the fat JAR for you, through a plugin such as
 
 </div>
 
-**Documentation ships too.** A library's users read its API documentation, which the `javadoc` tool generates from **documentation comments** in the source <abbr title="The javadoc command, JDK 25 documentation">[16]</abbr>. A traditional doc comment is written in HTML between `/**` and `*/`. Since JDK 23, you can write it in Markdown instead, on lines that each begin with `///` <abbr title="JEP 467: Markdown Documentation Comments (JDK 23)">[14]</abbr> <abbr title="Documentation Comment Specification for the Standard Doclet (JDK 25), &quot;Markdown Documentation Comments&quot;">[15]</abbr>. To the compiler, they're ordinary comments, so the program runs as usual:
+**Documentation ships too.** A library's users read its API documentation, which the `javadoc` tool generates from **documentation comments** in the source <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/javadoc.html" target="_blank" rel="noopener noreferrer"><abbr title="The javadoc command, JDK 25 documentation">[16]</abbr></a>. A traditional doc comment is written in HTML between `/**` and `*/`. Since JDK 23, you can write it in Markdown instead, on lines that each begin with `///` <a href="https://openjdk.org/jeps/467" target="_blank" rel="noopener noreferrer"><abbr title="JEP 467: Markdown Documentation Comments (JDK 23)">[14]</abbr></a> <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/javadoc/doc-comment-spec.html#markdown-documentation-comments" target="_blank" rel="noopener noreferrer"><abbr title="Documentation Comment Specification for the Standard Doclet (JDK 25), &quot;Markdown Documentation Comments&quot;">[15]</abbr></a>. To the compiler, they're ordinary comments, so the program runs as usual:
 
 ```java run
 import static java.lang.IO.println;
@@ -508,7 +508,7 @@ When a test goes red or production misbehaves, debug methodically, not by guessw
 
 - **Read the stack trace.** It names the exception and the exact line.
 - **Reproduce** the failure reliably. A failing test is the ideal reproduction.
-- **Inspect state** with a debugger (the JDK ships `jdb` <abbr title="The jdb command, JDK 25 documentation">[10]</abbr>, and every IDE has one), or with targeted logging.
+- **Inspect state** with a debugger (the JDK ships `jdb` <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/jdb.html" target="_blank" rel="noopener noreferrer"><abbr title="The jdb command, JDK 25 documentation">[10]</abbr></a>, and every IDE has one), or with targeted logging.
 - **Bisect**: narrow the problem down by halving it (which commit, which input, which method) until you've isolated the cause.
 
 A stack trace is a map, and you read it from the top:
@@ -554,7 +554,7 @@ Exception in thread "main" java.lang.NumberFormatException: Cannot parse null st
 
 The single most effective debugging move is to turn the bug into a **failing test**. It reproduces the problem on demand, tells you the moment you've fixed it, and then stays behind as a regression guard.
 
-**Logging.** A log message records state as the program runs, along with a **level** that says how much it matters. The JDK's own logging API is `java.util.logging` <abbr title="Java SE 25 API, java.util.logging">[11]</abbr>. Its default configuration lets through `INFO` and above, and drops `FINE` and lower <abbr title="JDK 25, conf/logging.properties (.level= INFO)">[12]</abbr>. This program sends each record to standard output, so you can see which ones get through:
+**Logging.** A log message records state as the program runs, along with a **level** that says how much it matters. The JDK's own logging API is `java.util.logging` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.logging/java/util/logging/package-summary.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.logging">[11]</abbr></a>. Its default configuration lets through `INFO` and above, and drops `FINE` and lower <abbr title="JDK 25, conf/logging.properties (.level= INFO)">[12]</abbr>. This program sends each record to standard output, so you can see which ones get through:
 
 ```java run
 import java.util.logging.Handler;
@@ -685,7 +685,7 @@ One check per objective. Answer before you open anything.
 </dependency>
 ```
 
-With no `<scope>`, the scope is `compile`, which is the default <abbr title="Apache Maven, Introduction to the Dependency Mechanism">[7]</abbr>. `mvn package` downloads `widgets` and its own dependencies, compiles your code against them, runs the tests, and builds a JAR containing only *your* classes.
+With no `<scope>`, the scope is `compile`, which is the default <a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html" target="_blank" rel="noopener noreferrer"><abbr title="Apache Maven, Introduction to the Dependency Mechanism">[7]</abbr></a>. `mvn package` downloads `widgets` and its own dependencies, compiles your code against them, runs the tests, and builds a JAR containing only *your* classes.
 
 That JAR has no `Main-Class` unless you configure one, so `java -jar` says `no main manifest attribute`. Configure it, and `java -jar` then fails with `NoClassDefFoundError` at the first use of a `widgets` class, because the library isn't inside the JAR, and `-jar` ignores `-cp`. A fat JAR bundles the library in.
 
@@ -695,22 +695,22 @@ That JAR has no `Main-Class` unless you configure one, so `java -jar` says `no m
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 25*, §14.10 "The `assert` Statement" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.10>
-2. The `java` command, JDK 25 documentation (`-enableassertions`; `-jar`) — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html>
-3. The `jar` command, JDK 25 documentation — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/jar.html>
-4. JUnit 5.10.2 User Guide (§2.1 annotations, §2.3 test classes and methods, §2.11 test instance lifecycle) — <https://docs.junit.org/5.10.2/user-guide/index.html>
-5. JUnit User Guide, current (6.1.3; "JUnit requires Java 17 (or higher) at runtime") — <https://docs.junit.org/current/user-guide/>
-6. Apache Maven, *Introduction to the Build Lifecycle* — <https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html>
-7. Apache Maven, *Introduction to the Dependency Mechanism* (transitive dependencies, "nearest definition", scopes) — <https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html>
-8. Gradle User Guide, *Testing in Java & JVM projects* (`useJUnitPlatform`) — <https://docs.gradle.org/current/userguide/java_testing.html>
-9. JAR File Specification, JDK 25 (`Main-Class`; the `Class-Path` attribute) — <https://docs.oracle.com/en/java/javase/25/docs/specs/jar/jar.html>
-10. The `jdb` command, JDK 25 documentation — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/jdb.html>
-11. `java.util.logging`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.logging/java/util/logging/package-summary.html>
+1. *The Java Language Specification, Java SE 25*, §14.10 "The `assert` Statement" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.10" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.10</a>
+2. The `java` command, JDK 25 documentation (`-enableassertions`; `-jar`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html</a>
+3. The `jar` command, JDK 25 documentation — <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/jar.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/specs/man/jar.html</a>
+4. JUnit 5.10.2 User Guide (§2.1 annotations, §2.3 test classes and methods, §2.11 test instance lifecycle) — <a href="https://docs.junit.org/5.10.2/user-guide/index.html" target="_blank" rel="noopener noreferrer">https://docs.junit.org/5.10.2/user-guide/index.html</a>
+5. JUnit User Guide, current (6.1.3; "JUnit requires Java 17 (or higher) at runtime") — <a href="https://docs.junit.org/current/user-guide/" target="_blank" rel="noopener noreferrer">https://docs.junit.org/current/user-guide/</a>
+6. Apache Maven, *Introduction to the Build Lifecycle* — <a href="https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html" target="_blank" rel="noopener noreferrer">https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html</a>
+7. Apache Maven, *Introduction to the Dependency Mechanism* (transitive dependencies, "nearest definition", scopes) — <a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html" target="_blank" rel="noopener noreferrer">https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html</a>
+8. Gradle User Guide, *Testing in Java & JVM projects* (`useJUnitPlatform`) — <a href="https://docs.gradle.org/current/userguide/java_testing.html" target="_blank" rel="noopener noreferrer">https://docs.gradle.org/current/userguide/java_testing.html</a>
+9. JAR File Specification, JDK 25 (`Main-Class`; the `Class-Path` attribute) — <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/jar/jar.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/specs/jar/jar.html</a>
+10. The `jdb` command, JDK 25 documentation — <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/jdb.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/specs/man/jdb.html</a>
+11. `java.util.logging`, Java SE 25 API — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.logging/java/util/logging/package-summary.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.logging/java/util/logging/package-summary.html</a>
 12. JDK 25, `conf/logging.properties` (`.level= INFO`; `ConsoleHandler.level = INFO`), in every JDK 25 installation
-13. Apache Maven Shade Plugin — <https://maven.apache.org/plugins/maven-shade-plugin/>
-14. JEP 467: Markdown Documentation Comments (JDK 23) — <https://openjdk.org/jeps/467>
-15. *Documentation Comment Specification for the Standard Doclet (JDK 25)*, "Markdown Documentation Comments" ("consecutive lines, each beginning with optional whitespace followed by `///`") — <https://docs.oracle.com/en/java/javase/25/docs/specs/javadoc/doc-comment-spec.html#markdown-documentation-comments>
-16. The `javadoc` command, JDK 25 documentation — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/javadoc.html>
+13. Apache Maven Shade Plugin — <a href="https://maven.apache.org/plugins/maven-shade-plugin/" target="_blank" rel="noopener noreferrer">https://maven.apache.org/plugins/maven-shade-plugin/</a>
+14. JEP 467: Markdown Documentation Comments (JDK 23) — <a href="https://openjdk.org/jeps/467" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/467</a>
+15. *Documentation Comment Specification for the Standard Doclet (JDK 25)*, "Markdown Documentation Comments" ("consecutive lines, each beginning with optional whitespace followed by `///`") — <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/javadoc/doc-comment-spec.html#markdown-documentation-comments" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/specs/javadoc/doc-comment-spec.html#markdown-documentation-comments</a>
+16. The `javadoc` command, JDK 25 documentation — <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/javadoc.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/specs/man/javadoc.html</a>
 
 ---
 

@@ -81,7 +81,7 @@ cold
 
 **Analysis.** `temp < 10` is `true`, so the `if` block ran and the `else` block was skipped. Exactly one of the two blocks runs, never both.
 
-The condition must be a `boolean` <abbr title="The Java Language Specification, Java SE 25, §14.9">[1]</abbr>. [Booleans & Logic](/synapse/programming-languages/java/control-flow/booleans-and-logic) promised that Java refuses a number, and here's the refusal:
+The condition must be a `boolean` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.9" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.9">[1]</abbr></a>. [Booleans & Logic](/synapse/programming-languages/java/control-flow/booleans-and-logic) promised that Java refuses a number, and here's the refusal:
 
 ```java run
 import static java.lang.IO.println;
@@ -130,7 +130,7 @@ leave the house
 
 `cold` is `false`, so `wear a coat` is correctly skipped, but `leave the house` printed anyway. The indentation suggests both lines are guarded, but only the first one is. The braceless `if` controls exactly one statement, and the second runs no matter what.
 
-*Watch out: a stray semicolon.* A `;` on its own is a statement too. It's the **empty statement**, and it does nothing <abbr title="The Java Language Specification, Java SE 25, §14.6">[3]</abbr>. Put one after the condition, and the `if` guards that nothing:
+*Watch out: a stray semicolon.* A `;` on its own is a statement too. It's the **empty statement**, and it does nothing <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.6" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.6">[3]</abbr></a>. Put one after the condition, and the `if` guards that nothing:
 
 ```java run
 import static java.lang.IO.println;
@@ -152,7 +152,7 @@ cold
 
 `25 < 10` is `false`, yet `cold` printed anyway. The `if` ended at the `;`, so the braces after it form an ordinary block that always runs.
 
-*The dangling `else`.* With two braceless `if`s, an `else` belongs to the **nearest** `if`, whatever the indentation claims <abbr title="The Java Language Specification, Java SE 25, §14.5">[2]</abbr>:
+*The dangling `else`.* With two braceless `if`s, an `else` belongs to the **nearest** `if`, whatever the indentation claims <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.5">[2]</abbr></a>:
 
 ```java run
 import static java.lang.IO.println;
@@ -212,7 +212,7 @@ The payoff: "what does this `if` control?" has one answer, the block. Without br
 
 To choose among more than two paths, chain `else if`. Java tests each condition in order, runs the **first** block whose condition is `true`, and skips the rest.
 
-`else if` isn't a keyword of its own. It's an `else` whose one statement happens to be another `if` <abbr title="The Java Language Specification, Java SE 25, §14.9">[1]</abbr>. So a chain is really `if`s nested inside `else`s, written flat.
+`else if` isn't a keyword of its own. It's an `else` whose one statement happens to be another `if` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.9" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.9">[1]</abbr></a>. So a chain is really `if`s nested inside `else`s, written flat.
 
 ```java run
 import static java.lang.IO.println;
@@ -282,7 +282,7 @@ C
 
 `95` deserves an `A`, but `score >= 70` is checked first and matches. So it prints `C` and never reaches `>= 90`. The compiler sees nothing wrong. The logic is legal, just ordered backwards.
 
-*Watch out: a chain with no final `else`.* A chain often sets a variable. Without an `else`, some values set nothing, and the compiler spots that path <abbr title="The Java Language Specification, Java SE 25, Chapter 16">[10]</abbr>:
+*Watch out: a chain with no final `else`.* A chain often sets a variable. Without an `else`, some values set nothing, and the compiler spots that path <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-16.html" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, Chapter 16">[10]</abbr></a>:
 
 ```java run
 import static java.lang.IO.println;
@@ -355,7 +355,7 @@ Wed
 **Analysis.** `day` is `3`, so execution jumped to `case 3`, printed `Wed`, and `break` ended the switch. The other cases were skipped entirely.
 
 **Intuition.**
-*Mechanism.* A `switch` statement *jumps* to the matching `case` label and then runs **straight down** until it hits a `break` (or the end) <abbr title="The Java Language Specification, Java SE 25, §14.11.3">[5]</abbr>. The `break` isn't decoration. Without it, execution "falls through" into the next case's code and ignores that case's label.
+*Mechanism.* A `switch` statement *jumps* to the matching `case` label and then runs **straight down** until it hits a `break` (or the end) <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.3">[5]</abbr></a>. The `break` isn't decoration. Without it, execution "falls through" into the next case's code and ignores that case's label.
 
 *Concrete bite.* Drop the `break`s, and one match runs several cases:
 
@@ -384,7 +384,7 @@ Wed
 
 `day` is `1`, so it entered `case 1` and printed `Mon`. Then, with no `break`, it fell through into `case 2` (`Tue`) and `case 3` (`Wed`), stopping only at the `break`. One value, three lines printed.
 
-**What a `switch` can test.** The value in `switch ( … )` is the **selector**. It can be a `char`, `byte`, `short` or `int`, or an object such as a `String` <abbr title="The Java Language Specification, Java SE 25, §14.11">[4]</abbr>. A `String` case matches with `.equals`, so upper and lower case matter:
+**What a `switch` can test.** The value in `switch ( … )` is the **selector**. It can be a `char`, `byte`, `short` or `int`, or an object such as a `String` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11">[4]</abbr></a>. A `String` case matches with `.equals`, so upper and lower case matter:
 
 ```java run
 import static java.lang.IO.println;
@@ -441,9 +441,9 @@ Main.java:7: error: constant label of type int is not compatible with switch sel
 2 errors
 ```
 
-The first message hints at where Java is heading. JDK 25 has a *preview* feature that would allow these selectors <abbr title="JEP 507: Primitive Types in Patterns, instanceof, and switch (Third Preview) (JDK 25)">[12]</abbr>. A preview feature isn't part of the standard language yet: it only works with the `--enable-preview` flag, and it can still change. Without that flag, a `long` selector is an error.
+The first message hints at where Java is heading. JDK 25 has a *preview* feature that would allow these selectors <a href="https://openjdk.org/jeps/507" target="_blank" rel="noopener noreferrer"><abbr title="JEP 507: Primitive Types in Patterns, instanceof, and switch (Third Preview) (JDK 25)">[12]</abbr></a>. A preview feature isn't part of the standard language yet: it only works with the `--enable-preview` flag, and it can still change. Without that flag, a `long` selector is an error.
 
-Each `case` label must also be a **constant**: a literal, or a `final` variable set from one <abbr title="The Java Language Specification, Java SE 25, §14.11">[4]</abbr>. Put an ordinary variable after `case`, and you get `constant expression required`.
+Each `case` label must also be a **constant**: a literal, or a `final` variable set from one <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11">[4]</abbr></a>. Put an ordinary variable after `case`, and you get `constant expression required`.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -457,7 +457,7 @@ This footgun is exactly what the colon-and-`break` form costs you. A forgotten `
 
 ## 4. `switch` expressions
 
-Since JDK 14, a `switch` can be an **expression** that produces a value, using `case … ->` arrows <abbr title="JEP 361: Switch Expressions (JDK 14)">[8]</abbr>. There's no fall-through, and you can assign the whole thing to a variable.
+Since JDK 14, a `switch` can be an **expression** that produces a value, using `case … ->` arrows <a href="https://openjdk.org/jeps/361" target="_blank" rel="noopener noreferrer"><abbr title="JEP 361: Switch Expressions (JDK 14)">[8]</abbr></a>. There's no fall-through, and you can assign the whole thing to a variable.
 
 ```java run
 import static java.lang.IO.println;
@@ -511,7 +511,7 @@ weekend
 sleep in
 ```
 
-When a case needs more than one expression, give it a block in braces. The block hands back its value with **`yield`** <abbr title="The Java Language Specification, Java SE 25, §14.21">[7]</abbr>:
+When a case needs more than one expression, give it a block in braces. The block hands back its value with **`yield`** <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.21" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.21">[7]</abbr></a>:
 
 ```java run
 import static java.lang.IO.println;
@@ -565,7 +565,7 @@ Main.java:9: error: switch rule completes without providing a value
 ```
 
 **Intuition.**
-*Mechanism.* An arrow `case X -> value` runs only its right-hand side and produces a value for the whole `switch`. Because the result is *used* (assigned, returned, printed), the compiler insists that the `switch` is **exhaustive**. Every possible input must be covered, or it won't compile <abbr title="The Java Language Specification, Java SE 25, §15.28.1">[6]</abbr>.
+*Mechanism.* An arrow `case X -> value` runs only its right-hand side and produces a value for the whole `switch`. Because the result is *used* (assigned, returned, printed), the compiler insists that the `switch` is **exhaustive**. Every possible input must be covered, or it won't compile <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.28.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.28.1">[6]</abbr></a>.
 
 *Concrete bite.* Leave a gap with no `default`, and the compiler refuses:
 
@@ -598,7 +598,7 @@ An `int` can be more than `1` or `2`, and a `switch` *expression* must always pr
 
 💡 **Earned rule.** Prefer arrow `switch` expressions when you're computing a value from one of several cases. They can't fall through, and the compiler checks exhaustiveness for you.
 
-The cost is that you must handle every case (or add a `default`). But that's the whole point: the compiler turns "I forgot a branch" from a run-time bug into a build error. Java 21 extends this to `sealed` types and pattern matching <abbr title="JEP 441: Pattern Matching for switch (JDK 21)">[11]</abbr>, in [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching).
+The cost is that you must handle every case (or add a `default`). But that's the whole point: the compiler turns "I forgot a branch" from a run-time bug into a build error. Java 21 extends this to `sealed` types and pattern matching <a href="https://openjdk.org/jeps/441" target="_blank" rel="noopener noreferrer"><abbr title="JEP 441: Pattern Matching for switch (JDK 21)">[11]</abbr></a>, in [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching).
 
 </div>
 
@@ -606,7 +606,7 @@ The cost is that you must handle every case (or add a `default`). But that's the
 
 ## 5. The ternary operator `?:`
 
-For the smallest choice, picking one of two *values* based on a condition, use the ternary operator `cond ? a : b`. It's a conditional that is itself an expression: it evaluates to `a` when `cond` is true, and to `b` otherwise <abbr title="The Java Language Specification, Java SE 25, §15.25">[9]</abbr>.
+For the smallest choice, picking one of two *values* based on a condition, use the ternary operator `cond ? a : b`. It's a conditional that is itself an expression: it evaluates to `a` when `cond` is true, and to `b` otherwise <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.25" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.25">[9]</abbr></a>.
 
 ```java run
 import static java.lang.IO.println;
@@ -630,7 +630,7 @@ adult
 
 **Analysis.** `age >= 18` is true, so the ternary produced `"adult"`. In the second, `a > b` is true, so it produced `a` (`7`), a one-line "max". Because the ternary *yields a value*, it can sit on the right of `=` or inside a `println`.
 
-When the two values are different numeric types, the result takes the wider type, just as in [arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) <abbr title="The Java Language Specification, Java SE 25, §15.25.2">[9]</abbr>. Even the branch that was chosen changes type:
+When the two values are different numeric types, the result takes the wider type, just as in [arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic) <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.25" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.25.2">[9]</abbr></a>. Even the branch that was chosen changes type:
 
 ```java run
 import static java.lang.IO.println;
@@ -792,18 +792,18 @@ It prints `A` for 100 and 90, `B` for 85, `C` for 70, and `F` for 69. The `defau
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 25*, §14.9 "The `if` Statement" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.9>
-2. *The Java Language Specification, Java SE 25*, §14.5 "Statements" (the dangling `else`: "an `else` clause belongs to the innermost `if` to which it might possibly belong") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.5>
-3. *The Java Language Specification, Java SE 25*, §14.6 "The Empty Statement" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.6>
-4. *The Java Language Specification, Java SE 25*, §14.11 "The `switch` Statement" (selector types; case constants; `String` cases use `equals`) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11>
-5. *The Java Language Specification, Java SE 25*, §14.11.3 "Execution of a `switch` Statement" (fall through) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.3>
-6. *The Java Language Specification, Java SE 25*, §15.28.1 "The Switch Block of a `switch` Expression" ("It is a compile-time error if a switch expression is not exhaustive") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.28.1>
-7. *The Java Language Specification, Java SE 25*, §14.21 "The `yield` Statement" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.21>
-8. JEP 361: Switch Expressions (JDK 14) — <https://openjdk.org/jeps/361>
-9. *The Java Language Specification, Java SE 25*, §15.25 "Conditional Operator `? :`" and §15.25.2 "Numeric Conditional Expressions" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.25>
-10. *The Java Language Specification, Java SE 25*, Chapter 16 "Definite Assignment" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-16.html>
-11. JEP 441: Pattern Matching for `switch` (JDK 21) — <https://openjdk.org/jeps/441>
-12. JEP 507: Primitive Types in Patterns, `instanceof`, and `switch` (Third Preview) (JDK 25) — <https://openjdk.org/jeps/507>
+1. *The Java Language Specification, Java SE 25*, §14.9 "The `if` Statement" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.9" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.9</a>
+2. *The Java Language Specification, Java SE 25*, §14.5 "Statements" (the dangling `else`: "an `else` clause belongs to the innermost `if` to which it might possibly belong") — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.5" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.5</a>
+3. *The Java Language Specification, Java SE 25*, §14.6 "The Empty Statement" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.6" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.6</a>
+4. *The Java Language Specification, Java SE 25*, §14.11 "The `switch` Statement" (selector types; case constants; `String` cases use `equals`) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11</a>
+5. *The Java Language Specification, Java SE 25*, §14.11.3 "Execution of a `switch` Statement" (fall through) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.3" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.3</a>
+6. *The Java Language Specification, Java SE 25*, §15.28.1 "The Switch Block of a `switch` Expression" ("It is a compile-time error if a switch expression is not exhaustive") — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.28.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.28.1</a>
+7. *The Java Language Specification, Java SE 25*, §14.21 "The `yield` Statement" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.21" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.21</a>
+8. JEP 361: Switch Expressions (JDK 14) — <a href="https://openjdk.org/jeps/361" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/361</a>
+9. *The Java Language Specification, Java SE 25*, §15.25 "Conditional Operator `? :`" and §15.25.2 "Numeric Conditional Expressions" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.25" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.25</a>
+10. *The Java Language Specification, Java SE 25*, Chapter 16 "Definite Assignment" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-16.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-16.html</a>
+11. JEP 441: Pattern Matching for `switch` (JDK 21) — <a href="https://openjdk.org/jeps/441" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/441</a>
+12. JEP 507: Primitive Types in Patterns, `instanceof`, and `switch` (Third Preview) (JDK 25) — <a href="https://openjdk.org/jeps/507" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/507</a>
 
 ---
 

@@ -56,7 +56,7 @@ Every output below was produced by compiling and running the code on Java 25.
 
 ## 1. Pattern matching for `instanceof`
 
-A **type pattern** — `o instanceof Type var` — tests whether `o` is a `Type`, and if it is, binds it to `var`, already cast. It's been standard since Java 16 <abbr title="JEP 394: Pattern Matching for instanceof (JDK 16)">[1]</abbr>. The binding is in scope wherever the test is known to be true, so test-and-cast becomes a single step.
+A **type pattern** — `o instanceof Type var` — tests whether `o` is a `Type`, and if it is, binds it to `var`, already cast. It's been standard since Java 16 <a href="https://openjdk.org/jeps/394" target="_blank" rel="noopener noreferrer"><abbr title="JEP 394: Pattern Matching for instanceof (JDK 16)">[1]</abbr></a>. The binding is in scope wherever the test is known to be true, so test-and-cast becomes a single step.
 
 ```java run
 import static java.lang.IO.println;
@@ -88,7 +88,7 @@ unknown
 **Analysis.** `o instanceof String s` did three things at once: it checked the type, cast the value, and bound `s`. That's why the branch could call `s.length()` without an explicit `(String) o`. Likewise, `i` was a ready-to-use `Integer`. Compare that with the old style from [`equals`](/synapse/programming-languages/java/core-libraries/equals-and-hashcode): `if (!(o instanceof Point)) return false; Point p = (Point) o;` The pattern collapses the redundant cast away.
 
 **Intuition.**
-*Mechanism.* The compiler introduces the binding variable only where the pattern is provably true <abbr title="The Java Language Specification, Java SE 25, §6.3.1">[5]</abbr>. The cast is implicit and guaranteed safe, so you can't get a `ClassCastException` from a mismatched manual cast.
+*Mechanism.* The compiler introduces the binding variable only where the pattern is provably true <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.3.1">[5]</abbr></a>. The cast is implicit and guaranteed safe, so you can't get a `ClassCastException` from a mismatched manual cast.
 
 "Provably true" also covers the code *after* a negated test that returns. So the early-exit style works too:
 
@@ -115,7 +115,7 @@ public class Main {
 -1
 ```
 
-The `if` returns whenever `o` isn't a `String`. So on the line after it, `o` must be a `String`, and `s` is in scope there <abbr title="The Java Language Specification, Java SE 25, §6.3.2.2">[10]</abbr>.
+The `if` returns whenever `o` isn't a `String`. So on the line after it, `o` must be a `String`, and `s` is in scope there <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3.2.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.3.2.2">[10]</abbr></a>.
 
 *Concrete bite.* The redundancy this removes is real. The classic `instanceof` + cast names the type twice, and the two can drift apart. The pattern names the type once and binds the result, so there's no second cast to get wrong.
 
@@ -159,7 +159,7 @@ With `&&`, the same code compiles, because the right side runs only when the tes
 
 ## 2. Switch pattern matching
 
-Since JDK 21, a `switch` can match on **type patterns** <abbr title="JEP 441: Pattern Matching for switch (JDK 21)">[3]</abbr>: each `case Type var ->` handles values of that type and binds the variable. This turns a chain of `instanceof`/`else if` into a clean multi-way dispatch.
+Since JDK 21, a `switch` can match on **type patterns** <a href="https://openjdk.org/jeps/441" target="_blank" rel="noopener noreferrer"><abbr title="JEP 441: Pattern Matching for switch (JDK 21)">[3]</abbr></a>: each `case Type var ->` handles values of that type and binds the variable. This turns a chain of `instanceof`/`else if` into a clean multi-way dispatch.
 
 ```java run
 import static java.lang.IO.println;
@@ -190,9 +190,9 @@ other
 **Analysis.** The `switch` matched each value against the type patterns: a `String` took the first case (binding `s`), an `Integer` took the second, and the `Double` fell through to `default`. This is the [arrow `switch` expression](/synapse/programming-languages/java/control-flow/conditionals), generalized from constants to *types*. Each case both tests the type and binds a usable variable, and the whole thing produces a value.
 
 **Intuition.**
-*Mechanism.* The `switch` evaluates the selector once, then tries each `case` pattern from top to bottom, running the first one that matches and binding its variable. A pattern `switch` must be **exhaustive**: some case has to match every possible value <abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[7]</abbr>. That's true for a `switch` *statement* with patterns too, not just for an expression. With `Object` as the selector type, there are unboundedly many possible types, so you need a `default`.
+*Mechanism.* The `switch` evaluates the selector once, then tries each `case` pattern from top to bottom, running the first one that matches and binding its variable. A pattern `switch` must be **exhaustive**: some case has to match every possible value <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[7]</abbr></a>. That's true for a `switch` *statement* with patterns too, not just for an expression. With `Object` as the selector type, there are unboundedly many possible types, so you need a `default`.
 
-Two more tools let you refine the cases <abbr title="The Java Language Specification, Java SE 25, §14.11.1">[6]</abbr>:
+Two more tools let you refine the cases <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.1">[6]</abbr></a>:
 
 - A **guard**, `when condition`, adds a test after the type matches.
 - `case null` handles a `null` selector, which otherwise matches no case.
@@ -239,7 +239,7 @@ other: 2.5
 
 *Concrete bite.* This replaces the verbose `if (o instanceof A a) … else if (o instanceof B b) …` ladder with a flat, value-producing form. The `default` is required *only* because the selector type (`Object`) is open. Close the type set with `sealed`, and the next section removes even that.
 
-*Watch out: a `null` selector without `case null`.* `default` doesn't match `null`. Without a `case null`, a `null` selector throws a `NullPointerException` <abbr title="The Java Language Specification, Java SE 25, §14.11.3">[8]</abbr>:
+*Watch out: a `null` selector without `case null`.* `default` doesn't match `null`. Without a `case null`, a `null` selector throws a `NullPointerException` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.3">[8]</abbr></a>:
 
 ```java run
 import static java.lang.IO.println;
@@ -267,7 +267,7 @@ Exception in thread "main" java.lang.NullPointerException
 
 To fix it, add `case null ->`, or check for `null` before the `switch`.
 
-*Watch out: a general case before a specific one.* Cases are tried in order. Put `case CharSequence cs` first, and it takes every `String`, so a later `case String s` could never run. javac calls that later case **dominated**, and rejects it <abbr title="The Java Language Specification, Java SE 25, §14.11.1">[6]</abbr>:
+*Watch out: a general case before a specific one.* Cases are tried in order. Put `case CharSequence cs` first, and it takes every `String`, so a later `case String s` could never run. javac calls that later case **dominated**, and rejects it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.1">[6]</abbr></a>:
 
 ```java run
 import static java.lang.IO.println;
@@ -348,7 +348,7 @@ classDiagram
 **Analysis.** `Shape` permits exactly `Circle` and `Square`, so a `switch` that handles both is *complete*. No `default` was needed, and the compiler accepted it. Each case bound the matched shape and computed its area. This is the payoff of the whole design: the type system guarantees that the `switch` covers every case.
 
 **Intuition.**
-*Mechanism.* Because `sealed` closes the subtype set <abbr title="JEP 409: Sealed Classes (JDK 17)">[4]</abbr>, the compiler can verify that a `switch` handles every one of them <abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[7]</abbr>. Exhaustiveness is checked at compile time, so completeness is *proven*, not assumed.
+*Mechanism.* Because `sealed` closes the subtype set <a href="https://openjdk.org/jeps/409" target="_blank" rel="noopener noreferrer"><abbr title="JEP 409: Sealed Classes (JDK 17)">[4]</abbr></a>, the compiler can verify that a `switch` handles every one of them <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[7]</abbr></a>. Exhaustiveness is checked at compile time, so completeness is *proven*, not assumed.
 
 *Concrete bite.* Leave out a permitted case, and it won't compile:
 
@@ -388,7 +388,7 @@ Main.java:7: error: the switch expression does not cover all possible input valu
 
 ## 4. Record patterns
 
-When the cases are [records](/synapse/programming-languages/java/core-libraries/enums-and-records), a **record pattern** can deconstruct them <abbr title="JEP 440: Record Patterns (JDK 21)">[2]</abbr>. `case Circle(double r) ->` matches a `Circle` *and* binds its component `r` directly, so you skip the accessor call.
+When the cases are [records](/synapse/programming-languages/java/core-libraries/enums-and-records), a **record pattern** can deconstruct them <a href="https://openjdk.org/jeps/440" target="_blank" rel="noopener noreferrer"><abbr title="JEP 440: Record Patterns (JDK 21)">[2]</abbr></a>. `case Circle(double r) ->` matches a `Circle` *and* binds its component `r` directly, so you skip the accessor call.
 
 ```java run
 sealed interface Shape permits Circle, Rect {}
@@ -418,7 +418,7 @@ public class Main {
 **Analysis.** `case Circle(double r)` matched a `Circle` and bound its `radius` component to `r` in one step, with no `c.radius()` call. `Rect(double w, double h)` bound both components at once. The pattern mirrors the record's *shape*: you read its data by destructuring it, which is the inverse of constructing it.
 
 **Intuition.**
-*Mechanism.* A record pattern matches the record type, then gets each component by invoking its accessor method <abbr title="The Java Language Specification, Java SE 25, §14.30.2">[9]</abbr>. Record patterns can nest, and `var` lets the compiler infer a component's type. So a single case can match and destructure nested data, and a guard can test the parts:
+*Mechanism.* A record pattern matches the record type, then gets each component by invoking its accessor method <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.30.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.30.2">[9]</abbr></a>. Record patterns can nest, and `var` lets the compiler infer a component's type. So a single case can match and destructure nested data, and a guard can test the parts:
 
 ```java run
 import static java.lang.IO.println;
@@ -453,7 +453,7 @@ not a line
 
 **Analysis.** The first `Line` has `x1 == x2`, so the guarded case took it. The second one failed the guard and fell through to the unguarded `Line` case. Four coordinates were bound in a single `case`, with no accessor calls and no casts.
 
-**Unnamed patterns and variables.** The vertical-line case binds `y1` and `y2`, then never reads them. Since JDK 22, you can write an underscore, `_`, for any pattern or variable that you have to declare but never use <abbr title="JEP 456: Unnamed Variables &amp; Patterns (JDK 22)">[11]</abbr>:
+**Unnamed patterns and variables.** The vertical-line case binds `y1` and `y2`, then never reads them. Since JDK 22, you can write an underscore, `_`, for any pattern or variable that you have to declare but never use <a href="https://openjdk.org/jeps/456" target="_blank" rel="noopener noreferrer"><abbr title="JEP 456: Unnamed Variables &amp; Patterns (JDK 22)">[11]</abbr></a>:
 
 ```java run
 import java.util.List;
@@ -624,17 +624,17 @@ unknown
 
 ## 📚 Sources
 
-1. JEP 394: Pattern Matching for `instanceof` (JDK 16) — <https://openjdk.org/jeps/394>
-2. JEP 440: Record Patterns (JDK 21) — <https://openjdk.org/jeps/440>
-3. JEP 441: Pattern Matching for `switch` (JDK 21) — <https://openjdk.org/jeps/441>
-4. JEP 409: Sealed Classes (JDK 17) — <https://openjdk.org/jeps/409>
-5. *The Java Language Specification, Java SE 25*, §6.3.1 "Scope for Pattern Variables in Expressions" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3.1>
-6. *The Java Language Specification, Java SE 25*, §14.11.1 "Switch Blocks" (guards; `case null`; "It is a compile-time error if any switch label in a switch block is dominated") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1>
-7. *The Java Language Specification, Java SE 25*, §14.11.1.1 "Exhaustive Switch Blocks" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1>
-8. *The Java Language Specification, Java SE 25*, §14.11.3 "Execution of a `switch` Statement" (a `null` selector with no matching label throws `NullPointerException`) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.3>
-9. *The Java Language Specification, Java SE 25*, §14.30.2 "Pattern Matching" ("Each record component of v is determined by invoking the accessor method") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.30.2>
-10. *The Java Language Specification, Java SE 25*, §6.3.2.2 "`if` Statements" (a pattern variable introduced "when false" is in scope after an `if` whose body cannot complete normally) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3.2.2>
-11. JEP 456: Unnamed Variables & Patterns (JDK 22) — <https://openjdk.org/jeps/456>
+1. JEP 394: Pattern Matching for `instanceof` (JDK 16) — <a href="https://openjdk.org/jeps/394" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/394</a>
+2. JEP 440: Record Patterns (JDK 21) — <a href="https://openjdk.org/jeps/440" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/440</a>
+3. JEP 441: Pattern Matching for `switch` (JDK 21) — <a href="https://openjdk.org/jeps/441" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/441</a>
+4. JEP 409: Sealed Classes (JDK 17) — <a href="https://openjdk.org/jeps/409" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/409</a>
+5. *The Java Language Specification, Java SE 25*, §6.3.1 "Scope for Pattern Variables in Expressions" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3.1</a>
+6. *The Java Language Specification, Java SE 25*, §14.11.1 "Switch Blocks" (guards; `case null`; "It is a compile-time error if any switch label in a switch block is dominated") — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1</a>
+7. *The Java Language Specification, Java SE 25*, §14.11.1.1 "Exhaustive Switch Blocks" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1</a>
+8. *The Java Language Specification, Java SE 25*, §14.11.3 "Execution of a `switch` Statement" (a `null` selector with no matching label throws `NullPointerException`) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.3" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.3</a>
+9. *The Java Language Specification, Java SE 25*, §14.30.2 "Pattern Matching" ("Each record component of v is determined by invoking the accessor method") — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.30.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.30.2</a>
+10. *The Java Language Specification, Java SE 25*, §6.3.2.2 "`if` Statements" (a pattern variable introduced "when false" is in scope after an `if` whose body cannot complete normally) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3.2.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3.2.2</a>
+11. JEP 456: Unnamed Variables & Patterns (JDK 22) — <a href="https://openjdk.org/jeps/456" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/456</a>
 
 ---
 

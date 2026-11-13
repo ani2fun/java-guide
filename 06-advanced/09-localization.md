@@ -58,7 +58,7 @@ This lesson uses [nested classes](/synapse/programming-languages/java/robust-oop
 
 ## 1. Locales
 
-A **`Locale`** names a language, and usually a region too <abbr title="Java SE 25 API, java.util.Locale">[1]</abbr>. It holds no rules of its own; it's a key that locale-sensitive methods use to look up their rules. Two parts matter most:
+A **`Locale`** names a language, and usually a region too <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Locale.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Locale">[1]</abbr></a>. It holds no rules of its own; it's a key that locale-sensitive methods use to look up their rules. Two parts matter most:
 
 - the **language**, a lowercase code such as `fr` (French) or `de` (German);
 - the **country**, an uppercase code such as `FR` (France) or `CA` (Canada).
@@ -67,7 +67,7 @@ French in France and French in Canada share a language but differ in the details
 
 There are three ways to get one:
 
-- `Locale.of("fr", "FR")` — from the parts (Java 19 and later; the `new Locale(…)` constructors are deprecated) <abbr title="Java SE 25 API, java.util.Locale, Obtaining a Locale">[1]</abbr>;
+- `Locale.of("fr", "FR")` — from the parts (Java 19 and later; the `new Locale(…)` constructors are deprecated) <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Locale.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Locale, Obtaining a Locale">[1]</abbr></a>;
 - `Locale.forLanguageTag("fr-CA")` — from a tag, such as one a web browser sends;
 - a constant: `Locale.US`, `Locale.FRANCE`, `Locale.GERMANY`, `Locale.JAPAN`.
 
@@ -105,9 +105,9 @@ japonais (Japon)
 
 - `toString()` joins the parts with an underscore (`fr_FR`), while `toLanguageTag()` gives the hyphen form.
 - `getDisplayName` names a locale *in* another locale: France's own name for itself is `français (France)`.
-- The last line is **`Locale.ROOT`**, the locale with no language and no country. Its tag is `und`, for "undetermined". It's the neutral locale for output that isn't meant for any one audience <abbr title="Java SE 25 API, java.util.Locale.ROOT">[1]</abbr>.
+- The last line is **`Locale.ROOT`**, the locale with no language and no country. Its tag is `und`, for "undetermined". It's the neutral locale for output that isn't meant for any one audience <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Locale.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Locale.ROOT">[1]</abbr></a>.
 
-Every JVM also has a **default locale**, set at startup from the operating system <abbr title="Java SE 25 API, java.util.Locale, Default Locale">[1]</abbr>, so it differs from machine to machine:
+Every JVM also has a **default locale**, set at startup from the operating system <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Locale.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Locale, Default Locale">[1]</abbr></a>, so it differs from machine to machine:
 
 ```java run
 import java.util.Locale;
@@ -127,7 +127,7 @@ default locale: en_US
 ```
 
 **Intuition.**
-*Mechanism.* `forLanguageTag` reads a **BCP 47** language tag — the web standard — which separates its parts with hyphens. It skips the first part it can't read, along with every part after it <abbr title="Java SE 25 API, java.util.Locale.forLanguageTag">[1]</abbr>. A bad tag never makes it throw.
+*Mechanism.* `forLanguageTag` reads a **BCP 47** language tag — the web standard — which separates its parts with hyphens. It skips the first part it can't read, along with every part after it <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Locale.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Locale.forLanguageTag">[1]</abbr></a>. A bad tag never makes it throw.
 
 *Watch out: an underscore in a tag.* `fr_FR` is how a locale *prints*, not how a tag is written. As a tag, that whole string is one unreadable part:
 
@@ -167,7 +167,7 @@ The cost is one extra check. The payoff is that a malformed tag fails where you 
 
 ## 2. Numbers, money and percentages
 
-**`NumberFormat`** (in `java.text`) formats numbers according to a locale's rules. You never build the rules yourself; you just ask for a formatter <abbr title="Java SE 25 API, java.text.NumberFormat">[2]</abbr>:
+**`NumberFormat`** (in `java.text`) formats numbers according to a locale's rules. You never build the rules yourself; you just ask for a formatter <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/NumberFormat.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.text.NumberFormat">[2]</abbr></a>:
 
 - `getInstance(locale)` — a plain number;
 - `getCurrencyInstance(locale)` — an amount of money, with the currency symbol;
@@ -207,7 +207,7 @@ fr_FR: 1 234 567,891 | 1 234,50 € | 75 %
 - Swiss German groups digits with an apostrophe-like `’`;
 - France groups digits with a space, and puts `€` after the amount.
 
-These rules come from the **CLDR**, the Unicode Consortium's shared locale data, which the JDK has used by default since Java 9 <abbr title="JEP 252: Use CLDR Locale Data by Default">[9]</abbr>.
+These rules come from the **CLDR**, the Unicode Consortium's shared locale data, which the JDK has used by default since Java 9 <a href="https://openjdk.org/jeps/252" target="_blank" rel="noopener noreferrer"><abbr title="JEP 252: Use CLDR Locale Data by Default">[9]</abbr></a>.
 
 **Intuition.**
 *Mechanism.* The "spaces" in the French line aren't the ordinary space character. CLDR uses a **no-break space** there, so that a line break can't split `1 234` in two. France groups digits with U+202F, the *narrow* no-break space.
@@ -245,7 +245,7 @@ U+202F U+00A0 U+20AC
 
 The two strings look identical on screen, yet `equals` says `false`. The printed one holds U+202F between the digit groups, and U+00A0 — the ordinary no-break space — before `€`. A test that compares formatted output against a typed string fails for this reason alone.
 
-**Parsing is locale-sensitive too.** `parse` reads text back into a number, following the same locale's rules. It reads from the start of the text, and by default it stops at the first character it can't use <abbr title="Java SE 25 API, java.text.NumberFormat.parse">[2]</abbr>. If the text doesn't start with a number, it throws the checked `ParseException`:
+**Parsing is locale-sensitive too.** `parse` reads text back into a number, following the same locale's rules. It reads from the start of the text, and by default it stops at the first character it can't use <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/NumberFormat.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.text.NumberFormat.parse">[2]</abbr></a>. If the text doesn't start with a number, it throws the checked `ParseException`:
 
 ```java run
 import java.text.NumberFormat;
@@ -277,7 +277,7 @@ Exception in thread "main" java.text.ParseException: Unparseable number: "abc"
 
 In France, the comma is the decimal separator, so `"1,234"` means one point two three four, not a thousand. `"12abc"` gave `12` without complaint, because parsing simply stopped at `a`. Only text with no number at its start throws.
 
-That forgiving behaviour is called **lenient** parsing, and it's the default. Since JDK 23, you can ask for **strict** parsing instead: `setStrict(true)` makes `parse` reject text that has anything left over after the number <abbr title="Java SE 25 API, java.text.NumberFormat (Leniency; setStrict, since 23)">[2]</abbr>:
+That forgiving behaviour is called **lenient** parsing, and it's the default. Since JDK 23, you can ask for **strict** parsing instead: `setStrict(true)` makes `parse` reject text that has anything left over after the number <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/NumberFormat.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.text.NumberFormat (Leniency; setStrict, since 23)">[2]</abbr></a>:
 
 ```java run
 import java.text.NumberFormat;
@@ -305,7 +305,7 @@ Exception in thread "main" java.text.ParseException: Unparseable number: "12abc"
 
 Use strict parsing when you check user input: `"12abc"` is a typo, not the number 12.
 
-**Money is two things: an amount and a currency.** A currency formatter takes its currency from the locale's *country*, not from your data. `Currency` (in `java.util`) names a currency by its ISO 4217 code, such as `EUR`, and `Currency.getInstance(locale)` gives you the currency of a locale's country <abbr title="Java SE 25 API, java.util.Currency">[3]</abbr>:
+**Money is two things: an amount and a currency.** A currency formatter takes its currency from the locale's *country*, not from your data. `Currency` (in `java.util`) names a currency by its ISO 4217 code, such as `EUR`, and `Currency.getInstance(locale)` gives you the currency of a locale's country <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Currency.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Currency">[3]</abbr></a>:
 
 ```java run
 import java.text.NumberFormat;
@@ -347,7 +347,7 @@ JPY has 0 decimal places
 
 - A price in euros printed as `$1,234.50`: the amount was right, but the currency was a lie. `setCurrency` keeps the US layout, with the euro sign.
 - The yen has no minor unit, so a yen amount has no decimal places.
-- The formatters use **half-even** rounding <abbr title="Java SE 25 API, java.text.NumberFormat, Implementation Requirements">[2]</abbr>, so a value exactly halfway goes to its even neighbour: `2.5` to `2`, and `3.5` to `4`.
+- The formatters use **half-even** rounding <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/NumberFormat.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.text.NumberFormat, Implementation Requirements">[2]</abbr></a>, so a value exactly halfway goes to its even neighbour: `2.5` to `2`, and `3.5` to `4`.
 - `getCompactNumberInstance` (Java 12) writes short forms such as `1M`, for display.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
@@ -362,7 +362,7 @@ The cost is carrying a locale and a currency through the program. The payoff is 
 
 ## 3. Dates and times in a locale
 
-In [Dates & Times](/synapse/programming-languages/java/core-libraries/dates-and-times), you wrote patterns such as `dd/MM/yyyy`. A pattern fixes the order of the fields — but the order is itself local: the United States writes the month first. A **localized formatter** takes the order from the locale as well, so all you pick is a **`FormatStyle`**: `FULL`, `LONG`, `MEDIUM` or `SHORT` <abbr title="Java SE 25 API, java.time.format.DateTimeFormatter.ofLocalizedDate">[4]</abbr>.
+In [Dates & Times](/synapse/programming-languages/java/core-libraries/dates-and-times), you wrote patterns such as `dd/MM/yyyy`. A pattern fixes the order of the fields — but the order is itself local: the United States writes the month first. A **localized formatter** takes the order from the locale as well, so all you pick is a **`FormatStyle`**: `FULL`, `LONG`, `MEDIUM` or `SHORT` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/format/DateTimeFormatter.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.format.DateTimeFormatter.ofLocalizedDate">[4]</abbr></a>.
 
 ```java run
 import java.time.LocalDate;
@@ -397,7 +397,7 @@ SHORT: 3/5/24 | 05.03.24 | 05/03/2024
 **Analysis.** The same date in `SHORT` style is `3/5/24` in the United States, and `05/03/2024` in France. Read with the wrong convention, that's 3 May. The day and month names get translated too: `Dienstag, 5. März` in German, `mardi 5 mars` in French.
 
 **Intuition.**
-*Mechanism.* A localized style is a pattern that the locale's data chooses for you. The `FULL` and `LONG` date-time styles "typically require a time-zone" <abbr title="Java SE 25 API, java.time.format.DateTimeFormatter.ofLocalizedDateTime">[4]</abbr>, and a `LocalDateTime` has no zone to print.
+*Mechanism.* A localized style is a pattern that the locale's data chooses for you. The `FULL` and `LONG` date-time styles "typically require a time-zone" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/format/DateTimeFormatter.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.time.format.DateTimeFormatter.ofLocalizedDateTime">[4]</abbr></a>, and a `LocalDateTime` has no zone to print.
 
 *Concrete bite.* `MEDIUM` works fine with a `LocalDateTime`, but `FULL` stops the program (and `LONG` fails the same way):
 
@@ -429,7 +429,7 @@ Exception in thread "main" java.time.DateTimeException: Unable to extract ZoneId
 
 Use a `ZonedDateTime` for `FULL` or `LONG` date-times, or stick with `MEDIUM` and `SHORT`.
 
-*Watch out: typing the output back in.* Since JDK 20, US English times put a **narrow no-break space** (U+202F) before `AM` and `PM`, a change that came with the move to CLDR version 42 <abbr title="JDK-8284840: Update CLDR to Version 42.0 (JDK 20)">[10]</abbr>. A formatter can parse its own output, but it rejects the same time typed with an ordinary space:
+*Watch out: typing the output back in.* Since JDK 20, US English times put a **narrow no-break space** (U+202F) before `AM` and `PM`, a change that came with the move to CLDR version 42 <a href="https://bugs.openjdk.org/browse/JDK-8284840" target="_blank" rel="noopener noreferrer"><abbr title="JDK-8284840: Update CLDR to Version 42.0 (JDK 20)">[10]</abbr></a>. A formatter can parse its own output, but it rejects the same time typed with an ordinary space:
 
 ```java run
 import java.time.LocalTime;
@@ -475,7 +475,7 @@ The cost is two formats per date, one for people and one for programs. The payof
 
 ## 4. Resource bundles: translated text
 
-Numbers and dates follow rules. Words don't: someone has to translate "Hello". A **`ResourceBundle`** holds one language's text as key–value pairs. The program asks for a key, and the bundle for the reader's locale supplies the answer <abbr title="Java SE 25 API, java.util.ResourceBundle">[5]</abbr>.
+Numbers and dates follow rules. Words don't: someone has to translate "Hello". A **`ResourceBundle`** holds one language's text as key–value pairs. The program asks for a key, and the bundle for the reader's locale supplies the answer <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ResourceBundle.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.ResourceBundle">[5]</abbr></a>.
 
 Bundles form a family that shares a **base name**, with the locale in each member's name:
 
@@ -483,7 +483,7 @@ Bundles form a family that shares a **base name**, with the locale in each membe
 - `Messages_fr` — French;
 - `Messages_fr_CA` — Canadian French, holding only what differs from `Messages_fr`.
 
-A bundle is usually a `.properties` file, as shown below. But each Run button compiles a single file, so the runnable examples use a **`ListResourceBundle`** instead. That's a bundle written as a class, which returns its pairs from the abstract method `getContents()` <abbr title="Java SE 25 API, java.util.ListResourceBundle">[6]</abbr>. Here, the bundles are nested classes of `Main`, so their names start with `Main$`:
+A bundle is usually a `.properties` file, as shown below. But each Run button compiles a single file, so the runnable examples use a **`ListResourceBundle`** instead. That's a bundle written as a class, which returns its pairs from the abstract method `getContents()` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ListResourceBundle.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.ListResourceBundle">[6]</abbr></a>. Here, the bundles are nested classes of `Main`, so their names start with `Main$`:
 
 ```java run
 import java.util.List;
@@ -537,7 +537,7 @@ de-DE: Hello, Goodbye   (bundle )
 - `de-DE` found no German bundle at all, and fell back to the base bundle.
 
 **Intuition.**
-*Mechanism.* `getBundle` builds a list of candidate names from the requested locale: `Messages_de_DE`, then `Messages_de`. If none of them exists, it doesn't go to the base bundle just yet. Instead, it builds a second list from the **default locale**, and searches again. Only after that does it take the base bundle <abbr title="Java SE 25 API, ResourceBundle.getBundle, the lookup algorithm">[5]</abbr>.
+*Mechanism.* `getBundle` builds a list of candidate names from the requested locale: `Messages_de_DE`, then `Messages_de`. If none of them exists, it doesn't go to the base bundle just yet. Instead, it builds a second list from the **default locale**, and searches again. Only after that does it take the base bundle <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ResourceBundle.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, ResourceBundle.getBundle, the lookup algorithm">[5]</abbr></a>.
 
 *Concrete bite: the server's locale leaks into the reply.* Here, a German user asks a server whose default locale is French:
 
@@ -583,7 +583,7 @@ without the fallback: Hello
 
 The German user got French, because the *server* was French. The same code on a server in New York would answer in English. `getNoFallbackControl` switches off the default-locale step, so a missing language always gets the base bundle.
 
-Ask for a key that no bundle in the chain holds, and you get the unchecked `MissingResourceException` <abbr title="Java SE 25 API, ResourceBundle.getString">[5]</abbr>:
+Ask for a key that no bundle in the chain holds, and you get the unchecked `MissingResourceException` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ResourceBundle.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, ResourceBundle.getString">[5]</abbr></a>:
 
 ```java run
 import java.util.ListResourceBundle;
@@ -615,7 +615,7 @@ Exception in thread "main" java.util.MissingResourceException: Can't find resour
 
 A misspelled key compiles fine, and fails only when that line runs. The base bundle is where every key must exist.
 
-**Bundles as `.properties` files.** In a real project, each bundle is a text file of `key=value` lines, found on the classpath by the same names. Since Java 9 <abbr title="JEP 226: UTF-8 Property Resource Bundles (JDK 9)">[13]</abbr>, these files are read as UTF-8, with a fallback to ISO-8859-1 <abbr title="Java SE 25 API, java.util.PropertyResourceBundle">[7]</abbr>, so you can type `ç` as-is. Here's a terminal session with two files:
+**Bundles as `.properties` files.** In a real project, each bundle is a text file of `key=value` lines, found on the classpath by the same names. Since Java 9 <a href="https://openjdk.org/jeps/226" target="_blank" rel="noopener noreferrer"><abbr title="JEP 226: UTF-8 Property Resource Bundles (JDK 9)">[13]</abbr></a>, these files are read as UTF-8, with a fallback to ISO-8859-1 <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/PropertyResourceBundle.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.PropertyResourceBundle">[7]</abbr></a>, so you can type `ç` as-is. Here's a terminal session with two files:
 
 ```
 $ cat Messages.properties
@@ -654,7 +654,7 @@ The cost is a longer `getBundle` call. The payoff is that what a user reads depe
 
 ## 5. Sentences with values: `MessageFormat`
 
-A translated sentence often has values inside it, and word order differs between languages: in French, "Ada has 12 new messages" puts the number first. Gluing strings together with `+` bakes the English word order into the code. **`MessageFormat`** (in `java.text`) puts the order into the translated text instead <abbr title="Java SE 25 API, java.text.MessageFormat">[8]</abbr>:
+A translated sentence often has values inside it, and word order differs between languages: in French, "Ada has 12 new messages" puts the number first. Gluing strings together with `+` bakes the English word order into the code. **`MessageFormat`** (in `java.text`) puts the order into the translated text instead <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/MessageFormat.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.text.MessageFormat">[8]</abbr></a>:
 
 - `{0}`, `{1}`, … are **placeholders** — argument 0, argument 1 — in any order in the pattern;
 - `{1,number,percent}` formats an argument with a type and a style; the types are `number`, `date`, `time` and `choice`.
@@ -694,7 +694,7 @@ Ada hat 1.234 neue Nachrichten
 **Analysis.** The arguments are the same in every language, and each pattern places them wherever its grammar wants them. A number with no type is formatted by the pattern's locale, so `1234` became `1,234` in English and `1.234` in German. The style `#` means "digits only", with no grouping.
 
 **Intuition.**
-*Mechanism.* In a pattern, the single quote `'` starts and ends a **quoted** section, whose text is copied as-is. To print a single apostrophe, you write two: `''` <abbr title="Java SE 25 API, java.text.MessageFormat, Patterns and Their Interpretation">[8]</abbr>.
+*Mechanism.* In a pattern, the single quote `'` starts and ends a **quoted** section, whose text is copied as-is. To print a single apostrophe, you write two: `''` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/MessageFormat.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.text.MessageFormat, Patterns and Their Interpretation">[8]</abbr></a>.
 
 *Concrete bite: the apostrophe trap.* English is full of apostrophes, and each one opens a quote:
 
@@ -728,7 +728,7 @@ Copyright 2,024
 - In `It's {0}'s turn`, the first `'` quoted all the text up to the second `'`. So `{0}` was copied as plain text, and both apostrophes vanished.
 - A year passed as a number gets grouped like any other number: `Copyright 2,024`. Use `{0,number,#}`, or pass the year as a String.
 
-**Plurals.** "1 files" is wrong, and the `choice` type solves this by picking the text based on the number. Each option is `limit#text`, where `#` means "from this value" and `<` means "above this value" <abbr title="Java SE 25 API, java.text.MessageFormat, choice">[8]</abbr>:
+**Plurals.** "1 files" is wrong, and the `choice` type solves this by picking the text based on the number. Each option is `limit#text`, where `#` means "from this value" and `<` means "above this value" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/MessageFormat.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.text.MessageFormat, choice">[8]</abbr></a>:
 
 ```java run
 import java.text.MessageFormat;
@@ -769,7 +769,7 @@ The cost is escaping apostrophes by hand. The payoff is that a translator can re
 
 ## 6. The default locale in ordinary code
 
-Many everyday methods are locale-sensitive, yet take no locale: `String.format`, `toUpperCase`, `toLowerCase`, and `MessageFormat.format`. Each of them uses the **default** locale <abbr title="Java SE 25 API, String.format and Locale.Category.FORMAT">[11]</abbr>. That's right for text a person reads on this machine. But it's wrong for text a program reads, because the output changes from machine to machine.
+Many everyday methods are locale-sensitive, yet take no locale: `String.format`, `toUpperCase`, `toLowerCase`, and `MessageFormat.format`. Each of them uses the **default** locale <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#format(java.lang.String,java.lang.Object...)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, String.format and Locale.Category.FORMAT">[11]</abbr></a>. That's right for text a person reads on this machine. But it's wrong for text a program reads, because the output changes from machine to machine.
 
 ```java run
 import java.util.Locale;
@@ -802,7 +802,7 @@ false
 **Analysis.**
 
 - On a German machine, `%.2f` wrote a decimal comma. The comma-separated line `1234,50,EUR` now has three fields, so the program that reads it gets `1234`, `50` and `EUR`. `Locale.ROOT`, on the other hand, wrote `1234.50` on every machine.
-- Turkish has both a dotted and a dotless `i`. In Turkish, `toUpperCase` turns `i` into `İ`, and `toLowerCase` turns `I` into `ı` <abbr title="Java SE 25 API, String.toLowerCase(): the Turkish &quot;TITLE&quot; example">[12]</abbr>. So a key compared after `toLowerCase()` stops matching on a Turkish machine.
+- Turkish has both a dotted and a dotless `i`. In Turkish, `toUpperCase` turns `i` into `İ`, and `toLowerCase` turns `I` into `ı` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#toLowerCase()" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, String.toLowerCase(): the Turkish &quot;TITLE&quot; example">[12]</abbr></a>. So a key compared after `toLowerCase()` stops matching on a Turkish machine.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -878,7 +878,7 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>Why does <code>NumberFormat.getInstance(Locale.FRANCE).parse("1,234")</code> return <code>1.234</code>, and how do you get one thousand two hundred and thirty-four?</summary>
 
-In French, the comma is the **decimal** separator, so `1,234` reads as one point two three four <abbr title="Java SE 25 API, java.text.NumberFormat">[2]</abbr>. The US grouping comma means nothing to a French parser.
+In French, the comma is the **decimal** separator, so `1,234` reads as one point two three four <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/NumberFormat.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.text.NumberFormat">[2]</abbr></a>. The US grouping comma means nothing to a French parser.
 
 The text itself is ambiguous; only its locale says what it means. So parse it with the locale it was written in: `NumberFormat.getInstance(Locale.US).parse("1,234")` returns `1234`.
 
@@ -888,19 +888,19 @@ The text itself is ambiguous; only its locale says what it means. So parse it wi
 
 ## 📚 Sources
 
-1. `java.util.Locale`, Java SE 25 API (`Locale.of` since 19; deprecated constructors; `forLanguageTag` ignores the first ill-formed subtag and all after it; `ROOT`; the default locale) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Locale.html>
-2. `java.text.NumberFormat`, Java SE 25 API (`parse` reads "from the beginning of the given string"; "by default, parses leniently"; `setStrict` since 23; `ParseException`; half-even rounding; `getCompactNumberInstance` since 12) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/NumberFormat.html>
-3. `java.util.Currency`, Java SE 25 API (ISO 4217 codes; `getDefaultFractionDigits`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Currency.html>
-4. `java.time.format.DateTimeFormatter`, Java SE 25 API (`ofLocalizedDate`, `ofLocalizedDateTime`; "The `FULL` and `LONG` styles typically require a time-zone") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/format/DateTimeFormatter.html>
-5. `java.util.ResourceBundle`, Java SE 25 API (candidate bundle names; the default-locale fallback from `getFallbackLocale`; the base name as last resort; `MissingResourceException`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ResourceBundle.html>
-6. `java.util.ListResourceBundle`, Java SE 25 API (`getContents` returns the key–value pairs) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ListResourceBundle.html>
-7. `java.util.PropertyResourceBundle`, Java SE 25 API (input "encoded in UTF-8", re-read in ISO-8859-1 on a malformed sequence) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/PropertyResourceBundle.html>
-8. `java.text.MessageFormat`, Java SE 25 API (quoting: "a single quote itself must be represented by doubled single quotes"; format types and styles; `choice`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/MessageFormat.html>
-9. JEP 252: Use CLDR Locale Data by Default (JDK 9) — <https://openjdk.org/jeps/252>
-10. JDK-8284840: Update CLDR to Version 42.0 (fixed in JDK 20; CLDR-14032, "NBSP/NNBSP prefixed to AM/PM in time format") — <https://bugs.openjdk.org/browse/JDK-8284840>
-11. `java.lang.String.format` and `java.util.Locale.Category.FORMAT`, Java SE 25 API (`format(String, Object...)` uses the default `FORMAT` locale) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#format(java.lang.String,java.lang.Object...)>
-12. `java.lang.String.toLowerCase()`, Java SE 25 API ("TITLE".toLowerCase() in a Turkish locale returns "tıtle") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#toLowerCase()>
-13. JEP 226: UTF-8 Property Resource Bundles (JDK 9) — <https://openjdk.org/jeps/226>
+1. `java.util.Locale`, Java SE 25 API (`Locale.of` since 19; deprecated constructors; `forLanguageTag` ignores the first ill-formed subtag and all after it; `ROOT`; the default locale) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Locale.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Locale.html</a>
+2. `java.text.NumberFormat`, Java SE 25 API (`parse` reads "from the beginning of the given string"; "by default, parses leniently"; `setStrict` since 23; `ParseException`; half-even rounding; `getCompactNumberInstance` since 12) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/NumberFormat.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/NumberFormat.html</a>
+3. `java.util.Currency`, Java SE 25 API (ISO 4217 codes; `getDefaultFractionDigits`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Currency.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Currency.html</a>
+4. `java.time.format.DateTimeFormatter`, Java SE 25 API (`ofLocalizedDate`, `ofLocalizedDateTime`; "The `FULL` and `LONG` styles typically require a time-zone") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/format/DateTimeFormatter.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/time/format/DateTimeFormatter.html</a>
+5. `java.util.ResourceBundle`, Java SE 25 API (candidate bundle names; the default-locale fallback from `getFallbackLocale`; the base name as last resort; `MissingResourceException`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ResourceBundle.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ResourceBundle.html</a>
+6. `java.util.ListResourceBundle`, Java SE 25 API (`getContents` returns the key–value pairs) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ListResourceBundle.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ListResourceBundle.html</a>
+7. `java.util.PropertyResourceBundle`, Java SE 25 API (input "encoded in UTF-8", re-read in ISO-8859-1 on a malformed sequence) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/PropertyResourceBundle.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/PropertyResourceBundle.html</a>
+8. `java.text.MessageFormat`, Java SE 25 API (quoting: "a single quote itself must be represented by doubled single quotes"; format types and styles; `choice`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/MessageFormat.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/text/MessageFormat.html</a>
+9. JEP 252: Use CLDR Locale Data by Default (JDK 9) — <a href="https://openjdk.org/jeps/252" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/252</a>
+10. JDK-8284840: Update CLDR to Version 42.0 (fixed in JDK 20; CLDR-14032, "NBSP/NNBSP prefixed to AM/PM in time format") — <a href="https://bugs.openjdk.org/browse/JDK-8284840" target="_blank" rel="noopener noreferrer">https://bugs.openjdk.org/browse/JDK-8284840</a>
+11. `java.lang.String.format` and `java.util.Locale.Category.FORMAT`, Java SE 25 API (`format(String, Object...)` uses the default `FORMAT` locale) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#format(java.lang.String,java.lang.Object...)" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#format(java.lang.String,java.lang.Object...)</a>
+12. `java.lang.String.toLowerCase()`, Java SE 25 API ("TITLE".toLowerCase() in a Turkish locale returns "tıtle") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#toLowerCase()" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html#toLowerCase()</a>
+13. JEP 226: UTF-8 Property Resource Bundles (JDK 9) — <a href="https://openjdk.org/jeps/226" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/226</a>
 
 ---
 

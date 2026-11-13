@@ -57,7 +57,7 @@ This lesson takes a deeper pass at [concurrency basics](/synapse/programming-lan
 
 ## 1. `ExecutorService` and `Future`
 
-Instead of creating `Thread`s by hand, you **submit** tasks to an `ExecutorService`, which is a managed thread pool. Each `submit` returns a `Future`: a handle to a result that may not exist yet. Calling `get()` blocks until it does <abbr title="Java SE 25 API, java.util.concurrent.ExecutorService and Future">[1]</abbr>.
+Instead of creating `Thread`s by hand, you **submit** tasks to an `ExecutorService`, which is a managed thread pool. Each `submit` returns a `Future`: a handle to a result that may not exist yet. Calling `get()` blocks until it does <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ExecutorService.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.concurrent.ExecutorService and Future">[1]</abbr></a>.
 
 ```java run
 import java.util.concurrent.*;
@@ -111,7 +111,7 @@ pool.w1 -> result: "completes"
 - The diagram shows the model: tasks queue up, idle workers pull them off and run them, and the `Future` is how you retrieve each result.
 - `shutdown()` lets the pool finish its work and stop. Without it, the pool's threads would keep the JVM alive.
 
-**Two kinds of task.** A lambda that returns a value is a **`Callable<V>`**, whose one method is `V call() throws Exception`. A lambda that returns nothing is a `Runnable`. The API sums up the difference in one sentence: "A `Runnable`, however, does not return a result and cannot throw a checked exception" <abbr title="Java SE 25 API, java.util.concurrent.Callable">[2]</abbr>. That's why `submit(runnable)` gives you a `Future<?>` whose `get()` returns `null`:
+**Two kinds of task.** A lambda that returns a value is a **`Callable<V>`**, whose one method is `V call() throws Exception`. A lambda that returns nothing is a `Runnable`. The API sums up the difference in one sentence: "A `Runnable`, however, does not return a result and cannot throw a checked exception" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/Callable.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.concurrent.Callable">[2]</abbr></a>. That's why `submit(runnable)` gives you a `Future<?>` whose `get()` returns `null`:
 
 ```java run
 import java.util.concurrent.Callable;
@@ -206,7 +206,7 @@ Shutting down involves three distinct methods, and production code uses all thre
 - `shutdownNow()` also interrupts running tasks, and returns the ones that never started.
 - `awaitTermination(timeout)` is how the caller *waits* for the wind-down.
 
-Note that neither `shutdown()` nor `shutdownNow()` waits by itself <abbr title="Java SE 25 API, java.util.concurrent.ExecutorService">[1]</abbr>:
+Note that neither `shutdown()` nor `shutdownNow()` waits by itself <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ExecutorService.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.concurrent.ExecutorService">[1]</abbr></a>:
 
 ```java run
 import java.util.concurrent.*;
@@ -245,7 +245,7 @@ awaitTermination returned true: isTerminated=true
 
 `isShutdown` flipped immediately, because intake closed. `isTerminated` stayed `false` while the four queued tasks drained through the two workers. It became `true` only after `awaitTermination` saw the last task finish. The graceful-shutdown idiom is this sequence: `shutdown()`, then `awaitTermination(deadline)`, and `shutdownNow()` only if the deadline passes.
 
-Since Java 19, an `ExecutorService` is also `AutoCloseable`. Its `close()` "invokes `shutdown()` and waits for tasks to complete" <abbr title="Java SE 25 API, java.util.concurrent.ExecutorService.close() (since 19)">[1]</abbr>, so a `try`-with-resources block handles the whole idiom for you. The `Callable` example above used exactly that.
+Since Java 19, an `ExecutorService` is also `AutoCloseable`. Its `close()` "invokes `shutdown()` and waits for tasks to complete" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ExecutorService.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.concurrent.ExecutorService.close() (since 19)">[1]</abbr></a>, so a `try`-with-resources block handles the whole idiom for you. The `Callable` example above used exactly that.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -287,10 +287,10 @@ public class Main {
 400000
 ```
 
-**Analysis.** It's always exactly 400,000 — the same workload that gave random, too-small totals with a plain `int++` in [the basics lesson](/synapse/programming-languages/java/advanced/concurrency-the-basics). `incrementAndGet()` is atomic, so no two threads interleave inside it, and no update is lost. No thread blocks, either: the package describes itself as "a small toolkit of classes that support lock-free thread-safe programming on single variables" <abbr title="Java SE 25 API, java.util.concurrent.atomic package summary">[3]</abbr>.
+**Analysis.** It's always exactly 400,000 — the same workload that gave random, too-small totals with a plain `int++` in [the basics lesson](/synapse/programming-languages/java/advanced/concurrency-the-basics). `incrementAndGet()` is atomic, so no two threads interleave inside it, and no update is lost. No thread blocks, either: the package describes itself as "a small toolkit of classes that support lock-free thread-safe programming on single variables" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/package-summary.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.concurrent.atomic package summary">[3]</abbr></a>.
 
 **Intuition.**
-*Mechanism.* An `AtomicInteger` holds a value that it updates using the processor's atomic instructions, so each operation is all-or-nothing. Each one also has the memory effects of a `volatile` read or write <abbr title="Java SE 25 API, java.util.concurrent.atomic.AtomicInteger">[4]</abbr>, so it's both atomic *and* visible, without a lock.
+*Mechanism.* An `AtomicInteger` holds a value that it updates using the processor's atomic instructions, so each operation is all-or-nothing. Each one also has the memory effects of a `volatile` read or write <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/AtomicInteger.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.concurrent.atomic.AtomicInteger">[4]</abbr></a>, so it's both atomic *and* visible, without a lock.
 
 *Concrete bite.* Atomicity applies per *operation*. `get()` is atomic, and `set()` is atomic, but the pair `counter.set(counter.get() + 1)` isn't. Another thread can change the value between the `get` and the `set`:
 
@@ -353,7 +353,7 @@ false -> 4
 
 The second `compareAndSet` failed: it expected `5`, but the value was `4`. So it changed nothing, and said so.
 
-The same idea applies to collections. The `HashMap` docs require that a map changed by several threads "must be synchronized externally" <abbr title="Java SE 25 API, java.util.HashMap">[5]</abbr>. **`ConcurrentHashMap`** is the safe replacement, with atomic compound operations such as `merge` and `computeIfAbsent` <abbr title="Java SE 25 API, java.util.concurrent.ConcurrentHashMap">[6]</abbr>. Here, four threads count words into one shared map:
+The same idea applies to collections. The `HashMap` docs require that a map changed by several threads "must be synchronized externally" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashMap.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.HashMap">[5]</abbr></a>. **`ConcurrentHashMap`** is the safe replacement, with atomic compound operations such as `merge` and `computeIfAbsent` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.concurrent.ConcurrentHashMap">[6]</abbr></a>. Here, four threads count words into one shared map:
 
 ```java run
 import java.util.Map;
@@ -423,7 +423,7 @@ public class Main {
 42
 ```
 
-**Analysis.** `supplyAsync(() -> 21)` ran a task on a pool — the `ForkJoinPool.commonPool()`, unless you pass in an executor <abbr title="Java SE 25 API, java.util.concurrent.CompletableFuture.supplyAsync(Supplier)">[7]</abbr> — and produced `21`. `thenApply(n -> n * 2)` scheduled a *follow-up* that runs once the first step completes, giving `42`. The pipeline reads like a [stream](/synapse/programming-languages/java/advanced/functional-java-and-streams), but over *asynchronous* values. Each stage is a callback wired to its predecessor's completion, so nothing blocks until the final `get()`.
+**Analysis.** `supplyAsync(() -> 21)` ran a task on a pool — the `ForkJoinPool.commonPool()`, unless you pass in an executor <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.concurrent.CompletableFuture.supplyAsync(Supplier)">[7]</abbr></a> — and produced `21`. `thenApply(n -> n * 2)` scheduled a *follow-up* that runs once the first step completes, giving `42`. The pipeline reads like a [stream](/synapse/programming-languages/java/advanced/functional-java-and-streams), but over *asynchronous* values. Each stage is a callback wired to its predecessor's completion, so nothing blocks until the final `get()`.
 
 The real power shows up when the pipeline branches and rejoins:
 
@@ -595,7 +595,7 @@ The cost is a richer API, plus careful exception handling (`exceptionally`, `han
 
 A platform thread maps to an OS thread, with a large stack: 1024 KB or 2048 KB by default, depending on the platform ([the basics lesson](/synapse/programming-languages/java/advanced/concurrency-the-basics) lists them). That means you can have thousands of them, but not millions.
 
-A **virtual thread**, final as of JDK 21 <abbr title="JEP 444: Virtual Threads (JDK 21)">[8]</abbr>, is scheduled by the JVM onto a small pool of OS threads, called its **carriers**. It *unmounts* from its carrier whenever it blocks, so blocking is nearly free, and you can run **millions** of them. Here, 10,000 virtual threads each sleep for 10 ms:
+A **virtual thread**, final as of JDK 21 <a href="https://openjdk.org/jeps/444" target="_blank" rel="noopener noreferrer"><abbr title="JEP 444: Virtual Threads (JDK 21)">[8]</abbr></a>, is scheduled by the JVM onto a small pool of OS threads, called its **carriers**. It *unmounts* from its carrier whenever it blocks, so blocking is nearly free, and you can run **millions** of them. Here, 10,000 virtual threads each sleep for 10 ms:
 
 ```java run
 import java.util.concurrent.*;
@@ -665,7 +665,7 @@ virtual:        64 ms
 
 100 platform threads run the sleeps in batches of 100, and 100 batches × 10 ms comes to at least 1 second. The virtual threads, on the other hand, all slept at once.
 
-A virtual thread is still a `Thread`. `Thread.ofVirtual()` builds one, and `isVirtual()` tells the two kinds apart. But one difference can bite: "Virtual threads are daemon threads" <abbr title="Java SE 25 API, java.lang.Thread, &quot;Virtual threads&quot;">[9]</abbr>, so they don't keep the JVM alive. Always `join` them, or close their executor:
+A virtual thread is still a `Thread`. `Thread.ofVirtual()` builds one, and `isVirtual()` tells the two kinds apart. But one difference can bite: "Virtual threads are daemon threads" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Thread.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.lang.Thread, &quot;Virtual threads&quot;">[9]</abbr></a>, so they don't keep the JVM alive. Always `join` them, or close their executor:
 
 ```java run
 import static java.lang.IO.println;
@@ -692,7 +692,7 @@ inside: isVirtual=true
 
 A virtual thread can't always unmount. When it can't, it's **pinned** to its carrier: if it blocks while pinned, it holds on to that OS thread for the whole wait, quietly costing you the very scalability you came for.
 
-In JDK 21, the common cause was `synchronized`: a virtual thread was pinned "when it executes code inside a `synchronized` block or method" <abbr title="JEP 444: Virtual Threads, &quot;Pinning&quot;">[8]</abbr>. JDK 24 reimplemented monitors, so a virtual thread that blocks inside `synchronized` now unmounts like any other <abbr title="JEP 491: Synchronize Virtual Threads without Pinning (JDK 24)">[10]</abbr>. This program makes the difference visible. It limits the JVM to **one** carrier thread, then runs 100 virtual threads that each sleep for 50 ms while holding a monitor:
+In JDK 21, the common cause was `synchronized`: a virtual thread was pinned "when it executes code inside a `synchronized` block or method" <a href="https://openjdk.org/jeps/444" target="_blank" rel="noopener noreferrer"><abbr title="JEP 444: Virtual Threads, &quot;Pinning&quot;">[8]</abbr></a>. JDK 24 reimplemented monitors, so a virtual thread that blocks inside `synchronized` now unmounts like any other <a href="https://openjdk.org/jeps/491" target="_blank" rel="noopener noreferrer"><abbr title="JEP 491: Synchronize Virtual Threads without Pinning (JDK 24)">[10]</abbr></a>. This program makes the difference visible. It limits the JVM to **one** carrier thread, then runs 100 virtual threads that each sleep for 50 ms while holding a monitor:
 
 ```java run
 import java.util.concurrent.Executors;
@@ -731,7 +731,7 @@ overlapped (under 1 s): true
 
 On JDK 25, each virtual thread unmounted while it slept, even inside `synchronized`, so the 100 sleeps overlapped on the single carrier. We ran the same program on JDK 21, and it printed `overlapped (under 1 s): false`: there, each thread stayed pinned for its whole sleep, so the sleeps ran one after another, and the run took about 5.4 s.
 
-Pinning hasn't gone away entirely. A virtual thread is still pinned when it blocks inside native code that calls back into Java, and in a few cases during class loading and initialization <abbr title="JEP 491: Synchronize Virtual Threads without Pinning (JDK 24)">[10]</abbr>. These are rare in application code. To find them, record a JDK Flight Recorder (JFR) session and look for `jdk.VirtualThreadPinned` events. The JDK 21 flag `-Djdk.tracePinnedThreads` no longer does anything.
+Pinning hasn't gone away entirely. A virtual thread is still pinned when it blocks inside native code that calls back into Java, and in a few cases during class loading and initialization <a href="https://openjdk.org/jeps/491" target="_blank" rel="noopener noreferrer"><abbr title="JEP 491: Synchronize Virtual Threads without Pinning (JDK 24)">[10]</abbr></a>. These are rare in application code. To find them, record a JDK Flight Recorder (JFR) session and look for `jdk.VirtualThreadPinned` events. The JDK 21 flag `-Djdk.tracePinnedThreads` no longer does anything.
 
 **Intuition.**
 *Mechanism.* A virtual thread occupies a carrier OS thread only while it's executing. The moment it blocks (on I/O, `sleep`, or a lock), the JVM *unmounts* it and frees the carrier for another virtual thread. Blocking parks a cheap object rather than an expensive OS thread, so the thread count is limited by memory, not by the OS. A native frame on the stack prevents the unmount; on JDK 21, so did a held monitor.
@@ -746,7 +746,7 @@ The cost: they don't help CPU-bound work, and on JDK 21, blocking inside a monit
 
 </div>
 
-**Scoped values: context without parameters.** A request handler often needs some context, such as the current user, deep inside the code it calls. Passing it as a parameter through every method is noisy. A **scoped value**, final as of JDK 25, binds a value for the duration of one call <abbr title="JEP 506: Scoped Values (JDK 25)">[12]</abbr>. Every method that call reaches can read it, and nothing outside it can:
+**Scoped values: context without parameters.** A request handler often needs some context, such as the current user, deep inside the code it calls. Passing it as a parameter through every method is noisy. A **scoped value**, final as of JDK 25, binds a value for the duration of one call <a href="https://openjdk.org/jeps/506" target="_blank" rel="noopener noreferrer"><abbr title="JEP 506: Scoped Values (JDK 25)">[12]</abbr></a>. Every method that call reaches can read it, and nothing outside it can:
 
 ```java run
 import static java.lang.IO.println;
@@ -781,7 +781,7 @@ Exception in thread "main" java.util.NoSuchElementException: ScopedValue not bou
 
 `where(USER, "alice").run(…)` bound `USER` only while `run` was executing. `audit` read it with `get()`, two calls deep, without a parameter. Once `run` returned, the binding was gone, so the last `audit` call threw. The binding is also immutable: code inside `run` can read `USER`, but it can't change it for its caller. That's what makes a scoped value safe to share with millions of virtual threads.
 
-**Structured concurrency.** One more thing to look out for, because you'll meet it in code review. `StructuredTaskScope` is still a *preview* API in JDK 25 <abbr title="JEP 505: Structured Concurrency (Fifth Preview) (JDK 25)">[11]</abbr>. It needs `--enable-preview`, so this block has no working Run button here. A scope owns its forked subtasks the way a `try` block owns a resource:
+**Structured concurrency.** One more thing to look out for, because you'll meet it in code review. `StructuredTaskScope` is still a *preview* API in JDK 25 <a href="https://openjdk.org/jeps/505" target="_blank" rel="noopener noreferrer"><abbr title="JEP 505: Structured Concurrency (Fifth Preview) (JDK 25)">[11]</abbr></a>. It needs `--enable-preview`, so this block has no working Run button here. A scope owns its forked subtasks the way a `try` block owns a resource:
 
 ```java
 // requires: --enable-preview (a preview API in JDK 25), and fetchUser/fetchScore from your code
@@ -907,18 +907,18 @@ aaa
 
 ## 📚 Sources
 
-1. `java.util.concurrent.ExecutorService` and `Future`, Java SE 25 API (`shutdown`, `shutdownNow`, `awaitTermination`; `close()` since 19) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ExecutorService.html>
-2. `java.util.concurrent.Callable`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/Callable.html>
-3. `java.util.concurrent.atomic` package summary, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/package-summary.html>
-4. `java.util.concurrent.atomic.AtomicInteger`, Java SE 25 API (memory effects as `VarHandle.getVolatile`/`setVolatile`; `compareAndSet`; `updateAndGet`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/AtomicInteger.html>
-5. `java.util.HashMap`, Java SE 25 API ("it must be synchronized externally") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashMap.html>
-6. `java.util.concurrent.ConcurrentHashMap`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html>
-7. `java.util.concurrent.CompletableFuture`, Java SE 25 API (`supplyAsync` runs in `ForkJoinPool.commonPool()`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html>
-8. JEP 444: Virtual Threads (JDK 21; "Pinning") — <https://openjdk.org/jeps/444>
-9. `java.lang.Thread`, Java SE 25 API ("Virtual threads are daemon threads") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Thread.html>
-10. JEP 491: Synchronize Virtual Threads without Pinning (JDK 24; the remaining pinning cases; `jdk.VirtualThreadPinned`; `jdk.tracePinnedThreads` "is no longer needed") — <https://openjdk.org/jeps/491>
-11. JEP 505: Structured Concurrency (Fifth Preview) (JDK 25; `StructuredTaskScope.open()`) — <https://openjdk.org/jeps/505>
-12. JEP 506: Scoped Values (JDK 25) — <https://openjdk.org/jeps/506>
+1. `java.util.concurrent.ExecutorService` and `Future`, Java SE 25 API (`shutdown`, `shutdownNow`, `awaitTermination`; `close()` since 19) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ExecutorService.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ExecutorService.html</a>
+2. `java.util.concurrent.Callable`, Java SE 25 API — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/Callable.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/Callable.html</a>
+3. `java.util.concurrent.atomic` package summary, Java SE 25 API — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/package-summary.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/package-summary.html</a>
+4. `java.util.concurrent.atomic.AtomicInteger`, Java SE 25 API (memory effects as `VarHandle.getVolatile`/`setVolatile`; `compareAndSet`; `updateAndGet`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/AtomicInteger.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/AtomicInteger.html</a>
+5. `java.util.HashMap`, Java SE 25 API ("it must be synchronized externally") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashMap.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HashMap.html</a>
+6. `java.util.concurrent.ConcurrentHashMap`, Java SE 25 API — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html</a>
+7. `java.util.concurrent.CompletableFuture`, Java SE 25 API (`supplyAsync` runs in `ForkJoinPool.commonPool()`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CompletableFuture.html</a>
+8. JEP 444: Virtual Threads (JDK 21; "Pinning") — <a href="https://openjdk.org/jeps/444" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/444</a>
+9. `java.lang.Thread`, Java SE 25 API ("Virtual threads are daemon threads") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Thread.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Thread.html</a>
+10. JEP 491: Synchronize Virtual Threads without Pinning (JDK 24; the remaining pinning cases; `jdk.VirtualThreadPinned`; `jdk.tracePinnedThreads` "is no longer needed") — <a href="https://openjdk.org/jeps/491" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/491</a>
+11. JEP 505: Structured Concurrency (Fifth Preview) (JDK 25; `StructuredTaskScope.open()`) — <a href="https://openjdk.org/jeps/505" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/505</a>
+12. JEP 506: Scoped Values (JDK 25) — <a href="https://openjdk.org/jeps/506" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/506</a>
 
 ---
 

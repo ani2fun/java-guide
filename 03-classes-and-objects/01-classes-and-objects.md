@@ -96,7 +96,7 @@ classDiagram
 
 The fields carry no access modifier, so any class in the same package can reach them. [Encapsulation & Access Modifiers](/synapse/programming-languages/java/classes-and-objects/encapsulation-and-access-modifiers) adds the control that usually hides them.
 
-**Two classes, one file.** This file holds two top-level classes, `Rectangle` and `Main`. A file may hold several, but at most one of them may be `public` <abbr title="The Java Language Specification, Java SE 25, §7.6">[1]</abbr>.
+**Two classes, one file.** This file holds two top-level classes, `Rectangle` and `Main`. A file may hold several, but at most one of them may be `public` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.6" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.6">[1]</abbr></a>.
 
 - Here the `public` one is `Main`, which matches the file name `Main.java`.
 - `javac` still writes one bytecode file per class: `Main.class` and `Rectangle.class`.
@@ -134,7 +134,7 @@ Main.java:10: error: non-static method area() cannot be referenced from a static
 
 ### Fields start at a default value
 
-A field that nothing assigns still holds a value. `new` sets every field to a **default value** that depends on its type <abbr title="The Java Language Specification, Java SE 25, §4.12.5">[2]</abbr>:
+A field that nothing assigns still holds a value. `new` sets every field to a **default value** that depends on its type <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §4.12.5">[2]</abbr></a>:
 
 ```java run
 import static java.lang.IO.println;
@@ -171,7 +171,7 @@ null
 null
 ```
 
-Number fields start at zero, `boolean` at `false`, and `char` at the character with code `0`. Every reference type (`String`, arrays, your own classes) starts at `null`, meaning no object at all. A field may also declare its own start value, as in `int width = 1;` <abbr title="The Java Language Specification, Java SE 25, §8.3.2">[3]</abbr>.
+Number fields start at zero, `boolean` at `false`, and `char` at the character with code `0`. Every reference type (`String`, arrays, your own classes) starts at `null`, meaning no object at all. A field may also declare its own start value, as in `int width = 1;` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.3.2">[3]</abbr></a>.
 
 *Watch out: a local variable gets no default.* The rule covers fields, not a method's local variables. An object variable declared without `new` isn't a usable object:
 
@@ -201,7 +201,7 @@ Main.java:11: error: variable r might not have been initialized
 
 `r` is a local variable, and [Variables & Primitive Types](/synapse/programming-languages/java/first-steps/variables-and-primitive-types) showed that you must assign a local before you read it. Declaring `Rectangle r;` makes a variable, not an object. Only `new Rectangle()` makes the object.
 
-**Printing an object.** `println(r)` doesn't print the fields. Unless the class says otherwise, it prints the class name, `@`, and a hexadecimal hash code <abbr title="java.lang.Object.toString(), Java SE 25 API">[4]</abbr>:
+**Printing an object.** `println(r)` doesn't print the fields. Unless the class says otherwise, it prints the class name, `@`, and a hexadecimal hash code <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#toString()" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.Object.toString(), Java SE 25 API">[4]</abbr></a>:
 
 ```java run
 import static java.lang.IO.println;
@@ -237,7 +237,7 @@ This bundling costs you the ceremony of creating objects before you can use thei
 
 ## 2. Constructors: initializing a new object
 
-Setting fields one by one after `new` is wordy and easy to forget. A **constructor** runs at creation time to initialize the object, so you can build it fully formed in one step. It looks like a method with the class's name and no return type <abbr title="The Java Language Specification, Java SE 25, §8.8">[5]</abbr>.
+Setting fields one by one after `new` is wordy and easy to forget. A **constructor** runs at creation time to initialize the object, so you can build it fully formed in one step. It looks like a method with the class's name and no return type <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.8">[5]</abbr></a>.
 
 ```java run
 import static java.lang.IO.println;
@@ -270,13 +270,13 @@ public class Main {
 A constructor has no return type, not even `void`. Its job is to initialize, and `new` is what returns the object. A constructor isn't a method, so you can't call it by name. `new` runs it, and so can another constructor, as you'll see below.
 
 **Intuition.**
-*Mechanism.* `new` works in a fixed order <abbr title="The Java Language Specification, Java SE 25, §12.5">[6]</abbr>:
+*Mechanism.* `new` works in a fixed order <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.5">[6]</abbr></a>:
 
 1. It allocates the object and sets every field to its default ([§1](#1-a-class-bundles-fields-and-methods)).
 2. It runs the field initializers, such as `int width = 1;`, and then the constructor body.
 3. It returns the reference.
 
-If you write **no** constructor, javac adds a **default constructor**: no parameters, and none of your code <abbr title="The Java Language Specification, Java SE 25, §8.8.9">[7]</abbr>. That's why `new Rectangle()` worked in [§1](#1-a-class-bundles-fields-and-methods). The moment you declare *any* constructor, javac stops adding it.
+If you write **no** constructor, javac adds a **default constructor**: no parameters, and none of your code <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.9" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.8.9">[7]</abbr></a>. That's why `new Rectangle()` worked in [§1](#1-a-class-bundles-fields-and-methods). The moment you declare *any* constructor, javac stops adding it.
 
 *Concrete bite.* So once you add a constructor that takes arguments, you can no longer call `new Rectangle()`:
 
@@ -304,7 +304,7 @@ Main.java:10: error: constructor Rectangle in class Rectangle cannot be applied 
   required: int,int
 ```
 
-Once `Rectangle(int, int)` exists, the default constructor is gone, so `new Rectangle()` has nothing to match. If you want both, declare both. Constructors overload just like methods <abbr title="The Java Language Specification, Java SE 25, §8.8.8">[8]</abbr>. One constructor can hand its work to another with `this(…)`:
+Once `Rectangle(int, int)` exists, the default constructor is gone, so `new Rectangle()` has nothing to match. If you want both, declare both. Constructors overload just like methods <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.8" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.8.8">[8]</abbr></a>. One constructor can hand its work to another with `this(…)`:
 
 ```java run
 import static java.lang.IO.println;
@@ -337,7 +337,7 @@ public class Main {
 
 `new Rectangle(5)` picked the one-parameter constructor. It called `this(5, 5)`, so the two-parameter constructor did the real work.
 
-Before JDK 25, `this(…)` had to be the very first statement of the constructor. JDK 25 relaxed that rule <abbr title="JEP 513: Flexible Constructor Bodies (JDK 25)">[10]</abbr>: statements may now come before `this(…)`, as long as they don't use the object that's being built <abbr title="The Java Language Specification, Java SE 25, §8.8.7">[9]</abbr>. A `println`, a check on a parameter, or a local variable is fine:
+Before JDK 25, `this(…)` had to be the very first statement of the constructor. JDK 25 relaxed that rule <a href="https://openjdk.org/jeps/513" target="_blank" rel="noopener noreferrer"><abbr title="JEP 513: Flexible Constructor Bodies (JDK 25)">[10]</abbr></a>: statements may now come before `this(…)`, as long as they don't use the object that's being built <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.8.7">[9]</abbr></a>. A `println`, a check on a parameter, or a local variable is fine:
 
 ```java run
 import static java.lang.IO.println;
@@ -452,7 +452,7 @@ The cost is that declaring one constructor removes the default one. If some call
 
 ## 3. `this` and per-instance state
 
-You'll often want constructor parameters to have the same names as the fields they set (`width`, `height`). When a parameter and a field share a name, the parameter **shadows** the field <abbr title="The Java Language Specification, Java SE 25, §6.4.1">[11]</abbr>. `this.field` says "the field of the current object", not the parameter.
+You'll often want constructor parameters to have the same names as the fields they set (`width`, `height`). When a parameter and a field share a name, the parameter **shadows** the field <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.4.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.4.1">[11]</abbr></a>. `this.field` says "the field of the current object", not the parameter.
 
 ```java run
 import static java.lang.IO.println;
@@ -481,7 +481,7 @@ public class Main {
 
 **Analysis.** Inside the constructor, the parameters are also named `width` and `height`, so a bare `width` means the *parameter*. `this.width` reaches past the parameter to the object's field, and `this.width = width` copies the parameter into the field.
 
-`this` is the current object <abbr title="The Java Language Specification, Java SE 25, §15.8.3">[12]</abbr>. In a constructor, it's the object being built. In an instance method, it's the object the method was called on.
+`this` is the current object <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.8.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.8.3">[12]</abbr></a>. In a constructor, it's the object being built. In an instance method, it's the object the method was called on.
 
 **Intuition.**
 *Mechanism.* `this` is an implicit reference to the receiver object. When a local variable or parameter shares a field's name, the nearer (local) name wins whenever you write the name on its own. `this.name` selects the field.
@@ -710,18 +710,18 @@ public class Main {
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 25*, §7.6 "Top Level Class and Interface Declarations" ("at most one such class or interface per compilation unit") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.6>
-2. *The Java Language Specification, Java SE 25*, §4.12.5 "Initial Values of Variables" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.5>
-3. *The Java Language Specification, Java SE 25*, §8.3.2 "Field Initialization" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.2>
-4. `java.lang.Object.toString()`, Java SE 25 API ("`getClass().getName() + '@' + Integer.toHexString(hashCode())`") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#toString()>
-5. *The Java Language Specification, Java SE 25*, §8.8 "Constructor Declarations" ("Constructor declarations are not members") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8>
-6. *The Java Language Specification, Java SE 25*, §12.5 "Creation of New Class Instances" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.5>
-7. *The Java Language Specification, Java SE 25*, §8.8.9 "Default Constructor" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.9>
-8. *The Java Language Specification, Java SE 25*, §8.8.8 "Constructor Overloading" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.8>
-9. *The Java Language Specification, Java SE 25*, §8.8.7 "Constructor Body" ("A constructor body may contain an explicit invocation of another constructor"; the prologue; the early construction context) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.7>
-10. JEP 513: Flexible Constructor Bodies (delivered in JDK 25) — <https://openjdk.org/jeps/513>
-11. *The Java Language Specification, Java SE 25*, §6.4.1 "Shadowing" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.4.1>
-12. *The Java Language Specification, Java SE 25*, §15.8.3 "`this`" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.8.3>
+1. *The Java Language Specification, Java SE 25*, §7.6 "Top Level Class and Interface Declarations" ("at most one such class or interface per compilation unit") — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.6" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.6</a>
+2. *The Java Language Specification, Java SE 25*, §4.12.5 "Initial Values of Variables" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.5" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.5</a>
+3. *The Java Language Specification, Java SE 25*, §8.3.2 "Field Initialization" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.2</a>
+4. `java.lang.Object.toString()`, Java SE 25 API ("`getClass().getName() + '@' + Integer.toHexString(hashCode())`") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#toString()" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#toString()</a>
+5. *The Java Language Specification, Java SE 25*, §8.8 "Constructor Declarations" ("Constructor declarations are not members") — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8</a>
+6. *The Java Language Specification, Java SE 25*, §12.5 "Creation of New Class Instances" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.5" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.5</a>
+7. *The Java Language Specification, Java SE 25*, §8.8.9 "Default Constructor" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.9" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.9</a>
+8. *The Java Language Specification, Java SE 25*, §8.8.8 "Constructor Overloading" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.8" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.8</a>
+9. *The Java Language Specification, Java SE 25*, §8.8.7 "Constructor Body" ("A constructor body may contain an explicit invocation of another constructor"; the prologue; the early construction context) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.7" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.7</a>
+10. JEP 513: Flexible Constructor Bodies (delivered in JDK 25) — <a href="https://openjdk.org/jeps/513" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/513</a>
+11. *The Java Language Specification, Java SE 25*, §6.4.1 "Shadowing" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.4.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.4.1</a>
+12. *The Java Language Specification, Java SE 25*, §15.8.3 "`this`" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.8.3" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.8.3</a>
 
 ---
 

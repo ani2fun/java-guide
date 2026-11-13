@@ -55,7 +55,7 @@ This uses the [loops](/synapse/programming-languages/java/control-flow/loops) th
 
 ## 1. Creating arrays
 
-There are two ways to make an array <abbr title="The Java Language Specification, Java SE 25, §10.3 and §10.6">[1]</abbr>:
+There are two ways to make an array <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.6" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §10.3 and §10.6">[1]</abbr></a>:
 
 - `new int[n]` makes one with `n` slots, each set to a **default** (`0` for `int`);
 - an array **literal** `{…}` makes one already filled.
@@ -121,7 +121,7 @@ public class Main {
 ```
 
 **Intuition.**
-*Mechanism.* An array is one object holding `length` slots of its type, numbered from `0`. `new T[n]` fills every slot with the type's default <abbr title="The Java Language Specification, Java SE 25, §4.12.5">[2]</abbr>, while a literal fills it with what you wrote. How the slots sit in memory is the JVM's business, because the specification doesn't pin it down <abbr title="The Java Virtual Machine Specification, Java SE 25, §2.7">[3]</abbr>.
+*Mechanism.* An array is one object holding `length` slots of its type, numbered from `0`. `new T[n]` fills every slot with the type's default <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §4.12.5">[2]</abbr></a>, while a literal fills it with what you wrote. How the slots sit in memory is the JVM's business, because the specification doesn't pin it down <a href="https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-2.html#jvms-2.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Virtual Machine Specification, Java SE 25, §2.7">[3]</abbr></a>.
 
 The default depends on the type:
 
@@ -151,7 +151,7 @@ A `String[]` slot starts as **`null`**: "no object yet". [References, Equality &
 
 *Concrete bite.* The size is fixed at creation: `.length` is a property of the array, not a target you can change. (You'll feel that limit firsthand in [§5](#5-arrays-are-not-growable-lists).) For now, the point is that every slot exists from the start. An unassigned `int` slot is `0`, not "empty" or "undefined".
 
-*Watch out: a literal assigned later.* The `{…}` shorthand works only in a declaration <abbr title="The Java Language Specification, Java SE 25, §10.6">[1]</abbr>. Declare first and assign the braces later, and javac can't parse it:
+*Watch out: a literal assigned later.* The `{…}` shorthand works only in a declaration <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.6" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §10.6">[1]</abbr></a>. Declare first and assign the braces later, and javac can't parse it:
 
 ```java run
 import static java.lang.IO.println;
@@ -192,7 +192,7 @@ public class Main {
 [I@2a139a55
 ```
 
-`[I` is Java's name for "array of `int`", and the hex digits come from the object's hash code <abbr title="Java SE 25 API, java.lang.Object.toString">[5]</abbr>. To see the contents, pass the array to `Arrays.toString`, after `import java.util.Arrays;` <abbr title="Java SE 25 API, java.util.Arrays">[4]</abbr>:
+`[I` is Java's name for "array of `int`", and the hex digits come from the object's hash code <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#toString()" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.lang.Object.toString">[5]</abbr></a>. To see the contents, pass the array to `Arrays.toString`, after `import java.util.Arrays;` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Arrays.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Arrays">[4]</abbr></a>:
 
 ```java run
 import java.util.Arrays;
@@ -260,7 +260,7 @@ public class Main {
 **Analysis.** `a[1] = 99` overwrote the middle slot, and `a[0]` and `a[2]` were untouched. Reading and writing both use the same `a[i]` notation. On the left of `=`, it names the slot to change. Anywhere else, it yields the slot's value.
 
 **Intuition.**
-*Mechanism.* Every array access is checked at run time <abbr title="The Java Language Specification, Java SE 25, §10.4">[6]</abbr>. An index below `0`, or at `length` or above, gets refused with an exception. Java never lets you read or write past the ends of an array.
+*Mechanism.* Every array access is checked at run time <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §10.4">[6]</abbr></a>. An index below `0`, or at `length` or above, gets refused with an exception. Java never lets you read or write past the ends of an array.
 
 *Concrete bite.* Index past the end (or below `0`), and it throws. That happens at run time, because nobody knows the index until then:
 
@@ -328,7 +328,7 @@ public class Main {
 **Analysis.** The first loop used `i` from `0` to `nums.length - 1`, printing each index alongside `nums[i]`. The second visited the values `5, 10, 15` with no index at all. Notice `i < nums.length` (not a hard-coded `3`). Tie the boundary to the array, so it stays correct if the array's size changes.
 
 **Intuition.**
-*Mechanism.* The classic `for` reads `nums[i]` on each pass, using the index it controls. The enhanced `for` walks `0..length-1` for you and hands over each value <abbr title="The Java Language Specification, Java SE 25, §14.14.2">[7]</abbr>: a copy, as [Loops](/synapse/programming-languages/java/control-flow/loops) showed. Same traversal, different access.
+*Mechanism.* The classic `for` reads `nums[i]` on each pass, using the index it controls. The enhanced `for` walks `0..length-1` for you and hands over each value <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.14.2">[7]</abbr></a>: a copy, as [Loops](/synapse/programming-languages/java/control-flow/loops) showed. Same traversal, different access.
 
 *Concrete bite.* The choice matters beyond style, because only the indexed `for` can write back. [§1](#1-creating-arrays)'s `Arrays.toString` run showed it: `for (int n : nums) n = 0;` left `[5, 10, 15]`, while the indexed loop gave `[0, 0, 0]`.
 
@@ -471,9 +471,9 @@ Main.java:6: error: cannot find symbol
 **Analysis.** Writing `a.length()`, with parentheses as if it were a method, fails. An array's `length` is a **field**, written `a.length` with no parentheses. (Contrast a `String`, where [`s.length()`](/synapse/programming-languages/java/first-steps/strings-the-basics) *is* a method.) The slip is a compile error, so you catch it right away.
 
 **Intuition.**
-*Mechanism.* `length` is a `final` field fixed in the array at creation <abbr title="The Java Language Specification, Java SE 25, §10.7">[8]</abbr>. It isn't a method, and you can't reassign it. No operation changes an array's size, because the array was created with exactly that many slots.
+*Mechanism.* `length` is a `final` field fixed in the array at creation <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §10.7">[8]</abbr></a>. It isn't a method, and you can't reassign it. No operation changes an array's size, because the array was created with exactly that many slots.
 
-**Growing by copying.** `Arrays.copyOf(a, n)` makes a *new* array of length `n`, copies `a` into it, and fills any extra slots with `0` <abbr title="Java SE 25 API, java.util.Arrays.copyOf">[4]</abbr>:
+**Growing by copying.** `Arrays.copyOf(a, n)` makes a *new* array of length `n`, copies `a` into it, and fills any extra slots with `0` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Arrays.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Arrays.copyOf">[4]</abbr></a>:
 
 ```java run
 import java.util.Arrays;
@@ -638,14 +638,14 @@ It prints `4 3 2 1`.
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 25*, §10.3 "Array Creation" and §10.6 "Array Initializers" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.6>
-2. *The Java Language Specification, Java SE 25*, §4.12.5 "Initial Values of Variables" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.5>
-3. *The Java Virtual Machine Specification, Java SE 25*, §2.7 "Representation of Objects" ("does not mandate any particular internal structure for objects") — <https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-2.html#jvms-2.7>
-4. Java SE 25 API, `java.util.Arrays` (`toString`, `equals`, `copyOf`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Arrays.html>
-5. Java SE 25 API, `java.lang.Object.toString` ("`getClass().getName() + '@' + Integer.toHexString(hashCode())`") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#toString()>
-6. *The Java Language Specification, Java SE 25*, §10.4 "Array Access" ("All array accesses are checked at run time") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.4>
-7. *The Java Language Specification, Java SE 25*, §14.14.2 "The enhanced `for` statement" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2>
-8. *The Java Language Specification, Java SE 25*, §10.7 "Array Members" ("The `public final` field `length`") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.7>
+1. *The Java Language Specification, Java SE 25*, §10.3 "Array Creation" and §10.6 "Array Initializers" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.6" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.6</a>
+2. *The Java Language Specification, Java SE 25*, §4.12.5 "Initial Values of Variables" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.5" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.5</a>
+3. *The Java Virtual Machine Specification, Java SE 25*, §2.7 "Representation of Objects" ("does not mandate any particular internal structure for objects") — <a href="https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-2.html#jvms-2.7" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-2.html#jvms-2.7</a>
+4. Java SE 25 API, `java.util.Arrays` (`toString`, `equals`, `copyOf`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Arrays.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Arrays.html</a>
+5. Java SE 25 API, `java.lang.Object.toString` ("`getClass().getName() + '@' + Integer.toHexString(hashCode())`") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#toString()" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#toString()</a>
+6. *The Java Language Specification, Java SE 25*, §10.4 "Array Access" ("All array accesses are checked at run time") — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.4" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.4</a>
+7. *The Java Language Specification, Java SE 25*, §14.14.2 "The enhanced `for` statement" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2</a>
+8. *The Java Language Specification, Java SE 25*, §10.7 "Array Members" ("The `public final` field `length`") — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.7" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.7</a>
 
 ---
 

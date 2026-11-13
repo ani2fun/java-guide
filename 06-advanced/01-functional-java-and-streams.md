@@ -57,7 +57,7 @@ This lesson builds on [generics](/synapse/programming-languages/java/core-librar
 
 ## 1. A stream pipeline
 
-Calling `collection.stream()` starts a pipeline, which has three parts <abbr title="Java SE 25 API, java.util.stream package summary, &quot;Stream operations and pipelines&quot;">[1]</abbr>:
+Calling `collection.stream()` starts a pipeline, which has three parts <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream package summary, &quot;Stream operations and pipelines&quot;">[1]</abbr></a>:
 
 - A **source** supplies the elements: a collection, an array, or a generator.
 - **Intermediate** operations (`filter`, `map`) each return a new stream, so you can chain them.
@@ -112,10 +112,10 @@ flowchart LR
 
 The chain reads like a description: *keep the long names, upper-case them, collect them*. There's no loop, no index and no intermediate variable. Each lambda or method reference supplies the behavior for one step.
 
-Since Java 16, a stream also has `toList()` as a shorter terminal operation <abbr title="Java SE 25 API, java.util.stream.Stream.toList() (since 16)">[2]</abbr>. The two differ in one way that can bite you:
+Since Java 16, a stream also has `toList()` as a shorter terminal operation <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Stream.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Stream.toList() (since 16)">[2]</abbr></a>. The two differ in one way that can bite you:
 
 - `Stream.toList()` returns an **unmodifiable** list.
-- `Collectors.toList()` makes "no guarantees on the type, mutability, serializability, or thread-safety" of its list <abbr title="Java SE 25 API, java.util.stream.Collectors.toList()">[3]</abbr>.
+- `Collectors.toList()` makes "no guarantees on the type, mutability, serializability, or thread-safety" of its list <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Collectors.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Collectors.toList()">[3]</abbr></a>.
 
 When you need to add to the result, ask for a specific list type by name, using `Collectors.toCollection(ArrayList::new)`:
 
@@ -147,7 +147,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 **Intuition.**
 *Mechanism.* `stream()` produces a stream object. Each intermediate operation wraps it in another stream that records the operation, but doesn't do anything yet. Only the terminal `collect` drives elements through the whole chain. The pipeline expresses the *what*, and the library owns the *how* (the iteration).
 
-*Concrete bite.* A stream is single-use, and it isn't a collection. The API says a stream "should be operated on (invoking an intermediate or terminal stream operation) only once" <abbr title="Java SE 25 API, java.util.stream.Stream">[2]</abbr>. Use it a second time, and it throws:
+*Concrete bite.* A stream is single-use, and it isn't a collection. The API says a stream "should be operated on (invoking an intermediate or terminal stream operation) only once" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Stream.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Stream">[2]</abbr></a>. Use it a second time, and it throws:
 
 ```java run
 import java.util.List;
@@ -184,13 +184,13 @@ The cost is learning a new mental model, plus the fact that streams are one-shot
 
 ## 2. Sorting, flattening and joining streams
 
-Three more intermediate operations reshape a stream, rather than filtering or transforming single elements <abbr title="Java SE 25 API, java.util.stream.Stream">[2]</abbr>:
+Three more intermediate operations reshape a stream, rather than filtering or transforming single elements <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Stream.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Stream">[2]</abbr></a>:
 
 - `sorted()` puts the elements in natural order, while `sorted(comparator)` uses the [`Comparator`](/synapse/programming-languages/java/core-libraries/the-collections-framework) you pass in.
 - `flatMap(f)` replaces each element with the elements of the stream that `f` returns, so nested lists become one flat stream.
 - `Stream.concat(a, b)` is a static method that joins two streams: all of `a`, then all of `b`.
 
-`Comparator.comparing(key)` builds a `Comparator` from a function that extracts a sort key. For example, `Comparator.comparing(String::length)` orders strings by their length <abbr title="Java SE 25 API, java.util.Comparator.comparing(Function)">[4]</abbr>.
+`Comparator.comparing(key)` builds a `Comparator` from a function that extracts a sort key. For example, `Comparator.comparing(String::length)` orders strings by their length <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Comparator.html#comparing(java.util.function.Function)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Comparator.comparing(Function)">[4]</abbr></a>.
 
 ```java run
 import java.util.Comparator;
@@ -220,7 +220,7 @@ public class Main {
 **Analysis.** Three sorts, and one untouched source:
 
 - `sorted()` used `String`'s natural order.
-- `sorted(Comparator.comparing(String::length))` ordered by length. `Grace` and `Linus` both have 5 letters, and they kept their original order, because this sort is *stable* for an ordered stream <abbr title="Java SE 25 API, java.util.stream.Stream.sorted(Comparator)">[2]</abbr>.
+- `sorted(Comparator.comparing(String::length))` ordered by length. `Grace` and `Linus` both have 5 letters, and they kept their original order, because this sort is *stable* for an ordered stream <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Stream.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Stream.sorted(Comparator)">[2]</abbr></a>.
 - `limit(2)` kept the first two elements of the reverse-sorted stream.
 - The last line printed `names` itself, unchanged. A stream reads its source, but never reorders it.
 
@@ -309,7 +309,7 @@ even=[2, 4]
 - `Collectors.groupingBy(...)` built a `Map` from each element's group key (`"odd"`/`"even"`) to the list of elements in that group. It's the stream form of [the counting and grouping idioms](/synapse/programming-languages/java/core-libraries/sets-and-maps), packed into one expression.
 
 **Intuition.**
-*Mechanism.* `reduce(identity, accumulator)` applies the accumulator over and over, starting from the identity. The API requires that "the `identity` value must be an identity for the accumulator function" <abbr title="Java SE 25 API, java.util.stream.Stream.reduce(Object, BinaryOperator)">[2]</abbr>: `0` for a sum, `""` for concatenation. A `Collector`, meanwhile, is a recipe for gathering elements into a container. `groupingBy`, `toList`, `joining`, `counting` and `partitioningBy` cover most needs <abbr title="Java SE 25 API, java.util.stream.Collectors">[3]</abbr>.
+*Mechanism.* `reduce(identity, accumulator)` applies the accumulator over and over, starting from the identity. The API requires that "the `identity` value must be an identity for the accumulator function" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Stream.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Stream.reduce(Object, BinaryOperator)">[2]</abbr></a>: `0` for a sum, `""` for concatenation. A `Collector`, meanwhile, is a recipe for gathering elements into a container. `groupingBy`, `toList`, `joining`, `counting` and `partitioningBy` cover most needs <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Collectors.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Collectors">[3]</abbr></a>.
 
 *Concrete bite.* Seed a sum with `1` — the identity for *multiplication* — and every result is off by one:
 
@@ -363,7 +363,7 @@ public class Main {
 {false=2, true=3}
 ```
 
-*Watch out: `toMap` with a repeated key.* `Collectors.toMap(keyFn, valueFn)` builds one entry per element. When two elements produce the same key, it throws <abbr title="Java SE 25 API, java.util.stream.Collectors.toMap(Function, Function)">[3]</abbr>:
+*Watch out: `toMap` with a repeated key.* `Collectors.toMap(keyFn, valueFn)` builds one entry per element. When two elements produce the same key, it throws <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Collectors.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Collectors.toMap(Function, Function)">[3]</abbr></a>:
 
 ```java run
 import java.util.List;
@@ -389,7 +389,7 @@ Exception in thread "main" java.lang.IllegalStateException: Duplicate key A (att
 
 `"Ada"` and `"Al"` both map to `'A'`. When a key can repeat, use `groupingBy` instead, or pass `toMap` a third argument that merges the two values.
 
-**Primitive streams.** A `Stream<Integer>` holds boxed `Integer` objects. `IntStream`, `LongStream` and `DoubleStream` hold primitive values instead, and add arithmetic terminals such as `sum()` and `average()` <abbr title="Java SE 25 API, java.util.stream.IntStream">[5]</abbr>. `mapToInt` turns a stream of objects into an `IntStream`:
+**Primitive streams.** A `Stream<Integer>` holds boxed `Integer` objects. `IntStream`, `LongStream` and `DoubleStream` hold primitive values instead, and add arithmetic terminals such as `sum()` and `average()` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/IntStream.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.IntStream">[5]</abbr></a>. `mapToInt` turns a stream of objects into an `IntStream`:
 
 ```java run
 import java.util.List;
@@ -429,7 +429,7 @@ The cost is learning the collector vocabulary. The payoff is that aggregation, g
 
 </div>
 
-**Gatherers: intermediate operations of your own.** A collector lets you write your own *terminal* step. Since JDK 24, a **gatherer** does the same for an *intermediate* step <abbr title="JEP 485: Stream Gatherers (JDK 24)">[8]</abbr>. You pass one to `Stream.gather`, and the class `Gatherers` already has the common ones, "such as windowing functions, folding functions" <abbr title="Java SE 25 API, java.util.stream.Gatherers">[10]</abbr>:
+**Gatherers: intermediate operations of your own.** A collector lets you write your own *terminal* step. Since JDK 24, a **gatherer** does the same for an *intermediate* step <a href="https://openjdk.org/jeps/485" target="_blank" rel="noopener noreferrer"><abbr title="JEP 485: Stream Gatherers (JDK 24)">[8]</abbr></a>. You pass one to `Stream.gather`, and the class `Gatherers` already has the common ones, "such as windowing functions, folding functions" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Gatherers.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Gatherers">[10]</abbr></a>:
 
 ```java run
 import java.util.stream.Gatherers;
@@ -497,13 +497,13 @@ public class Main {
 [x, y]
 ```
 
-**Analysis.** `ofSequential` took two parts <abbr title="Java SE 25 API, java.util.stream.Gatherer">[9]</abbr>. `Last::new` creates fresh state for each pipeline. The lambda, the *integrator*, runs once per element: it gets the state, the element, and the `downstream` (the next step). Its `boolean` result says whether it wants more elements. `push` returns `false` once the downstream wants no more, so after `limit(2)` was full, the integrator returned `false`, and the stream stopped pulling elements.
+**Analysis.** `ofSequential` took two parts <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Gatherer.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Gatherer">[9]</abbr></a>. `Last::new` creates fresh state for each pipeline. The lambda, the *integrator*, runs once per element: it gets the state, the element, and the `downstream` (the next step). Its `boolean` result says whether it wants more elements. `push` returns `false` once the downstream wants no more, so after `limit(2)` was full, the integrator returned `false`, and the stream stopped pulling elements.
 
 ---
 
 ## 4. Lazy evaluation
 
-Intermediate operations are **lazy**: they process nothing until a terminal operation runs <abbr title="Java SE 25 API, java.util.stream package summary, &quot;Stream operations and pipelines&quot;">[1]</abbr>. Once it does, elements flow through one at a time. That lets the pipeline **short-circuit** — stop as soon as the answer is known.
+Intermediate operations are **lazy**: they process nothing until a terminal operation runs <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream package summary, &quot;Stream operations and pipelines&quot;">[1]</abbr></a>. Once it does, elements flow through one at a time. That lets the pipeline **short-circuit** — stop as soon as the answer is known.
 
 ```java run
 import java.util.List;
@@ -564,7 +564,7 @@ public class Main {
 [1, 2, 4, 8, 16]
 ```
 
-*Watch out: a stateful step breaks the one-at-a-time flow.* `sorted` is **stateful**: it can't pass on the smallest element until it has seen them all <abbr title="Java SE 25 API, java.util.stream package summary, stateless and stateful operations">[1]</abbr>. Put it before `findFirst`, and every element gets pulled:
+*Watch out: a stateful step breaks the one-at-a-time flow.* `sorted` is **stateful**: it can't pass on the smallest element until it has seen them all <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream package summary, stateless and stateful operations">[1]</abbr></a>. Put it before `findFirst`, and every element gets pulled:
 
 ```java run
 import java.util.List;
@@ -621,9 +621,9 @@ count = 3
 ```
 
 - The first pipeline had no terminal operation, so nothing ran at all.
-- The second one did have a terminal operation, `count()`, and *still* printed no `peek` line. The list knows its own size, and the API lets `count()` skip the pipeline "if it is capable of computing the count directly from the stream source" <abbr title="Java SE 25 API, java.util.stream.Stream.count()">[2]</abbr>.
+- The second one did have a terminal operation, `count()`, and *still* printed no `peek` line. The list knows its own size, and the API lets `count()` skip the pipeline "if it is capable of computing the count directly from the stream source" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Stream.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Stream.count()">[2]</abbr></a>.
 
-The API says `peek` "exists mainly to support debugging" <abbr title="Java SE 25 API, java.util.stream.Stream.peek(Consumer)">[2]</abbr>. Never put work there that has to happen.
+The API says `peek` "exists mainly to support debugging" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Stream.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Stream.peek(Consumer)">[2]</abbr></a>. Never put work there that has to happen.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -667,7 +667,7 @@ none
 **Analysis.** The first query found `"Linus"`, so `found` was present, and `orElse` returned the value. The second query matched nothing, so `missing` was empty, and `orElse("none")` supplied the fallback. The *type* `Optional<String>` made the possibility of absence visible right in the signature. You can't use a missing value by accident, the way you can with `null`.
 
 **Intuition.**
-*Mechanism.* `Optional` wraps the idea of "a value, or nothing" <abbr title="Java SE 25 API, java.util.Optional">[6]</abbr>:
+*Mechanism.* `Optional` wraps the idea of "a value, or nothing" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Optional">[6]</abbr></a>:
 
 - `orElse` and `orElseGet` supply a default.
 - `map` transforms the value only if one is present, and `filter` keeps it only if it passes a test.
@@ -697,7 +697,7 @@ Exception in thread "main" java.util.NoSuchElementException: No value present
 
 `empty.get()` is the `Optional` version of dereferencing `null`: it asserts that a value is present when it isn't. Instead of a bare `get()`, use `orElse`, `orElseThrow(...)` with a meaningful exception, or `ifPresent`.
 
-*Edge: `orElse` always evaluates its argument.* `orElse(x)` is an ordinary method call, so Java computes `x` before making the call — even when the `Optional` already has a value. `orElseGet(supplier)`, by contrast, calls the supplier only when the `Optional` is empty <abbr title="Java SE 25 API, java.util.Optional.orElseGet(Supplier)">[6]</abbr>:
+*Edge: `orElse` always evaluates its argument.* `orElse(x)` is an ordinary method call, so Java computes `x` before making the call — even when the `Optional` already has a value. `orElseGet(supplier)`, by contrast, calls the supplier only when the `Optional` is empty <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Optional.orElseGet(Supplier)">[6]</abbr></a>:
 
 ```java run
 import java.util.Optional;
@@ -739,7 +739,7 @@ Linus
 
 💡 **Earned rule.** Return `Optional<T>` from methods that may find nothing, and consume it with `orElse`/`orElseGet`/`map`/`ifPresent` — never a naked `get()`.
 
-The cost is the wrapping and unwrapping. Also, `Optional` is meant "primarily … for use as a method return type" <abbr title="Java SE 25 API, java.util.Optional, API note">[6]</abbr>, not for fields or parameters. The payoff: "this might be absent" is visible right at the boundary, so a whole class of run-time `NullPointerException`s turns into handled cases.
+The cost is the wrapping and unwrapping. Also, `Optional` is meant "primarily … for use as a method return type" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Optional, API note">[6]</abbr></a>, not for fields or parameters. The payoff: "this might be absent" is visible right at the boundary, so a whole class of run-time `NullPointerException`s turns into handled cases.
 
 </div>
 
@@ -749,7 +749,7 @@ The cost is the wrapping and unwrapping. Also, `Optional` is meant "primarily �
 
 A **thread** is one independent path of execution through a program. A program can run several threads at once, and on a machine with several processor cores, they genuinely run side by side. The [concurrency lessons](/synapse/programming-languages/java/advanced/concurrency-the-basics) cover threads in depth.
 
-`parallelStream()` (or `.parallel()`) splits a stream's work across several threads <abbr title="Java SE 25 API, java.util.stream package summary, &quot;Parallelism&quot;">[1]</abbr>. It can speed up **stateless** operations on large data. But it's a trap when the pipeline touches **shared mutable state**, because the threads race each other.
+`parallelStream()` (or `.parallel()`) splits a stream's work across several threads <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream package summary, &quot;Parallelism&quot;">[1]</abbr></a>. It can speed up **stateless** operations on large data. But it's a trap when the pipeline touches **shared mutable state**, because the threads race each other.
 
 ```java run
 import java.util.stream.LongStream;
@@ -772,11 +772,11 @@ public class Main {
 **Analysis.** The parallel `sum` over one million numbers gave the correct `500000500000`, on every run. `sum` is a proper reduction: each thread sums its own chunk, and the chunks combine associatively, with no shared state. This is the safe way to parallelize: a stateless pipeline that ends in a reduction or a collector.
 
 **Intuition.**
-*Mechanism.* A parallel stream splits the source into chunks, processes them on a pool of threads, and then combines the partial results. That's correct as long as the operations are stateless and the combination is associative <abbr title="Java SE 25 API, java.util.stream package summary, &quot;Associativity&quot;">[1]</abbr>. `sum`, `map`, `filter` and `collect` all qualify.
+*Mechanism.* A parallel stream splits the source into chunks, processes them on a pool of threads, and then combines the partial results. That's correct as long as the operations are stateless and the combination is associative <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream package summary, &quot;Associativity&quot;">[1]</abbr></a>. `sum`, `map`, `filter` and `collect` all qualify.
 
 *Concrete bite.* Touch shared mutable state, and the threads corrupt it. This is called a **data race**, and it produces no error — only wrong answers.
 
-First, a word on why the example below counts in an `int[]`. A lambda may use a local variable only if it's effectively final <abbr title="The Java Language Specification, Java SE 25, §15.27.2">[7]</abbr>, so the obvious `total += n` doesn't compile:
+First, a word on why the example below counts in an `int[]`. A lambda may use a local variable only if it's effectively final <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.27.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.27.2">[7]</abbr></a>, so the obvious `total += n` doesn't compile:
 
 ```java run
 import java.util.List;
@@ -962,16 +962,16 @@ none
 
 ## 📚 Sources
 
-1. `java.util.stream` package summary, Java SE 25 API ("Stream operations and pipelines", "Parallelism", "Associativity") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html>
-2. `java.util.stream.Stream`, Java SE 25 API (`toList()` since 16; `sorted`; `reduce`; `peek` "exists mainly to support debugging"; `count()` may skip the pipeline) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Stream.html>
-3. `java.util.stream.Collectors`, Java SE 25 API (`toList()` "no guarantees on the type, mutability …"; `toMap` and `IllegalStateException` on duplicate keys) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Collectors.html>
-4. `java.util.Comparator.comparing(Function)`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Comparator.html#comparing(java.util.function.Function)>
-5. `java.util.stream.IntStream`, Java SE 25 API (`sum()`, `average()` returning `OptionalDouble`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/IntStream.html>
-6. `java.util.Optional`, Java SE 25 API (the API note on return types; `orElseGet`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html>
-7. *The Java Language Specification, Java SE 25*, §15.27.2 "Lambda Body" (a local variable used but not declared in a lambda body must be final or effectively final) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.27.2>
-8. JEP 485: Stream Gatherers (JDK 24) — <https://openjdk.org/jeps/485>
-9. `java.util.stream.Gatherer`, Java SE 25 API ("An intermediate operation that transforms a stream of input elements into a stream of output elements"; `ofSequential`; `Downstream.push`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Gatherer.html>
-10. `java.util.stream.Gatherers`, Java SE 25 API ("such as windowing functions, folding functions"; since 24) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Gatherers.html>
+1. `java.util.stream` package summary, Java SE 25 API ("Stream operations and pipelines", "Parallelism", "Associativity") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html</a>
+2. `java.util.stream.Stream`, Java SE 25 API (`toList()` since 16; `sorted`; `reduce`; `peek` "exists mainly to support debugging"; `count()` may skip the pipeline) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Stream.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Stream.html</a>
+3. `java.util.stream.Collectors`, Java SE 25 API (`toList()` "no guarantees on the type, mutability …"; `toMap` and `IllegalStateException` on duplicate keys) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Collectors.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Collectors.html</a>
+4. `java.util.Comparator.comparing(Function)`, Java SE 25 API — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Comparator.html#comparing(java.util.function.Function)" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Comparator.html#comparing(java.util.function.Function)</a>
+5. `java.util.stream.IntStream`, Java SE 25 API (`sum()`, `average()` returning `OptionalDouble`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/IntStream.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/IntStream.html</a>
+6. `java.util.Optional`, Java SE 25 API (the API note on return types; `orElseGet`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html</a>
+7. *The Java Language Specification, Java SE 25*, §15.27.2 "Lambda Body" (a local variable used but not declared in a lambda body must be final or effectively final) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.27.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.27.2</a>
+8. JEP 485: Stream Gatherers (JDK 24) — <a href="https://openjdk.org/jeps/485" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/485</a>
+9. `java.util.stream.Gatherer`, Java SE 25 API ("An intermediate operation that transforms a stream of input elements into a stream of output elements"; `ofSequential`; `Downstream.push`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Gatherer.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Gatherer.html</a>
+10. `java.util.stream.Gatherers`, Java SE 25 API ("such as windowing functions, folding functions"; since 24) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Gatherers.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Gatherers.html</a>
 
 ---
 

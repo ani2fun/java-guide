@@ -144,7 +144,7 @@ public class Main {
 25
 ```
 
-*Watch out: reading the box before anything is in it.* The compiler tracks whether each local variable has definitely been given a value before any line reads it — Java calls this **definite assignment** <abbr title="The Java Language Specification, Java SE 25, chapter 16">[1]</abbr>. Read an empty box, and the program doesn't compile:
+*Watch out: reading the box before anything is in it.* The compiler tracks whether each local variable has definitely been given a value before any line reads it — Java calls this **definite assignment** <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-16.html" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, chapter 16">[1]</abbr></a>. Read an empty box, and the program doesn't compile:
 
 ```java run
 import static java.lang.IO.println;
@@ -169,11 +169,11 @@ Main.java:6: error: variable x might not have been initialized
 
 ### Naming a variable
 
-A variable's name is called an **identifier**, and the rules for it come from the language itself <abbr title="The Java Language Specification, Java SE 25, §3.8">[2]</abbr>:
+A variable's name is called an **identifier**, and the rules for it come from the language itself <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.8" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.8">[2]</abbr></a>:
 
 - It is made of letters, digits, `_` and `$`.
 - It must **not start with a digit**: `score2` is fine, `2nd` is not.
-- It must not be a **keyword**, one of the words Java reserves for itself, such as `class`, `int` or `public` <abbr title="The Java Language Specification, Java SE 25, §3.9">[3]</abbr>.
+- It must not be a **keyword**, one of the words Java reserves for itself, such as `class`, `int` or `public` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.9" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.9">[3]</abbr></a>.
 - Case matters: `age` and `Age` are two different names.
 
 By convention, Java variable names use **camelCase**: start in lower case, and capitalize each later word, as in `totalScore`. Break the "no leading digit" rule, and javac's message doesn't even mention the name:
@@ -258,7 +258,7 @@ Main.java:5: error: incompatible types: String cannot be converted to int
 
 ### `final`: a value that never changes
 
-Some values should never change once they're set: the number of days in a week, say, or a tax rate. Put `final` before the type, and the compiler allows exactly one assignment <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[4]</abbr>. By convention, a constant's name is written in capitals, with `_` between words.
+Some values should never change once they're set: the number of days in a week, say, or a tax rate. Put `final` before the type, and the compiler allows exactly one assignment <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §4.12.4">[4]</abbr></a>. By convention, a constant's name is written in capitals, with `_` between words.
 
 ```java run
 import static java.lang.IO.println;
@@ -357,7 +357,7 @@ Each type's size is counted in **bits**. A bit is one binary digit, a 0 or a 1, 
 | `char` | one character | `'A'` | 16 bits | character codes 0 to 65535 |
 | `boolean` | true / false | `true` | not specified | `true` or `false` |
 
-The language fixes the whole-number ranges and the `char` range <abbr title="The Java Language Specification, Java SE 25, §4.2.1">[5]</abbr>. `boolean` has exactly two values, and its size in bits isn't defined <abbr title="The Java Tutorials, Primitive Data Types">[6]</abbr>. You don't need to memorize the ranges, either: each whole-number type carries its own limits as `MIN_VALUE` and `MAX_VALUE`.
+The language fixes the whole-number ranges and the `char` range <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §4.2.1">[5]</abbr></a>. `boolean` has exactly two values, and its size in bits isn't defined <a href="https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html" target="_blank" rel="noopener noreferrer"><abbr title="The Java Tutorials, Primitive Data Types">[6]</abbr></a>. You don't need to memorize the ranges, either: each whole-number type carries its own limits as `MIN_VALUE` and `MAX_VALUE`.
 
 ```java run
 import static java.lang.IO.println;
@@ -414,7 +414,7 @@ Main.java:5: error: incompatible types: possible lossy conversion from int to by
 
 `200` is an ordinary `int`, but a `byte` tops out at `127`. Storing `200` would lose information, so the compiler calls it a "lossy conversion" and refuses.
 
-**Why `byte b = 100;` compiles.** `100` is an `int` literal too, yet this line compiles. That's because Java makes one exception for a fixed value written in the source, called a **constant**. A constant `int` may go into a `byte`, `short` or `char` variable when the value fits within that type's range <abbr title="The Java Language Specification, Java SE 25, §5.2">[7]</abbr>. The compiler checks the value itself, `100`, and it fits.
+**Why `byte b = 100;` compiles.** `100` is an `int` literal too, yet this line compiles. That's because Java makes one exception for a fixed value written in the source, called a **constant**. A constant `int` may go into a `byte`, `short` or `char` variable when the value fits within that type's range <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §5.2">[7]</abbr></a>. The compiler checks the value itself, `100`, and it fits.
 
 ```java run
 import static java.lang.IO.println;
@@ -465,7 +465,7 @@ Main.java:6: error: incompatible types: possible lossy conversion from int to by
 1 error
 ```
 
-Adding `final` brings the exception back. A `final` variable counts as a constant when it's declared with a constant value <abbr title="The Java Language Specification, Java SE 25, §4.12.4">[4]</abbr>, so the compiler can check the value again:
+Adding `final` brings the exception back. A `final` variable counts as a constant when it's declared with a constant value <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §4.12.4">[4]</abbr></a>, so the compiler can check the value again:
 
 ```java run
 import static java.lang.IO.println;
@@ -505,8 +505,8 @@ The cost of a wrong choice is either a compile error (for a too-big value) or, w
 
 A **literal** is a value written directly in the source, like `25` or `'A'`. The way you write it fixes *its own* type, independent of any variable — and that type must be compatible with wherever you put it.
 
-- A plain whole number is an `int`; a number with a decimal point is a `double` <abbr title="The Java Language Specification, Java SE 25, §3.10.2">[9]</abbr>.
-- A suffix chooses otherwise: `L` for `long` <abbr title="The Java Language Specification, Java SE 25, §3.10.1">[8]</abbr>, `f` for `float`.
+- A plain whole number is an `int`; a number with a decimal point is a `double` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.2">[9]</abbr></a>.
+- A suffix chooses otherwise: `L` for `long` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.1">[8]</abbr></a>, `f` for `float`.
 - Single quotes make a `char`; double quotes make a `String`.
 
 ```java run
@@ -540,7 +540,7 @@ A
 - `3.14` is a `double`, and `3.14f` a `float`.
 - `'A'` is a `char`, and `"A"` a `String`.
 
-The type is invisible in the output, but very real to the compiler. A lower-case `l` also makes a `long`, but it looks like the digit `1`, which is why the language specification itself prefers `L` <abbr title="The Java Language Specification, Java SE 25, §3.10.1">[8]</abbr>.
+The type is invisible in the output, but very real to the compiler. A lower-case `l` also makes a `long`, but it looks like the digit `1`, which is why the language specification itself prefers `L` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.1">[8]</abbr></a>.
 
 **Intuition.**
 *Mechanism.* The compiler gives every literal a type based on how it's written, before considering where it goes. A bare integer literal is always an `int`, even when the variable next to it is a `long`.
@@ -617,7 +617,7 @@ The fix is the suffix: `float ratio = 0.5f;`, as in [§3](#3-the-eight-primitive
 
 ## 5. `var`: inferred, not dynamic
 
-Spelling a type out twice can get tedious. Since Java 10, `var` lets the compiler **infer** a local variable's type from its **initializer** — the value after `=` <abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[10]</abbr>. It's a convenience, not a new kind of typing. The variable still has one fixed type; you just didn't write it out.
+Spelling a type out twice can get tedious. Since Java 10, `var` lets the compiler **infer** a local variable's type from its **initializer** — the value after `=` <a href="https://openjdk.org/jeps/286" target="_blank" rel="noopener noreferrer"><abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[10]</abbr></a>. It's a convenience, not a new kind of typing. The variable still has one fixed type; you just didn't write it out.
 
 ```java run
 import static java.lang.IO.println;
@@ -672,7 +672,7 @@ The error names `int`, even though you wrote `var`. That's the proof: `x`'s type
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Use `var` when the initializer already makes the type obvious (`var total = 0;`, `var name = "Ada";`). Keep the explicit type wherever naming it helps the reader. Its boundaries are its cost <abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[10]</abbr>:
+💡 **Earned rule.** Use `var` when the initializer already makes the type obvious (`var total = 0;`, `var name = "Ada";`). Keep the explicit type wherever naming it helps the reader. Its boundaries are its cost <a href="https://openjdk.org/jeps/286" target="_blank" rel="noopener noreferrer"><abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[10]</abbr></a>:
 
 - `var` needs an initializer on the same line; otherwise, the compiler has nothing to infer from.
 - The initializer must have a type: `var n = null;` fails with `cannot infer type for local variable n`.
@@ -766,7 +766,7 @@ One check per objective. Answer before you open anything.
 
 `var d = 5;` gives `d` the type `int`, from the `int` literal `5`. `5.5` is a `double`, so javac says `incompatible types: possible lossy conversion from double to int`. `var` fixed the type just as firmly as writing `int` would have.
 
-`var` needs an initializer to copy a type from, and a parameter doesn't have one. It works only for local variables; on a parameter, javac says `'var' is not allowed here` <abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[10]</abbr>.
+`var` needs an initializer to copy a type from, and a parameter doesn't have one. It works only for local variables; on a parameter, javac says `'var' is not allowed here` <a href="https://openjdk.org/jeps/286" target="_blank" rel="noopener noreferrer"><abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[10]</abbr></a>.
 
 </details>
 
@@ -783,16 +783,16 @@ One check per objective. Answer before you open anything.
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 25*, chapter 16 "Definite Assignment" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-16.html>
-2. *The Java Language Specification, Java SE 25*, §3.8 "Identifiers" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.8>
-3. *The Java Language Specification, Java SE 25*, §3.9 "Keywords" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.9>
-4. *The Java Language Specification, Java SE 25*, §4.12.4 "`final` Variables" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.4>
-5. *The Java Language Specification, Java SE 25*, §4.2.1 "Integral Types and Values" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2.1>
-6. *The Java Tutorials*, "Primitive Data Types" (`boolean`: "its 'size' isn't something that's precisely defined") — <https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html>
-7. *The Java Language Specification, Java SE 25*, §5.2 "Assignment Contexts" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.2>
-8. *The Java Language Specification, Java SE 25*, §3.10.1 "Integer Literals" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.1>
-9. *The Java Language Specification, Java SE 25*, §3.10.2 "Floating-Point Literals" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.2>
-10. JEP 286: Local-Variable Type Inference (JDK 10) — <https://openjdk.org/jeps/286>
+1. *The Java Language Specification, Java SE 25*, chapter 16 "Definite Assignment" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-16.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-16.html</a>
+2. *The Java Language Specification, Java SE 25*, §3.8 "Identifiers" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.8" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.8</a>
+3. *The Java Language Specification, Java SE 25*, §3.9 "Keywords" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.9" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.9</a>
+4. *The Java Language Specification, Java SE 25*, §4.12.4 "`final` Variables" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.4" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.4</a>
+5. *The Java Language Specification, Java SE 25*, §4.2.1 "Integral Types and Values" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2.1</a>
+6. *The Java Tutorials*, "Primitive Data Types" (`boolean`: "its 'size' isn't something that's precisely defined") — <a href="https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html</a>
+7. *The Java Language Specification, Java SE 25*, §5.2 "Assignment Contexts" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.2</a>
+8. *The Java Language Specification, Java SE 25*, §3.10.1 "Integer Literals" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.1</a>
+9. *The Java Language Specification, Java SE 25*, §3.10.2 "Floating-Point Literals" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.2</a>
+10. JEP 286: Local-Variable Type Inference (JDK 10) — <a href="https://openjdk.org/jeps/286" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/286</a>
 
 ---
 

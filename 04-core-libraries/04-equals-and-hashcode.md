@@ -56,7 +56,7 @@ Every output below was produced by compiling and running the code on Java 25.
 
 ## 1. Default `equals` is identity
 
-If a class doesn't define its own `equals`, it inherits the one from `Object`. That version returns `true` only when both references point at *the same object* <abbr title="Java SE 25 API, Object.equals(Object)">[1]</abbr>. So two objects created separately are not equal, even when their fields are identical:
+If a class doesn't define its own `equals`, it inherits the one from `Object`. That version returns `true` only when both references point at *the same object* <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Object.equals(Object)">[1]</abbr></a>. So two objects created separately are not equal, even when their fields are identical:
 
 ```java run
 import static java.lang.IO.println;
@@ -85,9 +85,9 @@ false
 **Analysis.** `a == b` is `false` — no surprise, since these are two distinct objects. But `a.equals(b)` is `false` *too*. The inherited `equals` is an identity check, so by default `.equals` and `==` give the same answer. The class never said what it means for two points to be "equal", so Java falls back on the safest default: a thing equals only itself.
 
 **Intuition.**
-*Mechanism.* For non-`null` `x` and `y`, `Object.equals` returns `true` "if and only if `x` and `y` refer to the same object" <abbr title="Java SE 25 API, Object.equals(Object)">[1]</abbr>. So unless a class overrides it, "equal" simply means "the same object".
+*Mechanism.* For non-`null` `x` and `y`, `Object.equals` returns `true` "if and only if `x` and `y` refer to the same object" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Object.equals(Object)">[1]</abbr></a>. So unless a class overrides it, "equal" simply means "the same object".
 
-*Concrete bite.* That second `false` is the surprise, because most people expect `.equals` to compare contents. And it matters beyond your own calls, because the collections use `.equals` too. `List.contains` looks for an element `e` "such that `Objects.equals(o, e)`" <abbr title="Java SE 25 API, List.contains(Object)">[2]</abbr>, and `Set` membership and `Map` key lookups work the same way. So every one of them treats your two equal points as different.
+*Concrete bite.* That second `false` is the surprise, because most people expect `.equals` to compare contents. And it matters beyond your own calls, because the collections use `.equals` too. `List.contains` looks for an element `e` "such that `Objects.equals(o, e)`" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html#contains(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, List.contains(Object)">[2]</abbr></a>, and `Set` membership and `Map` key lookups work the same way. So every one of them treats your two equal points as different.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -141,12 +141,12 @@ true
 
 **Analysis.** Now `a.equals(b)` is `true`: the overridden method compared `x` and `y`, and they match. `a == b` is still `false`, because `==` checks identity, and these are still two separate objects. The two notions have now parted ways: `==` asks "same object?", while `.equals` asks "same value?".
 
-The `@Override` **annotation** asks the compiler to confirm that this method really does override one from a supertype <abbr title="The Java Language Specification, Java SE 25, §9.6.4.4">[3]</abbr>. For `equals`, that means the parameter type must be `Object`.
+The `@Override` **annotation** asks the compiler to confirm that this method really does override one from a supertype <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.6.4.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §9.6.4.4">[3]</abbr></a>. For `equals`, that means the parameter type must be `Object`.
 
 **Intuition.**
-*Mechanism.* Once you override `equals`, your comparison replaces the identity check everywhere `.equals(Object)` is called — including deep inside the collections. The `instanceof` guard returns `false` for `null` and for the wrong type. That satisfies the contract's rule that `x.equals(null)` returns `false` <abbr title="Java SE 25 API, Object.equals(Object)">[1]</abbr>. The contract also asks for a relation that is *reflexive*, *symmetric*, *transitive* and *consistent*. Comparing the same fields on both sides gives you all four.
+*Mechanism.* Once you override `equals`, your comparison replaces the identity check everywhere `.equals(Object)` is called — including deep inside the collections. The `instanceof` guard returns `false` for `null` and for the wrong type. That satisfies the contract's rule that `x.equals(null)` returns `false` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Object.equals(Object)">[1]</abbr></a>. The contract also asks for a relation that is *reflexive*, *symmetric*, *transitive* and *consistent*. Comparing the same fields on both sides gives you all four.
 
-*Concrete bite.* Here's a subtle slip: `public boolean equals(Point p)`, with a `Point` parameter instead of `Object`. This does *not* override `Object.equals` — it **overloads** it. The JLS calls out this exact mistake as the classic reason `@Override` exists <abbr title="The Java Language Specification, Java SE 25, §9.6.4.4">[3]</abbr>. Add `@Override`, and javac rejects it:
+*Concrete bite.* Here's a subtle slip: `public boolean equals(Point p)`, with a `Point` parameter instead of `Object`. This does *not* override `Object.equals` — it **overloads** it. The JLS calls out this exact mistake as the classic reason `@Override` exists <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.6.4.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §9.6.4.4">[3]</abbr></a>. Add `@Override`, and javac rejects it:
 
 ```java run
 import static java.lang.IO.println;
@@ -237,13 +237,13 @@ The cost is some care with the signature and with the fields you include. The pa
 
 ## 3. The `hashCode` contract
 
-Here's the rule that makes or breaks hash collections <abbr title="Java SE 25 API, Object.hashCode()">[4]</abbr>:
+Here's the rule that makes or breaks hash collections <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#hashCode()" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Object.hashCode()">[4]</abbr></a>:
 
 - **If `a.equals(b)` is `true`, then `a.hashCode()` must equal `b.hashCode()`.**
 - Unequal objects *may* share a hash code. Distinct codes just make hash tables faster.
 - An object's hash code must stay the same for as long as the fields that `equals` uses stay the same.
 
-The `Object.equals` documentation adds: "It is generally necessary to override the `hashCode` method whenever this method is overridden" <abbr title="Java SE 25 API, Object.equals(Object)">[1]</abbr>. Here's what happens if you ignore that advice. Override `equals` but keep the inherited, identity-based `hashCode`, and equal objects end up with *different* hash codes. A `HashSet` or `HashMap` then looks in the wrong bucket, and your object effectively vanishes.
+The `Object.equals` documentation adds: "It is generally necessary to override the `hashCode` method whenever this method is overridden" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Object.equals(Object)">[1]</abbr></a>. Here's what happens if you ignore that advice. Override `equals` but keep the inherited, identity-based `hashCode`, and equal objects end up with *different* hash codes. A `HashSet` or `HashMap` then looks in the wrong bucket, and your object effectively vanishes.
 
 ```java run viz=hashmap:set
 import java.util.HashSet;
@@ -328,7 +328,7 @@ The cost is writing a second method. The cost of skipping it is a class that pas
 
 The good news: you rarely need to write `hashCode` by hand. Two helpers do the heavy lifting:
 
-- `Objects.hash(...)` builds a hash from the fields you pass, "as if all the input values were placed into an array" and hashed <abbr title="Java SE 25 API, Objects.hash(Object...)">[5]</abbr>;
+- `Objects.hash(...)` builds a hash from the fields you pass, "as if all the input values were placed into an array" and hashed <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Objects.html#hash(java.lang.Object...)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Objects.hash(Object...)">[5]</abbr></a>;
 - `Objects.equals(a, b)` compares two fields safely, even when either one may be `null`.
 
 Pass exactly the fields that `equals` compares, and the contract holds.
@@ -379,7 +379,7 @@ true
 **Intuition.**
 *Mechanism.* `Objects.hash(x, y)` turns the same field values into the same `int`, every time. `equals` then confirms the match within the bucket. The key is that both methods use the *same fields*. A field in `hashCode` but not in `equals` breaks the contract all over again: two objects can be equal, yet hash to different buckets. The reverse is safe but costly. A field in `equals` but not in `hashCode` keeps the contract, but it weakens the hash, so more unequal objects share a bucket.
 
-*Concrete bite.* The contract also asks that a hash code stay put while the object is in use. Change a field that `hashCode` depends on after the object is already in a `HashSet`, and the set loses track of it <abbr title="Java SE 25 API, java.util.Set">[6]</abbr>:
+*Concrete bite.* The contract also asks that a hash code stay put while the object is in use. Change a field that `hashCode` depends on after the object is already in a `HashSet`, and the set loses track of it <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Set">[6]</abbr></a>:
 
 ```java run
 import java.util.HashSet;
@@ -431,7 +431,7 @@ false
 - `contains(new Point(1, 2))` found the right bucket, but `equals` reported that the stored point is now `(5, 2)`.
 - `size()` is still `1`. The object is in the set — it's just unreachable by lookup.
 
-This isn't a bug in `HashSet`. The `Set` API warns that its behavior "is not specified if the value of an object is changed in a manner that affects equals comparisons" <abbr title="Java SE 25 API, java.util.Set">[6]</abbr>, and the `Map` API says the same about keys <abbr title="Java SE 25 API, java.util.Map">[7]</abbr>.
+This isn't a bug in `HashSet`. The `Set` API warns that its behavior "is not specified if the value of an object is changed in a manner that affects equals comparisons" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Set">[6]</abbr></a>, and the `Map` API says the same about keys <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Map">[7]</abbr></a>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -507,13 +507,13 @@ One check per objective. Answer before you open anything.
 
 ## 📚 Sources
 
-1. `java.lang.Object.equals(Object)`, Java SE 25 API (identity; the equivalence-relation contract; "It is generally necessary to override the hashCode method") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)>
-2. `java.util.List.contains(Object)`, Java SE 25 API ("such that `Objects.equals(o, e)`") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html#contains(java.lang.Object)>
-3. *The Java Language Specification, Java SE 25*, §9.6.4.4 "@Override" (the `equals(Foo)` example) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.6.4.4>
-4. `java.lang.Object.hashCode()`, Java SE 25 API (the general contract of `hashCode`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#hashCode()>
-5. `java.util.Objects.hash(Object...)` and `Objects.equals(Object, Object)`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Objects.html#hash(java.lang.Object...)>
-6. `java.util.Set`, Java SE 25 API ("Great care must be exercised if mutable objects are used as set elements") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html>
-7. `java.util.Map`, Java SE 25 API ("great care must be exercised if mutable objects are used as map keys") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html>
+1. `java.lang.Object.equals(Object)`, Java SE 25 API (identity; the equivalence-relation contract; "It is generally necessary to override the hashCode method") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)</a>
+2. `java.util.List.contains(Object)`, Java SE 25 API ("such that `Objects.equals(o, e)`") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html#contains(java.lang.Object)" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html#contains(java.lang.Object)</a>
+3. *The Java Language Specification, Java SE 25*, §9.6.4.4 "@Override" (the `equals(Foo)` example) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.6.4.4" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.6.4.4</a>
+4. `java.lang.Object.hashCode()`, Java SE 25 API (the general contract of `hashCode`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#hashCode()" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#hashCode()</a>
+5. `java.util.Objects.hash(Object...)` and `Objects.equals(Object, Object)`, Java SE 25 API — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Objects.html#hash(java.lang.Object...)" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Objects.html#hash(java.lang.Object...)</a>
+6. `java.util.Set`, Java SE 25 API ("Great care must be exercised if mutable objects are used as set elements") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html</a>
+7. `java.util.Map`, Java SE 25 API ("great care must be exercised if mutable objects are used as map keys") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html</a>
 
 ---
 

@@ -56,7 +56,7 @@ This rests on [boolean conditions](/synapse/programming-languages/java/control-f
 
 ## 1. `while`: test before each pass
 
-A `while` loop checks its condition, and if it's `true`, runs the body. Then it checks again, and again, until the condition becomes `false` <abbr title="The Java Language Specification, Java SE 25, §14.12">[1]</abbr>. Something inside the body has to move toward that end, or the loop never stops.
+A `while` loop checks its condition, and if it's `true`, runs the body. Then it checks again, and again, until the condition becomes `false` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.12" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.12">[1]</abbr></a>. Something inside the body has to move toward that end, or the loop never stops.
 
 ```java run
 import static java.lang.IO.print;
@@ -147,7 +147,7 @@ A loose boundary costs you an off-by-one: one pass too many or too few. Forgetti
 
 ## 2. `do-while`: test after each pass
 
-A `do-while` runs the body **first**, then checks the condition <abbr title="The Java Language Specification, Java SE 25, §14.13">[2]</abbr>. So the body always runs at least once, even when the condition is false from the start.
+A `do-while` runs the body **first**, then checks the condition <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.13" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.13">[2]</abbr></a>. So the body always runs at least once, even when the condition is false from the start.
 
 ```java run
 import static java.lang.IO.println;
@@ -207,7 +207,7 @@ Main.java:8: error: cannot find symbol
 1 error
 ```
 
-A variable lives from its declaration to the end of the block that holds it <abbr title="The Java Language Specification, Java SE 25, §6.3">[5]</abbr>. Declare `tries` before the `do`, and the condition can read it.
+A variable lives from its declaration to the end of the block that holds it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.3">[5]</abbr></a>. Declare `tries` before the `do`, and the condition can read it.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -221,7 +221,7 @@ Reach for it out of habit, and you pay with a body that runs even when it should
 
 ## 3. The classic `for`
 
-Counting loops have three moving parts: a starting value, a continue-condition, and a step. The `for` loop puts all three on one line: `for (init; test; update)` <abbr title="The Java Language Specification, Java SE 25, §14.14.1">[3]</abbr>. It's the same logic as the `while` in [§1](#1-while-test-before-each-pass), gathered in one place.
+Counting loops have three moving parts: a starting value, a continue-condition, and a step. The `for` loop puts all three on one line: `for (init; test; update)` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.14.1">[3]</abbr></a>. It's the same logic as the `while` in [§1](#1-while-test-before-each-pass), gathered in one place.
 
 ```java run
 import static java.lang.IO.print;
@@ -286,7 +286,7 @@ public class Main {
 After the third pass, `i` is `3` and `j` is `2`, so `i < j` fails. Each part is optional, too. `for (;;)` has no test at all, and it runs until something inside it leaves the loop. [Loop Control & Patterns](/synapse/programming-languages/java/control-flow/loop-control-and-patterns) shows how.
 
 **Intuition.**
-*Mechanism.* The `init` runs once. Then comes `test`, `body`, `update`, `test`, … until `test` is false. The loop variable declared in `init` lives **only inside the loop**: its scope is the `for` and its body, and nothing after <abbr title="The Java Language Specification, Java SE 25, §6.3">[5]</abbr>.
+*Mechanism.* The `init` runs once. Then comes `test`, `body`, `update`, `test`, … until `test` is false. The loop variable declared in `init` lives **only inside the loop**: its scope is the `for` and its body, and nothing after <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.3">[5]</abbr></a>.
 
 *Concrete bite.* Use the loop variable after the loop, and the compiler can't find it:
 
@@ -415,7 +415,7 @@ That tidy scoping costs you the counter, which vanishes at the loop's end. The p
 
 ## 4. The enhanced `for` (for-each)
 
-When you want *each element* of a collection, use the enhanced `for` <abbr title="The Java Language Specification, Java SE 25, §14.14.2">[4]</abbr>. Read `for (T x : items)` as "for each `x` in `items`". It hands you the elements one at a time, with no counter and no index to manage.
+When you want *each element* of a collection, use the enhanced `for` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.14.2">[4]</abbr></a>. Read `for (T x : items)` as "for each `x` in `items`". It hands you the elements one at a time, with no counter and no index to manage.
 
 Here we iterate over an **array**, a fixed list of values. Arrays get their full treatment in [Arrays](/synapse/programming-languages/java/control-flow/arrays). For now, read `int[] nums = {2, 4, 6}` as "a list of numbers".
 
@@ -489,7 +489,7 @@ a-b-c-
 ```
 
 **Intuition.**
-*Mechanism.* Each pass copies the next element into the loop variable <abbr title="The Java Language Specification, Java SE 25, §14.14.2">[4]</abbr>. That variable is a **copy** of the element, not the slot it came from. So assigning to it changes the copy, never the array.
+*Mechanism.* Each pass copies the next element into the loop variable <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.14.2">[4]</abbr></a>. That variable is a **copy** of the element, not the slot it came from. So assigning to it changes the copy, never the array.
 
 *Concrete bite.* Try to modify elements through the loop variable, and nothing happens:
 
@@ -609,11 +609,11 @@ It prints `0 1 2 3 4`, the same line.
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 25*, §14.12 "The `while` Statement" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.12>
-2. *The Java Language Specification, Java SE 25*, §14.13 "The `do` Statement" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.13>
-3. *The Java Language Specification, Java SE 25*, §14.14.1 "The basic `for` Statement" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.1>
-4. *The Java Language Specification, Java SE 25*, §14.14.2 "The enhanced `for` statement" (an array, or an `Iterable`) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2>
-5. *The Java Language Specification, Java SE 25*, §6.3 "Scope of a Declaration" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3>
+1. *The Java Language Specification, Java SE 25*, §14.12 "The `while` Statement" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.12" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.12</a>
+2. *The Java Language Specification, Java SE 25*, §14.13 "The `do` Statement" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.13" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.13</a>
+3. *The Java Language Specification, Java SE 25*, §14.14.1 "The basic `for` Statement" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.1</a>
+4. *The Java Language Specification, Java SE 25*, §14.14.2 "The enhanced `for` statement" (an array, or an `Iterable`) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2</a>
+5. *The Java Language Specification, Java SE 25*, §6.3 "Scope of a Declaration" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.3</a>
 
 ---
 

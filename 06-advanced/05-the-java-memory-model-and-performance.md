@@ -56,7 +56,7 @@ This lesson takes a deeper pass at [happens-before](/synapse/programming-languag
 
 ## 1. `volatile`: visibility, not atomicity
 
-A field may be declared `volatile`, "in which case the Java Memory Model ensures that all threads see a consistent value for the variable" <abbr title="The Java Language Specification, Java SE 25, §8.3.1.4">[1]</abbr>. A write to it is *visible* to every later read by other threads, which fixes the "a thread never sees the flag change" bug. Here, a worker spins until `main` flips a `volatile` flag — and then it stops.
+A field may be declared `volatile`, "in which case the Java Memory Model ensures that all threads see a consistent value for the variable" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.1.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.3.1.4">[1]</abbr></a>. A write to it is *visible* to every later read by other threads, which fixes the "a thread never sees the flag change" bug. Here, a worker spins until `main` flips a `volatile` flag — and then it stops.
 
 ```java run
 import static java.lang.IO.println;
@@ -115,12 +115,12 @@ public class Main {
  running = false; we killed the process. Neither println was ever reached.)
 ```
 
-The JLS describes this exact bug, for a loop on a non-`volatile` field. The compiler "is free to read the field this.done" just once, "and reuse the cached value in each execution of the loop" <abbr title="The Java Language Specification, Java SE 25, §17.3">[2]</abbr>.
+The JLS describes this exact bug, for a loop on a non-`volatile` field. The compiler "is free to read the field this.done" just once, "and reuse the cached value in each execution of the loop" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.3">[2]</abbr></a>.
 
 In effect, the worker's loop becomes `if (running) while (true) count++;`. That's a perfectly legal transformation of code that never said another thread would touch the field. The write from `main` does happen — the worker just never looks again.
 
 **Intuition.**
-*Mechanism.* A `volatile` write happens-before every later read of that field <abbr title="The Java Language Specification, Java SE 25, §17.4.5">[3]</abbr>. So a reader that comes after the write is guaranteed to see it, along with everything written before it. The JIT may not keep the field in a register, or reorder other memory operations across it, in any way that would break that guarantee.
+*Mechanism.* A `volatile` write happens-before every later read of that field <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.4.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.4.5">[3]</abbr></a>. So a reader that comes after the write is guaranteed to see it, along with everything written before it. The JIT may not keep the field in a register, or reorder other memory operations across it, in any way that would break that guarantee.
 
 *Concrete bite.* `volatile` gives you visibility, but **not** atomicity. A `volatile` counter's `++` still races:
 
@@ -160,7 +160,7 @@ The cost of confusing the two is the bug above: a `volatile` counter that still 
 
 ## 2. happens-before, in depth
 
-**Happens-before** is the JMM's guarantee: if action A happens-before action B, then A's writes are visible to B. Without such an edge, there's *no* guarantee at all, and B may see an older value. A handful of rules establish these edges <abbr title="The Java Language Specification, Java SE 25, §17.4.5">[3]</abbr>:
+**Happens-before** is the JMM's guarantee: if action A happens-before action B, then A's writes are visible to B. Without such an edge, there's *no* guarantee at all, and B may see an older value. A handful of rules establish these edges <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.4.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.4.5">[3]</abbr></a>:
 
 ```mermaid
 ---
@@ -194,7 +194,7 @@ flowchart LR
 Think of each one as a bridge, across which writes are guaranteed to be visible.
 
 **Intuition.**
-*Mechanism.* Happens-before is *transitive*: "If hb(x, y) and hb(y, z), then hb(x, z)" <abbr title="The Java Language Specification, Java SE 25, §17.4.5">[3]</abbr>. So a writer can set several plain fields and then write a single `volatile` flag — and a reader that sees the flag also sees those fields:
+*Mechanism.* Happens-before is *transitive*: "If hb(x, y) and hb(y, z), then hb(x, z)" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.4.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.4.5">[3]</abbr></a>. So a writer can set several plain fields and then write a single `volatile` flag — and a reader that sees the flag also sees those fields:
 
 1. Program order: `data = 42` happens-before `ready = true` in the writer.
 2. `volatile`: the write `ready = true` happens-before the reader's read that sees `true`.
@@ -264,11 +264,11 @@ This one is described rather than demonstrated. The reordering is allowed, but i
 
 Publishing an object so that its fields travel along with the reference is called **safe publication**. There are three tools for it, plus a fourth that the class loader gives you:
 
-1. **`final` fields.** The JLS guarantees them. A thread that sees the reference only after the object "has been completely initialized is guaranteed to see the correctly initialized values for that object's final fields" <abbr title="The Java Language Specification, Java SE 25, §17.5">[4]</abbr>. The object counts as initialized "when its constructor finishes", so the constructor must not let `this` escape to another thread before it ends.
+1. **`final` fields.** The JLS guarantees them. A thread that sees the reference only after the object "has been completely initialized is guaranteed to see the correctly initialized values for that object's final fields" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.5">[4]</abbr></a>. The object counts as initialized "when its constructor finishes", so the constructor must not let `this` escape to another thread before it ends.
 2. **A `volatile` reference.** The `volatile` write of the reference happens-before the `volatile` read. By [§2](#2-happens-before-in-depth)'s transitivity, it carries every earlier write along with it, the fields included.
 3. **A lock.** Publish and consume under the same monitor, and the unlock→lock edge carries the writes.
 
-This is the deepest reason [records](/synapse/programming-languages/java/core-libraries/enums-and-records) are safe to hand between threads. A record's component fields are "private, final, and non-static" <abbr title="The Java Language Specification, Java SE 25, §8.10.3">[5]</abbr>. The guarantee also covers objects reached through those `final` fields, as they were when the constructor finished <abbr title="The Java Language Specification, Java SE 25, §17.5">[4]</abbr>. It doesn't cover changes made *after* construction, though: a record holding a mutable `ArrayList` is only shallowly immutable.
+This is the deepest reason [records](/synapse/programming-languages/java/core-libraries/enums-and-records) are safe to hand between threads. A record's component fields are "private, final, and non-static" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.10.3">[5]</abbr></a>. The guarantee also covers objects reached through those `final` fields, as they were when the constructor finished <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.5">[4]</abbr></a>. It doesn't cover changes made *after* construction, though: a record holding a mutable `ArrayList` is only shallowly immutable.
 
 The classic place where these tools collide is the **lazily initialized singleton**. The infamous *double-checked locking* pattern (check, lock, check again, construct) is broken when written with a plain field, because the unlocked first check can observe the half-built object. With `volatile`, the pattern is correct — and here it is, running:
 
@@ -323,7 +323,7 @@ Thread-1 got loaded
 
 **Analysis.** Four threads raced into `getInstance()`, and exactly one of them constructed the `Config` — the lock plus the *second* check guarantee that. The `volatile` write published it, so the other threads' *unlocked* fast-path reads still saw a fully built object. Remove `volatile`, and the fast path becomes the unsafe publication described above: rare, timing-dependent, and catastrophic.
 
-**The holder idiom** gets the same laziness and safety from the class loader, with no `volatile` and no lock. A class is initialized "immediately before" its first use, such as the first read of one of its `static` fields <abbr title="The Java Language Specification, Java SE 25, §12.4.1">[6]</abbr>. The JVM synchronizes that initialization, so exactly one thread runs it <abbr title="The Java Language Specification, Java SE 25, §12.4.2">[7]</abbr>:
+**The holder idiom** gets the same laziness and safety from the class loader, with no `volatile` and no lock. A class is initialized "immediately before" its first use, such as the first read of one of its `static` fields <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.4.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.4.1">[6]</abbr></a>. The JVM synchronizes that initialization, so exactly one thread runs it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.4.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.4.2">[7]</abbr></a>:
 
 ```java run
 import static java.lang.IO.println;
@@ -381,7 +381,7 @@ The cost is one more thing to check whenever a reference leaves a constructor or
 
 ## 4. JIT compilation
 
-At first, the JVM runs bytecode by **interpreting** it. Methods that run often ("hot" methods) then get **JIT-compiled**: compiled into optimized native code while the program is running. By default, the JVM uses a "Tiered compiler, using both C1 and C2" <abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 25, &quot;Ergonomics&quot;">[8]</abbr>: C1 compiles quickly, and C2 optimizes fully. This program makes `fib` hot:
+At first, the JVM runs bytecode by **interpreting** it. Methods that run often ("hot" methods) then get **JIT-compiled**: compiled into optimized native code while the program is running. By default, the JVM uses a "Tiered compiler, using both C1 and C2" <a href="https://docs.oracle.com/en/java/javase/25/gctuning/ergonomics1.html" target="_blank" rel="noopener noreferrer"><abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 25, &quot;Ergonomics&quot;">[8]</abbr></a>: C1 compiles quickly, and C2 optimizes fully. This program makes `fib` hot:
 
 ```java run
 import static java.lang.IO.println;
@@ -402,7 +402,7 @@ public class Main {
 fib(30) = 832040
 ```
 
-The flag `-XX:+PrintCompilation` prints "a message to the console every time a method is compiled" <abbr title="The java command, JDK 25 documentation, -XX:+PrintCompilation">[9]</abbr>. The sandbox can't pass JVM flags, so this is a terminal run, filtered down to the lines about `Main`:
+The flag `-XX:+PrintCompilation` prints "a message to the console every time a method is compiled" <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html" target="_blank" rel="noopener noreferrer"><abbr title="The java command, JDK 25 documentation, -XX:+PrintCompilation">[9]</abbr></a>. The sandbox can't pass JVM flags, so this is a terminal run, filtered down to the lines about `Main`:
 
 ```
 $ java -XX:+PrintCompilation Main | grep -E "Main::|fib\(30\)"
@@ -421,7 +421,7 @@ fib(30) = 832040
 
 **Analysis.** Each line is a compilation event: a timestamp in milliseconds, a compile id, a **tier**, and the method with its bytecode size.
 
-- In HotSpot's source, tier 3 is "C1, invocation & backedge counters + mdo" (C1 with full profiling), and tier 4 is C2 <abbr title="OpenJDK 25 source, src/hotspot/share/compiler/compilerDefinitions.hpp, enum CompLevel">[10]</abbr>.
+- In HotSpot's source, tier 3 is "C1, invocation & backedge counters + mdo" (C1 with full profiling), and tier 4 is C2 <a href="https://github.com/openjdk/jdk25u/blob/master/src/hotspot/share/compiler/compilerDefinitions.hpp" target="_blank" rel="noopener noreferrer"><abbr title="OpenJDK 25 source, src/hotspot/share/compiler/compilerDefinitions.hpp, enum CompLevel">[10]</abbr></a>.
 - `fib` was compiled at tier 3 first. Once it proved *very* hot, it was recompiled at tier 4.
 - The tier-3 version was then "made not entrant" — retired in favour of the faster one, because it was no longer used.
 
@@ -430,7 +430,7 @@ This is why Java *warms up*: the same code runs faster once the JIT has compiled
 **Intuition.**
 *Mechanism.* While interpreting, the JVM counts calls and records how branches behave. It then compiles hot methods, applying inlining, loop optimizations and speculative optimizations based on that profile. If one of its assumptions later turns out to be wrong, it *deoptimizes*: it falls back to the interpreter, and later recompiles.
 
-*Concrete bite.* This makes naive timing lie. The first calls to a method run interpreted and slow; later calls run optimized and fast. So timing a method once measures interpretation, not steady-state performance. That's why you warm up (run the code many times) before measuring, and why a real benchmark uses a harness such as JMH <abbr title="OpenJDK Code Tools: JMH, the Java Microbenchmark Harness">[11]</abbr>.
+*Concrete bite.* This makes naive timing lie. The first calls to a method run interpreted and slow; later calls run optimized and fast. So timing a method once measures interpretation, not steady-state performance. That's why you warm up (run the code many times) before measuring, and why a real benchmark uses a harness such as JMH <a href="https://github.com/openjdk/jmh" target="_blank" rel="noopener noreferrer"><abbr title="OpenJDK Code Tools: JMH, the Java Microbenchmark Harness">[11]</abbr></a>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -444,9 +444,9 @@ The cost is that performance is dynamic, and hard to predict from the source alo
 
 ## 5. Garbage collection and tuning
 
-Java manages memory automatically. A **garbage collector** reclaims objects that are no longer **reachable**, so you never `free` memory yourself. "A reachable object is any object that can be accessed in any potential continuing computation from any live thread" <abbr title="The Java Language Specification, Java SE 25, §12.6.1">[13]</abbr>. The [object-model lesson](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) shows when an object becomes unreachable.
+Java manages memory automatically. A **garbage collector** reclaims objects that are no longer **reachable**, so you never `free` memory yourself. "A reachable object is any object that can be accessed in any potential continuing computation from any live thread" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.6.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.6.1">[13]</abbr></a>. The [object-model lesson](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model) shows when an object becomes unreachable.
 
-Modern collectors are **generational**. They rely on "the weak generational hypothesis, which states that most objects survive for only a short period of time" <abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 25, &quot;Garbage Collector Implementation&quot;">[12]</abbr>. So the GC scans a small "young" region often, and cheaply. This program allocates 2000 MB worth of short-lived 1 MB arrays:
+Modern collectors are **generational**. They rely on "the weak generational hypothesis, which states that most objects survive for only a short period of time" <a href="https://docs.oracle.com/en/java/javase/25/gctuning/garbage-collector-implementation1.html" target="_blank" rel="noopener noreferrer"><abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 25, &quot;Garbage Collector Implementation&quot;">[12]</abbr></a>. So the GC scans a small "young" region often, and cheaply. This program allocates 2000 MB worth of short-lived 1 MB arrays:
 
 ```java run
 import static java.lang.IO.println;
@@ -493,7 +493,7 @@ allocated 2000 MB of garbage
 
 The heap never grew anywhere near 2 GB, because the collector kept recycling the same space.
 
-G1 is the default only "on server-class machines, Serial Collector otherwise". A machine counts as server-class when the JVM "detects two or more processors and physical memory larger than or equal to 1792 MB" <abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 25, &quot;Ergonomics&quot;">[8]</abbr>. Tell the same JVM it has only one processor, and it picks Serial:
+G1 is the default only "on server-class machines, Serial Collector otherwise". A machine counts as server-class when the JVM "detects two or more processors and physical memory larger than or equal to 1792 MB" <a href="https://docs.oracle.com/en/java/javase/25/gctuning/ergonomics1.html" target="_blank" rel="noopener noreferrer"><abbr title="HotSpot Virtual Machine Garbage Collection Tuning Guide, Release 25, &quot;Ergonomics&quot;">[8]</abbr></a>. Tell the same JVM it has only one processor, and it picks Serial:
 
 ```
 $ java -Xlog:gc -XX:ActiveProcessorCount=1 Main
@@ -615,19 +615,19 @@ One check per objective. Answer before you open anything.
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 25*, §8.3.1.4 "`volatile` Fields" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.1.4>
-2. *The Java Language Specification, Java SE 25*, §17.3 "Sleep and Yield" (the `this.done` loop the compiler may read once) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.3>
-3. *The Java Language Specification, Java SE 25*, §17.4.5 "Happens-before Order" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.4.5>
-4. *The Java Language Specification, Java SE 25*, §17.5 "`final` Field Semantics" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.5>
-5. *The Java Language Specification, Java SE 25*, §8.10.3 "Record Members" ("A component field is private, final, and non-static") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.3>
-6. *The Java Language Specification, Java SE 25*, §12.4.1 "When Initialization Occurs" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.4.1>
-7. *The Java Language Specification, Java SE 25*, §12.4.2 "Detailed Initialization Procedure" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.4.2>
-8. *HotSpot Virtual Machine Garbage Collection Tuning Guide*, Release 25, "Ergonomics" (G1 on server-class machines, Serial otherwise; "Tiered compiler, using both C1 and C2") — <https://docs.oracle.com/en/java/javase/25/gctuning/ergonomics1.html>
-9. The `java` command, JDK 25 documentation (`-XX:+PrintCompilation`, `-Xlog`) — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html>
-10. OpenJDK 25 source, `src/hotspot/share/compiler/compilerDefinitions.hpp` (`enum CompLevel`) — <https://github.com/openjdk/jdk25u/blob/master/src/hotspot/share/compiler/compilerDefinitions.hpp>
-11. OpenJDK Code Tools, JMH (Java Microbenchmark Harness) — <https://github.com/openjdk/jmh>
-12. *HotSpot Virtual Machine Garbage Collection Tuning Guide*, Release 25, "Garbage Collector Implementation" (the weak generational hypothesis) — <https://docs.oracle.com/en/java/javase/25/gctuning/garbage-collector-implementation1.html>
-13. *The Java Language Specification, Java SE 25*, §12.6.1 "Implementing Finalization" (the definition of a reachable object) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.6.1>
+1. *The Java Language Specification, Java SE 25*, §8.3.1.4 "`volatile` Fields" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.1.4" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.1.4</a>
+2. *The Java Language Specification, Java SE 25*, §17.3 "Sleep and Yield" (the `this.done` loop the compiler may read once) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.3" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.3</a>
+3. *The Java Language Specification, Java SE 25*, §17.4.5 "Happens-before Order" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.4.5" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.4.5</a>
+4. *The Java Language Specification, Java SE 25*, §17.5 "`final` Field Semantics" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.5" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.5</a>
+5. *The Java Language Specification, Java SE 25*, §8.10.3 "Record Members" ("A component field is private, final, and non-static") — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.3" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.3</a>
+6. *The Java Language Specification, Java SE 25*, §12.4.1 "When Initialization Occurs" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.4.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.4.1</a>
+7. *The Java Language Specification, Java SE 25*, §12.4.2 "Detailed Initialization Procedure" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.4.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.4.2</a>
+8. *HotSpot Virtual Machine Garbage Collection Tuning Guide*, Release 25, "Ergonomics" (G1 on server-class machines, Serial otherwise; "Tiered compiler, using both C1 and C2") — <a href="https://docs.oracle.com/en/java/javase/25/gctuning/ergonomics1.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/gctuning/ergonomics1.html</a>
+9. The `java` command, JDK 25 documentation (`-XX:+PrintCompilation`, `-Xlog`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html</a>
+10. OpenJDK 25 source, `src/hotspot/share/compiler/compilerDefinitions.hpp` (`enum CompLevel`) — <a href="https://github.com/openjdk/jdk25u/blob/master/src/hotspot/share/compiler/compilerDefinitions.hpp" target="_blank" rel="noopener noreferrer">https://github.com/openjdk/jdk25u/blob/master/src/hotspot/share/compiler/compilerDefinitions.hpp</a>
+11. OpenJDK Code Tools, JMH (Java Microbenchmark Harness) — <a href="https://github.com/openjdk/jmh" target="_blank" rel="noopener noreferrer">https://github.com/openjdk/jmh</a>
+12. *HotSpot Virtual Machine Garbage Collection Tuning Guide*, Release 25, "Garbage Collector Implementation" (the weak generational hypothesis) — <a href="https://docs.oracle.com/en/java/javase/25/gctuning/garbage-collector-implementation1.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/gctuning/garbage-collector-implementation1.html</a>
+13. *The Java Language Specification, Java SE 25*, §12.6.1 "Implementing Finalization" (the definition of a reachable object) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.6.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.6.1</a>
 
 ---
 

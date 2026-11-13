@@ -96,10 +96,10 @@ HELLO!
 
 - `javac -d out` wrote the compiled classes into directories that mirror the package names: `out/com/example/Main.class` and `out/com/example/util/Text.class`.
 - `java -cp out com.example.Main` set the **classpath** to `out`, and ran the class by its full name, `com.example.Main`.
-- The `import` let `Main` write `Text` instead of `com.example.util.Text`. It's a compile-time shorthand, nothing more <abbr title="The Java Language Specification, Java SE 25, §7.5">[2]</abbr>.
+- The `import` let `Main` write `Text` instead of `com.example.util.Text`. It's a compile-time shorthand, nothing more <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.5">[2]</abbr></a>.
 
 **Intuition.**
-*Mechanism.* A package is a namespace. The classpath is the list of root locations where the JVM looks for `.class` files. So `java com.example.Main` means "find `com/example/Main.class` under one of the classpath roots." The JLS leaves this file-system mapping up to the host system <abbr title="The Java Language Specification, Java SE 25, §7.2">[1]</abbr>, and the JDK tools use directories.
+*Mechanism.* A package is a namespace. The classpath is the list of root locations where the JVM looks for `.class` files. So `java com.example.Main` means "find `com/example/Main.class` under one of the classpath roots." The JLS leaves this file-system mapping up to the host system <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.2">[1]</abbr></a>, and the JDK tools use directories.
 
 *Concrete bite.* The directory rule applies to the *class files*, not the sources. Even if `javac` compiled both files from a single `src/anywhere/` folder, `-d out` would still write `out/com/example/util/Text.class`. Move that class file out of its package directory, and the JVM can't find it when `Main` first needs it:
 
@@ -159,7 +159,7 @@ src2/com/example/Main.java:6: error: whisper(String) is not public in Text; cann
 **Analysis.** `Text` is `public` (so `Main` can use it), and `shout` is `public` (so `Main` can call it). But `whisper` is package-private, belonging to `com.example.util`, and `Main` lives in `com.example` — a *different* package. So `whisper` is off-limits: "not public … cannot be accessed from outside package." The boundary is the package, and the default (no modifier) stops right at it.
 
 **Intuition.**
-*Mechanism.* The compiler checks each access against both the member's modifier *and* the package of the code doing the accessing <abbr title="The Java Language Specification, Java SE 25, §6.6.1">[3]</abbr>. Package-private grants access only to code in the same package. Crossing a package boundary requires `public` (or `protected`, for subclasses).
+*Mechanism.* The compiler checks each access against both the member's modifier *and* the package of the code doing the accessing <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.6.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §6.6.1">[3]</abbr></a>. Package-private grants access only to code in the same package. Crossing a package boundary requires `public` (or `protected`, for subclasses).
 
 *Concrete bite.* This is real encapsulation, not just a convention. A package can expose a `public` API while keeping helper classes and methods package-private, and no outside code can reach them, because the compiler enforces it. That's how libraries hide their internals from the code that uses them.
 
@@ -176,7 +176,7 @@ src2/com/example/Main.java:6: error: whisper(String) is not public in Text; cann
 
 ## 3. Modules: `module-info.java`
 
-On the classpath, any `public` type in any package is reachable by anyone. Package-private hides *members*, but a `public` class in an "internal" package is still exposed. The **module system** (JPMS, JDK 9) <abbr title="JEP 261: Module System (JDK 9)">[8]</abbr> closes that gap. A module declares which packages it `exports` and which modules it `requires`, in a `module-info.java` file at its root <abbr title="The Java Language Specification, Java SE 25, §7.7">[4]</abbr>.
+On the classpath, any `public` type in any package is reachable by anyone. Package-private hides *members*, but a `public` class in an "internal" package is still exposed. The **module system** (JPMS, JDK 9) <a href="https://openjdk.org/jeps/261" target="_blank" rel="noopener noreferrer"><abbr title="JEP 261: Module System (JDK 9)">[8]</abbr></a> closes that gap. A module declares which packages it `exports` and which modules it `requires`, in a `module-info.java` file at its root <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.7">[4]</abbr></a>.
 
 ```java
 // requires: a module source tree — a module-info.java is not a program
@@ -251,7 +251,7 @@ import com.example.Main;
 
 A module **reads** another module only if it `requires` it. Put `requires com.example.app;` back, and the client compiles and prints `HELLO!`.
 
-This is called "strong encapsulation": the classpath's hole (public-but-internal types leaking out) is sealed. It's also why the JDK itself is modularized — into `java.base`, `java.sql`, and more. Since JDK 17, the JDK's own internals are strongly encapsulated too, and reaching into them requires an explicit `--add-opens` <abbr title="JEP 403: Strongly Encapsulate JDK Internals (JDK 17)">[10]</abbr>.
+This is called "strong encapsulation": the classpath's hole (public-but-internal types leaking out) is sealed. It's also why the JDK itself is modularized — into `java.base`, `java.sql`, and more. Since JDK 17, the JDK's own internals are strongly encapsulated too, and reaching into them requires an explicit `--add-opens` <a href="https://openjdk.org/jeps/403" target="_blank" rel="noopener noreferrer"><abbr title="JEP 403: Strongly Encapsulate JDK Internals (JDK 17)">[10]</abbr></a>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -262,7 +262,7 @@ This is called "strong encapsulation": the classpath's hole (public-but-internal
 
 </div>
 
-**Importing a whole module.** Because a module lists the packages it exports, JDK 25 lets you import all of them at once. `import module java.base;` imports, on demand, every public class and interface in every package that `java.base` exports <abbr title="The Java Language Specification, Java SE 25, §7.5.5">[18]</abbr> <abbr title="JEP 511: Module Import Declarations (JDK 25)">[17]</abbr>. Your own code doesn't have to be a module to use it:
+**Importing a whole module.** Because a module lists the packages it exports, JDK 25 lets you import all of them at once. `import module java.base;` imports, on demand, every public class and interface in every package that `java.base` exports <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.5.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.5.5">[18]</abbr></a> <a href="https://openjdk.org/jeps/511" target="_blank" rel="noopener noreferrer"><abbr title="JEP 511: Module Import Declarations (JDK 25)">[17]</abbr></a>. Your own code doesn't have to be a module to use it:
 
 ```java run
 import module java.base;
@@ -319,7 +319,7 @@ Add `import java.util.Date;` under the module imports, and it compiles and print
 
 ## 4. Reflection and `opens`
 
-**Reflection** is code that inspects classes while the program runs: it can list a class's fields and read them by name. JSON and database libraries use it to fill in objects without knowing their classes in advance. But `exports` doesn't grant reflective access to `private` members. For that, you need `opens` <abbr title="The Java Language Specification, Java SE 25, §7.7.2">[5]</abbr>.
+**Reflection** is code that inspects classes while the program runs: it can list a class's fields and read them by name. JSON and database libraries use it to fill in objects without knowing their classes in advance. But `exports` doesn't grant reflective access to `private` members. For that, you need `opens` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.7.2">[5]</abbr></a>.
 
 Here, module `com.lib` exports `com.lib.model`, whose `Secret` class has a `private` field. A second module tries to read that field by reflection:
 
@@ -358,7 +358,7 @@ Exception in thread "main" java.lang.reflect.InaccessibleObjectException: Unable
 **Analysis.** It compiled, because reflection names the field as a string. It failed at run time instead, at `setAccessible(true)` — and the message even names the missing line. Add `opens com.lib.model;` to `com.lib`'s `module-info.java`, recompile, and the same command prints `value = hidden`.
 
 **Intuition.**
-*Mechanism.* `exports` and `opens` grant different things <abbr title="The Java Language Specification, Java SE 25, §7.7.2">[5]</abbr>:
+*Mechanism.* `exports` and `opens` grant different things <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.7.2">[5]</abbr></a>:
 
 - `exports` grants compile-time and run-time access to the package's `public` and `protected` types and members.
 - `opens` grants run-time access only, but to *all* members — `private` ones included — through reflection.
@@ -380,11 +380,11 @@ A package can be exported, opened, both, or neither. Writing `opens com.lib.mode
 
 ## 5. Services: `provides`, `uses` and `ServiceLoader`
 
-A **service** lets a module use an implementation that it doesn't name — or even `require`. In this example, three modules share the work <abbr title="The Java Language Specification, Java SE 25, §7.7.3–7.7.4">[6]</abbr>:
+A **service** lets a module use an implementation that it doesn't name — or even `require`. In this example, three modules share the work <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.7.3–7.7.4">[6]</abbr></a>:
 
 - `greet.api` exports an interface, `com.greet.api.Greeter`.
 - `greet.english` implements it, and announces that with `provides … with`. Its package isn't exported.
-- `greet.app` declares `uses com.greet.api.Greeter`, and asks `ServiceLoader` for implementations <abbr title="java.util.ServiceLoader, Java SE 25 API">[12]</abbr>.
+- `greet.app` declares `uses com.greet.api.Greeter`, and asks `ServiceLoader` for implementations <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ServiceLoader.html" target="_blank" rel="noopener noreferrer"><abbr title="java.util.ServiceLoader, Java SE 25 API">[12]</abbr></a>.
 
 ```java
 // requires: three modules — not runnable in the sandbox
@@ -472,10 +472,10 @@ Exception in thread "main" java.util.ServiceConfigurationError: com.greet.api.Gr
 
 ## 6. The unnamed module and automatic modules
 
-Not all code is modular, but the module system has a place for all of it <abbr title="The Java Language Specification, Java SE 25, §7.7.5">[7]</abbr>:
+Not all code is modular, but the module system has a place for all of it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.7.5">[7]</abbr></a>:
 
 - Code on the **classpath** belongs to the **unnamed module**. It reads every module, and exports and opens all of its packages. No named module can `require` it, because it has no name to require.
-- A plain JAR with no `module-info.class`, placed on the **module path**, becomes an **automatic module**. Its name comes from the manifest's `Automatic-Module-Name`, or failing that, from the JAR's file name <abbr title="java.lang.module.ModuleFinder, Java SE 25 API (of)">[13]</abbr>. It reads every other module, and all of its packages are exported and open <abbr title="java.lang.module.ModuleDescriptor, Java SE 25 API">[15]</abbr>.
+- A plain JAR with no `module-info.class`, placed on the **module path**, becomes an **automatic module**. Its name comes from the manifest's `Automatic-Module-Name`, or failing that, from the JAR's file name <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/module/ModuleFinder.html" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.module.ModuleFinder, Java SE 25 API (of)">[13]</abbr></a>. It reads every other module, and all of its packages are exported and open <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/module/ModuleDescriptor.html" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.module.ModuleDescriptor, Java SE 25 API">[15]</abbr></a>.
 
 A classpath program can ask which module it's in:
 
@@ -557,7 +557,7 @@ HELLO!
 HELLO!
 ```
 
-**Analysis.** `jar --create` bundled the `out` directory's classes into `app.jar`, and recorded `com.example.Main` in the manifest as the entry point. That's how `java -jar app.jar` found and ran it <abbr title="The jar command, JDK 25 documentation">[14]</abbr>. A JAR is Java's standard unit of distribution: one file to ship, put on a classpath, or run.
+**Analysis.** `jar --create` bundled the `out` directory's classes into `app.jar`, and recorded `com.example.Main` in the manifest as the entry point. That's how `java -jar app.jar` found and ran it <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/jar.html" target="_blank" rel="noopener noreferrer"><abbr title="The jar command, JDK 25 documentation">[14]</abbr></a>. A JAR is Java's standard unit of distribution: one file to ship, put on a classpath, or run.
 
 A JAR that contains a `module-info.class` is called a **modular JAR**. `jar --describe-module` prints its descriptor (the path is shortened here):
 
@@ -574,9 +574,9 @@ $ java --module-path mlib -m com.example.app
 HELLO!
 ```
 
-The same modular JAR works on the classpath too (`java -cp mlib/app.jar com.example.Main` prints `HELLO!`). In that case, its classes belong to the unnamed module <abbr title="java.lang.Module, Java SE 25 API">[16]</abbr>.
+The same modular JAR works on the classpath too (`java -cp mlib/app.jar com.example.Main` prints `HELLO!`). In that case, its classes belong to the unnamed module <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Module.html" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.Module, Java SE 25 API">[16]</abbr></a>.
 
-**A runtime image with `jlink`.** `jlink` links your modules, together with only the JDK modules they need, into a self-contained directory: a **runtime image** with its own `java` <abbr title="JEP 282: jlink: The Java Linker (JDK 9)">[9]</abbr> <abbr title="The jlink command, JDK 25 documentation">[11]</abbr>. The machine that runs it doesn't need a JDK installed.
+**A runtime image with `jlink`.** `jlink` links your modules, together with only the JDK modules they need, into a self-contained directory: a **runtime image** with its own `java` <a href="https://openjdk.org/jeps/282" target="_blank" rel="noopener noreferrer"><abbr title="JEP 282: jlink: The Java Linker (JDK 9)">[9]</abbr></a> <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/jlink.html" target="_blank" rel="noopener noreferrer"><abbr title="The jlink command, JDK 25 documentation">[11]</abbr></a>. The machine that runs it doesn't need a JDK installed.
 
 ```
 $ jlink --module-path out --add-modules com.example.app --launcher hello=com.example.app/com.example.Main --output image
@@ -693,24 +693,24 @@ One check per objective. Answer before you open anything.
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 25*, §7.2 "Host Support for Modules and Packages" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.2>
-2. *The Java Language Specification, Java SE 25*, §7.5 "Import Declarations" (makes classes "available by their simple names") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.5>
-3. *The Java Language Specification, Java SE 25*, §6.6.1 "Determining Accessibility" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.6.1>
-4. *The Java Language Specification, Java SE 25*, §7.7 "Module Declarations" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7>
-5. *The Java Language Specification, Java SE 25*, §7.7.2 "Exported and Opened Packages" (`opens`: "access at run time, but not compile time", and reflective access) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.2>
-6. *The Java Language Specification, Java SE 25*, §7.7.3 "Service Consumption" and §7.7.4 "Service Provision" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.3>
-7. *The Java Language Specification, Java SE 25*, §7.7.5 "Unnamed Modules" (reads every observable module; exports and opens every package) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.5>
-8. JEP 261: Module System (JDK 9) — <https://openjdk.org/jeps/261>
-9. JEP 282: jlink: The Java Linker (JDK 9) — <https://openjdk.org/jeps/282>
-10. JEP 403: Strongly Encapsulate JDK Internals (JDK 17) — <https://openjdk.org/jeps/403>
-11. The `jlink` command, JDK 25 documentation ("assemble and optimize a set of modules and their dependencies into a custom runtime image") — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/jlink.html>
-12. `java.util.ServiceLoader`, Java SE 25 API — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ServiceLoader.html>
-13. `java.lang.module.ModuleFinder`, Java SE 25 API (`of`: automatic module names from `Automatic-Module-Name` or the JAR file name) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/module/ModuleFinder.html>
-14. The `jar` command, JDK 25 documentation — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/jar.html>
-15. `java.lang.module.ModuleDescriptor`, Java SE 25 API (an automatic module "is treated as if all packages are exported and open") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/module/ModuleDescriptor.html>
-16. `java.lang.Module`, Java SE 25 API ("All types that are not in a named module are members of their defining class loader's unnamed module") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Module.html>
-17. JEP 511: Module Import Declarations (JDK 25) — <https://openjdk.org/jeps/511>
-18. *The Java Language Specification, Java SE 25*, §7.5.5 "Single-Module-Import Declarations" ("A single-module-import declaration can be used in any source file") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.5.5>
+1. *The Java Language Specification, Java SE 25*, §7.2 "Host Support for Modules and Packages" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.2</a>
+2. *The Java Language Specification, Java SE 25*, §7.5 "Import Declarations" (makes classes "available by their simple names") — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.5" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.5</a>
+3. *The Java Language Specification, Java SE 25*, §6.6.1 "Determining Accessibility" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.6.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-6.html#jls-6.6.1</a>
+4. *The Java Language Specification, Java SE 25*, §7.7 "Module Declarations" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7</a>
+5. *The Java Language Specification, Java SE 25*, §7.7.2 "Exported and Opened Packages" (`opens`: "access at run time, but not compile time", and reflective access) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.2</a>
+6. *The Java Language Specification, Java SE 25*, §7.7.3 "Service Consumption" and §7.7.4 "Service Provision" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.3" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.3</a>
+7. *The Java Language Specification, Java SE 25*, §7.7.5 "Unnamed Modules" (reads every observable module; exports and opens every package) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.5" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.7.5</a>
+8. JEP 261: Module System (JDK 9) — <a href="https://openjdk.org/jeps/261" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/261</a>
+9. JEP 282: jlink: The Java Linker (JDK 9) — <a href="https://openjdk.org/jeps/282" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/282</a>
+10. JEP 403: Strongly Encapsulate JDK Internals (JDK 17) — <a href="https://openjdk.org/jeps/403" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/403</a>
+11. The `jlink` command, JDK 25 documentation ("assemble and optimize a set of modules and their dependencies into a custom runtime image") — <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/jlink.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/specs/man/jlink.html</a>
+12. `java.util.ServiceLoader`, Java SE 25 API — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ServiceLoader.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ServiceLoader.html</a>
+13. `java.lang.module.ModuleFinder`, Java SE 25 API (`of`: automatic module names from `Automatic-Module-Name` or the JAR file name) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/module/ModuleFinder.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/module/ModuleFinder.html</a>
+14. The `jar` command, JDK 25 documentation — <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/jar.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/specs/man/jar.html</a>
+15. `java.lang.module.ModuleDescriptor`, Java SE 25 API (an automatic module "is treated as if all packages are exported and open") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/module/ModuleDescriptor.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/module/ModuleDescriptor.html</a>
+16. `java.lang.Module`, Java SE 25 API ("All types that are not in a named module are members of their defining class loader's unnamed module") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Module.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Module.html</a>
+17. JEP 511: Module Import Declarations (JDK 25) — <a href="https://openjdk.org/jeps/511" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/511</a>
+18. *The Java Language Specification, Java SE 25*, §7.5.5 "Single-Module-Import Declarations" ("A single-module-import declaration can be used in any source file") — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.5.5" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.5.5</a>
 
 ---
 

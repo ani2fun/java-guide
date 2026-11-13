@@ -164,7 +164,7 @@ The next idea: to make a number negative, **flip every switch**. +5 is `0000 010
 
 Adding works better now. 5 + (−5) is `0000 0101` + `1111 1010` = `1111 1111`. And `1111 1111` is the flip of `0000 0000`, so it means... **−0**. There are still two zeros. Adding also needs a strange extra rule called the "end-around carry" to get some answers right.
 
-Real computers were built this way, like the CDC 6600 supercomputer and the UNIVAC 1100 series in the 1960s. And one's complement isn't gone: the checksum that guards every IPv4 internet packet header is still added up in one's complement today <abbr title="RFC 1071, Computing the Internet Checksum">[13]</abbr>.
+Real computers were built this way, like the CDC 6600 supercomputer and the UNIVAC 1100 series in the 1960s. And one's complement isn't gone: the checksum that guards every IPv4 internet packet header is still added up in one's complement today <a href="https://www.rfc-editor.org/rfc/rfc1071" target="_blank" rel="noopener noreferrer"><abbr title="RFC 1071, Computing the Internet Checksum">[13]</abbr></a>.
 
 ### Idea 3: two's complement, flip and add one
 
@@ -182,7 +182,7 @@ Now try the same addition, 5 + (−5):
             a 9th bit: there's no 9th switch, so it falls off
 ```
 
-The carry ripples all the way to the left and drops off the end, leaving `0000 0000`: exactly **0**. There's only one zero, and the plain adding circuit works for negatives with no extra rules. That's why almost every computer today uses two's complement, and why Java's rules *require* it: the Java Language Specification says every `byte`, `short`, `int` and `long` is a two's-complement number <abbr title="JLS SE 25, §4.2 Primitive Types and Values">[1]</abbr>.
+The carry ripples all the way to the left and drops off the end, leaving `0000 0000`: exactly **0**. There's only one zero, and the plain adding circuit works for negatives with no extra rules. That's why almost every computer today uses two's complement, and why Java's rules *require* it: the Java Language Specification says every `byte`, `short`, `int` and `long` is a two's-complement number <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2" target="_blank" rel="noopener noreferrer"><abbr title="JLS SE 25, §4.2 Primitive Types and Values">[1]</abbr></a>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -272,7 +272,7 @@ But Java has a surprise: **it never adds two bytes at all**.
 
 ### Java does its math in `int`
 
-Before Java does `+`, `-`, `*` or `/`, it *promotes* any `byte`, `short` or `char` to a 32-bit `int`. This is called **numeric promotion** <abbr title="JLS SE 25, §5.6 Numeric Contexts">[6]</abbr>. So `big + 10` is really an `int` sum, with 32 switches, and 130 fits in an `int` with plenty of room:
+Before Java does `+`, `-`, `*` or `/`, it *promotes* any `byte`, `short` or `char` to a 32-bit `int`. This is called **numeric promotion** <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.6" target="_blank" rel="noopener noreferrer"><abbr title="JLS SE 25, §5.6 Numeric Contexts">[6]</abbr></a>. So `big + 10` is really an `int` sum, with 32 switches, and 130 fits in an `int` with plenty of room:
 
 ```text
    130 as an int:  00000000 00000000 00000000 10000010
@@ -304,7 +304,7 @@ Java refuses. `big + 10` is an `int`, and you can't put an `int` into a `byte` w
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **But `byte big = 120;` works. Isn't `120` an `int` too?** Yes! Every number you type, like `120`, is an `int`. But when the value is a **constant**, known while compiling, javac checks it. If it fits in a byte, javac allows it with no cast <abbr title="JLS SE 25, §5.2 Assignment Contexts">[5]</abbr>. That's why `byte ok = 120 + 7;` compiles: javac works out 127 and sees that it fits. `byte tooBig = 120 + 10;` is rejected, because 130 doesn't. A variable like `big` isn't a constant, so javac can't check it, and asks you for a cast.
+📘 **But `byte big = 120;` works. Isn't `120` an `int` too?** Yes! Every number you type, like `120`, is an `int`. But when the value is a **constant**, known while compiling, javac checks it. If it fits in a byte, javac allows it with no cast <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.2" target="_blank" rel="noopener noreferrer"><abbr title="JLS SE 25, §5.2 Assignment Contexts">[5]</abbr></a>. That's why `byte ok = 120 + 7;` compiles: javac works out 127 and sees that it fits. `byte tooBig = 120 + 10;` is rejected, because 130 doesn't. A variable like `big` isn't a constant, so javac can't check it, and asks you for a cast.
 
 </div>
 
@@ -327,7 +327,7 @@ class Main {
 
 ### The hidden cast inside `+=`
 
-So why does `big += 10` compile? Because the compound operators, `+=`, `-=`, `*=` and friends, come with a **cast built in**. The Java rules say `E1 op= E2` means `E1 = (T) ((E1) op (E2))`, where `T` is the type of `E1` <abbr title="JLS SE 25, §15.26.2 Compound Assignment Operators">[7]</abbr>. So when you write `big += 10`, Java runs `big = (byte) (big + 10)`:
+So why does `big += 10` compile? Because the compound operators, `+=`, `-=`, `*=` and friends, come with a **cast built in**. The Java rules say `E1 op= E2` means `E1 = (T) ((E1) op (E2))`, where `T` is the type of `E1` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.26.2" target="_blank" rel="noopener noreferrer"><abbr title="JLS SE 25, §15.26.2 Compound Assignment Operators">[7]</abbr></a>. So when you write `big += 10`, Java runs `big = (byte) (big + 10)`:
 
 ```java run
 import static java.lang.IO.println;
@@ -356,7 +356,7 @@ That's the whole trick. The `(byte)` cast is there, you just can't see it. And a
 
 ### What the cast does: keep the last 8 switches
 
-When Java squeezes an `int` into a `byte`, it doesn't round or clamp. It **keeps the lowest 8 switches and throws the other 24 away** <abbr title="JLS SE 25, §5.1.3 Narrowing Primitive Conversion">[4]</abbr>. Then it reads those 8 switches as a two's-complement byte:
+When Java squeezes an `int` into a `byte`, it doesn't round or clamp. It **keeps the lowest 8 switches and throws the other 24 away** <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.3" target="_blank" rel="noopener noreferrer"><abbr title="JLS SE 25, §5.1.3 Narrowing Primitive Conversion">[4]</abbr></a>. Then it reads those 8 switches as a two's-complement byte:
 
 ```text
    130 as an int:  00000000 00000000 00000000 10000010
@@ -449,7 +449,7 @@ Try dragging to 256. The `int` says 256, but the byte says 0: the hand went all 
 
 In our game, the fix is easy: don't keep scores in a `byte`. Use an `int`. But there's a big part of programming where bytes are everywhere and you can't avoid them: **files, images, sounds and networks**. Those all move data around as raw bytes, and to them, a byte means a number from **0 to 255**. A pixel's brightness of 130, a byte from a file, a piece of an IP address: none of these are ever negative.
 
-Java has no unsigned byte. In fact, `char` is the only unsigned whole-number type Java has <abbr title="JLS SE 25, §4.2 Primitive Types and Values">[1]</abbr>. So every time you read the bytes of a file, Java hands you values from −128 to 127, and you have to turn the negatives back into 128 to 255 yourself.
+Java has no unsigned byte. In fact, `char` is the only unsigned whole-number type Java has <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2" target="_blank" rel="noopener noreferrer"><abbr title="JLS SE 25, §4.2 Primitive Types and Values">[1]</abbr></a>. So every time you read the bytes of a file, Java hands you values from −128 to 127, and you have to turn the negatives back into 128 to 255 yourself.
 
 The tempting fix doesn't work. If you just store the byte in an `int`, which has plenty of room for 130, you still get −126:
 
@@ -478,7 +478,7 @@ Look at that binary line. The byte's 8 switches are at the end, `10000010`, but 
 
 ### Sign extension: the copycat bits
 
-When Java widens a byte to an `int`, it fills the 24 new switches with **copies of switch 7**, the sign bit <abbr title="JLS SE 25, §5.1.2 Widening Primitive Conversion">[3]</abbr>. This is called **sign extension**. A positive byte has switch 7 off, so it gets 24 zeros. A negative byte has switch 7 on, so it gets 24 copycat ones.
+When Java widens a byte to an `int`, it fills the 24 new switches with **copies of switch 7**, the sign bit <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.2" target="_blank" rel="noopener noreferrer"><abbr title="JLS SE 25, §5.1.2 Widening Primitive Conversion">[3]</abbr></a>. This is called **sign extension**. A positive byte has switch 7 off, so it gets 24 zeros. A negative byte has switch 7 on, so it gets 24 copycat ones.
 
 Java does this on purpose, because copying the sign bit keeps the **value** the same, and that's what widening promises. Here's why it works. Grow `1000 0010` by just one switch, copying the sign into a new 9th switch: `1 1000 0010`. In 9 switches, the new top switch is the anchor, worth −256, and old switch 7 becomes a regular balloon worth +128. Together they're −256 + 128 = **−128**: exactly what switch 7 was worth on its own. So the value is still −128 + 2 = −126. Every extra copy repeats the same trick, all the way up to 32 switches.
 
@@ -496,7 +496,7 @@ In Java code, `0x` in front means "this number is written in hex". So `1000 0010
 
 ### The bitwise AND: a stencil for switches
 
-The `&` operator, **bitwise AND**, compares two numbers switch by switch. Each result switch is on only if *both* switches in that column are on <abbr title="JLS SE 25, §15.22.1 Integer Bitwise Operators &, ^, and |">[8]</abbr>:
+The `&` operator, **bitwise AND**, compares two numbers switch by switch. Each result switch is on only if *both* switches in that column are on <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.22.1" target="_blank" rel="noopener noreferrer"><abbr title="JLS SE 25, §15.22.1 Integer Bitwise Operators &, ^, and |">[8]</abbr></a>:
 
 | `a` | `b` | `a & b` |
 | --- | --- | --- |
@@ -541,7 +541,7 @@ in binary           = 10000010
 Byte.toUnsignedInt  = 130
 ```
 
-`Byte.toUnsignedInt(big)` does exactly the same thing, with a name that says what you mean <abbr title="Java SE 25 API, Byte.toUnsignedInt(byte)">[10]</abbr>. It arrived in Java 8, along with friends like `Short.toUnsignedInt` and `Integer.toUnsignedLong`. You'll see `& 0xFF` far more often in real code, because it's older and shorter, so it's worth knowing both.
+`Byte.toUnsignedInt(big)` does exactly the same thing, with a name that says what you mean <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Byte.html#toUnsignedInt(byte)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, Byte.toUnsignedInt(byte)">[10]</abbr></a>. It arrived in Java 8, along with friends like `Short.toUnsignedInt` and `Integer.toUnsignedLong`. You'll see `& 0xFF` far more often in real code, because it's older and shorter, so it's worth knowing both.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -551,7 +551,7 @@ Byte.toUnsignedInt  = 130
 
 ### Three traps when you work with bytes
 
-**Trap 1: hex that's too long.** `Integer.toHexString` takes an `int`, so a negative byte gets sign-extended first, and you get 8 hex digits instead of 2. Mask it first, or use a tool that understands bytes. `String.format("%02x", b)` treats a `byte` as 8 switches, and `java.util.HexFormat` turns a whole array of bytes into hex <abbr title="Java SE 25 API, java.util.HexFormat">[12]</abbr>:
+**Trap 1: hex that's too long.** `Integer.toHexString` takes an `int`, so a negative byte gets sign-extended first, and you get 8 hex digits instead of 2. Mask it first, or use a tool that understands bytes. `String.format("%02x", b)` treats a `byte` as 8 switches, and `java.util.HexFormat` turns a whole array of bytes into hex <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HexFormat.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.HexFormat">[12]</abbr></a>:
 
 ```java run
 import java.util.HexFormat;
@@ -604,7 +604,7 @@ Main.java:6: error: bad operand types for binary operator '&'
 
 Always write the mask in its own parentheses: `(big & 0xFF) == 130`. The same goes for `<`, `>` and the other comparisons.
 
-**Trap 3: shifting a byte to the right.** Java has two right shifts. `>>` copies the sign bit into the switches it opens up on the left, and `>>>` fills them with zeros <abbr title="JLS SE 25, §15.19 Shift Operators">[9]</abbr>. You'd expect `>>>` to work on a byte like an unsigned shift. It doesn't, because the byte is sign-extended to an `int` *before* the shift:
+**Trap 3: shifting a byte to the right.** Java has two right shifts. `>>` copies the sign bit into the switches it opens up on the left, and `>>>` fills them with zeros <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.19" target="_blank" rel="noopener noreferrer"><abbr title="JLS SE 25, §15.19 Shift Operators">[9]</abbr></a>. You'd expect `>>>` to work on a byte like an unsigned shift. It doesn't, because the byte is sign-extended to an `int` *before* the shift:
 
 ```java run
 import static java.lang.IO.println;
@@ -679,7 +679,7 @@ Without the mask, the brightest red in the world comes out as −1. Any picture 
 
 ### Network addresses and file streams
 
-An IPv4 address like `192.168.1.200` is 4 bytes, and three of those numbers are over 127. Print them straight from a `byte[]` and you get nonsense. The same data matters when you read a file: `InputStream.read()` returns an **`int`**, not a `byte`, on purpose <abbr title="Java SE 25 API, java.io.InputStream.read()">[11]</abbr>. It gives you each byte as 0 to 255, so it can use −1 to mean "the stream is empty". If it returned a `byte`, a real `0xFF` byte in the file and the end of the file would look exactly the same.
+An IPv4 address like `192.168.1.200` is 4 bytes, and three of those numbers are over 127. Print them straight from a `byte[]` and you get nonsense. The same data matters when you read a file: `InputStream.read()` returns an **`int`**, not a `byte`, on purpose <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/InputStream.html#read()" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.io.InputStream.read()">[11]</abbr></a>. It gives you each byte as 0 to 255, so it can use −1 to mean "the stream is empty". If it returned a `byte`, a real `0xFF` byte in the file and the end of the file would look exactly the same.
 
 ```java run
 import java.io.ByteArrayInputStream;
@@ -866,19 +866,19 @@ Because it needs 257 different answers: the 256 possible bytes, plus one more fo
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 25*, §4.2 "Primitive Types and Values" (two's-complement integral types; `char` is unsigned) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2>
-2. *The Java Language Specification, Java SE 25*, §4.2.1 "Integral Types and Values" (the range of `byte` is −128 to 127) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2.1>
-3. *The Java Language Specification, Java SE 25*, §5.1.2 "Widening Primitive Conversion" (sign extension) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.2>
-4. *The Java Language Specification, Java SE 25*, §5.1.3 "Narrowing Primitive Conversion" (keep the lowest bits) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.3>
-5. *The Java Language Specification, Java SE 25*, §5.2 "Assignment Contexts" (constants that fit need no cast) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.2>
-6. *The Java Language Specification, Java SE 25*, §5.6 "Numeric Contexts" (promotion to `int`) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.6>
-7. *The Java Language Specification, Java SE 25*, §15.26.2 "Compound Assignment Operators" (the hidden cast) — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.26.2>
-8. *The Java Language Specification, Java SE 25*, §15.22.1 "Integer Bitwise Operators &, ^, and |" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.22.1>
-9. *The Java Language Specification, Java SE 25*, §15.19 "Shift Operators" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.19>
-10. Java SE 25 API, `java.lang.Byte.toUnsignedInt(byte)` — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Byte.html#toUnsignedInt(byte)>
-11. Java SE 25 API, `java.io.InputStream.read()` — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/InputStream.html#read()>
-12. Java SE 25 API, `java.util.HexFormat` — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HexFormat.html>
-13. RFC 1071, "Computing the Internet Checksum" (one's-complement sums in IP headers) — <https://www.rfc-editor.org/rfc/rfc1071>
+1. *The Java Language Specification, Java SE 25*, §4.2 "Primitive Types and Values" (two's-complement integral types; `char` is unsigned) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2</a>
+2. *The Java Language Specification, Java SE 25*, §4.2.1 "Integral Types and Values" (the range of `byte` is −128 to 127) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2.1</a>
+3. *The Java Language Specification, Java SE 25*, §5.1.2 "Widening Primitive Conversion" (sign extension) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.2</a>
+4. *The Java Language Specification, Java SE 25*, §5.1.3 "Narrowing Primitive Conversion" (keep the lowest bits) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.3" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.1.3</a>
+5. *The Java Language Specification, Java SE 25*, §5.2 "Assignment Contexts" (constants that fit need no cast) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.2</a>
+6. *The Java Language Specification, Java SE 25*, §5.6 "Numeric Contexts" (promotion to `int`) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.6" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-5.html#jls-5.6</a>
+7. *The Java Language Specification, Java SE 25*, §15.26.2 "Compound Assignment Operators" (the hidden cast) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.26.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.26.2</a>
+8. *The Java Language Specification, Java SE 25*, §15.22.1 "Integer Bitwise Operators &, ^, and |" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.22.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.22.1</a>
+9. *The Java Language Specification, Java SE 25*, §15.19 "Shift Operators" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.19" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.19</a>
+10. Java SE 25 API, `java.lang.Byte.toUnsignedInt(byte)` — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Byte.html#toUnsignedInt(byte)" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Byte.html#toUnsignedInt(byte)</a>
+11. Java SE 25 API, `java.io.InputStream.read()` — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/InputStream.html#read()" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/InputStream.html#read()</a>
+12. Java SE 25 API, `java.util.HexFormat` — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HexFormat.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/HexFormat.html</a>
+13. RFC 1071, "Computing the Internet Checksum" (one's-complement sums in IP headers) — <a href="https://www.rfc-editor.org/rfc/rfc1071" target="_blank" rel="noopener noreferrer">https://www.rfc-editor.org/rfc/rfc1071</a>
 
 ---
 

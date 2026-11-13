@@ -68,7 +68,7 @@ These three features lock together:
 - each case is an immutable **`record`**;
 - a **pattern `switch`** consumes them, destructuring their components. Because the set is closed, the compiler checks it for exhaustiveness, with no `default` needed.
 
-A plain class that implements a sealed interface must say `final`, `sealed` or `non-sealed`; otherwise, javac reports `sealed, non-sealed or final modifiers expected`. A record needs none of the three, because a record class is implicitly `final` <abbr title="The Java Language Specification, Java SE 25, §8.1.1.2">[2]</abbr>.
+A plain class that implements a sealed interface must say `final`, `sealed` or `non-sealed`; otherwise, javac reports `sealed, non-sealed or final modifiers expected`. A record needs none of the three, because a record class is implicitly `final` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.1.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.1.1.2">[2]</abbr></a>.
 
 ```java run viz=array:shapes
 sealed interface Shape permits Circle, Rectangle, Triangle {}
@@ -121,14 +121,14 @@ dop -> exhaustive: "guarantees"
 
 **Analysis.**
 
-- Each shape is a one-line `record`, with private `final` fields, accessors, and generated `equals`/`hashCode`/`toString` <abbr title="The Java Language Specification, Java SE 25, §8.10.3">[1]</abbr>.
+- Each shape is a one-line `record`, with private `final` fields, accessors, and generated `equals`/`hashCode`/`toString` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.10.3">[1]</abbr></a>.
 - `sealed` declares the *complete* set.
-- The pattern `switch` destructures each shape (`Circle(double r)`) to compute its area, with **no `default`** <abbr title="JEP 440: Record Patterns (JDK 21)">[5]</abbr> <abbr title="JEP 441: Pattern Matching for switch (JDK 21)">[6]</abbr>.
+- The pattern `switch` destructures each shape (`Circle(double r)`) to compute its area, with **no `default`** <a href="https://openjdk.org/jeps/440" target="_blank" rel="noopener noreferrer"><abbr title="JEP 440: Record Patterns (JDK 21)">[5]</abbr></a> <a href="https://openjdk.org/jeps/441" target="_blank" rel="noopener noreferrer"><abbr title="JEP 441: Pattern Matching for switch (JDK 21)">[6]</abbr></a>.
 
 The data lives in the records, while the behavior lives in the `switch`, outside the data. And the type system guarantees that every case is handled. That's data-oriented programming: a closed algebra of data, with operations added from outside.
 
 **Intuition.**
-*Mechanism.* `sealed` gives the compiler the full list of subtypes. A `switch` whose cases cover every permitted subtype is **exhaustive** <abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[3]</abbr>, and a `switch` *expression* that isn't exhaustive is a compile-time error <abbr title="The Java Language Specification, Java SE 25, §15.28.1">[4]</abbr>.
+*Mechanism.* `sealed` gives the compiler the full list of subtypes. A `switch` whose cases cover every permitted subtype is **exhaustive** <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[3]</abbr></a>, and a `switch` *expression* that isn't exhaustive is a compile-time error <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.28.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.28.1">[4]</abbr></a>.
 
 *Concrete bite.* The payoff is that the compiler becomes your checklist. Add a fourth permitted shape, `Pentagon`, and leave `area` alone:
 
@@ -166,7 +166,7 @@ Main.java:11: error: the switch expression does not cover all possible input val
 
 Every such `switch` in the program stops compiling until it handles `Pentagon`. You first met this error in [Sealed Classes & Pattern Matching](/synapse/programming-languages/java/robust-oop/sealed-classes-and-pattern-matching).
 
-*Watch out: a `default` over a sealed type.* A `default` makes any `switch` exhaustive <abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[3]</abbr> — which also silences the check above:
+*Watch out: a `default` over a sealed type.* A `default` makes any `switch` exhaustive <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.1.1">[3]</abbr></a> — which also silences the check above:
 
 ```java run
 // ⚠️ ANTI-PATTERN — a default branch over a sealed type.  Do not copy it.
@@ -225,7 +225,7 @@ Compare this with the [inheritance](/synapse/programming-languages/java/robust-o
 
 ## 2. `Optional` over `null`
 
-Its own inventor, Tony Hoare, called `null` his "billion dollar mistake" <abbr title="Tony Hoare, Null References: The Billion Dollar Mistake, QCon 2009">[12]</abbr>. It's invisible in the type, and fatal when dereferenced ([References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model)). The idiom is to keep `null` out of your domain entirely:
+Its own inventor, Tony Hoare, called `null` his "billion dollar mistake" <a href="https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/" target="_blank" rel="noopener noreferrer"><abbr title="Tony Hoare, Null References: The Billion Dollar Mistake, QCon 2009">[12]</abbr></a>. It's invisible in the type, and fatal when dereferenced ([References, Equality & the Object Model](/synapse/programming-languages/java/classes-and-objects/references-equality-and-the-object-model)). The idiom is to keep `null` out of your domain entirely:
 
 - wrap a maybe-absent value in `Optional` at the boundary;
 - chain `map`/`filter`/`orElse` to handle absence declaratively.
@@ -271,7 +271,7 @@ There's no `if (x != null)`, and no `NullPointerException`: the chain handles ab
 **Intuition.**
 *Mechanism.* `Optional` makes "might be absent" part of the *type*. An `Optional<String>` isn't a `String`, so the compiler makes you unwrap it before use. `map` transforms the value only if one is present, and `orElse`/`orElseGet` supply defaults. The unsafe unwrap — `get()` on an empty `Optional` — throws `NoSuchElementException` (as [Functional Java & the Streams API](/synapse/programming-languages/java/advanced/functional-java-and-streams) shows).
 
-*Concrete bite.* `Optional` is meant as a return type. Its API says it's "primarily intended for use as a method return type where there is a clear need to represent 'no result'" <abbr title="Java SE 25 API, java.util.Optional">[7]</abbr>. The same note adds that a variable of type `Optional` "should never itself be `null`".
+*Concrete bite.* `Optional` is meant as a return type. Its API says it's "primarily intended for use as a method return type where there is a clear need to represent 'no result'" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Optional">[7]</abbr></a>. The same note adds that a variable of type `Optional` "should never itself be `null`".
 
 *Watch out: an `Optional` field left `null`.* A field of type `Optional` starts out as `null`, just like any other reference field:
 
@@ -383,11 +383,11 @@ Point[x=3, y=4]
 `var` changes nothing about scope. A `var` local lives in its block like any other local ([Methods](/synapse/programming-languages/java/control-flow/methods), [§3](/synapse/programming-languages/java/control-flow/methods#3-scope-where-parameters-and-local-variables-live)), and it shadows a field by the same rules ([Classes & Objects](/synapse/programming-languages/java/classes-and-objects/classes-and-objects)).
 
 **Intuition.**
-*Mechanism.* An immutable object's state is fixed at construction, and "changes" allocate a new object. Since nothing can change it behind your back, aliases are harmless. A record's fields are `private final` <abbr title="The Java Language Specification, Java SE 25, §8.10.3">[1]</abbr>, and `final` fields are what make an object safe to hand between threads <abbr title="The Java Language Specification, Java SE 25, §17.5">[13]</abbr> ([The Java Memory Model & Performance](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance)). `var` is compile-time inference: the variable has a concrete type, which you simply didn't spell out <abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[11]</abbr>.
+*Mechanism.* An immutable object's state is fixed at construction, and "changes" allocate a new object. Since nothing can change it behind your back, aliases are harmless. A record's fields are `private final` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.10.3">[1]</abbr></a>, and `final` fields are what make an object safe to hand between threads <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.5">[13]</abbr></a> ([The Java Memory Model & Performance](/synapse/programming-languages/java/advanced/the-java-memory-model-and-performance)). `var` is compile-time inference: the variable has a concrete type, which you simply didn't spell out <a href="https://openjdk.org/jeps/286" target="_blank" rel="noopener noreferrer"><abbr title="JEP 286: Local-Variable Type Inference (JDK 10)">[11]</abbr></a>.
 
 *Concrete bite: `final` is shallow.* A record's `final` field fixes the *reference*, not the object it points to. So a record holding a caller's `ArrayList` changes whenever the caller changes the list. [Enums & Records](/synapse/programming-languages/java/core-libraries/enums-and-records) shows this, along with the fix: `List.copyOf` in a compact constructor.
 
-*Watch out: an unmodifiable view is not a copy.* `Collections.unmodifiableList` looks like the same fix, but it returns a **view**, and reads "read through" to the original list <abbr title="Java SE 25 API, java.util.Collections.unmodifiableList">[8]</abbr>. `List.copyOf`, by contrast, returns an unmodifiable list that "will not reflect" later changes <abbr title="Java SE 25 API, java.util.List.copyOf">[9]</abbr>:
+*Watch out: an unmodifiable view is not a copy.* `Collections.unmodifiableList` looks like the same fix, but it returns a **view**, and reads "read through" to the original list <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Collections.html#unmodifiableList(java.util.List)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Collections.unmodifiableList">[8]</abbr></a>. `List.copyOf`, by contrast, returns an unmodifiable list that "will not reflect" later changes <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html#copyOf(java.util.Collection)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.List.copyOf">[9]</abbr></a>:
 
 ```java run
 import java.util.ArrayList;
@@ -422,7 +422,7 @@ view.add: UnsupportedOperationException
 
 Nobody can change the list *through* `view` — `add` threw. But `source` still could, and `view` showed `Linus`. The copy, meanwhile, kept `[Ada]`.
 
-*Watch out: `var` with a diamond.* `var` copies its type from the initializer, and `new ArrayList<>()` with nothing to infer from gives `ArrayList<Object>`. OpenJDK's style guide calls this "DANGEROUS" <abbr title="OpenJDK, Local Variable Type Inference: Style Guidelines, G6">[10]</abbr>:
+*Watch out: `var` with a diamond.* `var` copies its type from the initializer, and `new ArrayList<>()` with nothing to infer from gives `ArrayList<Object>`. OpenJDK's style guide calls this "DANGEROUS" <a href="https://openjdk.org/projects/amber/guides/lvti-style-guide" target="_blank" rel="noopener noreferrer"><abbr title="OpenJDK, Local Variable Type Inference: Style Guidelines, G6">[10]</abbr></a>:
 
 ```java run
 import java.util.ArrayList;
@@ -603,7 +603,7 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>In <a href="#4-composing-it-all">§4</a>, how many payments are cards? Count them with a stream and <code>instanceof</code>. Then make <code>amountOf</code> unnecessary.</summary>
 
-Two. Now declare `double amount();` in `Payment`. Each record already has a public accessor `amount()` with that exact name and return type <abbr title="The Java Language Specification, Java SE 25, §8.10.3">[1]</abbr>, so it implements the interface method with no extra code. `Payment::amount` can then replace `amountOf`:
+Two. Now declare `double amount();` in `Payment`. Each record already has a public accessor `amount()` with that exact name and return type <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.10.3">[1]</abbr></a>, so it implements the interface method with no extra code. `Payment::amount` can then replace `amountOf`:
 
 ```java run
 import java.util.List;
@@ -640,19 +640,19 @@ total: 350.0
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 25*, §8.10.3 "Record Members" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.3>
-2. *The Java Language Specification, Java SE 25*, §8.1.1.2 "`sealed`, `non-sealed`, and `final` Classes" ("a record class is implicitly `final`") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.1.2>
-3. *The Java Language Specification, Java SE 25*, §14.11.1.1 "Exhaustive Switch Blocks" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1>
-4. *The Java Language Specification, Java SE 25*, §15.28.1 "The Switch Block of a `switch` Expression" ("It is a compile-time error if a `switch` expression is not exhaustive") — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.28.1>
-5. JEP 440: Record Patterns (JDK 21) — <https://openjdk.org/jeps/440>
-6. JEP 441: Pattern Matching for `switch` (JDK 21) — <https://openjdk.org/jeps/441>
-7. `java.util.Optional`, Java SE 25 API (class API note) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html>
-8. `java.util.Collections.unmodifiableList`, Java SE 25 API ("unmodifiable view"; queries "read through") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Collections.html#unmodifiableList(java.util.List)>
-9. `java.util.List.copyOf`, Java SE 25 API ("will not reflect such modifications") — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html#copyOf(java.util.Collection)>
-10. OpenJDK, *Local Variable Type Inference: Style Guidelines*, G6 "Take care when using var with diamond or generic methods" — <https://openjdk.org/projects/amber/guides/lvti-style-guide>
-11. JEP 286: Local-Variable Type Inference (JDK 10) — <https://openjdk.org/jeps/286>
-12. Tony Hoare, "Null References: The Billion Dollar Mistake", QCon 2009 (InfoQ) — <https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/>
-13. *The Java Language Specification, Java SE 25*, §17.5 "`final` Field Semantics" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.5>
+1. *The Java Language Specification, Java SE 25*, §8.10.3 "Record Members" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.3" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.10.3</a>
+2. *The Java Language Specification, Java SE 25*, §8.1.1.2 "`sealed`, `non-sealed`, and `final` Classes" ("a record class is implicitly `final`") — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.1.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.1.2</a>
+3. *The Java Language Specification, Java SE 25*, §14.11.1.1 "Exhaustive Switch Blocks" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.1.1</a>
+4. *The Java Language Specification, Java SE 25*, §15.28.1 "The Switch Block of a `switch` Expression" ("It is a compile-time error if a `switch` expression is not exhaustive") — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.28.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.28.1</a>
+5. JEP 440: Record Patterns (JDK 21) — <a href="https://openjdk.org/jeps/440" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/440</a>
+6. JEP 441: Pattern Matching for `switch` (JDK 21) — <a href="https://openjdk.org/jeps/441" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/441</a>
+7. `java.util.Optional`, Java SE 25 API (class API note) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html</a>
+8. `java.util.Collections.unmodifiableList`, Java SE 25 API ("unmodifiable view"; queries "read through") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Collections.html#unmodifiableList(java.util.List)" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Collections.html#unmodifiableList(java.util.List)</a>
+9. `java.util.List.copyOf`, Java SE 25 API ("will not reflect such modifications") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html#copyOf(java.util.Collection)" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html#copyOf(java.util.Collection)</a>
+10. OpenJDK, *Local Variable Type Inference: Style Guidelines*, G6 "Take care when using var with diamond or generic methods" — <a href="https://openjdk.org/projects/amber/guides/lvti-style-guide" target="_blank" rel="noopener noreferrer">https://openjdk.org/projects/amber/guides/lvti-style-guide</a>
+11. JEP 286: Local-Variable Type Inference (JDK 10) — <a href="https://openjdk.org/jeps/286" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/286</a>
+12. Tony Hoare, "Null References: The Billion Dollar Mistake", QCon 2009 (InfoQ) — <a href="https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/" target="_blank" rel="noopener noreferrer">https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/</a>
+13. *The Java Language Specification, Java SE 25*, §17.5 "`final` Field Semantics" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.5" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.5</a>
 
 ---
 

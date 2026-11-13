@@ -86,7 +86,7 @@ Remember the two kinds of quote from [Variables and primitive types](/synapse/pr
 **Intuition.**
 *Mechanism.* A String variable is a **reference type**. `name` holds a reference to a String object stored elsewhere; it doesn't hold the characters directly, the way an `int` holds its number. For now, it's enough to know that a String is an object you send method calls to.
 
-*Concrete bite.* Positions run from `0` to `length − 1`, so reaching past the end is a run-time error <abbr title="Java SE 25 API, java.lang.String">[1]</abbr>:
+*Concrete bite.* Positions run from `0` to `length − 1`, so reaching past the end is a run-time error <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.lang.String">[1]</abbr></a>:
 
 ```java run
 import static java.lang.IO.println;
@@ -114,7 +114,7 @@ Exception in thread "main" java.lang.StringIndexOutOfBoundsException: Index 3 ou
 
 ### Characters that need a backslash
 
-A double quote ends a String. So how do you put one *inside* a String? You write a **backslash** in front of it: `\"`. A backslash plus the character after it form an **escape sequence**, which stands for a single character <abbr title="The Java Language Specification, Java SE 25, §3.10.7">[2]</abbr>:
+A double quote ends a String. So how do you put one *inside* a String? You write a **backslash** in front of it: `\"`. A backslash plus the character after it form an **escape sequence**, which stands for a single character <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.7">[2]</abbr></a>:
 
 - `\"` is a double quote, and `\'` a single quote (needed inside a `char` literal).
 - `\n` is a line break, and `\t` a tab.
@@ -175,7 +175,7 @@ The caret points at `hi`, the first thing after the String ended. So whenever ja
 
 ## 2. Immutability: methods return new strings
 
-A String never changes. Methods that look like they edit it (`toUpperCase`, `replace`, `strip`) actually return a **new** String and leave the original alone. This property is called **immutability**, and the String API puts it plainly: "Strings are constant; their values cannot be changed after they are created" <abbr title="Java SE 25 API, java.lang.String">[1]</abbr>.
+A String never changes. Methods that look like they edit it (`toUpperCase`, `replace`, `strip`) actually return a **new** String and leave the original alone. This property is called **immutability**, and the String API puts it plainly: "Strings are constant; their values cannot be changed after they are created" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.lang.String">[1]</abbr></a>.
 
 ```java run
 import static java.lang.IO.println;
@@ -234,7 +234,7 @@ The payoff is safety. A String you pass to other code can never be changed behin
 
 ## 3. Everyday string methods
 
-Strings come with a big toolkit <abbr title="Java SE 25 API, java.lang.String">[1]</abbr>, but a handful of methods covers most days:
+Strings come with a big toolkit <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.lang.String">[1]</abbr></a>, but a handful of methods covers most days:
 
 - `length`, `charAt`, `substring` and `indexOf` work with positions.
 - `contains` and `replace` work with pieces of text.
@@ -274,7 +274,7 @@ true
 - `substring(7)` returned everything from position 7 onward: `"World"`.
 - `replace` produced `"Hello, Java"`, and `contains("ello")` answered `true`.
 
-Notice that methods **chain**. `s.strip().length()` runs `strip` first, which makes a new String, and then calls `length` on that result. `trim()` is an older cousin of `strip()`, but it removes only characters up to the plain space. So reach for `strip()`, added in Java 11 <abbr title="Java SE 25 API, java.lang.String">[1]</abbr>.
+Notice that methods **chain**. `s.strip().length()` runs `strip` first, which makes a new String, and then calls `length` on that result. `trim()` is an older cousin of `strip()`, but it removes only characters up to the plain space. So reach for `strip()`, added in Java 11 <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.lang.String">[1]</abbr></a>.
 
 **`substring` with two positions.** `substring(begin, end)` takes the characters from `begin` up to, but **not including**, `end`. So its length is `end - begin`:
 
@@ -332,7 +332,7 @@ public class Main {
 
 ## 4. Concatenation with `+`
 
-Put `+` between two strings and it joins them. That's **concatenation**. Put `+` between a string and a number, and it turns the number into text, then joins <abbr title="The Java Language Specification, Java SE 25, §15.18.1">[3]</abbr>. It's the quickest way to build output, but it hides a precedence surprise.
+Put `+` between two strings and it joins them. That's **concatenation**. Put `+` between a string and a number, and it turns the number into text, then joins <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.18.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.18.1">[3]</abbr></a>. It's the quickest way to build output, but it hides a precedence surprise.
 
 ```java run
 import static java.lang.IO.println;
@@ -409,7 +409,7 @@ Java
 
 💡 **Earned rule.** When you mix text and arithmetic with `+`, wrap the arithmetic in parentheses: `"sum: " + (1 + 2)`. This ordering trap is the price of `+` having two meanings.
 
-There's a second cost. Every `+` that executes while the program runs creates a new String <abbr title="The Java Language Specification, Java SE 25, §15.18.1">[3]</abbr>. So building long text with `+` inside a loop copies the text again on every step: O(N²) work for N pieces. `StringBuilder`, covered in [Strings in depth](/synapse/programming-languages/java/core-libraries/strings-in-depth), is the linear-time fix.
+There's a second cost. Every `+` that executes while the program runs creates a new String <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.18.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.18.1">[3]</abbr></a>. So building long text with `+` inside a loop copies the text again on every step: O(N²) work for N pieces. `StringBuilder`, covered in [Strings in depth](/synapse/programming-languages/java/core-libraries/strings-in-depth), is the linear-time fix.
 
 </div>
 
@@ -450,7 +450,7 @@ false
 
 **Analysis.** `.equals` is `true` for both comparisons: `a`, `b` and `c` all spell `"hello"`. But `==` disagrees: `a == b` is `true`, while `a == c` is `false`.
 
-The culprit is the **String pool**. Java stores identical string *literals*, like the `"hello"` written for `a` and `b`, once and shares them <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[4]</abbr>. So `a` and `b` are the *same* object, and `==` happens to be true. `new String("hello")` builds a *separate* object on purpose, so `a == c` is false even though the characters match.
+The culprit is the **String pool**. Java stores identical string *literals*, like the `"hello"` written for `a` and `b`, once and shares them <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.5">[4]</abbr></a>. So `a` and `b` are the *same* object, and `==` happens to be true. `new String("hello")` builds a *separate* object on purpose, so `a == c` is false even though the characters match.
 
 **Intuition.**
 *Mechanism.* A String variable holds a reference. `==` compares the two references (same object?), while `.equals` compares the characters. The pool reuses literal strings, so `==` is *coincidentally* true for literals. That's the most dangerous kind of "it works."
@@ -477,7 +477,7 @@ true
 
 The text is `"yes"` both ways. `==` compared object identities, found two different objects, and said `false`. `.equals` compared characters and said `true`.
 
-*Watch out: text joined while the program runs.* The same thing happens with no `new` in sight. Strings built by concatenation at run time are new objects, never taken from the pool <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[4]</abbr>:
+*Watch out: text joined while the program runs.* The same thing happens with no `new` in sight. Strings built by concatenation at run time are new objects, never taken from the pool <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.5">[4]</abbr></a>:
 
 ```java run
 import static java.lang.IO.println;
@@ -560,7 +560,7 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>How do you print the text <code>She said "hi"</code>, and why does <code>"She said "hi""</code> not compile?</summary>
 
-Escape each inner quote: `System.out.println("She said \"hi\"");`. The backslash makes `\"` one quote character inside the String <abbr title="The Java Language Specification, Java SE 25, §3.10.7">[2]</abbr>.
+Escape each inner quote: `System.out.println("She said \"hi\"");`. The backslash makes `\"` one quote character inside the String <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.7">[2]</abbr></a>.
 
 Without the backslashes, the String ends at the second `"`. javac reads `hi` as code and reports `')' or ',' expected`.
 
@@ -579,7 +579,7 @@ Without the backslashes, the String ends at the second `"`. javac reads `hi` as 
 
 `true`, `true`, `false`, `true`.
 
-`"ja" + "va"` joins two literals, so it's a **constant expression**, which the compiler joins before the program runs. Constant strings get pooled just like literals <abbr title="The Java Language Specification, Java SE 25, §3.10.5">[4]</abbr>. So `y` is the same object as `x`, and `x == y` is `true`. `z` is a separate object built with `new`, so `x == z` is `false`. `.equals` compares characters, so it's `true` both times.
+`"ja" + "va"` joins two literals, so it's a **constant expression**, which the compiler joins before the program runs. Constant strings get pooled just like literals <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.10.5">[4]</abbr></a>. So `y` is the same object as `x`, and `x == y` is `true`. `z` is a separate object built with `new`, so `x == z` is `false`. `.equals` compares characters, so it's `true` both times.
 
 </details>
 
@@ -587,10 +587,10 @@ Without the backslashes, the String ends at the second `"`. javac reads `hi` as 
 
 ## 📚 Sources
 
-1. Java SE 25 API, `java.lang.String` (immutability; `charAt`, `substring`, `indexOf`, `strip` (since 11), `trim`) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html>
-2. *The Java Language Specification, Java SE 25*, §3.10.7 "Escape Sequences" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.7>
-3. *The Java Language Specification, Java SE 25*, §15.18.1 "String Concatenation Operator `+`" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.18.1>
-4. *The Java Language Specification, Java SE 25*, §3.10.5 "String Literals" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.5>
+1. Java SE 25 API, `java.lang.String` (immutability; `charAt`, `substring`, `indexOf`, `strip` (since 11), `trim`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html</a>
+2. *The Java Language Specification, Java SE 25*, §3.10.7 "Escape Sequences" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.7" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.7</a>
+3. *The Java Language Specification, Java SE 25*, §15.18.1 "String Concatenation Operator `+`" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.18.1" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.18.1</a>
+4. *The Java Language Specification, Java SE 25*, §3.10.5 "String Literals" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.5" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.10.5</a>
 
 ---
 

@@ -485,7 +485,7 @@ So real money software doesn't use `double` for amounts. There are two gold-stan
 
 The simplest trick is to stop using fractions at all. Instead of `$1.99`, store `199` **cents**. Whole numbers (integers) are always exact in a computer: no slices, no rounding, no crumbs. Java's `long` holds whole numbers up to 9,223,372,036,854,775,807, which is about 92 quadrillion dollars in cents.
 
-This is how many payment companies work. Stripe's API, for example, takes every amount as a whole number in the currency's smallest unit: `199` means $1.99 <abbr title="Stripe Docs, Supported currencies: zero-decimal currencies and minor units">[5]</abbr>. Some systems count even smaller units, like hundredths of a cent, when they need extra precision for interest. The idea is the same.
+This is how many payment companies work. Stripe's API, for example, takes every amount as a whole number in the currency's smallest unit: `199` means $1.99 <a href="https://docs.stripe.com/currencies" target="_blank" rel="noopener noreferrer"><abbr title="Stripe Docs, Supported currencies: zero-decimal currencies and minor units">[5]</abbr></a>. Some systems count even smaller units, like hundredths of a cent, when they need extra precision for interest. The idea is the same.
 
 ```java run
 import static java.lang.IO.println;
@@ -583,7 +583,7 @@ The bill is split so that the shares add back up to exactly $100.00. No cent is 
 
 ### Strategy B: `BigDecimal`, built from a `String`
 
-Java's `java.math.BigDecimal` is a number that thinks in **base 10**, just like you do. Inside, it keeps a whole number of digits plus a *scale*: how many of those digits come after the decimal point. `0.10` is stored as the digits `10` with a scale of 2. No binary slices are involved, so `0.10` is exactly ten cents <abbr title="Java SE 25 API, java.math.BigDecimal">[2]</abbr>. Many banking and accounting systems written in Java use it for their ledgers.
+Java's `java.math.BigDecimal` is a number that thinks in **base 10**, just like you do. Inside, it keeps a whole number of digits plus a *scale*: how many of those digits come after the decimal point. `0.10` is stored as the digits `10` with a scale of 2. No binary slices are involved, so `0.10` is exactly ten cents <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/BigDecimal.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.math.BigDecimal">[2]</abbr></a>. Many banking and accounting systems written in Java use it for their ledgers.
 
 But there's a trap at the front door, and it's easy to walk straight into it.
 
@@ -610,7 +610,7 @@ class Main {
 
 <div style="border-left:4px solid #da5233;background:rgba(218,82,51,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-⚠️ **The constructor trap.** By the time `new BigDecimal(0.1)` runs, the `0.1` has *already* been squashed into a `double` suitcase. The constructor faithfully copies every digit of that broken value, all 55 of them. `BigDecimal` can't undo damage that happened before it was called. Always build money from a `String`, `new BigDecimal("0.10")`, or from whole cents, `BigDecimal.valueOf(10, 2)`. The Java documentation itself warns that `new BigDecimal(double)` "can be somewhat unpredictable" <abbr title="Java SE 25 API, java.math.BigDecimal, constructor BigDecimal(double)">[3]</abbr>.
+⚠️ **The constructor trap.** By the time `new BigDecimal(0.1)` runs, the `0.1` has *already* been squashed into a `double` suitcase. The constructor faithfully copies every digit of that broken value, all 55 of them. `BigDecimal` can't undo damage that happened before it was called. Always build money from a `String`, `new BigDecimal("0.10")`, or from whole cents, `BigDecimal.valueOf(10, 2)`. The Java documentation itself warns that `new BigDecimal(double)` "can be somewhat unpredictable" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(double)" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.math.BigDecimal, constructor BigDecimal(double)">[3]</abbr></a>.
 
 </div>
 
@@ -696,7 +696,7 @@ no rule:   Non-terminating decimal expansion; no exact representable decimal res
 
 At school you learned to round `.5` **up**: `2.5 → 3`, `3.5 → 4`. Java calls that `RoundingMode.HALF_UP`. It looks fair, but it has a hidden lean. Halfway values *always* go up, never down. Round a million half-cent interest payments that way, and the bank's books creep upward by thousands of dollars that nobody actually earned.
 
-**Banker's rounding**, `RoundingMode.HALF_EVEN`, fixes the lean: a value that is exactly halfway goes to whichever neighbour is **even** <abbr title="Java SE 25 API, java.math.RoundingMode.HALF_EVEN">[4]</abbr>. So `2.5 → 2` (down) but `3.5 → 4` (up). About half the ties go down and half go up, and the errors cancel out over many payments, as long as the amounts aren't biased toward odd or even.
+**Banker's rounding**, `RoundingMode.HALF_EVEN`, fixes the lean: a value that is exactly halfway goes to whichever neighbour is **even** <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/RoundingMode.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.math.RoundingMode.HALF_EVEN">[4]</abbr></a>. So `2.5 → 2` (down) but `3.5 → 4` (up). About half the ties go down and half go up, and the errors cancel out over many payments, as long as the amounts aren't biased toward odd or even.
 
 ```java run
 import java.math.BigDecimal;
@@ -911,14 +911,14 @@ The `double` already holds a rounded binary value, and the constructor copies ev
 
 ## 📚 Sources
 
-1. IEEE Standard for Floating-Point Arithmetic, IEEE 754-2019 (binary64 format; round-to-nearest, ties-to-even) — <https://standards.ieee.org/ieee/754/6210/>
-2. Java SE 25 API, `java.math.BigDecimal` — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/BigDecimal.html>
-3. Java SE 25 API, `java.math.BigDecimal`, constructor `BigDecimal(double)` — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(double)>
-4. Java SE 25 API, `java.math.RoundingMode` — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/RoundingMode.html>
-5. Stripe Docs, "Supported currencies" (amounts in the smallest currency unit; zero-decimal currencies) — <https://docs.stripe.com/currencies>
-6. Java SE 25 API, `java.lang.Double.toString(double)` (the shortest-decimal rule) — <https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html#toString(double)>
-7. *The Java Language Specification, Java SE 25*, §4.2.3 "Floating-Point Types, Formats, and Values" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2.3>
-8. David Goldberg, "What Every Computer Scientist Should Know About Floating-Point Arithmetic", *ACM Computing Surveys*, 1991 — <https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html>
+1. IEEE Standard for Floating-Point Arithmetic, IEEE 754-2019 (binary64 format; round-to-nearest, ties-to-even) — <a href="https://standards.ieee.org/ieee/754/6210/" target="_blank" rel="noopener noreferrer">https://standards.ieee.org/ieee/754/6210/</a>
+2. Java SE 25 API, `java.math.BigDecimal` — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/BigDecimal.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/BigDecimal.html</a>
+3. Java SE 25 API, `java.math.BigDecimal`, constructor `BigDecimal(double)` — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(double)" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(double)</a>
+4. Java SE 25 API, `java.math.RoundingMode` — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/RoundingMode.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/math/RoundingMode.html</a>
+5. Stripe Docs, "Supported currencies" (amounts in the smallest currency unit; zero-decimal currencies) — <a href="https://docs.stripe.com/currencies" target="_blank" rel="noopener noreferrer">https://docs.stripe.com/currencies</a>
+6. Java SE 25 API, `java.lang.Double.toString(double)` (the shortest-decimal rule) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html#toString(double)" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html#toString(double)</a>
+7. *The Java Language Specification, Java SE 25*, §4.2.3 "Floating-Point Types, Formats, and Values" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2.3" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.2.3</a>
+8. David Goldberg, "What Every Computer Scientist Should Know About Floating-Point Arithmetic", *ACM Computing Surveys*, 1991 — <a href="https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html</a>
 
 ---
 

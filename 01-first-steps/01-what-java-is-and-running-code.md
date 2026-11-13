@@ -13,7 +13,7 @@ Java is a **compiled** language, and that one fact shapes everything you're abou
 - If the file passes, the compiler translates it into **bytecode** — a set of instructions for an imaginary computer called the **Java Virtual Machine** (the **JVM**).
 - The JVM is a real program on your machine. It reads the bytecode and carries it out.
 
-So running Java always takes two steps: **compile, then run**. The payoff is portability. Bytecode targets the *virtual* machine, not your laptop, so the same compiled program runs unchanged on Windows, macOS or Linux <abbr title="The Java Virtual Machine Specification, Java SE 25, §1.2">[4]</abbr>.
+So running Java always takes two steps: **compile, then run**. The payoff is portability. Bytecode targets the *virtual* machine, not your laptop, so the same compiled program runs unchanged on Windows, macOS or Linux <a href="https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-1.html#jvms-1.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Virtual Machine Specification, Java SE 25, §1.2">[4]</abbr></a>.
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -179,7 +179,7 @@ javac Main.java   # compile: reads Main.java, writes Main.class (bytecode)
 java Main          # run: starts the JVM, which executes Main.class
 ```
 
-`javac` turns your `Main.java` into a new file, `Main.class`, which holds bytecode. `java Main` then hands that bytecode to the JVM, which runs it. Note that it's `java Main`, not `java Main.class`: you name the **class**, not the file <abbr title="The java command, JDK 25 documentation">[5]</abbr>. Name the file instead, and the JVM goes looking for a class called `Main.class`, which doesn't exist:
+`javac` turns your `Main.java` into a new file, `Main.class`, which holds bytecode. `java Main` then hands that bytecode to the JVM, which runs it. Note that it's `java Main`, not `java Main.class`: you name the **class**, not the file <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html" target="_blank" rel="noopener noreferrer"><abbr title="The java command, JDK 25 documentation">[5]</abbr></a>. Name the file instead, and the JVM goes looking for a class called `Main.class`, which doesn't exist:
 
 ```
 $ java Main.class
@@ -187,7 +187,7 @@ Error: Could not find or load main class Main.class
 Caused by: java.lang.ClassNotFoundException: Main.class
 ```
 
-The Run buttons here do the same two steps for you: they compile your code as `Main.java` with `javac`, then start it with `java`. Since Java 11, there's also a one-step shortcut for a single file: `java Main.java` compiles the file in memory and runs it, leaving no `.class` file behind <abbr title="JEP 330: Launch Single-File Source-Code Programs (JDK 11)">[6]</abbr>. Since JDK 22, that shortcut also finds the other source files your program uses, so a small multi-file program runs without a separate `javac` step <abbr title="JEP 458: Launch Multi-File Source-Code Programs (JDK 22)">[9]</abbr>.
+The Run buttons here do the same two steps for you: they compile your code as `Main.java` with `javac`, then start it with `java`. Since Java 11, there's also a one-step shortcut for a single file: `java Main.java` compiles the file in memory and runs it, leaving no `.class` file behind <a href="https://openjdk.org/jeps/330" target="_blank" rel="noopener noreferrer"><abbr title="JEP 330: Launch Single-File Source-Code Programs (JDK 11)">[6]</abbr></a>. Since JDK 22, that shortcut also finds the other source files your program uses, so a small multi-file program runs without a separate `javac` step <a href="https://openjdk.org/jeps/458" target="_blank" rel="noopener noreferrer"><abbr title="JEP 458: Launch Multi-File Source-Code Programs (JDK 22)">[9]</abbr></a>.
 
 ```java run
 import static java.lang.IO.println;
@@ -209,7 +209,7 @@ then run by the JVM.
 **Analysis.** Behind the Run button, two things happened in order. First, `javac` checked both statements and translated them into bytecode. Then the JVM executed them from top to bottom: first line, then second. In a terminal, you'd type `javac Main.java` and then `java Main` to get the same two lines.
 
 **Intuition.**
-*Mechanism.* `java` doesn't run your *source*; it runs the *bytecode* the compiler produced. The JVM knows nothing about the Java language, only about the class-file format <abbr title="The Java Virtual Machine Specification, Java SE 25, §1.2">[4]</abbr>. By the time the launcher loads a class, the `.java` text no longer matters.
+*Mechanism.* `java` doesn't run your *source*; it runs the *bytecode* the compiler produced. The JVM knows nothing about the Java language, only about the class-file format <a href="https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-1.html#jvms-1.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Virtual Machine Specification, Java SE 25, §1.2">[4]</abbr></a>. By the time the launcher loads a class, the `.java` text no longer matters.
 
 *Concrete bite.* Ask the JVM to run a class that was never compiled, and it has nothing to load:
 
@@ -231,7 +231,7 @@ The cost of two steps is the ceremony of compiling before running. The payoff is
 
 </div>
 
-**You can't name the file just anything.** `javac` requires a `public` class to sit in a file with the same name, plus `.java` <abbr title="The Java Language Specification, Java SE 25, §7.6">[2]</abbr>. So `public class Main` belongs in `Main.java`. Put `public class Hello` in a file named `Main.java` on your own machine, and `javac` refuses:
+**You can't name the file just anything.** `javac` requires a `public` class to sit in a file with the same name, plus `.java` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.6" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §7.6">[2]</abbr></a>. So `public class Main` belongs in `Main.java`. Put `public class Hello` in a file named `Main.java` on your own machine, and `javac` refuses:
 
 ```
 $ javac Main.java
@@ -266,7 +266,7 @@ That line is the one piece of ceremony that nearly every Java program repeats, a
 - `main` — the **name** the JVM looks for, spelled exactly `main`. Java is **case-sensitive**, so `Main` (the class) and `main` (the method) are different names. The class is the container; the method is the starting point.
 - `String[] args` — a **parameter**: a slot for **command-line arguments**, the extra words typed after `java Main`. They arrive as a list of text values. You rarely need them at first, but the JVM always passes them. *([Arrays](/synapse/programming-languages/java/control-flow/arrays).)*
 
-Read as a whole, the line describes a public, class-level method named `main` that returns nothing and takes a list of text arguments. The JVM is built to find a method named `main` and call it <abbr title="The Java Language Specification, Java SE 25, §12.1.4">[1]</abbr>. This full form is the one every version of Java accepts. Two details are yours to choose: the parameter's name (`args` is just a convention), and whether to write `String... args` instead of `String[] args`.
+Read as a whole, the line describes a public, class-level method named `main` that returns nothing and takes a list of text arguments. The JVM is built to find a method named `main` and call it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.1.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.1.4">[1]</abbr></a>. This full form is the one every version of Java accepts. Two details are yours to choose: the parameter's name (`args` is just a convention), and whether to write `String... args` instead of `String[] args`.
 
 ```java run
 import static java.lang.IO.println;
@@ -309,7 +309,7 @@ or a JavaFX application class must extend javafx.application.Application
 
 It compiled, because the method is valid Java. But it never ran `greet`, because the JVM only ever calls `main`. The error even reminds you of the shape it wants.
 
-Until JDK 25, the contract was strict: `main` had to be `public`, `static`, return `void` and take a `String[]`. JDK 25 relaxed it <abbr title="JEP 512: Compact Source Files and Instance Main Methods (JDK 25; first previewed in JDK 21 as JEP 445)">[7]</abbr>. Now `main` must still be named `main` and return `void`, but `public` and `static` are optional, and so is the parameter. Only `private` is ruled out <abbr title="The Java Language Specification, Java SE 25, §12.1.4 (&quot;The form of a candidate main method expanded significantly in Java SE 25&quot;)">[1]</abbr>. Here's what the JDK 25 launcher does with each variation. Every one of them compiles:
+Until JDK 25, the contract was strict: `main` had to be `public`, `static`, return `void` and take a `String[]`. JDK 25 relaxed it <a href="https://openjdk.org/jeps/512" target="_blank" rel="noopener noreferrer"><abbr title="JEP 512: Compact Source Files and Instance Main Methods (JDK 25; first previewed in JDK 21 as JEP 445)">[7]</abbr></a>. Now `main` must still be named `main` and return `void`, but `public` and `static` are optional, and so is the parameter. Only `private` is ruled out <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.1.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.1.4 (&quot;The form of a candidate main method expanded significantly in Java SE 25&quot;)">[1]</abbr></a>. Here's what the JDK 25 launcher does with each variation. Every one of them compiles:
 
 | You wrote | What happens on JDK 25 |
 |---|---|
@@ -347,7 +347,7 @@ This `main` isn't `static`, so it belongs to an *object*. The JVM made one by ca
 
 </div>
 
-**Compact source files.** JDK 25 goes one step further: you can leave out the class too. A file that holds only methods and fields is a **compact source file**, and the compiler wraps it in a class for you, named after the file <abbr title="JEP 512: Compact Source Files and Instance Main Methods (JDK 25)">[7]</abbr>. The new `IO` class in `java.lang` gives such programs a short way to print, and a static import lets you call it by its bare name:
+**Compact source files.** JDK 25 goes one step further: you can leave out the class too. A file that holds only methods and fields is a **compact source file**, and the compiler wraps it in a class for you, named after the file <a href="https://openjdk.org/jeps/512" target="_blank" rel="noopener noreferrer"><abbr title="JEP 512: Compact Source Files and Instance Main Methods (JDK 25)">[7]</abbr></a>. The new `IO` class in `java.lang` gives such programs a short way to print, and a static import lets you call it by its bare name:
 
 ```java run
 import static java.lang.IO.println;
@@ -364,13 +364,13 @@ Hello from a compact source file
 
 That's a whole program. It's handy for small scripts and first experiments.
 
-This book uses the classic `public static void main(String[] args)` inside `class Main`. That's what nearly all existing code uses, and it runs on every version of Java, including older ones you'll meet at work. The Run buttons use **JDK 25**, a long-term-support release from September 2025 <abbr title="OpenJDK, JDK 25 project page">[8]</abbr>, so both forms run here.
+This book uses the classic `public static void main(String[] args)` inside `class Main`. That's what nearly all existing code uses, and it runs on every version of Java, including older ones you'll meet at work. The Run buttons use **JDK 25**, a long-term-support release from September 2025 <a href="https://openjdk.org/projects/jdk/25/" target="_blank" rel="noopener noreferrer"><abbr title="OpenJDK, JDK 25 project page">[8]</abbr></a>, so both forms run here.
 
 ---
 
 ## 4. `println` — how a program talks back
 
-A program that can't show anything is useless, and `println` is the statement that prints. It is a method of the `IO` class in `java.lang`, new in JDK 25 <abbr title="JEP 512: Compact Source Files and Instance Main Methods (JDK 25)">[7]</abbr>. The `import static java.lang.IO.println;` line at the top of every program in this book is what lets you write the short name `println` instead of `IO.println`. Read the call piece by piece:
+A program that can't show anything is useless, and `println` is the statement that prints. It is a method of the `IO` class in `java.lang`, new in JDK 25 <a href="https://openjdk.org/jeps/512" target="_blank" rel="noopener noreferrer"><abbr title="JEP 512: Compact Source Files and Instance Main Methods (JDK 25)">[7]</abbr></a>. The `import static java.lang.IO.println;` line at the top of every program in this book is what lets you write the short name `println` instead of `IO.println`. Read the call piece by piece:
 
 - `println` is an action: "print this, then move to the next line."
 - The value you want printed goes inside the parentheses.
@@ -432,7 +432,7 @@ The `a`, `b` and `c` all landed on one line (`abc`), because only the `println` 
 
 ## 5. Comments — notes for humans
 
-Not every line in a file is meant for the computer. A **comment** is a note for the people reading the code, and the compiler skips it entirely. Java has two forms of comment <abbr title="The Java Language Specification, Java SE 25, §3.7">[3]</abbr>:
+Not every line in a file is meant for the computer. A **comment** is a note for the people reading the code, and the compiler skips it entirely. Java has two forms of comment <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.7">[3]</abbr></a>:
 
 - `//` ignores the rest of *that line*.
 - `/* ... */` ignores everything between the markers, across as many lines as you like.
@@ -470,7 +470,7 @@ Putting `//` before a line to disable it is called **commenting out**.
 
 *Concrete bite.* The missing line is the proof: the output is just `code runs`. The commented-out `println` was legal code, but it sat behind `//`, so the compiler never saw it as a statement, and it produced nothing.
 
-*Watch out: a block comment inside a block comment.* Comments don't nest <abbr title="The Java Language Specification, Java SE 25, §3.7">[3]</abbr>. A `/* ... */` comment ends at the **first** `*/`, wherever that happens to be. Wrap a line that already carries a block comment, and the outer comment ends too early:
+*Watch out: a block comment inside a block comment.* Comments don't nest <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.7">[3]</abbr></a>. A `/* ... */` comment ends at the **first** `*/`, wherever that happens to be. Wrap a line that already carries a block comment, and the outer comment ends too early:
 
 ```java run
 import static java.lang.IO.println;
@@ -561,7 +561,7 @@ One check per objective. Answer before you open anything.
 <details>
 <summary>What does <code>System.out.println("// not a comment");</code> print, and why? Then: why does wrapping <code>/* old note */</code> in another <code>/* ... */</code> break the build?</summary>
 
-It prints `// not a comment`. Inside the double quotes, `//` is just two characters of text, because comments don't occur inside string literals <abbr title="The Java Language Specification, Java SE 25, §3.7">[3]</abbr>.
+It prints `// not a comment`. Inside the double quotes, `//` is just two characters of text, because comments don't occur inside string literals <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §3.7">[3]</abbr></a>.
 
 A block comment ends at the first `*/`. The inner `old note */` closes the outer comment, so the outer `*/` is left over as code, which javac rejects.
 
@@ -571,15 +571,15 @@ A block comment ends at the first `*/`. The inner `old note */` closes the outer
 
 ## 📚 Sources
 
-1. *The Java Language Specification, Java SE 25*, §12.1.4 "Invoke a `main` Method" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.1.4>
-2. *The Java Language Specification, Java SE 25*, §7.6 "Top Level Class and Interface Declarations" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.6>
-3. *The Java Language Specification, Java SE 25*, §3.7 "Comments" — <https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.7>
-4. *The Java Virtual Machine Specification, Java SE 25*, §1.2 "The Java Virtual Machine" — <https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-1.html#jvms-1.2>
-5. The `java` command, JDK 25 documentation — <https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html>
-6. JEP 330: Launch Single-File Source-Code Programs (JDK 11) — <https://openjdk.org/jeps/330>
-7. JEP 512: Compact Source Files and Instance Main Methods (JDK 25) — <https://openjdk.org/jeps/512>
-8. OpenJDK, JDK 25 (general availability 16 September 2025; "a long-term support (LTS) release from most vendors") — <https://openjdk.org/projects/jdk/25/>
-9. JEP 458: Launch Multi-File Source-Code Programs (JDK 22) — <https://openjdk.org/jeps/458>
+1. *The Java Language Specification, Java SE 25*, §12.1.4 "Invoke a `main` Method" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.1.4" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.1.4</a>
+2. *The Java Language Specification, Java SE 25*, §7.6 "Top Level Class and Interface Declarations" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.6" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-7.html#jls-7.6</a>
+3. *The Java Language Specification, Java SE 25*, §3.7 "Comments" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.7" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-3.html#jls-3.7</a>
+4. *The Java Virtual Machine Specification, Java SE 25*, §1.2 "The Java Virtual Machine" — <a href="https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-1.html#jvms-1.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-1.html#jvms-1.2</a>
+5. The `java` command, JDK 25 documentation — <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html</a>
+6. JEP 330: Launch Single-File Source-Code Programs (JDK 11) — <a href="https://openjdk.org/jeps/330" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/330</a>
+7. JEP 512: Compact Source Files and Instance Main Methods (JDK 25) — <a href="https://openjdk.org/jeps/512" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/512</a>
+8. OpenJDK, JDK 25 (general availability 16 September 2025; "a long-term support (LTS) release from most vendors") — <a href="https://openjdk.org/projects/jdk/25/" target="_blank" rel="noopener noreferrer">https://openjdk.org/projects/jdk/25/</a>
+9. JEP 458: Launch Multi-File Source-Code Programs (JDK 22) — <a href="https://openjdk.org/jeps/458" target="_blank" rel="noopener noreferrer">https://openjdk.org/jeps/458</a>
 
 ---
 
