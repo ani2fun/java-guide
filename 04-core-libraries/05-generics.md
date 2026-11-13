@@ -26,9 +26,9 @@ Every output below was produced by compiling and running the code on Java 25.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -83,8 +83,8 @@ HELLO
 
 `new Box<>("hello")` uses the diamond you met in [the Collections Framework](/synapse/programming-languages/java/core-libraries/the-collections-framework): the compiler infers `String` from the variable's type. You'll see more of this **type inference** in [§2](#2-generic-methods-and-bounded-types).
 
-**Why it works.**
-*How it works.* The compiler checks every use of a `Box<String>` as if `T` were `String`. The guarantee is static: any code that makes a `Box<String>` hold or return something other than a `String` simply doesn't compile.
+**The idea.**
+*The mechanics.* The compiler checks every use of a `Box<String>` as if `T` were `String`. The guarantee is static: any code that makes a `Box<String>` hold or return something other than a `String` simply doesn't compile.
 
 *Concrete bite.* You feel that guarantee as a compile error the moment you misuse the box:
 
@@ -184,8 +184,8 @@ banana
 
 Notice that nobody wrote `<Integer>` at the call site. The compiler **inferred** `T` from the arguments <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-18.html" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §18 Type Inference">[5]</abbr></a>. You can still spell it out if you like: `Main.<Integer>max(3, 7)` prints `7`.
 
-**Why it works.**
-*How it works.* A bound is a compile-time promise about what `T` can do. `T extends Comparable<T>` tells the compiler that every `T` has `compareTo`, so the call type-checks. In return, callers may pass only `Comparable` types.
+**The idea.**
+*The mechanics.* A bound is a compile-time promise about what `T` can do. `T extends Comparable<T>` tells the compiler that every `T` has `compareTo`, so the call type-checks. In return, callers may pass only `Comparable` types.
 
 *Concrete bite.* Drop the bound, and the method can't use anything type-specific:
 
@@ -308,8 +308,8 @@ public class Main {
 
 **Analysis.** Because `sum` accepts `List<? extends Number>`, it could sum both a `List<Integer>` (`6.0`) and a `List<Double>` (`4.0`). Every element is *some* kind of `Number`, and that's all `sum` needs in order to call `doubleValue()`. The wildcard widened the parameter from "exactly `List<Number>`" to "a list of any `Number` subtype".
 
-**Why it works.**
-*How it works.* Without a wildcard, `List<Number>` matches only `List<Number>`. It has to work that way: otherwise you could pass in a `List<Integer>` and then put a `Double` into it.
+**The idea.**
+*The mechanics.* Without a wildcard, `List<Number>` matches only `List<Number>`. It has to work that way: otherwise you could pass in a `List<Integer>` and then put a `Double` into it.
 
 - `? extends Number` is a **producer**. You can *read* `Number`s out of it, but you can't *add* to it, because the exact element type is unknown.
 - Its mirror image, `? super Integer`, is a **consumer**. You can *add* `Integer`s to it, but you can read only `Object`s back.
@@ -442,8 +442,8 @@ ArrayList
 
 **Analysis.** Both lists report the *same* class, `ArrayList`, and `getClass() == getClass()` is `true`. At run time, the `<String>` and `<Integer>` are simply gone: generics were enforced during compilation, then erased. That's why generics need no extra classes — and why some things are impossible.
 
-**Why it works.**
-*How it works.* Erasure replaces each type variable with the erasure of its bound, or with `Object` when there is no bound <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.6" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §4.6">[8]</abbr></a>. Wherever the code needs the real type, the compiler inserts a cast. You can see both effects with `javap -c`, the JDK's bytecode printer, on the [§1](#1-generic-classes-type-parameters) `Box<String>` program:
+**The idea.**
+*The mechanics.* Erasure replaces each type variable with the erasure of its bound, or with `Object` when there is no bound <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.6" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §4.6">[8]</abbr></a>. Wherever the code needs the real type, the compiler inserts a cast. You can see both effects with `javap -c`, the JDK's bytecode printer, on the [§1](#1-generic-classes-type-parameters) `Box<String>` program:
 
 ```text
 $ javap -c Main

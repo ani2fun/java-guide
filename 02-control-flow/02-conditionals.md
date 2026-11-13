@@ -31,9 +31,9 @@ Every output below was produced by compiling and running the code.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -106,8 +106,8 @@ Main.java:6: error: incompatible types: int cannot be converted to boolean
 
 Write the question out: `if (count != 0)`.
 
-**Why it works.**
-*How it works.* `if (cond) { … }` guards a **block**: everything inside the braces. Without braces, `if (cond) stmt;` guards only the *single statement* right after it. The next statement isn't part of the `if` at all, however it's indented.
+**The idea.**
+*The mechanics.* `if (cond) { … }` guards a **block**: everything inside the braces. Without braces, `if (cond) stmt;` guards only the *single statement* right after it. The next statement isn't part of the `if` at all, however it's indented.
 
 *Concrete bite.* That single-statement rule, combined with misleading indentation, is a classic trap:
 
@@ -257,8 +257,8 @@ flowchart TD
 
 This chain leaves out the braces so each branch fits on one line. Every branch is a single statement, so nothing can dangle. Add a second statement to any branch, though, and you'll need the braces.
 
-**Why it works.**
-*How it works.* Java evaluates the chain top to bottom and runs the block of the first true condition. Once one matches, the whole chain is done. So Java reaches a later condition only when every earlier one was false. In other words, order encodes priority.
+**The idea.**
+*The mechanics.* Java evaluates the chain top to bottom and runs the block of the first true condition. Once one matches, the whole chain is done. So Java reaches a later condition only when every earlier one was false. In other words, order encodes priority.
 
 *Concrete bite.* Put a broad condition before a narrow one, and the narrow one becomes unreachable:
 
@@ -354,8 +354,8 @@ Wed
 
 **Analysis.** `day` is `3`, so execution jumped to `case 3`, printed `Wed`, and `break` ended the switch. The other cases were skipped entirely.
 
-**Why it works.**
-*How it works.* A `switch` statement *jumps* to the matching `case` label and then runs **straight down** until it hits a `break` (or the end) <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.3">[5]</abbr></a>. The `break` isn't decoration. Without it, execution "falls through" into the next case's code and ignores that case's label.
+**The idea.**
+*The mechanics.* A `switch` statement *jumps* to the matching `case` label and then runs **straight down** until it hits a `break` (or the end) <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.11.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.11.3">[5]</abbr></a>. The `break` isn't decoration. Without it, execution "falls through" into the next case's code and ignores that case's label.
 
 *Concrete bite.* Drop the `break`s, and one match runs several cases:
 
@@ -564,8 +564,8 @@ Main.java:9: error: switch rule completes without providing a value
 1 error
 ```
 
-**Why it works.**
-*How it works.* An arrow `case X -> value` runs only its right-hand side and produces a value for the whole `switch`. Because the result is *used* (assigned, returned, printed), the compiler insists that the `switch` is **exhaustive**. Every possible input must be covered, or it won't compile <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.28.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.28.1">[6]</abbr></a>.
+**The idea.**
+*The mechanics.* An arrow `case X -> value` runs only its right-hand side and produces a value for the whole `switch`. Because the result is *used* (assigned, returned, printed), the compiler insists that the `switch` is **exhaustive**. Every possible input must be covered, or it won't compile <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.28.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.28.1">[6]</abbr></a>.
 
 *Concrete bite.* Leave a gap with no `default`, and the compiler refuses:
 
@@ -650,8 +650,8 @@ public class Main {
 
 The condition chose `1`, and `1` became `1.0`, because the whole expression has one type, `double`.
 
-**Why it works.**
-*How it works.* `?:` is an **expression**, so it has a value. `if` is a **statement**, so it doesn't. That's why you can assign or print a ternary directly, but not an `if`.
+**The idea.**
+*The mechanics.* `?:` is an **expression**, so it has a value. `if` is a **statement**, so it doesn't. That's why you can assign or print a ternary directly, but not an `if`.
 
 *Concrete bite.* Try to use `if` where a value is required, and it fails to compile, because a statement has no value to assign:
 

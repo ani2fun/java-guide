@@ -33,9 +33,9 @@ This lesson takes a deeper pass at [classes & objects](/synapse/programming-lang
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -111,8 +111,8 @@ classDiagram
 
 The superclass part of the object is set up before the subclass part. Before JDK 25, the language enforced this by making `super(...)` the first statement in the constructor. Since JDK 25, statements may come before `super(...)`, as long as they don't use the object that's being built <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.8.7">[3]</abbr></a> <a href="https://openjdk.org/jeps/513" target="_blank" rel="noopener noreferrer"><abbr title="JEP 513: Flexible Constructor Bodies (JDK 25)">[15]</abbr></a>. Later in this section, you'll see why that matters.
 
-**Why it works.**
-*How it works.* `new Dog("Rex")` creates **one** object, with room for both the fields declared in `Animal` and those declared in `Dog` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.5">[17]</abbr></a>. Construction runs top-down: the `Animal` constructor initializes the inherited fields first, and then the `Dog` constructor finishes the job.
+**The idea.**
+*The mechanics.* `new Dog("Rex")` creates **one** object, with room for both the fields declared in `Animal` and those declared in `Dog` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.5">[17]</abbr></a>. Construction runs top-down: the `Animal` constructor initializes the inherited fields first, and then the `Dog` constructor finishes the job.
 
 What if you don't write `super(...)` at all? Then javac inserts `super();` — a call to the superclass's no-argument constructor — as the first statement <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.8.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.8.7">[3]</abbr></a>. You can see the order when each constructor prints something:
 
@@ -369,8 +369,8 @@ Woof
 
 `super` is your escape hatch back to the parent's behavior. You'll often use it to *extend* that behavior: "do what the parent does, plus this."
 
-**Why it works.**
-*How it works.* An override must have the same **signature** as the inherited method: the same name and the same parameter types <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.4.2">[4]</abbr></a>. The `@Override` annotation asks the compiler to verify that for you. If the method doesn't actually override anything, that's an error <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.6.4.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §9.6.4.4">[5]</abbr></a> — which catches typos and signature mismatches.
+**The idea.**
+*The mechanics.* An override must have the same **signature** as the inherited method: the same name and the same parameter types <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.4.2">[4]</abbr></a>. The `@Override` annotation asks the compiler to verify that for you. If the method doesn't actually override anything, that's an error <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.6.4.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §9.6.4.4">[5]</abbr></a> — which catches typos and signature mismatches.
 
 *Concrete bite.* Misspell the method name (or get the parameters wrong), and you've written a *new* method, not an override. `@Override` turns that silent mistake into a compile error:
 
@@ -475,8 +475,8 @@ Thing: ...
 
 **Analysis.** Every element is declared as an `Animal`, yet each `a.speak()` ran the *object's* own version: `Dog`'s `Woof`, `Cat`'s `Meow`, `Animal`'s `...`. The loop is written against `Animal` and knows nothing about `Dog` or `Cat`, yet it drives their specialized behavior. That's polymorphism: one interface (`speak()` on `Animal`), many implementations, with the actual type choosing between them at run time.
 
-**Why it works.**
-*How it works.* Two types are in play at every call, and each one decides one thing:
+**The idea.**
+*The mechanics.* Two types are in play at every call, and each one decides one thing:
 
 - The **declared** type decides, at compile time, which methods you may call at all.
 - For an instance method, the **object's class** decides, at run time, which override runs <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.12.4.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.12.4.4">[7]</abbr></a>.
@@ -644,8 +644,8 @@ Meow, and no fetch
 
 **Analysis.** The `Dog` passed the `instanceof` test, so the cast was safe, and `d.fetch()` compiled because `d` is declared as a `Dog`. The `Cat` failed the test, so the code never attempted the cast. Meanwhile, `a.speak()` dispatched as usual; the cast was needed only for `fetch()`.
 
-**Why it works.**
-*How it works.* A downcast gets checked twice. First, the compiler rejects any cast between two types that no object could belong to at once. Then the JVM checks the object's class at the moment of the cast. If the object isn't a `Dog` (or a subclass of `Dog`), the cast throws a `ClassCastException` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.16" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.16">[11]</abbr></a>.
+**The idea.**
+*The mechanics.* A downcast gets checked twice. First, the compiler rejects any cast between two types that no object could belong to at once. Then the JVM checks the object's class at the moment of the cast. If the object isn't a `Dog` (or a subclass of `Dog`), the cast throws a `ClassCastException` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.16" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.16">[11]</abbr></a>.
 
 *Concrete bite.* This cast compiles, because an `Animal` *could* be a `Dog`. But this particular one is a `Cat`:
 
@@ -748,8 +748,8 @@ unknown
 
 Overriding `toString`/`equals`/`hashCode` is how your types get readable printing and correct [value equality](/synapse/programming-languages/java/core-libraries/equals-and-hashcode). You inherit these methods from `Object` whether you ask for them or not.
 
-**Why it works.**
-*How it works.* `Object` is the root of every class hierarchy, so its methods are always there to override. A `final` method, on the other hand, can't be overridden or hidden: the compiler rejects any attempt <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.3.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.4.3.3">[16]</abbr></a>. Its behavior is fixed for the whole hierarchy.
+**The idea.**
+*The mechanics.* `Object` is the root of every class hierarchy, so its methods are always there to override. A `final` method, on the other hand, can't be overridden or hidden: the compiler rejects any attempt <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.3.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.4.3.3">[16]</abbr></a>. Its behavior is fixed for the whole hierarchy.
 
 *Concrete bite.* Try to override a `final` method, and it won't compile:
 

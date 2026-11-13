@@ -21,9 +21,9 @@ Every code block with a ▶ Run button is live — change it, run it again, and 
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM are *actually doing*.
+1. **The mechanics** — what the compiler and the JVM are *actually doing*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 

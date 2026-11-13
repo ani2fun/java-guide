@@ -29,9 +29,9 @@ This uses the [loops](/synapse/programming-languages/java/control-flow/loops) th
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -120,8 +120,8 @@ public class Main {
 0
 ```
 
-**Why it works.**
-*How it works.* An array is one object holding `length` slots of its type, numbered from `0`. `new T[n]` fills every slot with the type's default <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §4.12.5">[2]</abbr></a>, while a literal fills it with what you wrote. How the slots sit in memory is the JVM's business, because the specification doesn't pin it down <a href="https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-2.html#jvms-2.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Virtual Machine Specification, Java SE 25, §2.7">[3]</abbr></a>.
+**The idea.**
+*The mechanics.* An array is one object holding `length` slots of its type, numbered from `0`. `new T[n]` fills every slot with the type's default <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §4.12.5">[2]</abbr></a>, while a literal fills it with what you wrote. How the slots sit in memory is the JVM's business, because the specification doesn't pin it down <a href="https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-2.html#jvms-2.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Virtual Machine Specification, Java SE 25, §2.7">[3]</abbr></a>.
 
 The default depends on the type:
 
@@ -259,8 +259,8 @@ public class Main {
 
 **Analysis.** `a[1] = 99` overwrote the middle slot, and `a[0]` and `a[2]` were untouched. Reading and writing both use the same `a[i]` notation. On the left of `=`, it names the slot to change. Anywhere else, it yields the slot's value.
 
-**Why it works.**
-*How it works.* Every array access is checked at run time <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §10.4">[6]</abbr></a>. An index below `0`, or at `length` or above, gets refused with an exception. Java never lets you read or write past the ends of an array.
+**The idea.**
+*The mechanics.* Every array access is checked at run time <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §10.4">[6]</abbr></a>. An index below `0`, or at `length` or above, gets refused with an exception. Java never lets you read or write past the ends of an array.
 
 *Concrete bite.* Index past the end (or below `0`), and it throws. That happens at run time, because nobody knows the index until then:
 
@@ -327,8 +327,8 @@ public class Main {
 
 **Analysis.** The first loop used `i` from `0` to `nums.length - 1`, printing each index alongside `nums[i]`. The second visited the values `5, 10, 15` with no index at all. Notice `i < nums.length` (not a hard-coded `3`). Tie the boundary to the array, so it stays correct if the array's size changes.
 
-**Why it works.**
-*How it works.* The classic `for` reads `nums[i]` on each pass, using the index it controls. The enhanced `for` walks `0..length-1` for you and hands over each value <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.14.2">[7]</abbr></a>: a copy, as [Loops](/synapse/programming-languages/java/control-flow/loops) showed. Same traversal, different access.
+**The idea.**
+*The mechanics.* The classic `for` reads `nums[i]` on each pass, using the index it controls. The enhanced `for` walks `0..length-1` for you and hands over each value <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.14.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.14.2">[7]</abbr></a>: a copy, as [Loops](/synapse/programming-languages/java/control-flow/loops) showed. Same traversal, different access.
 
 *Concrete bite.* The choice matters beyond style, because only the indexed `for` can write back. [§1](#1-creating-arrays)'s `Arrays.toString` run showed it: `for (int n : nums) n = 0;` left `[5, 10, 15]`, while the indexed loop gave `[0, 0, 0]`.
 
@@ -403,8 +403,8 @@ public class Main {
 0
 ```
 
-**Why it works.**
-*How it works.* A 2D array is a one-dimensional array whose elements are other arrays. Nothing forces those inner arrays to share a length. A **jagged** array, where rows differ in size, is perfectly legal.
+**The idea.**
+*The mechanics.* A 2D array is a one-dimensional array whose elements are other arrays. Nothing forces those inner arrays to share a length. A **jagged** array, where rows differ in size, is perfectly legal.
 
 *Concrete bite.* So the bounds of one row tell you nothing about another, and if you assume a rectangle, it throws:
 
@@ -470,8 +470,8 @@ Main.java:6: error: cannot find symbol
 
 **Analysis.** Writing `a.length()`, with parentheses as if it were a method, fails. An array's `length` is a **field**, written `a.length` with no parentheses. (Contrast a `String`, where [`s.length()`](/synapse/programming-languages/java/first-steps/strings-the-basics) *is* a method.) The slip is a compile error, so you catch it right away.
 
-**Why it works.**
-*How it works.* `length` is a `final` field fixed in the array at creation <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §10.7">[8]</abbr></a>. It isn't a method, and you can't reassign it. No operation changes an array's size, because the array was created with exactly that many slots.
+**The idea.**
+*The mechanics.* `length` is a `final` field fixed in the array at creation <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-10.html#jls-10.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §10.7">[8]</abbr></a>. It isn't a method, and you can't reassign it. No operation changes an array's size, because the array was created with exactly that many slots.
 
 **Growing by copying.** `Arrays.copyOf(a, n)` makes a *new* array of length `n`, copies `a` into it, and fills any extra slots with `0` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Arrays.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Arrays.copyOf">[4]</abbr></a>:
 

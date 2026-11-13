@@ -40,9 +40,9 @@ On your own machine, `Scanner(System.in)` pauses and waits for you to type.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -103,8 +103,8 @@ score = 95
 
 `%n` is the platform's own line separator <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Formatter.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Formatter">[1]</abbr></a>, so prefer it to `\n` in a format string.
 
-**Why it works.**
-*How it works.* `printf` walks the format string. At each `%…` it consumes the next argument and renders it according to the **specifier**: `%d` as a whole number, `%.2f` as a decimal with two digits after the point.
+**The idea.**
+*The mechanics.* `printf` walks the format string. At each `%…` it consumes the next argument and renders it according to the **specifier**: `%d` as a whole number, `%.2f` as a decimal with two digits after the point.
 
 *Concrete bite.* The specifier must match the argument's type, or `printf` throws at run time <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Formatter.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Formatter">[1]</abbr></a>:
 
@@ -229,8 +229,8 @@ public class Main {
 
 `next()` returned `Ada` and left the Scanner sitting at the space. `nextLine()` then returned the *rest of that line*, `" Lovelace"`, space included. Only the second `nextLine()` got to `London`. The brackets show exactly where each value starts and ends.
 
-**Why it works.**
-*How it works.* A `Scanner` is a reader over a **source**. `new Scanner(System.in)` reads the keyboard; `new Scanner("Ada")` reads a fixed string. `nextLine`, `next` and `nextInt` behave the same over either one. The Scanner keeps a position in its source, and each call consumes a little more from that position.
+**The idea.**
+*The mechanics.* A `Scanner` is a reader over a **source**. `new Scanner(System.in)` reads the keyboard; `new Scanner("Ada")` reads a fixed string. `nextLine`, `next` and `nextInt` behave the same over either one. The Scanner keeps a position in its source, and each call consumes a little more from that position.
 
 *Concrete bite.* Ask for input that isn't there, and it throws:
 
@@ -309,8 +309,8 @@ public class Main {
 Next year you'll be 37
 ```
 
-**Why it works.**
-*How it works.* `nextInt()` reads characters up to the next space or line break, and parses them into an `int`. It stops *before* the line break that ends the line. In other words, it consumes the number token, not the line.
+**The idea.**
+*The mechanics.* `nextInt()` reads characters up to the next space or line break, and parses them into an `int`. It stops *before* the line break that ends the line. In other words, it consumes the number token, not the line.
 
 *Concrete bite.* That leftover line break is the famous Scanner trap. A `nextLine()` after a `nextInt()` reads the *rest of the number's line*, which is empty, instead of the next line:
 
@@ -413,8 +413,8 @@ public class Main {
 7 + 5 = 12
 ```
 
-**Why it works.**
-*How it works.* `nextInt()` skips leading spaces and reads one whole-number token, so `"7 5"` yields `7`, then `5`, across two calls. The read → compute → output shape is the backbone of interactive programs.
+**The idea.**
+*The mechanics.* `nextInt()` skips leading spaces and reads one whole-number token, so `"7 5"` yields `7`, then `5`, across two calls. The read → compute → output shape is the backbone of interactive programs.
 
 *Concrete bite.* Lose the number-ness, by reading as text and then adding, and `+` flips back to concatenation:
 
@@ -514,8 +514,8 @@ Exception in thread "main" java.lang.NumberFormatException: For input string: "3
 
 `Integer.parseInt("42")` worked and printed `42`. `Integer.parseInt("3.5")` failed with `NumberFormatException`, because `"3.5"` isn't a *whole* number, and that halted the program. `parseInt` is strict about spaces too: `Integer.parseInt(" 42")` fails with `For input string: " 42"`. Strip the text first.
 
-**Why it works.**
-*How it works.* Both `nextInt` and `Integer.parseInt` validate as they parse. If the characters don't form an `int`, there's no value to return, so they throw instead of guessing.
+**The idea.**
+*The mechanics.* Both `nextInt` and `Integer.parseInt` validate as they parse. If the characters don't form an `int`, there's no value to return, so they throw instead of guessing.
 
 *Concrete bite.* The outputs above are the demonstration: `42` prints, then the bad parse throws and execution stops. Real user input is unpredictable, so this isn't an edge case. It's an ordinary day.
 

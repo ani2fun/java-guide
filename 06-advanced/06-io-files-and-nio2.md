@@ -32,9 +32,9 @@ This lesson uses [streams](/synapse/programming-languages/java/advanced/function
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -131,8 +131,8 @@ absolute?  false
 - `getFileName` and `getParent` split a path apart, and `relativize` gives the path from one location to another.
 - None of these directories exists, yet nothing failed, because a `Path` is only a name. The output uses `/`, the separator on Linux and macOS.
 
-**Why it works.**
-*How it works.* A `Path` is a value that describes a location; it never touches the disk. The `Files` methods are where the I/O actually happens. Each one performs the open-operate-close cycle, and translates operating-system errors into Java exceptions.
+**The idea.**
+*The mechanics.* A `Path` is a value that describes a location; it never touches the disk. The `Files` methods are where the I/O actually happens. Each one performs the open-operate-close cycle, and translates operating-system errors into Java exceptions.
 
 *Concrete bite.* Since a `Path` is only a name, operating on one that doesn't exist fails at the `Files` call, not at `Path.of`:
 
@@ -197,8 +197,8 @@ banana
 
 **Analysis.** `Files.write` wrote three lines, adding a line separator after each one. `Files.readAllLines` read them into a `List` of three strings, so `lines.get(1)` is the second one, `"banana"`. This is the everyday text-file pattern: write a list of lines, read back a list of lines. The encoding (UTF-8, for these methods) is handled for you, and so is closing the file.
 
-**Why it works.**
-*How it works.* `readAllLines` reads the *entire* file into memory as a `List<String>`. It splits on line terminators, and decodes bytes into characters through the charset. It's eager: convenient for small and medium files, with everything in memory at once.
+**The idea.**
+*The mechanics.* `readAllLines` reads the *entire* file into memory as a `List<String>`. It splits on line terminators, and decodes bytes into characters through the charset. It's eager: convenient for small and medium files, with everything in memory at once.
 
 *Concrete bite.* "Everything in memory" is exactly the limit. `readAllLines` on a multi-gigabyte log loads the whole thing, and can exhaust the heap. The API says as much about `readString`: "It is not intended for reading very large files" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/nio/file/Files.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.nio.file.Files.readString(Path)">[1]</abbr></a>. For large or unbounded files, process them line by line *without* holding them all at once, as the next section shows.
 
@@ -251,8 +251,8 @@ lines > 2: 3
 
 Crucially, the stream sits in a `try`-with-resources. It's backed by an *open file*, so it must be closed — unlike the in-memory streams from the streams lesson. And because it reads lazily, it never holds the whole file in memory.
 
-**Why it works.**
-*How it works.* `Files.lines` opens the file and exposes its lines as a lazy `Stream<String>`, reading on demand as the pipeline pulls. It holds an operating-system file handle, so it has to be closed. The API is explicit about this: "This method must be used within a try-with-resources statement or similar control structure to ensure that the stream's open file is closed promptly" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/nio/file/Files.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.nio.file.Files.lines(Path)">[1]</abbr></a>. The unrelated `java.io` byte streams (`FileInputStream` and friends) are a separate, lower-level world for binary data.
+**The idea.**
+*The mechanics.* `Files.lines` opens the file and exposes its lines as a lazy `Stream<String>`, reading on demand as the pipeline pulls. It holds an operating-system file handle, so it has to be closed. The API is explicit about this: "This method must be used within a try-with-resources statement or similar control structure to ensure that the stream's open file is closed promptly" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/nio/file/Files.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.nio.file.Files.lines(Path)">[1]</abbr></a>. The unrelated `java.io` byte streams (`FileInputStream` and friends) are a separate, lower-level world for binary data.
 
 *Concrete bite.* The name clash causes real confusion. An `InputStream` is *not* a `Stream`: it has no `map` or `filter`, and the two aren't interchangeable. Forgetting `try`-with-resources on `Files.lines` leaks the file handle, whereas a `list.stream()` holds no resource at all. Same word, two meanings, two lifecycles.
 
@@ -298,8 +298,8 @@ chars: 4
 
 Text is an *interpretation* of bytes, and the charset decides which bytes. The `Files` text methods use UTF-8 unless you pass a different charset <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/nio/file/Files.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.nio.file.Files.readString(Path)">[1]</abbr></a>. Since JDK 18, UTF-8 is also Java's default charset everywhere else <a href="https://openjdk.org/jeps/400" target="_blank" rel="noopener noreferrer"><abbr title="JEP 400: UTF-8 by Default (JDK 18)">[3]</abbr></a>. Before that, relying on the platform's default charset was a classic source of "works on my machine" bugs.
 
-**Why it works.**
-*How it works.* Encoding turns characters into bytes, and decoding turns bytes back into characters. Both directions need the *same* charset. Decode with a different one, and the bytes get read as different characters.
+**The idea.**
+*The mechanics.* Encoding turns characters into bytes, and decoding turns bytes back into characters. Both directions need the *same* charset. Decode with a different one, and the bytes get read as different characters.
 
 *Concrete bite.* Write in one charset and read in another, and the text gets mangled — or rejected:
 
@@ -447,8 +447,8 @@ next readLine: null
 
 A `BufferedReader` works the same way over any `Reader`: a file, the console, or a `String`.
 
-**Why it works.**
-*How it works.* Each `read` or `write` on an unbuffered file stream can be a **system call** — a request to the operating system, which is slow. A buffer turns many small requests into a few large ones.
+**The idea.**
+*The mechanics.* Each `read` or `write` on an unbuffered file stream can be a **system call** — a request to the operating system, which is slow. A buffer turns many small requests into a few large ones.
 
 *Concrete bite.* Count the bytes of a 2 MB file one `read()` at a time, first without a buffer and then with one:
 

@@ -32,9 +32,9 @@ This lesson builds directly on [the primitive types](/synapse/programming-langua
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -88,8 +88,8 @@ public class Main {
 
 **Analysis.** `7 + 2 = 9`, `7 - 2 = 5`, and `7 * 2 = 14`. `7 % 2 = 1`, because `7` is `3 * 2 + 1`, leaving a remainder of `1`. `%` is how you test divisibility (a remainder of `0` when dividing by `2` means "even"). It's also how you fold a value into a range.
 
-**Why it works.**
-*How it works.* `%` returns the remainder, and in Java, its sign follows the **left** operand — the **dividend** (the number being divided) — not the right one <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.17.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.17.3">[1]</abbr></a>.
+**The idea.**
+*The mechanics.* `%` returns the remainder, and in Java, its sign follows the **left** operand — the **dividend** (the number being divided) — not the right one <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.17.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.17.3">[1]</abbr></a>.
 
 *Concrete bite.* That means it isn't the mathematical "modulo," which is never negative for a positive divisor:
 
@@ -231,8 +231,8 @@ public class Main {
 
 **Analysis.** `7 / 2` is `3` (not `3.5`), `1 / 2` is `0`, and `9 / 10` is `0`. The fraction isn't rounded; it's **truncated** — dropped toward zero, so `-7 / 2` is `-3` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.17.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.17.2">[4]</abbr></a>. Both operands are `int`, so the result is an `int`, and an `int` has nowhere to keep a fractional part.
 
-**Why it works.**
-*How it works.* When both operands are integer types, `/` computes the integer quotient. The result has that same integer type, so a fractional part simply can't exist.
+**The idea.**
+*The mechanics.* When both operands are integer types, `/` computes the integer quotient. The result has that same integer type, so a fractional part simply can't exist.
 
 *Concrete bite.* Here's the classic "average" bug: a `double` result that's produced one step too late. (The first line declares two `int` variables in one statement, separated by a comma.)
 
@@ -297,8 +297,8 @@ public class Main {
 - `(double) total / count`: the cast turns `total` into `7.0` first, because `(double)` binds to `total` alone. So it's `7.0 / 2 = 3.5`.
 - `(int) 3.9` is a **narrowing** cast, to a type with a smaller range. It chops the fraction off toward zero, giving `3`, not `4`.
 
-**Why it works.**
-*How it works.* A cast `(double) x` produces a value of the target type for that one spot, and automatic promotion does the same thing when types mix. Precedence matters here: a cast binds tightly, to the operand right after it. So `(double) total / count` casts `total`, *then* divides.
+**The idea.**
+*The mechanics.* A cast `(double) x` produces a value of the target type for that one spot, and automatic promotion does the same thing when types mix. Precedence matters here: a cast binds tightly, to the operand right after it. So `(double) total / count` casts `total`, *then* divides.
 
 *Concrete bite.* Cast the *result* instead of an operand, and the bug survives:
 
@@ -451,8 +451,8 @@ public class Main {
 
 **Analysis.** `Integer.MAX_VALUE` is the largest `int`, `2147483647`. Add `1`, and instead of `2147483648`, you get `-2147483648` — the *smallest* `int`. The value rolled over the top of the range straight to the bottom, like a car odometer passing its maximum. There's no exception and no warning, just a negative number where a larger positive one was expected.
 
-**Why it works.**
-*How it works.* `int + int` is always an `int`, and the result keeps only the low 32 bits. When the true answer needs a 33rd bit, that bit gets discarded — and because of how signed integers are encoded, discarding it flips the sign. The type never widens itself to fit.
+**The idea.**
+*The mechanics.* `int + int` is always an `int`, and the result keeps only the low 32 bits. When the true answer needs a 33rd bit, that bit gets discarded — and because of how signed integers are encoded, discarding it flips the sign. The type never widens itself to fit.
 
 *Concrete bite.* Overflow hides in ordinary code, such as the product of two modest numbers:
 
@@ -550,8 +550,8 @@ public class Main {
 
 **Analysis.** Neither `0.1` nor `0.2` is stored exactly, so their sum lands a hair above `0.3`. `1.0 - 0.9` lands a hair below `0.1`. And `1.0 / 3` has no exact form in decimal either, so `println` shows 16 digits of it. None of this is a bug in Java: it's simply how binary floating-point works, in every language that uses it.
 
-**Why it works.**
-*How it works.* `double` trades exactness for range and speed. Each value is the nearest member of a fixed set of binary fractions, and each operation rounds its result to that set.
+**The idea.**
+*The mechanics.* `double` trades exactness for range and speed. Each value is the nearest member of a fixed set of binary fractions, and each operation rounds its result to that set.
 
 *Concrete bite.* Unlike integer division, floating-point division by zero doesn't throw. Instead, it gives a special value: **Infinity**, or **NaN** ("not a number") for `0.0 / 0` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.17.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.17.2">[4]</abbr></a>. And the program just carries on with it:
 
@@ -640,8 +640,8 @@ public class Main {
 
 `8 / 4 / 2` is `(8 / 4) / 2 = 1`, not `8 / (4 / 2) = 4`. And `2 * 3 % 4` is `6 % 4 = 2`, because `*` and `%` share a level, so they run left to right too.
 
-**Why it works.**
-*How it works.* Precedence is fixed grammar that the compiler applies before anything runs. `Math.pow` and `Math.sqrt` are library methods that take and return `double`.
+**The idea.**
+*The mechanics.* Precedence is fixed grammar that the compiler applies before anything runs. `Math.pow` and `Math.sqrt` are library methods that take and return `double`.
 
 *Concrete bite.* Assuming that `Math.pow` produces an integer bites you the moment you store its result in an `int`:
 

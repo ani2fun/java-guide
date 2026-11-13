@@ -26,9 +26,9 @@ This pulls together [conditionals](/synapse/programming-languages/java/control-f
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -120,8 +120,8 @@ Main.java:9: error: method square in class Main cannot be applied to given types
 
 `required` is the parameter list, and `found` is what the call passed. A `double` argument such as `square(2.5)` fails too, with `possible lossy conversion from double to int`, the rule from [Numbers & Arithmetic](/synapse/programming-languages/java/first-steps/numbers-and-arithmetic).
 
-**Why it works.**
-*How it works.* A call pauses the caller and binds each argument to the matching parameter. It runs the body until a `return`, then resumes the caller with the returned value dropped in place of the call.
+**The idea.**
+*The mechanics.* A call pauses the caller and binds each argument to the matching parameter. It runs the body until a `return`, then resumes the caller with the returned value dropped in place of the call.
 
 *Concrete bite.* A method that declares a non-`void` return type must return a value on every path, or it won't compile <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.7" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.4.7">[1]</abbr></a>. The compiler proves that you always return:
 
@@ -191,8 +191,8 @@ Hello, Ada
 
 **Analysis.** `greet("Ada")` skipped the early-exit branch and printed the greeting. `greet("")` found an empty name, printed `(no name)`, and `return;` ended the method right there, so the greeting line never ran. A `void` method returns nothing, so `return;` carries no value. It just stops.
 
-**Why it works.**
-*How it works.* `void` means "no result", so calling a `void` method is a statement, not an expression. There's nothing to assign <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.17" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.17">[2]</abbr></a>. A `return;` in any method ends it immediately, while `return value;` ends it *and* supplies the result.
+**The idea.**
+*The mechanics.* `void` means "no result", so calling a `void` method is a statement, not an expression. There's nothing to assign <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.17" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.17">[2]</abbr></a>. A `return;` in any method ends it immediately, while `return value;` ends it *and* supplies the result.
 
 *Concrete bite.* Because a `void` call has no value, using it as one fails to compile:
 
@@ -349,8 +349,8 @@ double 5.0
 
 The `int` `5` fits both `long` and `double`, and `long` is the closer one. The `float` `5.0f` can't become a `long`, so only `double` applies. When two overloads fit equally well, the compiler refuses to guess. With `pair(int, double)` and `pair(double, int)`, the call `pair(1, 2)` gives `reference to pair is ambiguous`.
 
-**Why it works.**
-*How it works.* A method is identified by its **signature**: name plus parameter types, not its return type <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.4.2">[7]</abbr></a>. The compiler resolves an overloaded call by matching the argument types to a signature, entirely at compile time.
+**The idea.**
+*The mechanics.* A method is identified by its **signature**: name plus parameter types, not its return type <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.4.2">[7]</abbr></a>. The compiler resolves an overloaded call by matching the argument types to a signature, entirely at compile time.
 
 *Concrete bite.* Because the return type *isn't* part of the signature, two methods that differ only by return type count as a duplicate definition:
 
@@ -483,8 +483,8 @@ outside: 5
 
 **Analysis.** `addOne(x)` copied `x`'s value (`5`) into `n`. Incrementing `n` to `6` changed only that copy (`inside: 6`), while the caller's `x` stayed `5`, as `outside: 5` confirms. The method had no way to reach back and change `x`.
 
-**Why it works.**
-*How it works.* "Pass-by-value" means the argument's *value* is copied into the parameter. The parameter is a separate variable, so assignments to it rewrite the copy, never the original. Java has no way to pass a primitive variable so that the callee can change it.
+**The idea.**
+*The mechanics.* "Pass-by-value" means the argument's *value* is copied into the parameter. The parameter is a separate variable, so assignments to it rewrite the copy, never the original. Java has no way to pass a primitive variable so that the callee can change it.
 
 *Concrete bite.* The classic `swap` shows this. The method swaps its two copies, and the caller's variables never move:
 
@@ -591,8 +591,8 @@ public class Main {
 
 Mutation reached through to the shared object. Reassignment didn't.
 
-**Why it works.**
-*How it works.* The reference is copied, so caller and method hold two handles to the *same* object. Following a handle to change the object's contents (`arr[0] = …`) affects what both handles see. Overwriting the handle itself (`arr = …`) changes only that local copy. Java is *always* pass-by-value. For objects, the value is the reference.
+**The idea.**
+*The mechanics.* The reference is copied, so caller and method hold two handles to the *same* object. Following a handle to change the object's contents (`arr[0] = …`) affects what both handles see. Overwriting the handle itself (`arr = …`) changes only that local copy. Java is *always* pass-by-value. For objects, the value is the reference.
 
 *Concrete bite.* The two `99`s are the whole lesson: the mutation in `mutate` stuck, and the reassignment in `reassign` didn't. A method that "replaces your array" by assigning to its parameter silently does nothing to the caller. It's a real and common bug.
 

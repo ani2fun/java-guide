@@ -1,6 +1,6 @@
 ---
 title: Java
-summary: A single, progressive Java book that takes you from absolute beginner to advanced. Thirty-seven lessons in six chapters, read in strict order. Each one derives the language's behaviour from one core idea instead of listing features. Every example is compiled and run, and a three-move "Why it works" standard turns rules into things you can re-derive. The throughline: the compiler is a proof-checker you run before your program ever touches data.
+summary: A single, progressive Java book that takes you from absolute beginner to advanced. Thirty-seven lessons in six chapters, read in strict order. Each one derives the language's behaviour from one core idea instead of listing features. Every example is compiled and run, and a three-move "The idea" standard turns rules into things you can re-derive. The throughline: the compiler is a proof-checker you run before your program ever touches data.
 prereqs: []
 ---
 
@@ -15,13 +15,13 @@ The book is a single text, meant to be read from top to bottom. It starts by ass
 - **Every code block with a Run button is real.** Synapse compiles and runs it in a sandboxed **Java 25 (OpenJDK)** runner — the same one that produced every `Output:` block in this book. Click ▶ Run, edit the code, and run it again. The output you see is the output we verified.
 - **When the lesson is a compile error, the block is labelled `Compiler error:`**, and it shows the real `javac` diagnostic — because in Java, many of the most important lessons happen *before* the program runs.
 - **Blocks without a Run button are deliberate.** They're either short fragments, or programs shown precisely because they need keyboard input that the sandbox can't supply. Their output is still shown, and still real.
-- **Every lesson is built on a thesis** stated in its first paragraph, and follows a fixed rhythm: concept → code → verified output → analysis ("what happened") → a **Why it works** box (why it must be so).
+- **Every lesson is built on a thesis** stated in its first paragraph, and follows a fixed rhythm: concept → code → verified output → analysis ("what happened") → a **The idea** box (why it must be so).
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM are *actually doing*.
+1. **The mechanics** — what the compiler and the JVM are *actually doing*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 

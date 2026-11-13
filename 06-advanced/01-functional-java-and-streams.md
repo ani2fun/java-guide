@@ -30,9 +30,9 @@ This lesson builds on [generics](/synapse/programming-languages/java/core-librar
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -144,8 +144,8 @@ toCollection(ArrayList::new): [3, 1, 2, 4]
 Exception in thread "main" java.lang.UnsupportedOperationException
 ```
 
-**Why it works.**
-*How it works.* `stream()` produces a stream object. Each intermediate operation wraps it in another stream that records the operation, but doesn't do anything yet. Only the terminal `collect` drives elements through the whole chain. The pipeline expresses the *what*, and the library owns the *how* (the iteration).
+**The idea.**
+*The mechanics.* `stream()` produces a stream object. Each intermediate operation wraps it in another stream that records the operation, but doesn't do anything yet. Only the terminal `collect` drives elements through the whole chain. The pipeline expresses the *what*, and the library owns the *how* (the iteration).
 
 *Concrete bite.* A stream is single-use, and it isn't a collection. The API says a stream "should be operated on (invoking an intermediate or terminal stream operation) only once" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Stream.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Stream">[2]</abbr></a>. Use it a second time, and it throws:
 
@@ -253,8 +253,8 @@ flatMap: [1, 2, 3]
 concat:  [a, b, c]
 ```
 
-**Why it works.**
-*How it works.* `flatMap(List::stream)` turned each inner list into a stream, and poured all those streams into one. The empty list contributed zero elements, so it simply vanished. `Stream.of(…)` makes a stream from the values you list, and `concat` ran one stream after the other.
+**The idea.**
+*The mechanics.* `flatMap(List::stream)` turned each inner list into a stream, and poured all those streams into one. The empty list contributed zero elements, so it simply vanished. `Stream.of(…)` makes a stream from the values you list, and `concat` ran one stream after the other.
 
 *Concrete bite.* The `map` line is the trap: it printed `[[1, 2], [3], []]`, still three lists. Asking `map` to flatten does nothing, because `map` never changes the number of elements.
 
@@ -308,8 +308,8 @@ even=[2, 4]
 - `Collectors.joining(", ")` produced `"1, 2, 3, 4, 5"`.
 - `Collectors.groupingBy(...)` built a `Map` from each element's group key (`"odd"`/`"even"`) to the list of elements in that group. It's the stream form of [the counting and grouping idioms](/synapse/programming-languages/java/core-libraries/sets-and-maps), packed into one expression.
 
-**Why it works.**
-*How it works.* `reduce(identity, accumulator)` applies the accumulator over and over, starting from the identity. The API requires that "the `identity` value must be an identity for the accumulator function" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Stream.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Stream.reduce(Object, BinaryOperator)">[2]</abbr></a>: `0` for a sum, `""` for concatenation. A `Collector`, meanwhile, is a recipe for gathering elements into a container. `groupingBy`, `toList`, `joining`, `counting` and `partitioningBy` cover most needs <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Collectors.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Collectors">[3]</abbr></a>.
+**The idea.**
+*The mechanics.* `reduce(identity, accumulator)` applies the accumulator over and over, starting from the identity. The API requires that "the `identity` value must be an identity for the accumulator function" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Stream.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Stream.reduce(Object, BinaryOperator)">[2]</abbr></a>: `0` for a sum, `""` for concatenation. A `Collector`, meanwhile, is a recipe for gathering elements into a container. `groupingBy`, `toList`, `joining`, `counting` and `partitioningBy` cover most needs <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/Collectors.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream.Collectors">[3]</abbr></a>.
 
 *Concrete bite.* Seed a sum with `1` — the identity for *multiplication* — and every result is off by one:
 
@@ -531,8 +531,8 @@ found: 2
 
 **Analysis.** `peek` prints each element as it flows by, and the output stops at `peek 2`. The pipeline never even looked at `3`, `4` or `5`. `findFirst` needed only the first even number, so once `filter` let `2` through, the whole pipeline stopped. A loop that first built a filtered list would have visited all five.
 
-**Why it works.**
-*How it works.* The terminal operation pulls elements through the pipeline one at a time, from top to bottom:
+**The idea.**
+*The mechanics.* The terminal operation pulls elements through the pipeline one at a time, from top to bottom:
 
 1. `peek(1)`, then `filter` rejects `1`.
 2. `peek(2)`, then `filter` accepts `2`, and `findFirst` is satisfied and halts.
@@ -666,8 +666,8 @@ none
 
 **Analysis.** The first query found `"Linus"`, so `found` was present, and `orElse` returned the value. The second query matched nothing, so `missing` was empty, and `orElse("none")` supplied the fallback. The *type* `Optional<String>` made the possibility of absence visible right in the signature. You can't use a missing value by accident, the way you can with `null`.
 
-**Why it works.**
-*How it works.* `Optional` wraps the idea of "a value, or nothing" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Optional">[6]</abbr></a>:
+**The idea.**
+*The mechanics.* `Optional` wraps the idea of "a value, or nothing" <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.Optional">[6]</abbr></a>:
 
 - `orElse` and `orElseGet` supply a default.
 - `map` transforms the value only if one is present, and `filter` keeps it only if it passes a test.
@@ -771,8 +771,8 @@ public class Main {
 
 **Analysis.** The parallel `sum` over one million numbers gave the correct `500000500000`, on every run. `sum` is a proper reduction: each thread sums its own chunk, and the chunks combine associatively, with no shared state. This is the safe way to parallelize: a stateless pipeline that ends in a reduction or a collector.
 
-**Why it works.**
-*How it works.* A parallel stream splits the source into chunks, processes them on a pool of threads, and then combines the partial results. That's correct as long as the operations are stateless and the combination is associative <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream package summary, &quot;Associativity&quot;">[1]</abbr></a>. `sum`, `map`, `filter` and `collect` all qualify.
+**The idea.**
+*The mechanics.* A parallel stream splits the source into chunks, processes them on a pool of threads, and then combines the partial results. That's correct as long as the operations are stateless and the combination is associative <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/stream/package-summary.html" target="_blank" rel="noopener noreferrer"><abbr title="Java SE 25 API, java.util.stream package summary, &quot;Associativity&quot;">[1]</abbr></a>. `sum`, `map`, `filter` and `collect` all qualify.
 
 *Concrete bite.* Touch shared mutable state, and the threads corrupt it. This is called a **data race**, and it produces no error — only wrong answers.
 

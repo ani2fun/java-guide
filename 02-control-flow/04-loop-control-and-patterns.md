@@ -30,9 +30,9 @@ This builds on [loops](/synapse/programming-languages/java/control-flow/loops) a
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -111,8 +111,8 @@ public class Main {
 
 Two outer passes times three inner passes make six pairs. The `println` after the inner loop ends each row.
 
-**Why it works.**
-*How it works.* `break` exits the **innermost** statement that encloses it and that it can leave: a loop, or a `switch` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.15" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.15">[1]</abbr></a>. It doesn't exit the method, and in nested loops it doesn't exit the outer loop.
+**The idea.**
+*The mechanics.* `break` exits the **innermost** statement that encloses it and that it can leave: a loop, or a `switch` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.15" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.15">[1]</abbr></a>. It doesn't exit the method, and in nested loops it doesn't exit the outer loop.
 
 *Concrete bite.* Put a `break` in an inner loop, and the outer loop keeps right on going:
 
@@ -225,8 +225,8 @@ flowchart TD
 
 **Analysis.** When `i` was `2`, `continue` skipped the `print` and went to the next pass. So `2` is missing, but the loop did **not** stop: it printed `3` and `4` afterward. The diagram shows why. `continue` routes back to the update/test, while `break` routes out of the loop entirely.
 
-**Why it works.**
-*How it works.* `continue` jumps over everything *below* it in the body and proceeds to the loop's update-and-test.
+**The idea.**
+*The mechanics.* `continue` jumps over everything *below* it in the body and proceeds to the loop's update-and-test.
 
 - In a `for`, that update (`i++`) still runs, so the loop always advances.
 - In a `while`, the increment is part of the body, so a `continue` placed *before* it skips it.
@@ -406,8 +406,8 @@ public class Main {
 
 For `i = 1`, the pair `1,2` fails the test, so `continue rows` abandoned the inner loop and moved `i` on to `2`. A plain `continue` would have skipped only `1,2`, then tried `1,3` for no reason.
 
-**Why it works.**
-*How it works.* A label names a statement. `break label` exits *that* statement, and `continue label` starts that loop's next pass. The label must sit on an **enclosing** loop. You can't break to a label that isn't above you in the nesting.
+**The idea.**
+*The mechanics.* A label names a statement. `break label` exits *that* statement, and `continue label` starts that loop's next pass. The label must sit on an **enclosing** loop. You can't break to a label that isn't above you in the nesting.
 
 *Concrete bite.* Refer to a label that doesn't enclose the `break`, and it won't compile:
 
@@ -530,8 +530,8 @@ true
 
 `15` is the first odd value, so the loop never looked at `16`, `23` or `42`.
 
-**Why it works.**
-*How it works.* An accumulator's **initial value** must be the right answer for an empty sequence. `0` adds nothing to a sum, and the smallest possible `int` loses to any real value in a `max`. The loop then folds each element into that running result.
+**The idea.**
+*The mechanics.* An accumulator's **initial value** must be the right answer for an empty sequence. `0` adds nothing to a sum, and the smallest possible `int` loses to any real value in a `max`. The loop then folds each element into that running result.
 
 *Concrete bite.* Initialize a `max` to `0`, and any all-negative data defeats it:
 

@@ -28,9 +28,9 @@ This builds on the [primitive types](/synapse/programming-languages/java/first-s
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -79,8 +79,8 @@ false
 
 **Analysis.** Two `boolean` variables, two values, printed as `true` and `false`. There's no third option and no numeric stand-in. A `boolean` is *only* ever `true` or `false`.
 
-**Why it works.**
-*How it works.* `boolean` is a separate type with no link to the integers. C and Python treat zero as false and any other number as true. Java has no conversion from a number to a `boolean` at all.
+**The idea.**
+*The mechanics.* `boolean` is a separate type with no link to the integers. C and Python treat zero as false and any other number as true. Java has no conversion from a number to a `boolean` at all.
 
 *Concrete bite.* So assigning a number to a `boolean` doesn't mean "0 is false, 1 is true". It doesn't compile:
 
@@ -193,8 +193,8 @@ true
 
 `5` became `5.0` before the test, so the two are equal. `'a'` is the number `97`, and `'b'` is `98`.
 
-**Why it works.**
-*How it works.* A comparison is an expression whose result type is `boolean`. `==` (two equals signs) is the *question* "are these equal?", while `=` (one equals sign) is the *action* "assign".
+**The idea.**
+*The mechanics.* A comparison is an expression whose result type is `boolean`. `==` (two equals signs) is the *question* "are these equal?", while `=` (one equals sign) is the *action* "assign".
 
 - A comparison produces a `boolean`.
 - An assignment produces the value it assigned <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.26" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.26">[4]</abbr></a>.
@@ -339,8 +339,8 @@ true
 false
 ```
 
-**Why it works.**
-*How it works.* Each operator combines `boolean`s into a `boolean`. `!` binds tightest, then `&&`, then `||`. So `!` applies only to the term it touches, not to a whole expression.
+**The idea.**
+*The mechanics.* Each operator combines `boolean`s into a `boolean`. `!` binds tightest, then `&&`, then `||`. So `!` applies only to the term it touches, not to a whole expression.
 
 *Concrete bite.* The precedence of `!` is where intuition lets you down. "Not (a and b)" is **not** the same as "not-a and not-b":
 
@@ -431,8 +431,8 @@ false
 
 **Analysis.** `x` is `0`, so `x != 0` is `false`, and `&&` stops there. The right side, `10 / x`, is **never evaluated**, so the divide-by-zero never happens. The whole expression is `false`, and the program runs cleanly. The first test guarded the second.
 
-**Why it works.**
-*How it works.* `&&` computes its left operand, and only when that's `true` does it compute the right. `||` is the mirror image: it computes the right only when the left is `false`. The single-character cousins `&` and `|` do **not** short-circuit: they always evaluate both sides <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.23" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.23">[6]</abbr></a>.
+**The idea.**
+*The mechanics.* `&&` computes its left operand, and only when that's `true` does it compute the right. `||` is the mirror image: it computes the right only when the left is `false`. The single-character cousins `&` and `|` do **not** short-circuit: they always evaluate both sides <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.23" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §15.23">[6]</abbr></a>.
 
 *Concrete bite.* Swap `&&` for `&` and the guard is gone. Both sides run, and `10 / 0` throws:
 
@@ -549,8 +549,8 @@ The full order, tightest first, for the operators you know so far <a href="https
 | 8 | `\|\|` |
 | 9 (loosest) | `=`, `+=`, and the other assignments |
 
-**Why it works.**
-*How it works.* Precedence is fixed grammar. The comparisons bind tighter than `&&` and `||`, so `a < b && c < d` already means `(a < b) && (c < d)`. `!` sits on the top level, and `+` binds tighter than any comparison.
+**The idea.**
+*The mechanics.* Precedence is fixed grammar. The comparisons bind tighter than `&&` and `||`, so `a < b && c < d` already means `(a < b) && (c < d)`. `!` sits on the top level, and `+` binds tighter than any comparison.
 
 *Concrete bite.* Two everyday lines run straight into those last two rules. Both look fine, and neither compiles:
 

@@ -30,9 +30,9 @@ This lesson takes a deeper pass at [happens-before](/synapse/programming-languag
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -119,8 +119,8 @@ The JLS describes this exact bug, for a loop on a non-`volatile` field. The comp
 
 In effect, the worker's loop becomes `if (running) while (true) count++;`. That's a perfectly legal transformation of code that never said another thread would touch the field. The write from `main` does happen — the worker just never looks again.
 
-**Why it works.**
-*How it works.* A `volatile` write happens-before every later read of that field <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.4.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.4.5">[3]</abbr></a>. So a reader that comes after the write is guaranteed to see it, along with everything written before it. The JIT may not keep the field in a register, or reorder other memory operations across it, in any way that would break that guarantee.
+**The idea.**
+*The mechanics.* A `volatile` write happens-before every later read of that field <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.4.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.4.5">[3]</abbr></a>. So a reader that comes after the write is guaranteed to see it, along with everything written before it. The JIT may not keep the field in a register, or reorder other memory operations across it, in any way that would break that guarantee.
 
 *Concrete bite.* `volatile` gives you visibility, but **not** atomicity. A `volatile` counter's `++` still races:
 
@@ -193,8 +193,8 @@ flowchart LR
 
 Think of each one as a bridge, across which writes are guaranteed to be visible.
 
-**Why it works.**
-*How it works.* Happens-before is *transitive*: "If hb(x, y) and hb(y, z), then hb(x, z)" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.4.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.4.5">[3]</abbr></a>. So a writer can set several plain fields and then write a single `volatile` flag — and a reader that sees the flag also sees those fields:
+**The idea.**
+*The mechanics.* Happens-before is *transitive*: "If hb(x, y) and hb(y, z), then hb(x, z)" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-17.html#jls-17.4.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §17.4.5">[3]</abbr></a>. So a writer can set several plain fields and then write a single `volatile` flag — and a reader that sees the flag also sees those fields:
 
 1. Program order: `data = 42` happens-before `ready = true` in the writer.
 2. `volatile`: the write `ready = true` happens-before the reader's read that sees `true`.
@@ -364,8 +364,8 @@ all four got loaded
 
 `Holder` wasn't initialized when `Main` started, so nothing was constructed yet. The first `getInstance()` triggered the initialization — exactly once, no matter how many threads raced there.
 
-**Why it works.**
-*How it works.* Unless something forbids it, the JIT and the processor may make the reference write visible before the field writes. `final` fields add a guarantee at constructor exit; `volatile` adds a write→read edge; a monitor adds unlock→lock; and class initialization adds its own lock. All of them are [§2](#2-happens-before-in-depth)'s rules, aimed at one moment: the instant an object becomes reachable by another thread.
+**The idea.**
+*The mechanics.* Unless something forbids it, the JIT and the processor may make the reference write visible before the field writes. `final` fields add a guarantee at constructor exit; `volatile` adds a write→read edge; a monitor adds unlock→lock; and class initialization adds its own lock. All of them are [§2](#2-happens-before-in-depth)'s rules, aimed at one moment: the instant an object becomes reachable by another thread.
 
 *Concrete bite.* The signature of this bug is its rarity. Unsafe publication can run clean for months on one JVM and processor, then produce impossible-looking `NullPointerException`s on another, with a different memory model or different JIT decisions. Testing on your machine can't catch it; only reasoning about edges can.
 
@@ -427,8 +427,8 @@ fib(30) = 832040
 
 This is why Java *warms up*: the same code runs faster once the JIT has compiled and optimized its hot paths.
 
-**Why it works.**
-*How it works.* While interpreting, the JVM counts calls and records how branches behave. It then compiles hot methods, applying inlining, loop optimizations and speculative optimizations based on that profile. If one of its assumptions later turns out to be wrong, it *deoptimizes*: it falls back to the interpreter, and later recompiles.
+**The idea.**
+*The mechanics.* While interpreting, the JVM counts calls and records how branches behave. It then compiles hot methods, applying inlining, loop optimizations and speculative optimizations based on that profile. If one of its assumptions later turns out to be wrong, it *deoptimizes*: it falls back to the interpreter, and later recompiles.
 
 *Concrete bite.* This makes naive timing lie. The first calls to a method run interpreted and slow; later calls run optimized and fast. So timing a method once measures interpretation, not steady-state performance. That's why you warm up (run the code many times) before measuring, and why a real benchmark uses a harness such as JMH <a href="https://github.com/openjdk/jmh" target="_blank" rel="noopener noreferrer"><abbr title="OpenJDK Code Tools: JMH, the Java Microbenchmark Harness">[11]</abbr></a>.
 
@@ -501,8 +501,8 @@ $ java -Xlog:gc -XX:ActiveProcessorCount=1 Main
 [0.030s][info][gc] GC(0) Pause Young (Allocation Failure) 137M->1M(494M) 0.250ms
 ```
 
-**Why it works.**
-*How it works.* The heap is split into generations. New objects go into the young generation, which fills up and gets collected quickly; objects that survive are promoted to the old generation. Since most objects die young, young collections touch little live data, and they're fast. `-Xmx` and `-Xms` size the heap, and flags such as `-XX:+UseZGC` select a different collector, tuned for low pause times.
+**The idea.**
+*The mechanics.* The heap is split into generations. New objects go into the young generation, which fills up and gets collected quickly; objects that survive are promoted to the old generation. Since most objects die young, young collections touch little live data, and they're fast. `-Xmx` and `-Xms` size the heap, and flags such as `-XX:+UseZGC` select a different collector, tuned for low pause times.
 
 *Concrete bite.* Automatic GC doesn't mean "no memory bugs." A **memory leak** in Java is unintended *reachability*. Objects you forgot to remove from a `static` collection or cache stay reachable, so the GC can't reclaim them, and the heap grows until you hit `OutOfMemoryError`. This program needs a small heap, `-Xmx64m`, to fail quickly, so it's a terminal run:
 

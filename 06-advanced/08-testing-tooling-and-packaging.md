@@ -30,9 +30,9 @@ Most examples here use multi-file projects and the `javac`/`mvn`/`gradle`/`jar` 
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -90,8 +90,8 @@ Exception in thread "main" java.lang.AssertionError: add(2,2) should be 5
 
 An assertion that the JVM ignores by default is worthless as a test. That's the motivation for a testing framework whose checks *always* run.
 
-**Why it works.**
-*How it works.* `assert cond : msg` throws `AssertionError` if `cond` is false — but only when assertions are enabled. When they're disabled, the JLS says the statement "has no effect whatsoever" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.10" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.10">[1]</abbr></a>. Assertions were designed for internal sanity checks during development, not as a testing mechanism.
+**The idea.**
+*The mechanics.* `assert cond : msg` throws `AssertionError` if `cond` is false — but only when assertions are enabled. When they're disabled, the JLS says the statement "has no effect whatsoever" <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.10" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.10">[1]</abbr></a>. Assertions were designed for internal sanity checks during development, not as a testing mechanism.
 
 *Concrete bite.* The first run is the trap: `java Main` printed `passed` for code that's wrong.
 
@@ -201,8 +201,8 @@ $ mvn test
 
 Both passed: `Tests run: 2, Failures: 0`. Unlike `assert`, these checks *always* run.
 
-**Why it works.**
-*How it works.* JUnit finds every method marked `@Test`. Test classes and methods don't need to be `public`, but they must not be `private` <a href="https://docs.junit.org/5.10.2/user-guide/index.html" target="_blank" rel="noopener noreferrer"><abbr title="JUnit 5.10.2 User Guide, §2.3 Test Classes and Methods">[4]</abbr></a>. JUnit creates a fresh instance of the test class before each test method, so one test's fields can't leak into the next <a href="https://docs.junit.org/5.10.2/user-guide/index.html" target="_blank" rel="noopener noreferrer"><abbr title="JUnit 5.10.2 User Guide, §2.11 Test Instance Lifecycle">[4]</abbr></a>. A failed assertion throws, and JUnit records that test as failed.
+**The idea.**
+*The mechanics.* JUnit finds every method marked `@Test`. Test classes and methods don't need to be `public`, but they must not be `private` <a href="https://docs.junit.org/5.10.2/user-guide/index.html" target="_blank" rel="noopener noreferrer"><abbr title="JUnit 5.10.2 User Guide, §2.3 Test Classes and Methods">[4]</abbr></a>. JUnit creates a fresh instance of the test class before each test method, so one test's fields can't leak into the next <a href="https://docs.junit.org/5.10.2/user-guide/index.html" target="_blank" rel="noopener noreferrer"><abbr title="JUnit 5.10.2 User Guide, §2.11 Test Instance Lifecycle">[4]</abbr></a>. A failed assertion throws, and JUnit records that test as failed.
 
 *Concrete bite: a failing test.* Change the expected value to `4` — a wrong expectation — and run again. The report names the test, the line, and both values, and Maven then fails the build (output trimmed at `…`):
 
@@ -324,8 +324,8 @@ tasks.test {
 
 With this file, `gradle test` ran both tests, and they passed. Leave out `useJUnitPlatform()`, and Gradle 9.8.2 fails with "the test task did not discover any tests to execute". Leave out the launcher line, and it says `Failed to load JUnit Platform`.
 
-**Why it works.**
-*How it works.* A build tool models the project as a descriptor (`pom.xml` or `build.gradle.kts`) plus a fixed sequence of steps. It resolves the dependency graph from repositories such as Maven Central, caches the artifacts locally, compiles, runs the tests, and packages — the same way on every machine.
+**The idea.**
+*The mechanics.* A build tool models the project as a descriptor (`pom.xml` or `build.gradle.kts`) plus a fixed sequence of steps. It resolves the dependency graph from repositories such as Maven Central, caches the artifacts locally, compiles, runs the tests, and packages — the same way on every machine.
 
 *Concrete bite.* Transitive resolution is the real value here: declaring one dependency pulled in seven more. When two paths bring in different versions of the same library, Maven picks the "nearest definition", meaning the version closest to your project in the tree <a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html" target="_blank" rel="noopener noreferrer"><abbr title="Apache Maven, Introduction to the Dependency Mechanism">[7]</abbr></a>. Doing all this by hand — tracking which JAR needs which other JAR — is the "JAR hell" that build tools were invented to end.
 
@@ -381,8 +381,8 @@ Hello from an executable JAR!
 
 Naming the class on the command line, with the JAR on the classpath, still works.
 
-**Why it works.**
-*How it works.* With `-jar`, "the specified JAR file is the source of all user classes, and other class path settings are ignored" <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html" target="_blank" rel="noopener noreferrer"><abbr title="The java command, JDK 25 documentation (-jar)">[2]</abbr></a>. A JAR contains only *your* classes, so any library your code uses has to come from somewhere else.
+**The idea.**
+*The mechanics.* With `-jar`, "the specified JAR file is the source of all user classes, and other class path settings are ignored" <a href="https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html" target="_blank" rel="noopener noreferrer"><abbr title="The java command, JDK 25 documentation (-jar)">[2]</abbr></a>. A JAR contains only *your* classes, so any library your code uses has to come from somewhere else.
 
 *Concrete bite.* Here, `com.example.App` calls `Shout.loud` from a library, `acme.jar`. The app was compiled against the library, but the executable JAR holds only `App` (output trimmed at `…`):
 
@@ -597,8 +597,8 @@ FINE orders: order 43 has 1 line
 
 The `orders` logger had no level of its own (`null`), so it used its parent's level, `INFO`. That's why the first `fine` message was dropped. After `setLevel(Level.FINE)`, the second one got through.
 
-**Why it works.**
-*How it works.* A debugger pauses the JVM at a breakpoint, and lets you inspect variables and step through execution. Logging records state over time. A failing test pins down the exact behavior. Each one turns "it's broken somewhere" into concrete, observable facts.
+**The idea.**
+*The mechanics.* A debugger pauses the JVM at a breakpoint, and lets you inspect variables and step through execution. Logging records state over time. A failing test pins down the exact behavior. Each one turns "it's broken somewhere" into concrete, observable facts.
 
 *Concrete bite.* The anti-pattern is changing code at random, hoping the symptom disappears. That often hides the bug instead of fixing it, or breaks something else. Reproduce first, understand the cause, *then* fix — a fix you can't explain isn't really a fix.
 

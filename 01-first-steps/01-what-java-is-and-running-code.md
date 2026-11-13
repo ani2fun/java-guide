@@ -33,9 +33,9 @@ You don't need anything installed. Every block with a ▶ Run button compiles an
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -88,8 +88,8 @@ The text between the double quotes is shown exactly as written; the quotes thems
 
 The `import static java.lang.IO.println;` line above the class is what makes the name `println` available. Take it as "print a line" for now; [§4](#4-println--how-a-program-talks-back) explains where it comes from.
 
-**Why it works.**
-*How it works.* Running this happens in two phases, not one. First, the **compiler** (`javac`) reads the entire file and translates it to bytecode. Only if that succeeds does the **JVM** start executing `main`, one statement at a time, from top to bottom. The compiler's job is to check everything *before* anything runs.
+**The idea.**
+*The mechanics.* Running this happens in two phases, not one. First, the **compiler** (`javac`) reads the entire file and translates it to bytecode. Only if that succeeds does the **JVM** start executing `main`, one statement at a time, from top to bottom. The compiler's job is to check everything *before* anything runs.
 
 *Concrete bite.* Because compiling is a gate, a single missing `;` means the program never runs at all. There's no partial output — just a compiler complaint pointing at the spot. Click Run and see for yourself:
 
@@ -208,8 +208,8 @@ then run by the JVM.
 
 **Analysis.** Behind the Run button, two things happened in order. First, `javac` checked both statements and translated them into bytecode. Then the JVM executed them from top to bottom: first line, then second. In a terminal, you'd type `javac Main.java` and then `java Main` to get the same two lines.
 
-**Why it works.**
-*How it works.* `java` doesn't run your *source*; it runs the *bytecode* the compiler produced. The JVM knows nothing about the Java language, only about the class-file format <a href="https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-1.html#jvms-1.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Virtual Machine Specification, Java SE 25, §1.2">[4]</abbr></a>. By the time the launcher loads a class, the `.java` text no longer matters.
+**The idea.**
+*The mechanics.* `java` doesn't run your *source*; it runs the *bytecode* the compiler produced. The JVM knows nothing about the Java language, only about the class-file format <a href="https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-1.html#jvms-1.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Virtual Machine Specification, Java SE 25, §1.2">[4]</abbr></a>. By the time the launcher loads a class, the `.java` text no longer matters.
 
 *Concrete bite.* Ask the JVM to run a class that was never compiled, and it has nothing to load:
 
@@ -285,8 +285,8 @@ The JVM called main.
 
 **Analysis.** The JVM loaded `Main`, found a method shaped `public static void main(String[] args)`, and called it. The modifiers, the return type, the name and the parameter type all had to match for that call to happen.
 
-**Why it works.**
-*How it works.* The JVM doesn't run "the class". It looks for a method named `main` with an acceptable declaration, and calls *that*. The name and shape form a contract: miss a required part of it, and there's nothing for the JVM to call.
+**The idea.**
+*The mechanics.* The JVM doesn't run "the class". It looks for a method named `main` with an acceptable declaration, and calls *that*. The name and shape form a contract: miss a required part of it, and there's nothing for the JVM to call.
 
 *Concrete bite.* Rename `main` to `greet`. The class still **compiles** — it's a perfectly legal class — but at run time, the JVM can't find its entry point:
 
@@ -395,8 +395,8 @@ second line
 
 **Analysis.** Two `println` calls produced two lines. Each one printed its text and then ended the line, so the second call started fresh below the first. We never wrote anything about a line break: the "ln" in `println` *is* that automatic newline.
 
-**Why it works.**
-*How it works.* There are two related actions. `println` prints its argument **and** ends the line. `print` (with no "ln") prints its argument and **stops there**, leaving whatever comes next on the same line.
+**The idea.**
+*The mechanics.* There are two related actions. `println` prints its argument **and** ends the line. `print` (with no "ln") prints its argument and **stops there**, leaving whatever comes next on the same line.
 
 *Concrete bite.* Mix the two, and the difference becomes visible — `print` keeps the cursor on the line, while `println` breaks it:
 
@@ -465,8 +465,8 @@ code runs
 
 Putting `//` before a line to disable it is called **commenting out**.
 
-**Why it works.**
-*How it works.* While reading your source, the compiler discards everything from `//` to the end of the line, and everything between `/*` and `*/` — before it does anything else. Commented text never becomes bytecode, so it can't run.
+**The idea.**
+*The mechanics.* While reading your source, the compiler discards everything from `//` to the end of the line, and everything between `/*` and `*/` — before it does anything else. Commented text never becomes bytecode, so it can't run.
 
 *Concrete bite.* The missing line is the proof: the output is just `code runs`. The commented-out `println` was legal code, but it sat behind `//`, so the compiler never saw it as a statement, and it produced nothing.
 

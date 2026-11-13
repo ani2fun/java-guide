@@ -26,9 +26,9 @@ This is the deep pass of [the `static` you've used on methods](/synapse/programm
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -101,8 +101,8 @@ c -> cls
 
 **Analysis.** Each constructor incremented the one shared `count` (`1`, `2`, `3`) and copied it into its own `id`. So the three widgets have distinct ids `1, 2, 3`, while `count` is a single value, `3`, that you reach through the class as `Widget.count`. The diagram shows three objects, each with its own `id`, all pointing at one class that holds the single `count`.
 
-**Why it works.**
-*How it works.* A `static` field has exactly one copy, however many objects exist, even zero <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.3.1.1">[1]</abbr></a>. It lives with the class. An instance field is created with each object, on that object. `Widget.count` names the class's copy, and `a.id` names that object's copy.
+**The idea.**
+*The mechanics.* A `static` field has exactly one copy, however many objects exist, even zero <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.3.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.3.1.1">[1]</abbr></a>. It lives with the class. An instance field is created with each object, on that object. `Widget.count` names the class's copy, and `a.id` names that object's copy.
 
 *Concrete bite.* Because the static field is shared, a change through *any* path shows up for *everyone*. `count` reached `3` because three different constructors all incremented the same variable. That's both the feature (a class-wide tally) and the hazard (shared mutable state that any instance can change).
 
@@ -176,8 +176,8 @@ id 2 of 2
 
 **Analysis.** `describe()` is an instance method called on `w`, so it sees both `w.id` (`2`) and the shared `count` (`2`). `total()` is `static`, called as `Widget.total()` with no object. It can read `count` because `count` is also `static`, but it has no `id` to read. Instance methods can touch everything, while static methods can touch only static members, unless someone hands them an object.
 
-**Why it works.**
-*How it works.* An instance method receives a hidden `this`, and an unqualified field name resolves against it. A `static` method has no `this` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.3.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.4.3.2">[2]</abbr></a>. A bare *instance* field name has nothing to resolve against, so the compiler rejects it.
+**The idea.**
+*The mechanics.* An instance method receives a hidden `this`, and an unqualified field name resolves against it. A `static` method has no `this` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.3.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.4.3.2">[2]</abbr></a>. A bare *instance* field name has nothing to resolve against, so the compiler rejects it.
 
 *Concrete bite.* Reading an instance field from a static method is a compile error:
 
@@ -249,8 +249,8 @@ public class Main {
 
 **Analysis.** `PI` is one shared value, since there's no point giving every circle its own copy of a constant. `final` means nothing can change it. `area()` reads it like any field, and `Circle.PI` reads it through the class. (The JDK already has a more precise one, `Math.PI`.)
 
-**Why it works.**
-*How it works.* `static` gives one copy, and `final` forbids reassignment after its single initialization. Some of these fields are special. Take a `static final` field of a primitive type or `String`, set to a compile-time constant such as `100`. That's a **constant variable** <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §4.12.4">[3]</abbr></a>. javac copies its value into every place that reads it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-13.html#jls-13.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §13.1">[4]</abbr></a>. [§4](#4-static-initialization-blocks) shows a consequence.
+**The idea.**
+*The mechanics.* `static` gives one copy, and `final` forbids reassignment after its single initialization. Some of these fields are special. Take a `static final` field of a primitive type or `String`, set to a compile-time constant such as `100`. That's a **constant variable** <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-4.html#jls-4.12.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §4.12.4">[3]</abbr></a>. javac copies its value into every place that reads it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-13.html#jls-13.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §13.1">[4]</abbr></a>. [§4](#4-static-initialization-blocks) shows a consequence.
 
 *Concrete bite.* Try to reassign a `static final`, and javac rejects it, just as it does an instance `final`:
 
@@ -323,8 +323,8 @@ static block ran
 
 At that point, the `static` block ran once and filled `SQUARES` (`0, 1, 4, 9, 16`). The reads that followed returned `9` and `16`. Think of a `static` block as the constructor for class-level state.
 
-**Why it works.**
-*How it works.* A class is initialized **lazily**, immediately before the first of these <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.4.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.4.1">[6]</abbr></a>:
+**The idea.**
+*The mechanics.* A class is initialized **lazily**, immediately before the first of these <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.4.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.4.1">[6]</abbr></a>:
 
 - an object of the class is created;
 - a `static` method of the class is called;
@@ -466,8 +466,8 @@ constructor body
 
 **Analysis.** The first `new Order()` triggered class initialization: the static field initializer, then the static block, in source order. Then it built the object: the instance field initializer, then the instance block, again in source order, and finally the constructor body. The second `new` skipped the static part, since the class was already initialized, and repeated only the three instance steps.
 
-**Why it works.**
-*How it works.* `new` works in a fixed order <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.5">[11]</abbr></a>:
+**The idea.**
+*The mechanics.* `new` works in a fixed order <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-12.html#jls-12.5" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §12.5">[11]</abbr></a>:
 
 1. Initialize the class, if this is its first use: `static` initializers and `static` blocks, top to bottom, once.
 2. Allocate the object; every field holds its default (`0`, `false`, `null`).

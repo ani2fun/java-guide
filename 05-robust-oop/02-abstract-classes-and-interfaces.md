@@ -30,9 +30,9 @@ Every output below was produced by compiling and running the code on Java 25.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-📘 **How to read the "Why it works" boxes.** Each one is built in three moves:
+📘 **How to read the "The idea" boxes.** Each one is built in three moves:
 
-1. **How it works** — what the compiler and the JVM *do*.
+1. **The mechanics** — what the compiler and the JVM *do*.
 2. **A concrete bite** — a specific, runnable failure (often a real compiler error), shown so the trap is visible.
 3. **The earned rule** — the decision heuristic, now justified rather than asserted, plus its cost.
 
@@ -133,8 +133,8 @@ square with area 9.00
 
 `Shape` owns the shared state (`name`) and the shared sentence (`describe()`). Each subclass writes only the part that differs: `area()`.
 
-**Why it works.**
-*How it works.* An abstract method has no implementation. So an object of the abstract class would have a "hole" in it: a method with nothing to run. That's why the compiler forbids creating one <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.1.1.1">[1]</abbr></a>. It also requires every concrete subclass to override all of the abstract methods it inherits.
+**The idea.**
+*The mechanics.* An abstract method has no implementation. So an object of the abstract class would have a "hole" in it: a method with nothing to run. That's why the compiler forbids creating one <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.1.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.1.1.1">[1]</abbr></a>. It also requires every concrete subclass to override all of the abstract methods it inherits.
 
 *Concrete bite.* Try to instantiate the abstract class directly, and it won't compile:
 
@@ -225,8 +225,8 @@ drawing a circle
 - An interface method with no body is implicitly `abstract` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §9.4">[3]</abbr></a>.
 - An interface method with no access modifier is implicitly `public` <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §9.4">[3]</abbr></a>. So the implementing method must be `public` too.
 
-**Why it works.**
-*How it works.* An interface defines a type and a method contract. It has no instance fields and no constructor: there's nothing to instantiate, only something to implement. Any field you declare in an interface is implicitly `public static final` — in other words, a constant <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §9.3">[4]</abbr></a>. A class that declares `implements` promises to provide every abstract method, and the compiler checks that promise.
+**The idea.**
+*The mechanics.* An interface defines a type and a method contract. It has no instance fields and no constructor: there's nothing to instantiate, only something to implement. Any field you declare in an interface is implicitly `public static final` — in other words, a constant <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §9.3">[4]</abbr></a>. A class that declares `implements` promises to provide every abstract method, and the compiler checks that promise.
 
 *Concrete bite.* Leave a contracted method unimplemented, and the class won't compile:
 
@@ -322,8 +322,8 @@ Hello, Ada
 
 **Analysis.** `Person` implemented only `name()`. It inherited `greet()` from the interface's `default` body, which called `name()` polymorphically (`"Hello, Ada"`). A `default` method is concrete behavior built on top of the interface's abstract methods: the interface provides the *how*, in terms of the implementer's *what*.
 
-**Why it works.**
-*How it works.* A `default` method's implementation lives in the interface, and implementers inherit it unless they override it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §9.4">[3]</abbr></a>. It can call the interface's abstract methods (like `name()`), which dispatch to the implementing class. So the default's behavior adapts to each implementer.
+**The idea.**
+*The mechanics.* A `default` method's implementation lives in the interface, and implementers inherit it unless they override it <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-9.html#jls-9.4" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §9.4">[3]</abbr></a>. It can call the interface's abstract methods (like `name()`), which dispatch to the implementing class. So the default's behavior adapts to each implementer.
 
 *Concrete bite.* Defaults are what let interfaces evolve. Before JDK 8, adding a method to a widely implemented interface broke every implementer's compile, because each one suddenly lacked the new method. A `default` method adds the capability along with a fallback, so old implementers keep compiling. The cost shows up only when a class inherits *two* defaults with the same signature. [§5](#5-one-class-many-interfaces) shows that clash, and how to fix it.
 
@@ -389,8 +389,8 @@ public class Main {
 - `reportF()` calls the `static` `toFahrenheit` by its simple name, since it's inside the interface.
 - `main` calls it as `Temperature.toFahrenheit(37)`: the interface's name, and no object.
 
-**Why it works.**
-*How it works.* A class doesn't inherit `private` or `static` methods from its interfaces <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.8" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.4.8">[5]</abbr></a>. The `private` helper is invisible outside the interface. The `static` method stays attached to the interface, and you can reach it only through the interface's name.
+**The idea.**
+*The mechanics.* A class doesn't inherit `private` or `static` methods from its interfaces <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.8" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §8.4.8">[5]</abbr></a>. The `private` helper is invisible outside the interface. The `static` method stays attached to the interface, and you can reach it only through the interface's name.
 
 *Concrete bite.* Call the `static` method through an implementing class, and javac can't find it:
 
@@ -508,8 +508,8 @@ classDiagram
 
 **Analysis.** `Duck` implements *both* `Swimmer` and `Flyer`, inheriting `move()` and `fly()`. It's a `Swimmer` and a `Flyer` at the same time, so a method that takes either type will accept a `Duck`. The diagram shows the two `implements` arrows (`<|..`). No single superclass could give `Duck` both identities, but interfaces can.
 
-**Why it works.**
-*How it works.* Interfaces carry no instance fields, so combining several of them raises no questions about *state* — such as which constructor sets which field. That's one reason Java allows many interfaces but only one superclass <a href="https://docs.oracle.com/javase/tutorial/java/IandI/multipleinheritance.html" target="_blank" rel="noopener noreferrer"><abbr title="The Java Tutorials, Multiple Inheritance of State, Implementation, and Type">[12]</abbr></a>. `default` methods do bring in one form of multiple inheritance of *implementation* <a href="https://docs.oracle.com/javase/tutorial/java/IandI/multipleinheritance.html" target="_blank" rel="noopener noreferrer"><abbr title="The Java Tutorials, Multiple Inheritance of State, Implementation, and Type">[12]</abbr></a>. When two of them collide, the compiler makes you choose.
+**The idea.**
+*The mechanics.* Interfaces carry no instance fields, so combining several of them raises no questions about *state* — such as which constructor sets which field. That's one reason Java allows many interfaces but only one superclass <a href="https://docs.oracle.com/javase/tutorial/java/IandI/multipleinheritance.html" target="_blank" rel="noopener noreferrer"><abbr title="The Java Tutorials, Multiple Inheritance of State, Implementation, and Type">[12]</abbr></a>. `default` methods do bring in one form of multiple inheritance of *implementation* <a href="https://docs.oracle.com/javase/tutorial/java/IandI/multipleinheritance.html" target="_blank" rel="noopener noreferrer"><abbr title="The Java Tutorials, Multiple Inheritance of State, Implementation, and Type">[12]</abbr></a>. When two of them collide, the compiler makes you choose.
 
 *Concrete bite.* Try to extend two classes, and you get a syntax error — a class has one superclass, and that's a hard rule:
 
