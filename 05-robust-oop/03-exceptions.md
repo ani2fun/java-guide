@@ -1,6 +1,6 @@
 ---
 title: Exceptions
-summary: Exceptions keep error handling apart from normal logic. Java splits them into checked exceptions, which the compiler forces you to handle or declare (recoverable conditions), and unchecked ones (RuntimeException, for programming bugs). try/catch recovers, several catch clauses or one multi-catch handle different types, throw raises, throws declares, and finally always cleans up. try-with-resources closes resources automatically in reverse order and keeps close failures as suppressed exceptions. Also covers the hierarchy, stack traces, custom exceptions and the return-in-finally trap, all with verified output.
+summary: Exceptions keep error handling apart from normal logic. Java splits them into checked exceptions, which the compiler forces you to handle or declare (recoverable conditions), and unchecked ones (RuntimeException, for programming bugs). try/catch recovers, several catch clauses or one multi-catch handle different types, throw raises, throws declares, and finally always cleans up, running after the try has computed its return value but before the method actually returns. System.exit skips finally, so shutdown hooks handle cleanup at JVM exit. try-with-resources closes resources automatically in reverse order, before any catch or finally runs, and keeps close failures as suppressed exceptions instead of letting them mask the real error. Also covers the hierarchy, stack traces, custom exceptions and the return-in-finally trap, all with verified output.
 prereqs: []
 ---
 
@@ -24,7 +24,7 @@ You've already watched programs crash: a [NullPointerException](/synapse/program
 
 Every output below was produced by compiling and running the code on Java 25.
 
-**You'll be able to:** trace which statements run when a `try` block throws, and read from a stack trace which method threw; predict whether a call compiles based on whether its exception is checked, and fix `unreported exception` with `catch` or `throws`; write a custom exception, and catch two unrelated exception types in a single multi-catch clause; predict the order of opening, closing and suppressed exceptions in `try`-with-resources; explain why a `return` inside `finally` loses an exception.
+**You'll be able to:** trace which statements run when a `try` block throws, and read from a stack trace which method threw; predict whether a call compiles based on whether its exception is checked, and fix `unreported exception` with `catch` or `throws`; write a custom exception, and catch two unrelated exception types in a single multi-catch clause; trace why `finally` *prints* before a value the `try` returned, and say when `finally` doesn't run at all; predict the order of opening, closing, `catch`, `finally` and suppressed exceptions in `try`-with-resources; explain why a `return` inside `finally`, or a failing `close()` in a hand-written `finally`, loses the real exception.
 
 <div style="border-left:4px solid #15448e;background:rgba(21,68,142,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -431,12 +431,79 @@ finally ran
 from try
 ```
 
-**Analysis.** Look closely at the order. `process()` hit `return "from try"`, but the `finally` ran *before* the method actually returned. So `finally ran` printed first, followed by the returned value.
+**Analysis.** It *looks* as if `finally` ran before the `try`. It didn't. The `try` ran first, but its result is printed by `main`, and `main` can't print until `process()` hands the value back. Step by step:
+
+1. `main` calls `process()`. Nothing is printed yet: `println(...)` needs its argument first.
+2. The `try` evaluates `"from try"` and sets it aside as the pending return value. The method doesn't leave yet.
+3. On the way out, `finally` runs and prints `finally ran` *itself*.
+4. Only now does `process()` return the saved `"from try"`, and `main` prints it.
+
+So running and printing are two different things. The `try` did its work first, quietly. Its words were spoken later, by `main`. Add a print inside the `try` and the true order shows up:
+
+```java run
+import static java.lang.IO.println;
+
+public class Main {
+    static String process() {
+        try {
+            println("try ran");
+            return "from try";
+        } finally {
+            println("finally ran");
+        }
+    }
+    public static void main(String[] args) {
+        println(process());
+    }
+}
+```
+
+**Output:**
+```
+try ran
+finally ran
+from try
+```
 
 `finally` intercepts every exit path, including a `return` in the middle of the `try`. That's what makes it reliable for cleanup.
 
 **The idea.**
-*The mechanics.* Whatever ends the `try` — completion, an exception, or a `return` — the `finally` block runs on the way out <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20.2">[5]</abbr></a>. For a `return`, the value is computed first, then `finally` runs, and then control leaves. The only ways to skip it are for the `try` to never end, or for the JVM to stop first — and `System.exit` never returns <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runtime.html" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.Runtime, Java SE 25 API (exit)">[11]</abbr></a>.
+*The mechanics.* Whatever ends the `try` — completion, an exception, or a `return` — the `finally` block runs on the way out <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20.2">[5]</abbr></a>. For a `return`, the value is computed first, then `finally` runs, and then control leaves.
+
+Because the value is computed *before* `finally` runs, changing the variable inside `finally` doesn't change what the method returns:
+
+```java run
+import static java.lang.IO.println;
+
+public class Main {
+    static int process() {
+        int x = 1;
+        try {
+            return x;
+        } finally {
+            x = 2;
+            println("finally set x to " + x);
+        }
+    }
+    public static void main(String[] args) {
+        println("returned: " + process());
+    }
+}
+```
+
+**Output:**
+```
+finally set x to 2
+returned: 1
+```
+
+The `return x` had already copied `1` aside. `finally` changed the variable, not the saved value. (With an object, `finally` could still change the object's *contents*, since the saved value is a reference to the same object.)
+
+*When `finally` doesn't run.* `finally` only runs when control *leaves* the `try`. So it's skipped whenever the thread never leaves:
+
+- `System.exit` is called inside the `try`. It shuts down the JVM and never returns <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runtime.html" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.Runtime, Java SE 25 API (exit)">[11]</abbr></a>.
+- The process is killed (for example `kill -9`), the JVM crashes, or the machine loses power.
+- The `try` never ends: an infinite loop, or a thread stuck in a deadlock.
 
 ```java run
 import static java.lang.IO.println;
@@ -458,7 +525,36 @@ public class Main {
 in try
 ```
 
-The JVM stopped inside the `try`, so there's no `finally ran`.
+The JVM stopped inside the `try`, so there's no `finally ran`. Whatever you write in that `finally`, even a `return`, never executes.
+
+If you need cleanup when the program exits, register a **shutdown hook**: a thread you hand to the JVM in advance, which it starts when it begins shutting down <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runtime.html" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.Runtime, Java SE 25 API (exit, addShutdownHook)">[11]</abbr></a>:
+
+```java run
+import static java.lang.IO.println;
+
+public class Main {
+    public static void main(String[] args) {
+        Runtime.getRuntime().addShutdownHook(
+            new Thread(() -> println("hook: cleaning up"))
+        );
+
+        try {
+            println("in try");
+            System.exit(0);
+        } finally {
+            println("finally ran");
+        }
+    }
+}
+```
+
+**Output:**
+```
+in try
+hook: cleaning up
+```
+
+`main` registered the hook first; the JVM kept it aside without running it. `System.exit` began the shutdown, the JVM ran the hook, and then the program ended. `finally` still didn't get its chance, but the hook did. Hooks also run when the program ends normally or on Ctrl+C. They don't run on a hard kill or a crash, and nothing can.
 
 *Concrete bite.* The surprise is that `finally ran` comes before `from try`, because people expect a `return` to leave immediately. It doesn't. `finally` always gets its turn first — and that's the whole point. You can release the lock or close the file, even if you bailed out early.
 
@@ -488,9 +584,11 @@ from finally
 
 The `IllegalStateException` simply vanished: no crash, no trace, just an ordinary return value. javac compiles this without a word. Only if you pass the `-Xlint:finally` option does it warn you: `finally clause cannot complete normally`.
 
+Think of it this way: the `try` has something ready to leave with, a value or an exception. If `finally` produces its *own* way out, a `return` or a new exception, that one overwrites the original. Java carries only one outcome out of a block. Keep this in mind for the next section: a `close()` that throws inside `finally` triggers exactly the same overwrite.
+
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
-💡 **Earned rule.** Put must-always-run cleanup in `finally`, and never `return` (or `throw`) from inside it.
+💡 **Earned rule.** Put must-always-run cleanup in `finally`, and never `return` (or `throw`) from inside it. For cleanup at program exit, use a shutdown hook, since `System.exit` skips `finally`.
 
 - The cost: `finally` runs on every path, so a misused one can mask the `try`'s outcome.
 - The payoff: cleanup that's guaranteed no matter how the block exits. For *resources*, the next section's tool is even cleaner.
@@ -533,8 +631,36 @@ after
 
 **Analysis.** The resource opened and got used. Then `close()` ran *automatically* as the `try` block exited — before `after` printed, and with no explicit `finally`. Had `use()` thrown, `close()` would still have run. Think of `try`-with-resources as `finally`-based cleanup, specialized for anything `AutoCloseable` (files, streams, connections, locks), and generated correctly for you.
 
+The only requirement is the type: `AutoCloseable` is an interface with a single method, `close()`. That's what `Resource implements AutoCloseable` promises.
+
+With several resources, separate them with `;`. They close in the reverse order of opening, so `try (Resource a = new Resource("A"); Resource b = new Resource("B"))` prints open A, open B, then close B, close A. A later resource may depend on an earlier one (a reader built on a file), so it gets closed while the earlier one still works.
+
 **The idea.**
-*The mechanics.* The compiler expands `try (R r = ...)` into a `try`/`finally` that calls `r.close()` on exit <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.3.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20.3.1">[7]</abbr></a>. It also handles the edge cases: it closes the resource even if the body throws. And if the body threw *and* `close()` throws too, the `close()` exception is **suppressed**: it gets attached to the body's exception, which is the one you catch <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20.3">[6]</abbr></a>:
+*The mechanics.* The compiler expands `try (R r = ...)` into a `try`/`finally` that calls `r.close()` on exit <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.3.1" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20.3.1">[7]</abbr></a>. So there *is* a `finally` — you just don't write it. In outline, the compiler produces something like this (a simplified sketch, not something you'd write yourself):
+
+```java
+// requires: an enclosing method and the Resource class — a sketch of the compiler's expansion, not runnable
+Resource r = new Resource("file");
+Throwable primary = null;
+try {
+    r.use();
+} catch (Throwable t) {
+    primary = t;                      // remember the real error
+    throw t;
+} finally {
+    if (primary != null) {
+        try {
+            r.close();
+        } catch (Throwable closeError) {
+            primary.addSuppressed(closeError);   // keep it, don't let it win
+        }
+    } else {
+        r.close();
+    }
+}
+```
+
+The interesting part is the `primary` bookkeeping. That's what you'd most likely get wrong by hand, and it's what handles the edge cases: it closes the resource even if the body throws. And if the body threw *and* `close()` throws too, the `close()` exception is **suppressed**: it gets attached to the body's exception, which is the one you catch <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.3" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20.3">[6]</abbr></a>:
 
 ```java run
 import static java.lang.IO.println;
@@ -572,7 +698,152 @@ suppressed: close of file failed
 
 **Analysis.** The resource was closed before the `catch` ran. The body's `body failed` is the exception that arrived, so the real cause isn't lost. The `close()` failure rode along with it, and `getSuppressed()` <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Throwable.html" target="_blank" rel="noopener noreferrer"><abbr title="java.lang.Throwable, Java SE 25 API (getSuppressed)">[12]</abbr></a> returned it.
 
-*Concrete bite.* The alternative — a manual `finally { r.close(); }` — is where leaks hide. Forget it, get the ordering wrong, or let `close()` itself throw and mask the real error, and a file handle or connection leaks. `try`-with-resources removes that whole class of bug by construction. The close isn't optional, and it isn't yours to forget.
+*Concrete bite.* The alternative — a manual `finally { r.close(); }` — is where leaks hide. Forget it, get the ordering wrong, or let `close()` itself throw and mask the real error, and a file handle or connection leaks.
+
+The masking is the subtle one, so let's watch it happen. This fake log file simulates a real-world failure: writing fails because the disk is full, and then closing fails too, because the stream is now in a bad state. The same work is done twice, once closed by hand and once with `try`-with-resources:
+
+```java run
+import static java.lang.IO.println;
+
+class LogFile implements AutoCloseable {
+    LogFile() { println("open log.txt"); }
+
+    void write(String text) {
+        println("writing: " + text);
+        throw new IllegalStateException("disk full");
+    }
+
+    @Override public void close() {
+        println("closing log.txt");
+        throw new IllegalStateException("stream closed");
+    }
+}
+
+public class Main {
+    static void manualClose() {
+        LogFile log = new LogFile();
+        try {
+            log.write("order #42 saved");
+        } finally {
+            log.close();
+        }
+    }
+
+    static void autoClose() {
+        try (LogFile log = new LogFile()) {
+            log.write("order #42 saved");
+        }
+    }
+
+    public static void main(String[] args) {
+        println("--- manual finally ---");
+        try {
+            manualClose();
+        } catch (Exception e) {
+            println("ERROR: " + e.getMessage());
+        }
+
+        println("--- try-with-resources ---");
+        try {
+            autoClose();
+        } catch (Exception e) {
+            println("ERROR: " + e.getMessage());
+            for (Throwable s : e.getSuppressed()) {
+                println("  also: " + s.getMessage());
+            }
+        }
+    }
+}
+```
+
+**Output:**
+```
+--- manual finally ---
+open log.txt
+writing: order #42 saved
+closing log.txt
+ERROR: stream closed
+--- try-with-resources ---
+open log.txt
+writing: order #42 saved
+closing log.txt
+ERROR: disk full
+  also: stream closed
+```
+
+**Analysis.** In the manual version, `write` threw `disk full`, and Java was carrying it out of the `try`. On the way, `finally` called `close()`, which threw `stream closed`. Java carries only one exception out of a block, and the new one from `finally` won — the same overwrite as a `return` inside `finally`. `disk full` was silently discarded.
+
+Imagine reading that log in production. It says `stream closed`, so you go hunting for a stream-handling bug that doesn't exist, while the real problem — a full disk — stays invisible. In the `try`-with-resources version, the real cause is on top and the close failure rides along as a note. You'd know to free disk space immediately.
+
+The work was identical in both. The only difference is who wrote the cleanup: you, or the compiler. `try`-with-resources removes that whole class of bug by construction. The close isn't optional, and it isn't yours to forget.
+
+*Adding your own `catch` and `finally`.* A `try`-with-resources can still have its own `catch` and `finally` clauses. The key is the order: the resource is closed *first*, as soon as the body ends, and only then do your `catch` and `finally` run <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.3.2" target="_blank" rel="noopener noreferrer"><abbr title="The Java Language Specification, Java SE 25, §14.20.3.2">[13]</abbr></a>:
+
+```java run
+import static java.lang.IO.println;
+
+class Resource implements AutoCloseable {
+    String name;
+    Resource(String name) { this.name = name; println("open " + name); }
+    @Override public void close() { println("close " + name); }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        try (Resource r = new Resource("file")) {
+            println("body");
+            throw new RuntimeException("oops");
+        } catch (RuntimeException e) {
+            println("catch: " + e.getMessage());
+        } finally {
+            println("my finally");
+        }
+    }
+}
+```
+
+**Output:**
+```
+open file
+body
+close file
+catch: oops
+my finally
+```
+
+By the time your `catch` or `finally` runs, the resource is already closed. The compiler enforces this: the resource variable is in scope only inside the `try` body, so referring to `r` in `finally` doesn't compile:
+
+```java run
+import static java.lang.IO.println;
+
+class Resource implements AutoCloseable {
+    String name;
+    Resource(String name) { this.name = name; println("open " + name); }
+    @Override public void close() { println("close " + name); }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        try (Resource r = new Resource("file")) {
+            println("body");
+        } finally {
+            println("closed? " + r.name);
+        }
+    }
+}
+```
+
+**Compiler error:**
+```
+Main.java:14: error: cannot find symbol
+            println("closed? " + r.name);
+                                 ^
+  symbol:   variable r
+  location: class Main
+1 error
+```
+
+Use your own `catch` to handle the error, and your own `finally` for cleanup unrelated to the resource (logging "done", resetting a flag).
 
 <div style="border-left:4px solid #195045;background:rgba(25,80,69,0.08);padding:0.6rem 1rem;border-radius:0 0.5rem 0.5rem 0;margin:1.25rem 0">
 
@@ -595,7 +866,11 @@ suppressed: close of file failed
 | `throw` raises, `throws` declares, custom types name the failure | Callers can `catch` a specific type and read its data |
 | An uncaught exception unwinds every caller | The stack trace lists the thrower first, then each waiting caller |
 | `finally` runs on every exit path, even a `return` | Reliable cleanup — but a `return`/`throw` inside it discards the `try`'s exception |
+| A `return` value is computed and saved *before* `finally` runs | `finally` prints before the caller prints the value; reassigning the variable in `finally` doesn't change it |
+| `finally` runs only when control leaves the `try` | `System.exit`, a kill or a crash skips it; shutdown hooks run on `System.exit` and normal exit |
 | `try`-with-resources auto-closes any `AutoCloseable`, last opened first | Guaranteed, ordered close; a failing `close()` is kept as a suppressed exception |
+| The resource closes before your own `catch`/`finally` run | The resource is already closed (and out of scope) in those clauses |
+| A hand-written `finally { r.close(); }` that throws overwrites the body's exception | The real cause is lost; `try`-with-resources keeps it and suppresses the close failure |
 
 ## 8. Gotcha checklist
 
@@ -611,8 +886,12 @@ suppressed: close of file failed
 | `Exception in thread "main"` and a list of `at` lines | an exception no method caught | the first `at` line is where it was thrown; the first line naming your own code is where to look |
 | Cleanup didn't run on an early `return` | it was not in `finally` | put it in `finally`, or use `try`-with-resources |
 | An exception "disappeared" | a `return` or `throw` inside `finally` replaced it | never exit from `finally`; compile with `-Xlint:finally` to be warned |
-| `finally` didn't run | `System.exit` stopped the JVM inside the `try` | don't call `System.exit` where cleanup is pending |
+| `finally` didn't run | `System.exit` stopped the JVM inside the `try` | don't call `System.exit` where cleanup is pending; put exit-time cleanup in a shutdown hook |
+| `finally` seems to run "before" the `try` | the `try`'s result is printed by the caller, after `finally` already printed | add a print inside the `try` to see the real order |
+| Changing a variable in `finally` didn't change the return value | the value was saved when `return` ran | compute the final value before `return` |
+| The log shows a `close()` error, but not the real failure | a hand-written `finally` called a `close()` that threw, overwriting the body's exception | use `try`-with-resources |
 | A `close()` failure seems lost | it was suppressed behind the body's exception | read `e.getSuppressed()` |
+| `cannot find symbol` for the resource in `catch`/`finally` | the resource variable is scoped to the `try` body, and is already closed | use it inside the body only |
 | A file/stream/connection leaked | it was closed by hand, or not at all | use `try`-with-resources so `close()` is guaranteed |
 
 </div>
@@ -621,7 +900,7 @@ suppressed: close of file failed
 
 ## ✅ Check yourself
 
-One check per objective. Answer before you open anything.
+At least one check per objective. Answer before you open anything.
 
 ```quiz
 {"prompt": "A loop parses {\"1\", \"x\", \"3\"} with Integer.parseInt inside try, adds each to total, and prints \"skipped \" + s in catch (NumberFormatException e). After the loop it prints \"total: \" + total. What is printed?", "options": ["skipped x, then total: 4", "total: 4 only", "a NumberFormatException stack trace"], "answer": "skipped x, then total: 4"}
@@ -641,6 +920,22 @@ One check per objective. Answer before you open anything.
 
 ```quiz
 {"prompt": "The try block throws IllegalStateException, and the finally block says return \"from finally\";. What does the caller see?", "options": ["The IllegalStateException", "Both: the value, then the exception", "The value \"from finally\"; the exception is lost"], "answer": "The value \"from finally\"; the exception is lost"}
+```
+
+```quiz
+{"prompt": "static int f() { int x = 1; try { return x; } finally { x = 2; } } — what does f() return?", "options": ["1", "2", "It doesn't compile"], "answer": "1"}
+```
+
+```quiz
+{"prompt": "main registers a shutdown hook that prints \"hook\", then runs try { println(\"in try\"); System.exit(0); } finally { println(\"finally\"); }. What is printed?", "options": ["in try, finally, hook", "in try, hook", "in try only"], "answer": "in try, hook"}
+```
+
+```quiz
+{"prompt": "try (Resource r = new Resource(\"file\")) { throw new RuntimeException(\"oops\"); } catch (RuntimeException e) { println(\"catch\"); } finally { println(\"finally\"); } — Resource prints on open and close. In what order?", "options": ["open, catch, close, finally", "open, close, catch, finally", "open, catch, finally, close"], "answer": "open, close, catch, finally"}
+```
+
+```quiz
+{"prompt": "The body throws \"disk full\", and a hand-written finally { log.close(); } throws \"stream closed\". What does the caller's catch receive?", "options": ["\"disk full\", with \"stream closed\" suppressed", "\"stream closed\"; \"disk full\" is lost", "Both, as two separate exceptions"], "answer": "\"stream closed\"; \"disk full\" is lost"}
 ```
 
 <details>
@@ -704,8 +999,9 @@ total: 4
 8. *The Java Language Specification, Java SE 25*, §14.18 "The `throw` Statement" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.18" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.18</a>
 9. *The Java Language Specification, Java SE 25*, §8.4.6 "Method Throws" — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.6" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.4.6</a>
 10. `java.lang.Error`, Java SE 25 API ("serious problems that a reasonable application should not try to catch") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Error.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Error.html</a>
-11. `java.lang.Runtime`, Java SE 25 API (`exit`: "An invocation of this method never returns normally") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runtime.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runtime.html</a>
+11. `java.lang.Runtime`, Java SE 25 API (`exit`: "An invocation of this method never returns normally"; `addShutdownHook`) — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runtime.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runtime.html</a>
 12. `java.lang.Throwable`, Java SE 25 API (`getSuppressed`: exceptions "suppressed, typically by the try-with-resources statement") — <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Throwable.html" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Throwable.html</a>
+13. *The Java Language Specification, Java SE 25*, §14.20.3.2 "Extended `try`-with-resources" (resources are closed before any `catch` or `finally` clause runs) — <a href="https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.3.2" target="_blank" rel="noopener noreferrer">https://docs.oracle.com/javase/specs/jls/se25/html/jls-14.html#jls-14.20.3.2</a>
 
 ---
 
@@ -716,6 +1012,7 @@ total: 4
 1. Predict the output of a loop that `parseInt`s `{"1", "x", "3"}` inside a `try`/`catch`, sums the valid values, and prints the total.
 2. Predict whether you can call a method `void read() throws IOException` from `main` without a `try`, and what error you get if you can't.
 3. Predict the exact order of lines printed by a `try`-with-resources that opens two resources, `A` then `B` (each printing on open and on close). Explain why `B` closes before `A`.
+4. Take the `LogFile` example from section 6 and explain, in one sentence each, why the manual version reports `stream closed` and the `try`-with-resources version reports `disk full`.
 
 </div>
 
